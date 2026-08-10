@@ -57,6 +57,12 @@ export function createCabarrusSceneView(
     },
     extent: initialExtent ?? clippingArea,
     map,
+    padding: {
+      bottom: 96,
+      left: 64,
+      right: 24,
+      top: 72,
+    },
     spatialReference,
     ui: {
       components: [],

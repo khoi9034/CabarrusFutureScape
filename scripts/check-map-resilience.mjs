@@ -38,6 +38,20 @@ const diagnostics = {
   requestFailures: [],
 };
 
+function isPublicCanvasUrl(value) {
+  try {
+    const url = new URL(value);
+    return (
+      (["server.arcgisonline.com", "services.arcgisonline.com"].includes(url.hostname) &&
+        url.pathname.includes("/Canvas/World_Dark_Gray_")) ||
+      (url.hostname === "static.arcgis.com" &&
+        url.pathname.includes("/attribution/Canvas/World_Dark_Gray_"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function run(
   name,
   configure = async () => {},
@@ -76,6 +90,7 @@ async function run(
     }
   });
   const page = await context.newPage();
+  page.setDefaultTimeout(60_000);
   page.on("framenavigated", (frame) => {
     if (frame === page.mainFrame()) counts.clear();
   });
@@ -90,6 +105,13 @@ async function run(
     if (!['error', 'warning'].includes(message.type())) return;
     const text = message.text();
     if (/GL Driver Message.*GPU stall due to ReadPixels/.test(text)) return;
+    if (
+      (isPublicCanvasUrl(message.location().url) && /Failed to load resource/.test(text)) ||
+      /Failed to load layer \(title: 'Public dark-gray reference (?:basemap|labels)'/.test(text)
+    ) {
+      diagnostics.expectedRendererErrors.push(`${name}: console ${text}`);
+      return;
+    }
     if (
       name === "ArcGIS asset failure" &&
       (message.location().url.includes("/arcgis-assets/") ||
@@ -254,12 +276,59 @@ try {
       await page.goForward({ waitUntil: "domcontentloaded" });
       await page.goBack({ waitUntil: "domcontentloaded" });
       await assertInteractiveMap(page);
+      await page.waitForLoadState("networkidle", { timeout: 60_000 });
     },
   );
   await run(
     "parcel focus and overlays",
     async () => {},
     async (_context, page) => {
+      const map = page.getByTestId("cfs-arcgis-map");
+      const search = page.getByRole("combobox", { name: "Search parcels" });
+      const runtimeToggle = page.getByRole("button", { name: "Open dashboard controls" });
+      await runtimeToggle.click();
+      const parcelId = (await page.getByTestId("local-runtime-status").count())
+        ? "CFS-PARCEL-0149726579"
+        : "CFS-PARCEL-0149780354";
+      await runtimeToggle.click();
+      await search.fill(parcelId);
+      await page
+        .getByRole("option", { name: new RegExp(parcelId) })
+        .click();
+      await page.getByText(parcelId, { exact: true }).first().waitFor();
+      await page.waitForFunction(
+        () => Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) > 9,
+      );
+      const focusedExtent = await map.getAttribute("data-map-extent");
+      assert(focusedExtent, "Parcel Lookup did not publish a focused map extent.");
+      const mapBounds = await map.boundingBox();
+      assert(mapBounds, "Interactive map bounds are unavailable.");
+      await page.mouse.move(mapBounds.x + mapBounds.width * 0.7, mapBounds.y + mapBounds.height * 0.35);
+      await page.mouse.down();
+      await page.mouse.move(mapBounds.x + mapBounds.width * 0.45, mapBounds.y + mapBounds.height * 0.6, {
+        steps: 8,
+      });
+      await page.mouse.up();
+      await page.waitForFunction(
+        (extent) => document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-extent") !== extent,
+        focusedExtent,
+      );
+      await page.getByRole("button", { name: "Focus Map", exact: true }).click();
+      await page.waitForFunction(
+        (extent) => {
+          const current = document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-extent");
+          if (!current) return false;
+          const [xmin, ymin, xmax, ymax] = current.split(",").map(Number);
+          const center = (value) => {
+            const [left, bottom, right, top] = value.split(",").map(Number);
+            return [(left + right) / 2, (bottom + top) / 2];
+          };
+          const [expectedX, expectedY] = center(extent);
+          return expectedX >= xmin && expectedX <= xmax && expectedY >= ymin && expectedY <= ymax;
+        },
+        focusedExtent,
+      );
+      await page.getByRole("button", { name: "Exit map focus", exact: true }).click();
       await page.getByTestId("command-center-explore-intelligence").click();
       const expand = page.getByRole("button", {
         name: "Expand map layers panel",
@@ -288,7 +357,6 @@ try {
         "cfs-local-hydrography",
         "cfs-local-municipalities",
         "transportation-context",
-        "cfs-local-place-labels",
         "parcel-intelligence",
       ]);
       await page.getByRole("button", { name: "Zoom in" }).click();
@@ -331,10 +399,15 @@ try {
     [],
     `Same-origin map request failures: ${diagnostics.requestFailures.join(" | ")}`,
   );
+  const unexpectedArcgisRequests = diagnostics.externalArcgisRequests.filter(
+    (entry) => {
+      return !isPublicCanvasUrl(entry.slice(entry.indexOf("https://")));
+    },
+  );
   assert.deepEqual(
-    diagnostics.externalArcgisRequests,
+    unexpectedArcgisRequests,
     [],
-    `External ArcGIS requests: ${diagnostics.externalArcgisRequests.join(" | ")}`,
+    `Unexpected Portal or authenticated ArcGIS requests: ${unexpectedArcgisRequests.join(" | ")}`,
   );
   console.log(
     JSON.stringify(
@@ -385,7 +458,10 @@ async function assertInteractiveMap(page) {
   const sdkVersion = await map.getAttribute("data-arcgis-sdk-version");
   assert.match(sdkVersion ?? "", /^\d+\.\d+\.\d+$/);
   assert.equal(await map.getAttribute("data-arcgis-assets-path"), `/arcgis-assets/${sdkVersion}`);
-  assert.equal(await map.getAttribute("data-basemap-mode"), "same-origin");
+  assert.match(
+    (await map.getAttribute("data-basemap-mode")) ?? "",
+    /^same-origin(?:\+public)?$/,
+  );
   const state = await page.evaluate(() => {
     const interactive = document.querySelector('[data-testid="cfs-arcgis-map"]');
     const fallback = document.querySelector('[data-testid="cfs-local-context-map"]');
@@ -415,8 +491,30 @@ async function assertInteractiveMap(page) {
     "cfs-local-hydrography",
     "cfs-local-municipalities",
     "transportation-context",
-    "cfs-local-place-labels",
   ]);
+  await page.waitForFunction(
+    () => {
+      const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
+      const state = element?.getAttribute("data-reference-basemap-state");
+      const layers = window.__cfsGetMapDebugState?.().layers ?? [];
+      if (state === "ready") {
+        return layers.some(
+          (layer) => layer.id === "cfs-public-reference-labels" && layer.visible,
+        );
+      }
+      if (state === "failed") {
+        return layers.some(
+          (layer) =>
+            layer.id === "cfs-local-place-labels" &&
+            layer.visible &&
+            Number(layer.graphicsCount) > 0,
+        );
+      }
+      return false;
+    },
+    null,
+    { timeout: 30_000 },
+  );
   await assertPaintedImage(await map.screenshot(), "interactive Cabarrus County map");
   assert.equal(
     await page.getByText("Interactive map could not start", { exact: true }).count(),

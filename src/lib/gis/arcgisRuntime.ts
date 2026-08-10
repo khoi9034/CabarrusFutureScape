@@ -5,6 +5,7 @@ import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type Extent from "@arcgis/core/geometry/Extent";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type MapImageLayer from "@arcgis/core/layers/MapImageLayer";
+import type TileLayer from "@arcgis/core/layers/TileLayer";
 import type TileInfo from "@arcgis/core/layers/support/TileInfo";
 import type Point from "@arcgis/core/geometry/Point";
 import type Polygon from "@arcgis/core/geometry/Polygon";
@@ -25,6 +26,7 @@ export interface ArcGISRuntime {
   GraphicsLayer: typeof GraphicsLayer;
   Map: typeof ArcGISMap;
   MapImageLayer: typeof MapImageLayer;
+  TileLayer: typeof TileLayer;
   Point: typeof Point;
   Polygon: typeof Polygon;
   Polyline: typeof Polyline;
@@ -50,6 +52,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     { default: FeatureLayer },
     { default: GraphicsLayer },
     { default: MapImageLayer },
+    { default: TileLayer },
     { default: Graphic },
     { default: Point },
     { default: Polygon },
@@ -65,6 +68,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     import("@arcgis/core/layers/FeatureLayer.js"),
     import("@arcgis/core/layers/GraphicsLayer.js"),
     import("@arcgis/core/layers/MapImageLayer.js"),
+    import("@arcgis/core/layers/TileLayer.js"),
     import("@arcgis/core/Graphic.js"),
     import("@arcgis/core/geometry/Point.js"),
     import("@arcgis/core/geometry/Polygon.js"),
@@ -83,6 +87,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     GraphicsLayer,
     Map,
     MapImageLayer,
+    TileLayer,
     Point,
     Polygon,
     Polyline,

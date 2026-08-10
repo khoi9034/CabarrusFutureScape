@@ -49,6 +49,7 @@ import {
 } from "@/lib/dashboard/urlState";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { isExploreCountywideMode } from "@/lib/gis/layerModeOwnership";
+import { dispatchParcelMapRefocusRequest } from "@/lib/map/parcelMapFocus";
 import { defaultIndicatorCenterGroupIds } from "@/data/intelligence/indicatorCenter";
 import type {
   CfsAppMode,
@@ -530,7 +531,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     useState<PlanningSnapshotView>("overview");
   const [planningReviewFocusMode, setPlanningReviewFocusMode] =
     useState<PlanningReviewFocusMode>("development_activity");
-  const [isMapFocusMode, setMapFocusMode] = useState(false);
+  const [isMapFocusMode, setMapFocusModeState] = useState(false);
   const temporalAnalysisState = useTemporalAnalysisState();
   const exploreCountywideLayersActive =
     isExploreCountywideMode(overviewCommandMode);
@@ -638,6 +639,16 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       setSelectedParcelIntelligenceState(parcel, source);
     },
     [setSelectedParcelIntelligenceState],
+  );
+
+  const setMapFocusMode = useCallback(
+    (enabled: boolean) => {
+      setMapFocusModeState(enabled);
+      if (enabled && selectedParcelId) {
+        window.requestAnimationFrame(dispatchParcelMapRefocusRequest);
+      }
+    },
+    [selectedParcelId],
   );
 
   const setOverviewCommandMode = useCallback(
@@ -786,7 +797,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
   );
 
   const toggleMapFocusMode = useCallback(() => {
-    setMapFocusMode((enabled) => !enabled);
+    setMapFocusModeState((enabled) => !enabled);
   }, []);
 
   useEffect(() => {

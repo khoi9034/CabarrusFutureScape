@@ -132,6 +132,7 @@ export type CfsTechnicalEventName =
   | "optional_hosted_basemap_unavailable"
   | "powerbi_export"
   | "provider_fallback"
+  | "reference_basemap_unavailable"
   | "report_generation";
 
 export interface CfsTechnicalEvent {
@@ -173,6 +174,12 @@ export const USE_ONLINE_BASEMAP =
 export const CFS_ESRI_BASEMAP_STYLE =
   process.env.NEXT_PUBLIC_CFS_ESRI_BASEMAP_STYLE ??
   "arcgis/navigation-night";
+export const CFS_REFERENCE_BASEMAP_URL =
+  process.env.NEXT_PUBLIC_CFS_REFERENCE_BASEMAP_URL?.trim() ||
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer";
+export const CFS_REFERENCE_LABELS_URL =
+  process.env.NEXT_PUBLIC_CFS_REFERENCE_LABELS_URL?.trim() ||
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer";
 
 export function buildApiUrl(path: string, params?: ApiQueryParams) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

@@ -4,9 +4,18 @@
 
 ArcGIS MapView is the primary renderer in demo, local, and enterprise modes.
 It starts with a custom `Basemap` made from the existing same-origin Cabarrus
-county, municipality, hydrography, major-road, and place-label graphics. The
-same layer instances are reused by ArcGIS, so the fallback and MapView do not
-fetch the context twice. No API key or external basemap service is required.
+county, municipality, hydrography, major-road, and place-label graphics. It
+then adds the public World Dark Gray Canvas base and reference-label cached
+services directly by URL, without a Portal item, API key, or ArcGIS sign-in.
+These direct services restore the original dark-gray street and place context
+while the same-origin layers remain the required interactive fallback.
+
+`NEXT_PUBLIC_CFS_REFERENCE_BASEMAP_URL` and
+`NEXT_PUBLIC_CFS_REFERENCE_LABELS_URL` may point Enterprise deployments to
+approved public or organization-hosted cached map services. They must not
+contain credentials. A failed reference service is removed without destroying MapView;
+the neutral same-origin context remains interactive and shows a small,
+nonblocking warning.
 
 The SVG renderer mounts underneath MapView while the SDK loads. MapView becomes
 visible and receives pointer input only after it reports `ready`, has a valid

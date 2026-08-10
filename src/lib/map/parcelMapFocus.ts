@@ -26,6 +26,8 @@ export const CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT =
 export const CFS_PARCEL_MAP_FOCUS_RESULT_EVENT =
   "cfs:parcel-map-focus-result";
 
+export const CFS_PARCEL_MAP_REFOCUS_EVENT = "cfs:parcel-map-refocus";
+
 function isFiniteNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value);
 }
@@ -84,8 +86,7 @@ export function resolveParcelMapFocus(
     return {
       canFocus: false,
       focusStatus: "idle",
-      message:
-        "Static map mode. Select a parcel to prepare map focus.",
+      message: "Interactive map ready. Select a parcel to prepare map focus.",
       mode: "no-selection",
       requiredBackendFields: REQUIRED_BACKEND_FIELDS,
     };
@@ -118,7 +119,7 @@ export function resolveParcelMapFocus(
       canFocus: false,
       focusStatus: "unsupported",
       message:
-        "Map focus is unavailable, so the selected parcel remains in static detail mode.",
+        "Map focus is unavailable, so the selected parcel remains in the detail panel.",
       mode: "no-op",
       requiredBackendFields: REQUIRED_BACKEND_FIELDS,
     };
@@ -175,10 +176,10 @@ export function getParcelMapFocusStatusLabel(
     case "pending-geometry":
       return "Map focus pending geometry";
     case "unsupported":
-      return "Static map mode";
+      return "Map focus unavailable";
     case "idle":
     default:
-      return "Static map mode";
+      return "Interactive map ready";
   }
 }
 
@@ -205,6 +206,12 @@ export function dispatchParcelMapFocusRequest(focus: ParcelMapFocus) {
       },
     ),
   );
+}
+
+export function dispatchParcelMapRefocusRequest() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(CFS_PARCEL_MAP_REFOCUS_EVENT));
+  }
 }
 
 export function dispatchParcelMapFocusResult(

@@ -6,6 +6,7 @@ import type Extent from "@arcgis/core/geometry/Extent";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type Layer from "@arcgis/core/layers/Layer";
+import type TileLayer from "@arcgis/core/layers/TileLayer";
 import type MapView from "@arcgis/core/views/MapView";
 import {
   useCallback,
@@ -74,12 +75,15 @@ import {
   createCabarrusStudyExtent,
 } from "@/lib/gis/sceneViewFactory";
 import {
+  CFS_PARCEL_MAP_REFOCUS_EVENT,
   CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
   dispatchParcelMapFocusResult,
   resolveParcelMapFocus,
 } from "@/lib/map/parcelMapFocus";
 import {
   CFS_ESRI_BASEMAP_STYLE,
+  CFS_REFERENCE_BASEMAP_URL,
+  CFS_REFERENCE_LABELS_URL,
   recordTechnicalEvent,
   USE_DEMO_DATA,
   USE_INTERACTIVE_MAP,
@@ -348,7 +352,10 @@ export function SceneViewContainer() {
     useState<ArcGisLoadState>(USE_INTERACTIVE_MAP ? "idle" : "disabled");
   const [hostedBasemapState, setHostedBasemapState] =
     useState<ArcGisLoadState>(USE_ONLINE_BASEMAP ? "idle" : "disabled");
+  const [referenceBasemapState, setReferenceBasemapState] =
+    useState<ArcGisLoadState>("idle");
   const [mapZoom, setMapZoom] = useState<number | null>(null);
+  const [mapExtent, setMapExtent] = useState<FloodZoneExtent | null>(null);
   const [mapViewReadyState, setMapViewReadyState] =
     useState<SceneView["readyState"]>("loading");
   const [fallbackZoom, setFallbackZoom] = useState(0);
@@ -980,9 +987,11 @@ export function SceneViewContainer() {
     let focusEventHandler: ((event: Event) => void) | null = null;
     let hostedBasemap: Basemap | null = null;
     let hostedBasemapLayers: Layer[] = [];
+    let referenceBasemapLayers: TileLayer[] = [];
     let hoverHandle: ArcGISHandle | null = null;
     let localView: SceneView | null = null;
     let readyWatchHandle: ArcGISHandle | null = null;
+    let refocusEventHandler: (() => void) | null = null;
     let zoomWatchHandle: ArcGISHandle | null = null;
     const initializationAttemptId = ++initializationAttemptRef.current;
     const isCurrentAttempt = () =>
@@ -1243,6 +1252,7 @@ export function SceneViewContainer() {
       setArcGisRuntimeState(USE_INTERACTIVE_MAP ? "idle" : "disabled");
       setArcGisViewState(USE_INTERACTIVE_MAP ? "idle" : "disabled");
       setHostedBasemapState(USE_ONLINE_BASEMAP ? "idle" : "disabled");
+      setReferenceBasemapState("idle");
 
       try {
         const context = await getDemoMapContext(false);
@@ -1530,6 +1540,7 @@ export function SceneViewContainer() {
           const extent = getSceneViewWgs84Extent(runtime, view);
 
           if (extent) {
+            setMapExtent(extent);
             setFloodZoneViewExtent(extent);
             preservedInteractiveExtent = view.extent?.clone() ?? null;
           }
@@ -1607,6 +1618,73 @@ export function SceneViewContainer() {
         registerSceneViewDebugState(runtime, view);
         setArcGisViewState("ready");
         setMapStatus("online");
+
+        setReferenceBasemapState("loading");
+        referenceBasemapLayers = [
+          new runtime.TileLayer({
+            id: "cfs-public-reference-basemap",
+            listMode: "hide",
+            title: "Public dark-gray reference basemap",
+            url: CFS_REFERENCE_BASEMAP_URL,
+          }),
+          new runtime.TileLayer({
+            id: "cfs-public-reference-labels",
+            listMode: "hide",
+            title: "Public dark-gray reference labels",
+            url: CFS_REFERENCE_LABELS_URL,
+          }),
+        ];
+        void withTimeout(
+          Promise.all(referenceBasemapLayers.map((layer) => layer.load())),
+          10_000,
+          "Public reference basemap timed out.",
+        )
+          .then(async ([baseLayer, labelsLayer]) => {
+            if (!isCurrentAttempt() || view.destroyed) {
+              baseLayer.destroy();
+              labelsLayer.destroy();
+              return;
+            }
+            contextBasemap.baseLayers.add(baseLayer, 0);
+            contextBasemap.referenceLayers.add(labelsLayer, 0);
+            await withTimeout(
+              Promise.all([
+                view.whenLayerView(baseLayer),
+                view.whenLayerView(labelsLayer),
+              ]),
+              10_000,
+              "Public reference basemap did not render.",
+            );
+            if (!isCurrentAttempt() || view.destroyed) {
+              return;
+            }
+            setCountyLandOpacity(
+              layers["county-boundary"] as GraphicsLayer,
+              0.04,
+            );
+            contextLayers.placeLabels.visible = false;
+            setReferenceBasemapState("ready");
+          })
+          .catch((error) => {
+            for (const layer of referenceBasemapLayers) {
+              contextBasemap.baseLayers.remove(layer);
+              contextBasemap.referenceLayers.remove(layer);
+              layer.destroy();
+            }
+            referenceBasemapLayers = [];
+            setCountyLandOpacity(
+              layers["county-boundary"] as GraphicsLayer,
+              0.94,
+            );
+            contextLayers.placeLabels.visible = true;
+            if (!isCurrentAttempt()) {
+              return;
+            }
+            setReferenceBasemapState("failed");
+            recordTechnicalEvent("reference_basemap_unavailable", {
+              reason: getSceneErrorMessage(error),
+            });
+          });
 
         if (USE_ONLINE_BASEMAP) {
           setHostedBasemapState("loading");
@@ -1721,6 +1799,21 @@ export function SceneViewContainer() {
       CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
       focusEventHandler,
     );
+    refocusEventHandler = () => {
+      const focus = fallbackParcelFocusRef.current;
+      if (
+        focus &&
+        focus.officialParcelId === selectedParcelIdRef.current &&
+        viewRef.current?.ready &&
+        runtimeRef.current
+      ) {
+        void applyParcelFocus(focus);
+      }
+    };
+    window.addEventListener(
+      CFS_PARCEL_MAP_REFOCUS_EVENT,
+      refocusEventHandler,
+    );
     initializeScene(containerRef.current);
 
     return () => {
@@ -1733,6 +1826,12 @@ export function SceneViewContainer() {
         window.removeEventListener(
           CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
           focusEventHandler,
+        );
+      }
+      if (refocusEventHandler) {
+        window.removeEventListener(
+          CFS_PARCEL_MAP_REFOCUS_EVENT,
+          refocusEventHandler,
         );
       }
       hoverHandle?.remove();
@@ -1776,6 +1875,14 @@ export function SceneViewContainer() {
       viewRef.current = null;
       hostedBasemap?.destroy();
       hostedBasemap = null;
+      if (localView?.map?.basemap) {
+        for (const layer of referenceBasemapLayers) {
+          localView.map.basemap.baseLayers.remove(layer);
+          localView.map.basemap.referenceLayers.remove(layer);
+        }
+      }
+      referenceBasemapLayers.forEach((layer) => layer.destroy());
+      referenceBasemapLayers = [];
       if (localView?.map?.basemap) {
         removeHostedBasemapLayers(localView.map.basemap, hostedBasemapLayers);
       }
@@ -2337,7 +2444,9 @@ export function SceneViewContainer() {
         data-basemap-mode={
           hostedBasemapState === "ready"
             ? "same-origin+hosted"
-            : "same-origin"
+            : referenceBasemapState === "ready"
+              ? "same-origin+public"
+              : "same-origin"
         }
         data-context-county-features={
           mapContext?.countyBoundary.features.length ?? 0
@@ -2359,13 +2468,35 @@ export function SceneViewContainer() {
         data-map-status={mapStatus}
         data-map-renderer-state={mapRendererMode}
         data-map-view-ready-state={mapViewReadyState}
+        data-map-extent={
+          interactiveReady && mapExtent
+            ? [
+                mapExtent.xmin,
+                mapExtent.ymin,
+                mapExtent.xmax,
+                mapExtent.ymax,
+              ].join(",")
+            : ""
+        }
         data-hosted-basemap-state={hostedBasemapState}
+        data-reference-basemap-state={referenceBasemapState}
+        data-reference-basemap-url={CFS_REFERENCE_BASEMAP_URL}
+        data-reference-labels-url={CFS_REFERENCE_LABELS_URL}
         data-map-zoom={interactiveReady ? (mapZoom ?? "") : fallbackZoom}
         data-static-context-ready={staticContextReady ? "true" : "false"}
         data-testid="cfs-arcgis-map"
         ref={containerRef}
         title="Interactive ArcGIS map of Cabarrus County"
       />
+      {interactiveReady && referenceBasemapState === "failed" ? (
+        <div
+          className="pointer-events-none absolute bottom-3 left-1/2 z-[54] max-w-[calc(100%-7rem)] -translate-x-1/2 rounded-md border border-amber-300/30 bg-[#121820]/92 px-3 py-2 text-center text-[11px] font-medium text-amber-100 shadow-lg backdrop-blur"
+          data-testid="cfs-reference-basemap-warning"
+          role="status"
+        >
+          Reference basemap is temporarily unavailable. Parcel and planning layers remain available.
+        </div>
+      ) : null}
       <div
         aria-label="Map navigation controls"
         className="app-chrome absolute left-3 top-[7.25rem] z-[55] flex w-10 flex-col overflow-hidden rounded-md border border-white/15 bg-[#06101a]/90 shadow-[0_14px_42px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:left-4"
@@ -3555,7 +3686,7 @@ function setCountyLandOpacity(layer: GraphicsLayer, opacity: number) {
 
 function createDemoBoundarySymbol(fillOpacity: number) {
   return {
-    color: [16, 33, 49, fillOpacity],
+    color: [24, 31, 38, fillOpacity],
     outline: {
       color: [216, 184, 106, 0.96],
       width: 2.4,
@@ -3645,17 +3776,17 @@ function createDemoPlaceLabelGraphic(
       y: coordinates.latitude,
     }),
     symbol: {
-      height: 34,
+      height: 24,
       type: "picture-marker",
       url: createPlaceLabelDataUrl(label),
-      width: 132,
-      yoffset: 12,
+      width: 96,
+      yoffset: 8,
     } as unknown as Graphic["symbol"],
   });
 }
 
 function createPlaceLabelDataUrl(label: string) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="264" height="68" viewBox="0 0 264 68"><rect x="1" y="1" width="262" height="66" rx="12" fill="#07111f" fill-opacity=".82" stroke="#68d8ff" stroke-opacity=".34"/><text x="132" y="43" text-anchor="middle" fill="#eef4f8" font-family="Arial,sans-serif" font-size="25" font-weight="700">${escapeSvgText(label)}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="192" height="48" viewBox="0 0 192 48"><rect x="1" y="1" width="190" height="46" rx="8" fill="#07111f" fill-opacity=".76" stroke="#ffffff" stroke-opacity=".22"/><text x="96" y="31" text-anchor="middle" fill="#eef4f8" font-family="Arial,sans-serif" font-size="18" font-weight="700">${escapeSvgText(label)}</text></svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
@@ -8041,13 +8172,34 @@ function createParcelFocusExtent(runtime: ArcGISRuntime, focus: ParcelMapFocus) 
 }
 
 function getParcelFocusTargetZoom(focus: ParcelMapFocus) {
-  return focus.centroid ? 18 : 17;
+  return focus.extent ? 16 : 17;
 }
 
 function buildParcelFocusGoToTarget(
   runtime: ArcGISRuntime,
   focus: ParcelMapFocus,
 ) {
+  const extent = createParcelFocusExtent(runtime, focus);
+  if (extent) {
+    const span = Math.max(extent.width, extent.height);
+    const minimumSpan = extent.spatialReference.isGeographic ? 0.012 : 1_200;
+    const paddedSpan = Math.max(
+      minimumSpan,
+      span * (span > minimumSpan * 6 ? 1.5 : 2.75),
+    );
+    const center = extent.center;
+
+    return {
+      target: new runtime.Extent({
+        spatialReference: extent.spatialReference,
+        xmax: center.x + paddedSpan / 2,
+        xmin: center.x - paddedSpan / 2,
+        ymax: center.y + paddedSpan / 2,
+        ymin: center.y - paddedSpan / 2,
+      }),
+    } as Parameters<SceneView["goTo"]>[0];
+  }
+
   if (focus.centroid) {
     return {
       center: createParcelFocusPoint(runtime, focus),
@@ -8055,10 +8207,7 @@ function buildParcelFocusGoToTarget(
     } as Parameters<SceneView["goTo"]>[0];
   }
 
-  return {
-    target: createParcelFocusExtent(runtime, focus),
-    zoom: getParcelFocusTargetZoom(focus),
-  } as Parameters<SceneView["goTo"]>[0];
+  throw new Error("Parcel focus has no usable navigation target.");
 }
 
 function describeSceneViewCenter(view: SceneView) {
