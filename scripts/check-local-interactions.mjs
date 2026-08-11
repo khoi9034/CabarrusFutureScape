@@ -18,7 +18,6 @@ const API_URL = (process.env.CFS_API_BASE_URL ?? "http://127.0.0.1:8000").replac
 );
 const API_ORIGIN = new URL(API_URL).origin;
 const PARCEL = "CFS-PARCEL-0149726579";
-const SECOND_PARCEL = "CFS-PARCEL-0149727441";
 const TEMP_PREFIX = `CFS-PRESENTATION-BROWSER-${Date.now()}`;
 const LIVE_MAP_CONTEXT_PATHS = new Set([
   "/demo-data/map_layers/demo_county_boundary.geojson",
@@ -192,7 +191,22 @@ async function assertHealthyPage(page) {
 }
 
 async function assertLiveStatus(page) {
-  await page.getByRole("button", { name: /Open .* controls/i }).click();
+  const controls = page.getByRole("button", { name: /Open .* controls/i });
+  await controls.waitFor();
+  const label = await controls.getAttribute("aria-label");
+  await page.waitForFunction(
+    (ariaLabel) => {
+      const element = document.querySelector(`button[aria-label="${ariaLabel}"]`);
+      return element && Object.keys(element).some((key) => key.startsWith("__reactProps$"));
+    },
+    label,
+  );
+  if ((await controls.getAttribute("aria-expanded")) !== "true") await controls.click();
+  await page.waitForFunction(
+    (ariaLabel) =>
+      document.querySelector(`button[aria-label="${ariaLabel}"]`)?.getAttribute("aria-expanded") === "true",
+    label,
+  );
   const panel = page.getByTestId("local-runtime-status");
   await panel.waitFor();
   await panel.getByText("Frontend Ready", { exact: true }).waitFor();
@@ -208,7 +222,7 @@ async function assertLiveStatus(page) {
     .getByText("Grounded local answers", { exact: true })
     .waitFor();
   await panel.getByText("Local neutral background", { exact: true }).waitFor();
-  await page.getByRole("button", { name: /Open .* controls/i }).click();
+  await controls.click();
 }
 
 async function askQuestions(page, questions) {
@@ -239,7 +253,15 @@ async function askQuestions(page, questions) {
   }
 }
 
-async function selectParcel(page, parcelId = PARCEL, waitForSelected = true) {
+async function selectParcel(
+  page,
+  { expectedProvider, parcelId = PARCEL, waitForSelected = true },
+) {
+  assert.equal(
+    expectedProvider,
+    "local_api",
+    `Local parcel selection expected local_api, received ${expectedProvider ?? "no provider"}.`,
+  );
   const search = page.getByRole("combobox", { name: "Search parcels" }).first();
   const responsePromise = page.waitForResponse(
     (response) =>
@@ -293,7 +315,7 @@ async function planningWorkflow(page) {
   });
 
   await runCase("Planning", "canonical parcel and local layers", async () => {
-    await selectParcel(page);
+    await selectParcel(page, { expectedProvider: "local_api" });
     const expand = page.getByRole("button", { name: "Expand map layers panel" });
     if (await expand.count()) await expand.click();
     await toggleLayer(page, "Development Hotspots", "Development Activity");
@@ -322,22 +344,74 @@ async function planningWorkflow(page) {
   });
 
   await runCase("Planning", "Model Lab and Planning Snapshot", async () => {
-    await page.getByRole("button", { name: /Workspace:/ }).click();
-    await page.getByTestId("command-center-model-lab").click();
-    const expand = page.getByRole("button", { name: "Expand Model Lab panel" }).first();
-    if (await expand.count()) await expand.click();
-    await page.getByTestId("model-lab-controls").waitFor({ timeout: 30_000 });
-    await page.getByRole("button", { name: /Workspace:/ }).click();
-    await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
-    await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
-    const library = page.getByTestId("planning-snapshot-library");
-    await library.getByText("Planning Snapshot Library", { exact: true }).waitFor();
-    page.once("dialog", (dialog) => dialog.accept());
-    await library.getByRole("button", { name: "Archive", exact: true }).first().click();
-    await library
-      .getByTestId("planning-persistence-status")
-      .filter({ hasText: "Planning Snapshot archived." })
-      .waitFor();
+    let snapshotId = null;
+    let snapshotArchived = false;
+    let primaryFailure = null;
+    try {
+      await page.getByRole("button", { name: /Workspace:/ }).click();
+      await page.getByTestId("command-center-model-lab").click();
+      const expand = page.getByRole("button", { name: "Expand Model Lab panel" }).first();
+      if (await expand.count()) await expand.click();
+      await page.getByTestId("model-lab-controls").waitFor({ timeout: 30_000 });
+      await page.getByRole("button", { name: /Workspace:/ }).click();
+      const createResponse = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).origin === API_ORIGIN &&
+          new URL(response.url()).pathname === "/api/v1/planning/snapshots" &&
+          response.request().method() === "POST",
+        { timeout: 60_000 },
+      );
+      await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
+      const created = await createResponse;
+      const createdPayload = await created.json();
+      assert.equal(created.status(), 201, "Planning Snapshot create failed.");
+      assert.match(createdPayload.data?.id ?? "", /^[0-9a-f-]{36}$/i, "Planning Snapshot create omitted its UUID.");
+      snapshotId = createdPayload.data.id;
+
+      await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
+      const library = page.getByTestId("planning-snapshot-library");
+      await library.getByText("Planning Snapshot Library", { exact: true }).waitFor();
+      const card = library.locator(
+        `[data-testid="planning-snapshot-card"][data-snapshot-id="${snapshotId}"]`,
+      );
+      await card.waitFor({ timeout: 45_000 });
+      const archiveResponse = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).origin === API_ORIGIN &&
+          new URL(response.url()).pathname === `/api/v1/planning/snapshots/${snapshotId}/archive` &&
+          response.request().method() === "POST",
+        { timeout: 60_000 },
+      );
+      page.once("dialog", (dialog) => dialog.accept());
+      await card.getByTestId("planning-snapshot-archive").click();
+      const archived = await archiveResponse;
+      const archivedPayload = await archived.json();
+      assert.equal(archived.status(), 200, `Planning Snapshot ${snapshotId} archive failed.`);
+      assert.equal(archivedPayload.data?.id, snapshotId, "Planning Snapshot archive returned the wrong record.");
+      assert(archivedPayload.data?.archived_at, "Planning Snapshot archive omitted archived_at.");
+      snapshotArchived = true;
+      await library
+        .getByTestId("planning-persistence-status")
+        .filter({ hasText: "Planning Snapshot archived." })
+        .waitFor();
+    } catch (error) {
+      primaryFailure = error;
+    }
+
+    let cleanupFailure = null;
+    if (snapshotId) {
+      try {
+        if (!snapshotArchived) await archivePlanningSnapshot(snapshotId);
+        await verifyPlanningSnapshotArchived(snapshotId, snapshotArchived ? "ui_archive" : "api_archive");
+      } catch (error) {
+        cleanupFailure = error;
+      }
+    }
+    if (primaryFailure && cleanupFailure) {
+      throw new AggregateError([primaryFailure, cleanupFailure], "Planning Snapshot interaction and cleanup both failed.");
+    }
+    if (primaryFailure) throw primaryFailure;
+    if (cleanupFailure) throw cleanupFailure;
   });
 
   await page.reload({ waitUntil: "domcontentloaded" });
@@ -347,19 +421,39 @@ async function planningWorkflow(page) {
 }
 
 async function economicsWorkflow(page) {
+  const intelligenceResponsePromise = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/economics/intelligence" &&
+      response.request().method() === "GET",
+    { timeout: 60_000 },
+  );
   await goto(page, `?app=economics&parcel=${PARCEL}`);
   await runCase("Economics", "database KPIs and parcel context", async () => {
+    const intelligenceResponse = await intelligenceResponsePromise;
+    assert.equal(intelligenceResponse.status(), 200, "Economics intelligence request failed.");
+    const intelligence = await intelligenceResponse.json();
+    const signal = (intelligence.parcel_economic_signals ?? intelligence.signals ?? []).find(
+      (candidate) => candidate.parcel_id && typeof candidate.assessed_value === "number",
+    );
+    assert(signal, "Economics intelligence returned no parcel with assessed-value context.");
+    const assessedValue = `$${signal.assessed_value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+
     await page.getByRole("button", { name: /Economic Dashboard:/ }).click();
     await page.getByRole("heading", { name: "Economic Dashboard", exact: true }).first().waitFor({
       timeout: 45_000,
     });
     await page.getByText("Executive Economic Signals", { exact: true }).waitFor();
-    await selectParcel(page, SECOND_PARCEL, false);
+    await selectParcel(page, {
+      expectedProvider: "local_api",
+      parcelId: signal.parcel_id,
+      waitForSelected: false,
+    });
     const context = page.getByTestId("parcel-economic-context");
     await context
-      .getByRole("heading", { name: `Parcel Economic Context: ${SECOND_PARCEL}` })
+      .getByRole("heading", { name: `Parcel Economic Context: ${signal.parcel_id}` })
       .waitFor({ timeout: 30_000 });
-    await context.getByText("Assessed value context", { exact: true }).waitFor();
+    const metric = context.getByText("Assessed value context", { exact: true }).locator("..");
+    await metric.getByText(assessedValue, { exact: true }).waitFor();
   });
 
   await runCase("Economics", "scenario, report surface, and export", async () => {
@@ -408,7 +502,55 @@ async function cleanupIntake(candidateId) {
   assert.equal(response.status, 200, "Disposable browser intake cleanup failed.");
   const verify = await fetch(`${API_URL}/investment/intake/${encodeURIComponent(candidateId)}`);
   assert.equal(verify.status, 404, "Disposable browser intake still exists.");
-  report.disposable_cleanup = { candidate_id: candidateId, deleted: true, verified: true };
+  report.disposable_cleanup = {
+    ...report.disposable_cleanup,
+    candidate_id: candidateId,
+    deleted: true,
+    verified: true,
+  };
+}
+
+async function archivePlanningSnapshot(snapshotId) {
+  const response = await fetch(
+    `${API_URL}/api/v1/planning/snapshots/${encodeURIComponent(snapshotId)}/archive`,
+    {
+      headers: { Accept: "application/json", "X-Request-ID": `${TEMP_PREFIX}-planning-cleanup` },
+      method: "POST",
+      signal: AbortSignal.timeout(30_000),
+    },
+  );
+  const payload = await response.json();
+  assert(response.ok, `Planning Snapshot cleanup failed for ${snapshotId}: HTTP ${response.status}`);
+  assert.equal(payload.data?.id, snapshotId, "Planning Snapshot cleanup archived the wrong record.");
+  assert(payload.data?.archived_at, "Planning Snapshot cleanup omitted archived_at.");
+}
+
+async function verifyPlanningSnapshotArchived(snapshotId, method) {
+  const [recordResponse, auditResponse] = await Promise.all([
+    fetch(`${API_URL}/api/v1/planning/snapshots/${encodeURIComponent(snapshotId)}`, {
+      headers: { Accept: "application/json", "X-Request-ID": `${TEMP_PREFIX}-planning-verify` },
+      signal: AbortSignal.timeout(30_000),
+    }),
+    fetch(`${API_URL}/api/v1/audit?limit=100&object_id=${encodeURIComponent(snapshotId)}`, {
+      headers: { Accept: "application/json", "X-Request-ID": `${TEMP_PREFIX}-planning-audit` },
+      signal: AbortSignal.timeout(30_000),
+    }),
+  ]);
+  const [record, audit] = await Promise.all([recordResponse.json(), auditResponse.json()]);
+  assert(recordResponse.ok, `Planning Snapshot cleanup verification failed for ${snapshotId}.`);
+  assert(auditResponse.ok, `Planning Snapshot archive audit lookup failed for ${snapshotId}.`);
+  assert(record.data?.archived_at, `Planning Snapshot ${snapshotId} remains active.`);
+  assert(
+    audit.data?.some((event) => event.action === "archive"),
+    `Planning Snapshot ${snapshotId} has no archive audit event.`,
+  );
+  report.disposable_cleanup = {
+    ...report.disposable_cleanup,
+    planning_snapshot_audit_verified: true,
+    planning_snapshot_id: snapshotId,
+    planning_snapshot_method: method,
+    planning_snapshot_verified: true,
+  };
 }
 
 async function cleanupRecentWork() {
@@ -613,9 +755,10 @@ async function offlineChecks(browser) {
   }, true);
   await runCase("Planning", "parcel, local layers, and deterministic Ask CFS", async () => {
     await goto(page, "?app=planning");
+    await assertLiveStatus(page);
     await page.getByTestId("command-center-explore-intelligence").click();
     await page.getByLabel("Cabarrus County ArcGIS MapView").waitFor({ timeout: 45_000 });
-    await selectParcel(page);
+    await selectParcel(page, { expectedProvider: "local_api" });
     const expand = page.getByRole("button", { name: "Expand map layers panel" });
     if (await expand.count()) await expand.click();
     await toggleLayer(page, "Development Hotspots", "Development Activity");
@@ -767,6 +910,8 @@ async function main() {
   assert.deepEqual(report.diagnostics.request_loops, [], "Probable request loop detected.");
   assert.deepEqual(report.diagnostics.request_failures, [], "Unexpected request failure observed.");
   assert.deepEqual(report.diagnostics.console_messages, [], "Console warnings or errors were observed.");
+  assert(report.disposable_cleanup?.planning_snapshot_verified, "Disposable Planning Snapshot was not archived.");
+  assert(report.disposable_cleanup?.planning_snapshot_audit_verified, "Planning Snapshot archive audit was not verified.");
   assert(report.disposable_cleanup?.verified, "Disposable investment mutation was not cleaned.");
   assert(report.disposable_cleanup?.recent_work_verified, "Disposable recent work was not cleaned.");
 

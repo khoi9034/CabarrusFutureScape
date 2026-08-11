@@ -3,10 +3,10 @@ from __future__ import annotations
 from fastapi import Request
 from fastapi.testclient import TestClient
 import pytest
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.main import app
-from app.product.models import audit_events, planning_snapshots
+from app.product.models import ask_cfs_messages, audit_events, planning_snapshots
 from app.product.principal import (
     AuthorizationError,
     Permission,
@@ -313,3 +313,60 @@ def test_denied_api_write_has_standard_error_and_append_only_audit(
         "method": "POST",
         "reason": "projects:write permission is required.",
     }
+
+
+def test_ask_cfs_message_api_denies_principal_without_permission(
+    session_factory,
+    identities,
+    monkeypatch,
+    principal_factory,
+) -> None:
+    with session_factory.begin() as session:
+        conversation = ProductService(
+            session,
+            principal_factory(Role.ADMINISTRATOR),
+        ).create("ask_cfs_conversations", {"title": "Denied message target"})
+
+    viewer = principal_factory(Role.VIEWER)
+    monkeypatch.setitem(
+        ROLE_PERMISSIONS,
+        Role.VIEWER,
+        ROLE_PERMISSIONS[Role.VIEWER] - {Permission.ASK_CFS},
+    )
+
+    def override_session():
+        session = session_factory()
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def override_principal(request: Request):
+        request.state.product_principal = viewer
+        return viewer
+
+    app.dependency_overrides[database_session] = override_session
+    app.dependency_overrides[get_product_principal] = override_principal
+    try:
+        with TestClient(app, raise_server_exceptions=False) as client:
+            response = client.post(
+                f"/api/v1/ask-cfs/conversations/{conversation['id']}/messages",
+                json={"role": "user", "safe_question": "This must be denied."},
+                headers={"X-Request-ID": "ask-denial-123"},
+            )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "forbidden"
+    assert response.json()["request_id"] == "ask-denial-123"
+    with session_factory() as session:
+        assert session.scalar(
+            select(func.count()).select_from(ask_cfs_messages).where(
+                ask_cfs_messages.c.conversation_id == conversation["id"]
+            )
+        ) == 0

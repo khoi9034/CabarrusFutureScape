@@ -12,6 +12,7 @@ import { chromium } from "playwright-core";
 const ROOT = process.cwd();
 const LOCAL_URL = (process.env.CFS_LOCAL_BASE_URL ?? "http://127.0.0.1:3000").replace(/\/$/, "");
 const API_URL = (process.env.CFS_API_BASE_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+const LOCAL_ORIGIN = new URL(LOCAL_URL).origin;
 const API_ORIGIN = new URL(API_URL).origin;
 const PREFIX = `CFS-FRONTEND-PERSISTENCE-${Date.now()}`;
 const REPORT_PATH = path.join(ROOT, "logs", "frontend-persistence-last-run.json");
@@ -19,7 +20,17 @@ const RESTART_MANIFEST_PATH = path.join(ROOT, "logs", "frontend-persistence-rest
 const PHASE = process.env.CFS_FRONTEND_PERSISTENCE_PHASE ?? "full";
 const RESTART_LABEL = process.env.CFS_FRONTEND_PERSISTENCE_RESTART_LABEL ?? null;
 const FORCE_RESTART_CLEANUP = process.env.CFS_FRONTEND_PERSISTENCE_FORCE_CLEANUP === "true";
-assert(["cleanup", "full", "seed", "verify"].includes(PHASE), `Unsupported frontend persistence phase ${PHASE}.`);
+const FORCE_OPTIONAL_BASEMAP_FAILURE =
+  process.env.CFS_FRONTEND_PERSISTENCE_TEST_OPTIONAL_BASEMAP_FAILURE === "true";
+const OPTIONAL_BASEMAP_FAILURE_TEST_URLS = [
+  "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/10/405/280",
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tilemap/10/384/256/32/32?f=json",
+];
+assert(["authorization", "cleanup", "full", "map-fallback", "seed", "verify"].includes(PHASE), `Unsupported frontend persistence phase ${PHASE}.`);
+if (process.argv.includes("--check-optional-basemap-classifier")) {
+  checkOptionalPublicBasemapClassifier();
+  process.exit(0);
+}
 const protectedPaths = [
   "outputs/lea_pupil_context_ingestion_summary.json",
   "outputs/school_capacity_ingestion_last_run.json",
@@ -41,7 +52,16 @@ const report = {
   cleanup: [],
   database: {},
   demo: { base_url: null, product_api_requests: [], session_keys: [] },
-  diagnostics: { api_failures: [], console: [], expected_console: [], page_errors: [], request_failures: [] },
+  diagnostics: {
+    api_failures: [],
+    console: [],
+    expected_console: [],
+    optional_public_basemap_console: [],
+    optional_public_basemap_failures: [],
+    page_errors: [],
+    request_failures: [],
+    unexpected_external_arcgis_requests: [],
+  },
   disposable_records: [],
   finished_at: null,
   local: { base_url: LOCAL_URL, product_requests: [], request_ids: [] },
@@ -70,12 +90,21 @@ try {
     });
     const localContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     attachDiagnostics(localContext, "local");
+    if (FORCE_OPTIONAL_BASEMAP_FAILURE) {
+      await localContext.route(
+        /^https:\/\/(?:server|services)\.arcgisonline\.com\/ArcGIS\/rest\/services\/Canvas\/World_Dark_Gray_(?:Base|Reference)\/MapServer(?:\/tile\/\d+\/\d+\/\d+|\/tilemap\/\d+\/\d+\/\d+\/\d+\/\d+)?(?:\?.*)?$/i,
+        (route) => route.abort("failed"),
+      );
+    }
     try {
       if (PHASE === "seed") {
         await seedRestartRecords(localContext);
       } else if (PHASE === "verify") {
         await verifyRestartRecords(localContext);
-      } else {
+      } else if (PHASE === "authorization") {
+        await localAskCfs(localContext);
+        await localPermissionDenial(localContext);
+      } else if (PHASE !== "map-fallback") {
         await localPlanning(localContext);
         await localEconomicsAndBucket(localContext);
         await localInvestmentsBucket(localContext);
@@ -84,6 +113,7 @@ try {
         await localPermissionDenial(localContext);
         await localBrowserStorageCheck(localContext);
       }
+      await assertOptionalPublicBasemapFallback(localContext);
     } finally {
       await localContext.close();
     }
@@ -100,6 +130,26 @@ try {
   assert.deepEqual(report.diagnostics.api_failures, [], "Browser observed unexpected API failures.");
   assert.deepEqual(report.diagnostics.page_errors, [], "Browser page errors were observed.");
   assert.deepEqual(report.diagnostics.request_failures, [], "Browser request failures were observed.");
+  assert.deepEqual(
+    report.diagnostics.unexpected_external_arcgis_requests,
+    [],
+    "Browser requested an unexpected external ArcGIS resource.",
+  );
+  const optionalBasemapFailureObserved =
+    report.diagnostics.optional_public_basemap_failures.length > 0 ||
+    report.diagnostics.optional_public_basemap_console.length > 0;
+  assert(
+    !optionalBasemapFailureObserved || report.optional_public_basemap_verification?.status === "PASS",
+    "Optional public basemap failure was not backed by a successful interactive fallback proof.",
+  );
+  assert(
+    !FORCE_OPTIONAL_BASEMAP_FAILURE || report.diagnostics.optional_public_basemap_failures.length > 0,
+    "The focused optional public basemap failure probe did not exercise the classifier.",
+  );
+  assert(
+    PHASE !== "map-fallback" || optionalBasemapFailureObserved,
+    "The map-fallback phase did not observe an optional public basemap failure.",
+  );
   assert.deepEqual(report.diagnostics.console, [], "Browser console errors or warnings were observed.");
   report.status = "PASS";
 } catch (error) {
@@ -1323,19 +1373,44 @@ async function localPermissionDenial(context) {
       await goto(page, LOCAL_URL, "?app=planning");
       await openPlanningAskCfs(page);
       const query = page.getByTestId("ask-cfs-query").first();
-      await query.fill(`${PREFIX}: confirm denied persistence is not reported as saved.`);
-      const messageDenied = page.waitForResponse((response) =>
-        response.request().method() === "POST" &&
-        /^\/api\/v1\/ask-cfs\/conversations(?:\/[0-9a-f-]+\/messages)?$/i.test(new URL(response.url()).pathname),
-      { timeout: 90_000 });
-      await page.getByTestId("ask-cfs-submit").first().click();
-      assert.equal((await messageDenied).status(), 403);
       const askStatus = page.getByTestId("ask-cfs-persistence-status").first();
+      const question = `${PREFIX}: confirm denied persistence is not reported as saved.`;
+      await query.fill(question);
+      const submit = page.getByTestId("ask-cfs-submit").first();
+      await poll(async () => (await query.inputValue()) === question && !(await submit.isDisabled()), 45_000);
+      const conversationId = await askStatus.getAttribute("data-conversation-id");
+      const conversationIdsBefore = (await readApi("/api/v1/ask-cfs/conversations?page_size=100"))
+        .map((record) => record.id)
+        .sort();
+      const messagesBefore = conversationId
+        ? await readApi(`/api/v1/ask-cfs/conversations/${conversationId}/messages?page_size=100`)
+        : [];
+      const [messageDenied] = await Promise.all([
+        page.waitForResponse((response) =>
+          response.request().method() === "POST" &&
+          /^\/api\/v1\/ask-cfs\/conversations(?:\/[0-9a-f-]+\/messages)?$/i.test(new URL(response.url()).pathname),
+        { timeout: 90_000 }),
+        submit.click(),
+      ]);
+      assert.equal(messageDenied.status(), 403);
       await poll(async () => /permission|forbidden|could not be saved|not authorized/i.test(await askStatus.innerText()), 60_000);
       assert.doesNotMatch(await askStatus.innerText(), /saved to cfs/i);
+      assert.deepEqual(
+        (await readApi("/api/v1/ask-cfs/conversations?page_size=100")).map((record) => record.id).sort(),
+        conversationIdsBefore,
+        "Denied Ask CFS write changed the active conversation set.",
+      );
+      if (conversationId) {
+        assert.deepEqual(
+          await readApi(`/api/v1/ask-cfs/conversations/${conversationId}/messages?page_size=100`),
+          messagesBefore,
+          "Denied Ask CFS write persisted a message.",
+        );
+      }
       report.authorization.cases.push({
         action: "Ask CFS message persistence",
-        expected: "403 is surfaced and never reported as saved",
+        endpoint: new URL(messageDenied.url()).pathname,
+        expected: "ready submit emits a 403 and does not persist a conversation or message",
         role: "Administrator with simulated server denial",
         status: "PASS",
       });
@@ -1995,10 +2070,31 @@ function isProductResponse(method, pathname) {
 }
 
 function attachDiagnostics(context, mode, { ignoreBlockedApi = false } = {}) {
+  context.on("request", (request) => {
+    if (mode !== "local") return;
+    const url = new URL(request.url());
+    if (
+      isExternalArcgisRequest(url) &&
+      !isApprovedPublicArcgisRequest(url)
+    ) {
+      report.diagnostics.unexpected_external_arcgis_requests.push(`${mode}: ${url.href}`);
+    }
+  });
   context.on("requestfailed", (request) => {
-    if (ignoreBlockedApi && (new URL(request.url()).origin === API_ORIGIN || new URL(request.url()).pathname.startsWith("/api/v1/"))) return;
-    if (request.method() === "GET" && request.failure()?.errorText === "net::ERR_ABORTED") return;
-    report.diagnostics.request_failures.push(`${mode}: ${request.failure()?.errorText ?? "failed"} ${request.url()}`);
+    const url = new URL(request.url());
+    const error = request.failure()?.errorText ?? "failed";
+    if (ignoreBlockedApi && (url.origin === API_ORIGIN || url.pathname.startsWith("/api/v1/"))) return;
+    if (request.method() === "GET" && error === "net::ERR_ABORTED") return;
+    if (isApprovedOptionalPublicBasemapFailure({ error, method: request.method(), mode, url })) {
+      report.diagnostics.optional_public_basemap_failures.push({
+        classification: "optional_public_basemap_failure",
+        error,
+        mode,
+        url: url.href,
+      });
+      return;
+    }
+    report.diagnostics.request_failures.push(`${mode}: ${error} ${request.url()}`);
   });
   context.on("response", async (response) => {
     const url = new URL(response.url());
@@ -2032,9 +2128,335 @@ function attachDiagnostics(context, mode, { ignoreBlockedApi = false } = {}) {
       if (!['error', 'warning'].includes(message.type())) return;
       const text = message.text();
       if (/GL Driver Message.*GPU stall|Font .* is not available|ERR_BLOCKED_BY_CLIENT/.test(text)) return;
+      const approvedUrl = approvedOptionalPublicBasemapConsoleUrl({
+        failures: report.diagnostics.optional_public_basemap_failures,
+        locationUrl: message.location().url,
+        mode,
+        text,
+      });
+      if (approvedUrl) {
+        report.diagnostics.optional_public_basemap_console.push({
+          classification: "optional_public_basemap_failure",
+          message: text,
+          mode,
+          url: approvedUrl,
+        });
+        return;
+      }
       report.diagnostics.console.push(`${mode}: ${message.type()}: ${text}`);
     });
   });
+}
+
+function isApprovedOptionalPublicBasemapRequest(value) {
+  const url = value instanceof URL ? value : new URL(value);
+  return (
+    ["server.arcgisonline.com", "services.arcgisonline.com"].includes(url.hostname) &&
+    /^\/ArcGIS\/rest\/services\/Canvas\/World_Dark_Gray_(?:Base|Reference)\/MapServer(?:\/tile\/\d+\/\d+\/\d+|\/tilemap\/\d+\/\d+\/\d+\/\d+\/\d+)?\/?$/i.test(
+      url.pathname,
+    )
+  );
+}
+
+function isApprovedOptionalPublicBasemapFailure({ error, method, mode, url }) {
+  return (
+    (mode === "local" ||
+      (mode === "authorization-planner" &&
+        ["net::ERR_FAILED", "net::ERR_NETWORK_ACCESS_DENIED"].includes(error))) &&
+    method === "GET" &&
+    isApprovedOptionalPublicBasemapRequest(url) &&
+    url.origin !== LOCAL_ORIGIN &&
+    url.origin !== API_ORIGIN
+  );
+}
+
+function approvedOptionalPublicBasemapConsoleUrl({ failures, locationUrl, mode, text }) {
+  const approvedUrl = approvedOptionalPublicBasemapUrl(locationUrl) ?? approvedOptionalPublicBasemapUrl(text);
+  const networkError = /net::(ERR_FAILED|ERR_NETWORK_ACCESS_DENIED)/i.exec(text);
+  const error = networkError ? `net::${networkError[1].toUpperCase()}` : /blocked by CORS/i.test(text) ? "cors" : null;
+  if (
+    approvedUrl &&
+    error &&
+    isApprovedOptionalPublicBasemapFailure({ error, method: "GET", mode, url: new URL(approvedUrl) })
+  ) {
+    return approvedUrl;
+  }
+
+  const layer = /\[@arcgis\/core\/layers\/TileLayer\] #load\(\) Failed to load layer \(title: 'Public dark-gray reference (basemap|labels)', id: 'cfs-public-reference-(basemap|labels)'\) \{error: [^}]+\}/i.exec(
+    text,
+  );
+  if (!layer || layer[1].toLowerCase() !== layer[2].toLowerCase()) return null;
+  const service = layer[1].toLowerCase() === "basemap" ? "Base" : "Reference";
+  return (
+    failures.find((failure) => {
+      const url = new URL(failure.url);
+      return (
+        failure.mode === mode &&
+        url.pathname.includes(`/Canvas/World_Dark_Gray_${service}/MapServer`) &&
+        isApprovedOptionalPublicBasemapFailure({ error: failure.error, method: "GET", mode, url })
+      );
+    })?.url ?? null
+  );
+}
+
+function checkOptionalPublicBasemapClassifier() {
+  const requestCases = [
+    ["approved Base tile network denied", true, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/10/405/280"],
+    ["approved Reference tile network denied", true, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/10/405/280"],
+    ["approved numeric tilemap network denied", true, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tilemap/10/384/256/32/32?f=json"],
+    ["approved Canvas ERR_FAILED", true, "authorization-planner", "GET", "net::ERR_FAILED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer?f=json"],
+    ["CFS API network denied", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${API_ORIGIN}/api/v1/planning/snapshots`],
+    ["parcel API network denied", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${API_ORIGIN}/parcels/search?q=test`],
+    ["same-origin SDK asset failure", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${LOCAL_ORIGIN}/arcgis-assets/chunks/runtime.js`],
+    ["required bundled context failure", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${LOCAL_ORIGIN}/demo-data/map/demo_transportation_context.geojson`],
+    ["unexpected ArcGIS MapServer", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json"],
+    ["Portal item", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json"],
+    ["OAuth sign-in", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/oauth2/authorize"],
+    ["arbitrary external request", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://example.com/unrelated.json"],
+    ["non-GET approved Canvas request", false, "authorization-planner", "POST", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer?f=json"],
+  ];
+  for (const [name, expected, mode, method, error, value] of requestCases) {
+    assert.equal(
+      isApprovedOptionalPublicBasemapFailure({ error, method, mode, url: new URL(value) }),
+      expected,
+      name,
+    );
+    console.log(`PASS ${expected ? "optional" : "fatal"}: ${name}`);
+  }
+
+  const baseUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer?f=json";
+  const referenceUrl = "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer?f=json";
+  const failures = [
+    { error: "net::ERR_NETWORK_ACCESS_DENIED", mode: "authorization-planner", url: baseUrl },
+    { error: "net::ERR_NETWORK_ACCESS_DENIED", mode: "authorization-planner", url: referenceUrl },
+  ];
+  const consoleCases = [
+    ["approved Base console network denied", true, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", baseUrl, failures],
+    ["approved Reference console network denied", true, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", referenceUrl, failures],
+    ["approved Base console ERR_FAILED", true, "authorization-planner", "Failed to load resource: net::ERR_FAILED", baseUrl, failures],
+    ["approved Reference console ERR_FAILED", true, "authorization-planner", "Failed to load resource: net::ERR_FAILED", referenceUrl, failures],
+    ["approved Base layer failure with matching request", true, "authorization-planner", "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Public dark-gray reference basemap', id: 'cfs-public-reference-basemap') {error: s}", "", failures],
+    ["approved Reference layer failure with matching request", true, "authorization-planner", "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Public dark-gray reference labels', id: 'cfs-public-reference-labels') {error: s}", "", failures],
+    ["generic JavaScript console error", false, "authorization-planner", "TypeError: cannot read properties of undefined", `${LOCAL_ORIGIN}/planning`, []],
+    ["CFS API 500 console error", false, "authorization-planner", "Failed to load resource: the server responded with a status of 500", `${API_ORIGIN}/api/v1/planning/snapshots`, []],
+    ["parcel endpoint console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", `${API_ORIGIN}/parcels/search?q=test`, []],
+    ["same-origin SDK console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", `${LOCAL_ORIGIN}/arcgis-assets/chunks/runtime.js`, []],
+    ["unexpected Esri MapServer console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json", []],
+    ["Portal item console error", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json", []],
+    ["OAuth sign-in console error", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/oauth2/authorize", []],
+    ["authorization 403 application error", false, "authorization-planner", "Authorization failed: 403 Forbidden", `${API_ORIGIN}/api/v1/planning/snapshots`, []],
+    ["arbitrary external console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://example.com/unrelated.json", []],
+    ["unlinked approved layer failure", false, "authorization-planner", "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Public dark-gray reference basemap', id: 'cfs-public-reference-basemap') {error: s}", "", []],
+  ];
+  for (const [name, expected, mode, text, locationUrl, observedFailures] of consoleCases) {
+    assert.equal(
+      Boolean(approvedOptionalPublicBasemapConsoleUrl({ failures: observedFailures, locationUrl, mode, text })),
+      expected,
+      name,
+    );
+    console.log(`PASS ${expected ? "optional" : "fatal"} console: ${name}`);
+  }
+}
+
+function isApprovedPublicArcgisRequest(url) {
+  return (
+    isApprovedOptionalPublicBasemapRequest(url) ||
+    (url.hostname === "static.arcgis.com" &&
+      /^\/attribution\/Canvas\/World_Dark_Gray_(?:Base|Reference)(?:\/|$)/i.test(url.pathname))
+  );
+}
+
+function isExternalArcgisRequest(url) {
+  return (
+    url.origin !== LOCAL_ORIGIN &&
+    url.origin !== API_ORIGIN &&
+    /(?:arcgis|esri)/i.test(url.hostname)
+  );
+}
+
+function approvedOptionalPublicBasemapUrl(value) {
+  const match = String(value).match(/https:\/\/[^\s'"<>]+/i);
+  if (!match) return null;
+  try {
+    const url = new URL(match[0].replace(/[),.;]+$/, ""));
+    return isApprovedOptionalPublicBasemapRequest(url) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+async function assertOptionalPublicBasemapFallback(context) {
+  const observed =
+    FORCE_OPTIONAL_BASEMAP_FAILURE ||
+    report.diagnostics.optional_public_basemap_failures.length > 0 ||
+    report.diagnostics.optional_public_basemap_console.length > 0;
+  if (!observed) return;
+
+  const page = await context.newPage();
+  try {
+    await goto(page, LOCAL_URL, "?app=planning");
+    const map = page.getByTestId("cfs-arcgis-map");
+    await map.waitFor({ timeout: 60_000 });
+    await page.waitForFunction(() => {
+      const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
+      return (
+        element?.getAttribute("data-static-context-ready") === "true" &&
+        element.getAttribute("data-context-ready") === "true" &&
+        element.getAttribute("data-map-renderer") === "interactive" &&
+        element.getAttribute("data-map-renderer-state") === "interactive_ready" &&
+        element.getAttribute("data-map-view-ready-state") === "ready"
+      );
+    });
+    if (FORCE_OPTIONAL_BASEMAP_FAILURE) {
+      await page.evaluate(async (urls) => {
+        await Promise.all(urls.map((url) => fetch(url).catch(() => undefined)));
+      }, OPTIONAL_BASEMAP_FAILURE_TEST_URLS);
+      await poll(async () =>
+        OPTIONAL_BASEMAP_FAILURE_TEST_URLS.every((url) =>
+          report.diagnostics.optional_public_basemap_failures.some((failure) => failure.url === url),
+        ),
+      );
+    }
+    const contextState = await page.evaluate(() => {
+      const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
+      return {
+        countyFeatures: Number(element?.getAttribute("data-context-county-features")),
+        debug: window.__cfsGetMapDebugState?.(),
+        labelFeatures: Number(element?.getAttribute("data-context-label-features")),
+        referenceBasemapState: element?.getAttribute("data-reference-basemap-state"),
+        roadFeatures: Number(element?.getAttribute("data-context-road-features")),
+      };
+    });
+    assert.equal(contextState.debug?.ready, true, "MapView is not ready after the optional basemap failure.");
+    assert.equal(contextState.debug?.readyState, "ready", "MapView readyState is not ready.");
+    assert.equal(contextState.debug?.basemapId, "cfs-same-origin-basemap");
+    assert(contextState.countyFeatures > 0, "Same-origin county context is empty.");
+    assert(contextState.roadFeatures > 0, "Same-origin street context is empty.");
+    assert(contextState.labelFeatures > 0, "Same-origin place labels are empty.");
+    for (const layerId of [
+      "county-boundary",
+      "cfs-local-hydrography",
+      "cfs-local-municipalities",
+      "transportation-context",
+    ]) {
+      const layer = contextState.debug?.layers?.find((candidate) => candidate.id === layerId);
+      assert(layer?.visible && Number(layer.graphicsCount) > 0, `Required same-origin layer ${layerId} is unavailable.`);
+    }
+    if (contextState.referenceBasemapState === "failed") {
+      const labels = contextState.debug?.layers?.find((candidate) => candidate.id === "cfs-local-place-labels");
+      assert(labels?.visible && Number(labels.graphicsCount) > 0, "Fallback local labels are unavailable.");
+      await page.getByTestId("cfs-reference-basemap-warning").waitFor();
+    }
+
+    const controls = page.getByRole("button", { name: /Open .* controls/i });
+    await controls.click();
+    const runtime = page.getByTestId("local-runtime-status");
+    await runtime.getByText("Frontend Ready", { exact: true }).waitFor();
+    await page.getByTestId("local-runtime-api").getByText("Ready", { exact: true }).waitFor();
+    await page.getByTestId("local-runtime-database").getByText("Connected", { exact: true }).waitFor();
+    await controls.click();
+
+    const parcelId = "CFS-PARCEL-0149726579";
+    const beforeExtent = await map.getAttribute("data-map-extent");
+    const search = page.getByRole("combobox", { name: "Search parcels" }).first();
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname.replace(/\/$/, "") === "/parcels/search" &&
+        response.request().method() === "GET",
+      { timeout: 60_000 },
+    );
+    await search.click();
+    await search.fill("");
+    await delay(100);
+    await search.fill(parcelId);
+    const response = await responsePromise;
+    assert.equal(response.status(), 200, `Parcel search returned ${response.status()}.`);
+    const payload = await response.json();
+    assert(
+      payload.results?.some((record) => record.official_parcel_id === parcelId),
+      `Parcel search response omitted ${parcelId}.`,
+    );
+    const option = page
+      .locator("#top-parcel-search-results")
+      .getByRole("option")
+      .filter({ hasText: parcelId })
+      .first();
+    await option.waitFor({ timeout: 30_000 });
+    await option.click();
+    await page.getByText(parcelId, { exact: true }).first().waitFor();
+    await page.waitForFunction(
+      (extent) => {
+        const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
+        return (
+          element?.getAttribute("data-map-extent") !== extent &&
+          Number(element?.getAttribute("data-map-zoom")) > 9
+        );
+      },
+      beforeExtent,
+    );
+    await page.getByTestId("command-center-explore-intelligence").click();
+    const expand = page.getByRole("button", { name: "Expand map layers panel", exact: true });
+    if ((await expand.count()) && (await expand.isVisible())) await expand.click();
+    const parcelCard = page
+      .locator("article")
+      .filter({ has: page.getByText("Parcel Intelligence", { exact: true }) })
+      .first();
+    if (!(await parcelCard.isVisible())) {
+      await page
+        .locator("details")
+        .filter({ has: page.getByText("Planning", { exact: true }) })
+        .first()
+        .locator("summary")
+        .click();
+    }
+    const showParcels = parcelCard.getByRole("button", {
+      name: "Show Parcel Intelligence",
+      exact: true,
+    });
+    if (await showParcels.count()) await showParcels.click();
+    await page.waitForFunction(() =>
+      (window.__cfsGetMapDebugState?.().layers ?? []).some(
+        (layer) => layer.id === "parcel-intelligence" && layer.visible && Number(layer.graphicsCount) > 0,
+      ),
+    );
+
+    const beforeZoom = Number(await map.getAttribute("data-map-zoom"));
+    const zoomIn = page.getByRole("button", { name: "Zoom in" });
+    await zoomIn.waitFor();
+    assert(!(await zoomIn.isDisabled()), "Map zoom control is disabled.");
+    await zoomIn.click();
+    await page.waitForFunction(
+      (zoom) => Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) > zoom,
+      beforeZoom,
+    );
+    const reset = page.getByRole("button", { name: "Reset to Cabarrus County" });
+    assert(!(await reset.isDisabled()), "Map reset control is disabled.");
+    await reset.click();
+    assert.equal(
+      await page.getByText(/Sign in to ArcGIS|ArcGIS organizational account/i).count(),
+      0,
+      "ArcGIS sign-in UI appeared.",
+    );
+    assert.deepEqual(
+      report.diagnostics.unexpected_external_arcgis_requests,
+      [],
+      "Fallback proof observed a private Portal, OAuth, or unexpected external ArcGIS request.",
+    );
+    report.optional_public_basemap_verification = {
+      classification: "optional_public_basemap_failure",
+      context_layers: [
+        "county-boundary",
+        "cfs-local-hydrography",
+        "cfs-local-municipalities",
+        "transportation-context",
+      ],
+      map_renderer: "interactive",
+      parcel_focus: parcelId,
+      status: "PASS",
+    };
+  } finally {
+    await page.close();
+  }
 }
 
 function isExpectedProductFailure(entry) {
