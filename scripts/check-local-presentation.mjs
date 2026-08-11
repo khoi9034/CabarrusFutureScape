@@ -4,8 +4,21 @@ import process from "node:process";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
+const venvPython = path.join(
+  root,
+  ".venv",
+  process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
+);
+const python = process.env.CFS_PYTHON?.trim() || (fs.existsSync(venvPython) ? venvPython : "python");
+const env = {
+  ...process.env,
+  CFS_PYTHON: python,
+  PATH: path.isAbsolute(python)
+    ? `${path.dirname(python)}${path.delimiter}${process.env.PATH ?? ""}`
+    : process.env.PATH,
+};
 const checks = [
-  ["Database readiness", "python", ["scripts/check_cfs_local_data.py"]],
+  ["Database readiness", python, ["scripts/check_cfs_local_data.py"]],
   ["Backend and frontend readiness", process.execPath, ["scripts/check-presentation.mjs"]],
   ["OpenAPI and deterministic Ask CFS", process.execPath, ["scripts/check-local-apis.mjs"]],
   ["Live and offline browser workflows", process.execPath, ["scripts/check-local-interactions.mjs"]],
@@ -17,7 +30,7 @@ for (const [name, command, args] of checks) {
   const started = Date.now();
   const result = spawnSync(command, args, {
     cwd: root,
-    env: process.env,
+    env,
     stdio: "inherit",
     windowsHide: true,
   });

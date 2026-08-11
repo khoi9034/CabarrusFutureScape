@@ -15,6 +15,14 @@ $FrontendEnv = Join-Path $Root ".env.local"
 $StopScript = Join-Path $PSScriptRoot "stop-cfs-local.ps1"
 $DataCheck = Join-Path $PSScriptRoot "check_cfs_local_data.py"
 $ApiCheck = Join-Path $PSScriptRoot "check-local-apis.mjs"
+$VenvPython = Join-Path $Root ".venv\Scripts\python.exe"
+$Python = if ($env:CFS_PYTHON) {
+  $env:CFS_PYTHON
+} elseif (Test-Path -LiteralPath $VenvPython) {
+  $VenvPython
+} else {
+  "python"
+}
 $BuildMarker = Join-Path $Logs "cfs-presentation-build.json"
 $BuildLog = Join-Path $Logs "cfs-presentation-build.log"
 $BackendLog = Join-Path $Logs "cfs-presentation-backend.log"
@@ -250,7 +258,7 @@ Set-Location -LiteralPath '$Backend'
 `$env:CFS_DATABASE_POOL_TIMEOUT_SECONDS='30'
 `$env:CFS_AI_ENABLED='$enabled'
 `$env:CFS_AI_PROVIDER='$provider'
-python -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'
+& '$Python' -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'
 "@
   Write-Cfs "Starting FastAPI in $(if ($EnableOpenAI) { 'optional OpenAI' } else { 'deterministic local' }) mode."
   return Start-Process -FilePath "powershell.exe" -ArgumentList @(
@@ -270,11 +278,12 @@ New-Item -ItemType Directory -Path $Logs -Force | Out-Null
 
 try {
   Write-Cfs "Checking local presentation prerequisites."
-  foreach ($command in @("node", "npm.cmd", "python", "git")) {
+  foreach ($command in @("node", "npm.cmd", "git")) {
     Assert-Command -Name $command
   }
+  Assert-Command -Name $Python
   Invoke-Checked -FailureMessage "Required Python packages are unavailable." -Command {
-    python -c "import fastapi, uvicorn, sqlalchemy, psycopg, pydantic_settings, shapely"
+    & $Python -c "import fastapi, uvicorn, sqlalchemy, psycopg, pydantic_settings, shapely"
   }
   if (!(Test-TcpPort -HostName $PostgresHost -Port $PostgresPort)) {
     throw "PostgreSQL is unavailable at localhost:$PostgresPort. Start the local cfs_dev service, then retry."
@@ -287,7 +296,7 @@ try {
   $env:CFS_DATABASE_AUTH_MODE = "password"
   $dataStarted = Get-Date
   Invoke-Checked -FailureMessage "Local cfs_dev/PostGIS readiness failed." -Command {
-    python $DataCheck
+    & $Python $DataCheck
   }
   $dataReadyMs = [math]::Round(((Get-Date) - $dataStarted).TotalMilliseconds, 1)
 

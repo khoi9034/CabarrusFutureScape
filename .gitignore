@@ -46,6 +46,7 @@ logs/next-dev.log
 !backend/.env.example
 backend.env
 backend/.venv/
+/.venv/
 
 # vercel
 .vercel
