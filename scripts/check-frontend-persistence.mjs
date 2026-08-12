@@ -8,6 +8,10 @@ import path from "node:path";
 import process from "node:process";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium } from "playwright-core";
+import {
+  captureProductBaseline,
+  verifyProductIsolation,
+} from "./product-acceptance-isolation.mjs";
 
 const ROOT = process.cwd();
 const LOCAL_URL = (process.env.CFS_LOCAL_BASE_URL ?? "http://127.0.0.1:3000").replace(/\/$/, "");
@@ -64,10 +68,15 @@ const report = {
   },
   disposable_records: [],
   finished_at: null,
+  final_invariants: [],
   local: { base_url: LOCAL_URL, product_requests: [], request_ids: [] },
   phase: PHASE,
   restart_label: RESTART_LABEL,
   restart_runs: [],
+  ownership: {
+    baseline: null,
+    verification: null,
+  },
   status: "RUNNING",
   workflows: [],
 };
@@ -79,6 +88,9 @@ let primaryError;
 try {
   if (PHASE === "cleanup") await waitForProductApi();
   else await waitForLocalStack();
+  if (["authorization", "full", "map-fallback", "verify"].includes(PHASE)) {
+    report.ownership.baseline = await captureProductBaseline(API_URL, PREFIX);
+  }
   report.local.principal = await readApi("/api/v1/me");
   if (PHASE === "cleanup") {
     await cleanupRestartRecords();
@@ -102,15 +114,15 @@ try {
       } else if (PHASE === "verify") {
         await verifyRestartRecords(localContext);
       } else if (PHASE === "authorization") {
-        await localAskCfs(localContext);
-        await localPermissionDenial(localContext);
+        const askConversationId = await localAskCfs(localContext);
+        await localPermissionDenial(localContext, askConversationId);
       } else if (PHASE !== "map-fallback") {
         await localPlanning(localContext);
         await localEconomicsAndBucket(localContext);
         await localInvestmentsBucket(localContext);
-        await localAskCfs(localContext);
+        const askConversationId = await localAskCfs(localContext);
         await localMalformedProductRecords(localContext);
-        await localPermissionDenial(localContext);
+        await localPermissionDenial(localContext, askConversationId);
         await localBrowserStorageCheck(localContext);
       }
       await assertOptionalPublicBasemapFallback(localContext);
@@ -163,6 +175,42 @@ try {
     report.cleanup.push({ fallback: true, status: "FAIL", error: String(error) });
     primaryError ??= error;
     report.status = "FAIL";
+  }
+  try {
+    if (report.ownership.baseline) {
+      const verification = await verifyProductIsolation(
+        API_URL,
+        PREFIX,
+        report.ownership.baseline,
+        acceptanceOwnedIds(),
+      );
+      report.ownership.verification = verification.resources;
+      report.final_invariants.push(...verification.final_invariants);
+      const failedInvariant = verification.final_invariants.find((invariant) => !invariant.passed);
+      if (failedInvariant) {
+        const error = new assert.AssertionError({
+          actual: failedInvariant.actual,
+          expected: failedInvariant.expected,
+          message: `Final invariant failed: ${failedInvariant.name}`,
+          operator: "deepStrictEqual",
+        });
+        primaryError ??= error;
+        report.status = "FAIL";
+        report.final_invariant = failedInvariant;
+      } else {
+        report.final_invariant = {
+          actual: "PASS",
+          expected: "PASS",
+          name: "baseline_isolation",
+          passed: true,
+        };
+      }
+    }
+  } catch (error) {
+    primaryError ??= error;
+    report.status = "FAIL";
+    report.ownership.verification_failure =
+      error instanceof Error ? error.stack ?? error.message : String(error);
   }
   if (demoServer && !demoServer.killed) demoServer.kill();
   if (browser) await browser.close();
@@ -1082,6 +1130,7 @@ async function localInvestmentsBucket(context) {
 
 async function localAskCfs(context) {
   const page = await context.newPage();
+  let ownedConversationId = null;
   try {
     await runCase("Ask CFS", "UI conversation, follow-up, refresh recovery, reset", async () => {
       const trafficStart = report.local.product_requests.length;
@@ -1101,6 +1150,7 @@ async function localAskCfs(context) {
         90_000,
       );
       const id = productId(created, "Ask CFS UI conversation");
+      ownedConversationId = id;
       remember("ask_cfs", "/api/v1/ask-cfs/conversations", id);
       await stopAskIsolation();
       assert.equal(created.data.title.includes("<redacted>"), true);
@@ -1141,6 +1191,8 @@ async function localAskCfs(context) {
   } finally {
     await page.close();
   }
+  assert.match(ownedConversationId ?? "", /^[0-9a-f-]{36}$/i, "Ask CFS ownership proof omitted its UUID.");
+  return ownedConversationId;
 }
 
 async function localMalformedProductRecords(context) {
@@ -1299,7 +1351,8 @@ async function localMalformedProductRecords(context) {
   }
 }
 
-async function localPermissionDenial(context) {
+async function localPermissionDenial(context, ownedAskConversationId) {
+  assert.match(ownedAskConversationId ?? "", /^[0-9a-f-]{36}$/i, "Denied Ask CFS proof requires an owned UUID.");
   const page = await context.newPage();
   try {
     await runCase("Authorization", "UI does not report a denied write as saved", async () => {
@@ -1362,6 +1415,7 @@ async function localPermissionDenial(context) {
     });
 
     await runCase("Authorization", "Ask CFS denied message persistence remains unsaved", async () => {
+      const stopAskIsolation = await isolateAskCfsConversationList(page, [ownedAskConversationId]);
       const deniedAskWrite = new RegExp(
         `^${escapeRegExp(API_URL)}/api/v1/ask-cfs/conversations(?:/[0-9a-f-]+/messages)?$`,
         "i",
@@ -1370,50 +1424,52 @@ async function localPermissionDenial(context) {
         if (route.request().method() !== "POST") return route.continue();
         await forbidden(route, "ask_cfs:use permission is required.");
       }, { times: 1 });
-      await goto(page, LOCAL_URL, "?app=planning");
-      await openPlanningAskCfs(page);
-      const query = page.getByTestId("ask-cfs-query").first();
-      const askStatus = page.getByTestId("ask-cfs-persistence-status").first();
-      const question = `${PREFIX}: confirm denied persistence is not reported as saved.`;
-      await query.fill(question);
-      const submit = page.getByTestId("ask-cfs-submit").first();
-      await poll(async () => (await query.inputValue()) === question && !(await submit.isDisabled()), 45_000);
-      const conversationId = await askStatus.getAttribute("data-conversation-id");
-      const conversationIdsBefore = (await readApi("/api/v1/ask-cfs/conversations?page_size=100"))
-        .map((record) => record.id)
-        .sort();
-      const messagesBefore = conversationId
-        ? await readApi(`/api/v1/ask-cfs/conversations/${conversationId}/messages?page_size=100`)
-        : [];
-      const [messageDenied] = await Promise.all([
-        page.waitForResponse((response) =>
-          response.request().method() === "POST" &&
-          /^\/api\/v1\/ask-cfs\/conversations(?:\/[0-9a-f-]+\/messages)?$/i.test(new URL(response.url()).pathname),
-        { timeout: 90_000 }),
-        submit.click(),
-      ]);
-      assert.equal(messageDenied.status(), 403);
-      await poll(async () => /permission|forbidden|could not be saved|not authorized/i.test(await askStatus.innerText()), 60_000);
-      assert.doesNotMatch(await askStatus.innerText(), /saved to cfs/i);
-      assert.deepEqual(
-        (await readApi("/api/v1/ask-cfs/conversations?page_size=100")).map((record) => record.id).sort(),
-        conversationIdsBefore,
-        "Denied Ask CFS write changed the active conversation set.",
-      );
-      if (conversationId) {
+      try {
+        await goto(page, LOCAL_URL, "?app=planning");
+        await openPlanningAskCfs(page);
+        const query = page.getByTestId("ask-cfs-query").first();
+        const askStatus = page.getByTestId("ask-cfs-persistence-status").first();
+        const question = `${PREFIX}: confirm denied persistence is not reported as saved.`;
+        await query.fill(question);
+        const submit = page.getByTestId("ask-cfs-submit").first();
+        await poll(async () => (await query.inputValue()) === question && !(await submit.isDisabled()), 45_000);
+        const conversationId = await askStatus.getAttribute("data-conversation-id");
+        assert.equal(conversationId, ownedAskConversationId, "Denied Ask CFS proof selected a non-owned conversation.");
+        const conversationIdsBefore = (await readApi("/api/v1/ask-cfs/conversations?page_size=100"))
+          .map((record) => record.id)
+          .sort();
+        const messagesBefore = await readApi(`/api/v1/ask-cfs/conversations/${conversationId}/messages?page_size=100`);
+        const [messageDenied] = await Promise.all([
+          page.waitForResponse((response) =>
+            response.request().method() === "POST" &&
+            new URL(response.url()).pathname === `/api/v1/ask-cfs/conversations/${conversationId}/messages`,
+          { timeout: 90_000 }),
+          submit.click(),
+        ]);
+        assert.equal(messageDenied.status(), 403);
+        await poll(async () => /permission|forbidden|could not be saved|not authorized/i.test(await askStatus.innerText()), 60_000);
+        assert.doesNotMatch(await askStatus.innerText(), /saved to cfs/i);
+        assert.deepEqual(
+          (await readApi("/api/v1/ask-cfs/conversations?page_size=100")).map((record) => record.id).sort(),
+          conversationIdsBefore,
+          "Denied Ask CFS write changed the active conversation set.",
+        );
         assert.deepEqual(
           await readApi(`/api/v1/ask-cfs/conversations/${conversationId}/messages?page_size=100`),
           messagesBefore,
           "Denied Ask CFS write persisted a message.",
         );
+        report.authorization.cases.push({
+          action: "Ask CFS message persistence",
+          endpoint: new URL(messageDenied.url()).pathname,
+          expected: "ready submit emits a 403 and does not persist a conversation or message",
+          owned_conversation_id: conversationId,
+          role: "Administrator with simulated server denial",
+          status: "PASS",
+        });
+      } finally {
+        await stopAskIsolation();
       }
-      report.authorization.cases.push({
-        action: "Ask CFS message persistence",
-        endpoint: new URL(messageDenied.url()).pathname,
-        expected: "ready submit emits a 403 and does not persist a conversation or message",
-        role: "Administrator with simulated server denial",
-        status: "PASS",
-      });
     });
   } finally {
     await page.close();
@@ -1914,7 +1970,7 @@ async function openPlanningAskCfs(page) {
   await query.waitFor({ timeout: 45_000 });
 }
 
-async function isolateAskCfsConversationList(page) {
+async function isolateAskCfsConversationList(page, allowedIds = []) {
   const pattern = new RegExp(`^${escapeRegExp(API_URL)}/api/v1/ask-cfs/conversations(?:\\?.*)?$`, "i");
   const handler = async (route) => {
     if (route.request().method() !== "GET") return route.continue();
@@ -1925,8 +1981,11 @@ async function isolateAskCfsConversationList(page) {
     await route.fulfill({
       body: JSON.stringify({
         ...payload,
-        data: [],
-        pagination: { ...(payload.pagination ?? {}), total: 0 },
+        data: payload.data.filter((record) => allowedIds.includes(record.id)),
+        pagination: {
+          ...(payload.pagination ?? {}),
+          total: payload.data.filter((record) => allowedIds.includes(record.id)).length,
+        },
       }),
       response,
     });
@@ -2535,6 +2594,29 @@ function remember(kind, apiPath, id) {
     minimum_child_rows: ["planning", "economics"].includes(kind) ? 1 : null,
   });
   cleanup.push({ apiPath, id, kind, cleaned: false });
+}
+
+function acceptanceOwnedIds() {
+  const owned = {
+    planning: [],
+    economics: [],
+    report_bucket: [],
+    ask_cfs: [],
+  };
+  for (const record of report.disposable_records) {
+    const kind =
+      record.kind === "planning"
+        ? "planning"
+        : record.kind === "economics"
+          ? "economics"
+          : record.kind.endsWith("report_bucket")
+            ? "report_bucket"
+            : record.kind === "ask_cfs"
+              ? "ask_cfs"
+              : null;
+    if (kind && !owned[kind].includes(record.id)) owned[kind].push(record.id);
+  }
+  return owned;
 }
 
 function expectPersistedFields(id, expectedFields) {

@@ -6,6 +6,11 @@ import path from "node:path";
 import process from "node:process";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium } from "playwright-core";
+import {
+  archiveOwnedProductRecords,
+  captureProductBaseline,
+  verifyProductIsolation,
+} from "./product-acceptance-isolation.mjs";
 
 const ROOT = process.cwd();
 const BASE_URL = (process.env.CFS_LOCAL_BASE_URL ?? "http://127.0.0.1:3000").replace(
@@ -19,6 +24,14 @@ const API_URL = (process.env.CFS_API_BASE_URL ?? "http://127.0.0.1:8000").replac
 const API_ORIGIN = new URL(API_URL).origin;
 const PARCEL = "CFS-PARCEL-0149726579";
 const TEMP_PREFIX = `CFS-PRESENTATION-BROWSER-${Date.now()}`;
+const ACCEPTANCE_PREFIX = `CFS-PRODUCT-V1-ACCEPTANCE-${Date.now()}`;
+const REPORT_PATH = path.join(ROOT, "logs", "local-interactions.json");
+const ownedIds = {
+  planning: [],
+  economics: [],
+  report_bucket: [],
+  ask_cfs: [],
+};
 const LIVE_MAP_CONTEXT_PATHS = new Set([
   "/demo-data/map_layers/demo_county_boundary.geojson",
   "/demo-data/map_layers/demo_hydrography.geojson",
@@ -49,6 +62,18 @@ const report = {
   offline: {
     blocked_external_requests: [],
     cases: [],
+  },
+  current_case: null,
+  failed_case: null,
+  final_invariants: [],
+  last_api_request_response: null,
+  last_completed_case: null,
+  navigation_attempts: [],
+  ownership: {
+    baseline: null,
+    cleanup: [],
+    owned_ids: ownedIds,
+    verification: null,
   },
   disposable_cleanup: null,
 };
@@ -111,6 +136,11 @@ function attachDiagnostics(context, { offline = false } = {}) {
     if (new URL(url).origin === API_ORIGIN) {
       const key = `${request.method()} ${new URL(url).pathname}`;
       report.api_paths[key] = (report.api_paths[key] ?? 0) + 1;
+      report.last_api_request_response = {
+        method: request.method(),
+        path: new URL(url).pathname,
+        status: null,
+      };
     }
 
     const pathname = /^https?:/i.test(url) ? new URL(url).pathname : url;
@@ -139,10 +169,17 @@ function attachDiagnostics(context, { offline = false } = {}) {
   });
 
   context.on("response", (response) => {
-    if (new URL(response.url()).origin === API_ORIGIN && response.status() >= 400) {
-      report.diagnostics.api_failures.push(
-        `${response.status()} ${response.request().method()} ${response.url()}`,
-      );
+    if (new URL(response.url()).origin === API_ORIGIN) {
+      report.last_api_request_response = {
+        method: response.request().method(),
+        path: new URL(response.url()).pathname,
+        status: response.status(),
+      };
+      if (response.status() >= 400) {
+        report.diagnostics.api_failures.push(
+          `${response.status()} ${response.request().method()} ${response.url()}`,
+        );
+      }
     }
   });
 
@@ -165,9 +202,21 @@ function attachDiagnostics(context, { offline = false } = {}) {
 
 async function runCase(product, name, run, offline = false) {
   const started = Date.now();
-  await run();
+  report.current_case = { name, product };
+  try {
+    await run();
+  } catch (error) {
+    report.failed_case = {
+      error: error instanceof Error ? error.stack ?? error.message : String(error),
+      name,
+      product,
+    };
+    throw error;
+  }
   const result = { product, name, response_ms: Date.now() - started };
   (offline ? report.offline.cases : report.cases).push(result);
+  report.last_completed_case = { name, product };
+  report.current_case = null;
   console.log(`PASS ${offline ? "Offline " : ""}${product}: ${name} (${result.response_ms}ms)`);
 }
 
@@ -178,6 +227,48 @@ async function goto(page, query = "") {
   });
   await delay(750);
   await assertHealthyPage(page);
+}
+
+async function navigateToHome(page) {
+  const home = page.getByRole("button", { name: "Return to CFS Home" });
+  const transition = {
+    attempts: [],
+    from_url: page.url(),
+    started_at: new Date().toISOString(),
+  };
+  report.navigation_attempts.push(transition);
+  await home.waitFor({ timeout: 45_000 });
+  await page.waitForLoadState("load");
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const result = { attempt, clicked_at: new Date().toISOString(), from_url: page.url() };
+    transition.attempts.push(result);
+    await home.click();
+    try {
+      await page.waitForFunction(
+        () =>
+          location.pathname === "/" &&
+          location.search === "" &&
+          document.querySelector('[data-testid="cfs-master-home"]') &&
+          !document.querySelector('[aria-label="Return to CFS Home"]'),
+        null,
+        { timeout: 10_000 },
+      );
+      result.status = "PASS";
+      result.to_url = page.url();
+      transition.completed_at = new Date().toISOString();
+      transition.status = "PASS";
+      return;
+    } catch (error) {
+      result.error = error instanceof Error ? error.message : String(error);
+      result.status = "NO_TRANSITION";
+      result.to_url = page.url();
+    }
+  }
+
+  transition.completed_at = new Date().toISOString();
+  transition.status = "FAIL";
+  throw new Error(`Home navigation did not change route and module state: ${JSON.stringify(transition)}`);
 }
 
 async function assertHealthyPage(page) {
@@ -225,21 +316,72 @@ async function assertLiveStatus(page) {
   await controls.click();
 }
 
-async function askQuestions(page, questions) {
-  for (const question of questions) {
+async function askQuestions(page, questions, { expectPersistence = true } = {}) {
+  let conversationId = null;
+  for (const [index, question] of questions.entries()) {
     const textbox = page.getByRole("textbox", { name: "Ask CFS question" }).first();
     await textbox.waitFor({ timeout: 45_000 });
-    await textbox.fill(question);
     const panel = textbox.locator("xpath=ancestor::section[1]");
-    const [request] = await Promise.all([
+    conversationId ??= await panel.getAttribute("data-conversation-id");
+    if (conversationId) {
+      assert(
+        ownedIds.ask_cfs.includes(conversationId),
+        `Ask CFS selected non-owned conversation ${conversationId}.`,
+      );
+    }
+    const submittedQuestion =
+      index === 0 && !conversationId ? `${ACCEPTANCE_PREFIX}: ${question}` : question;
+    await textbox.fill(submittedQuestion);
+    const createdPromise = !expectPersistence || conversationId
+      ? Promise.resolve(null)
+      : page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname === "/api/v1/ask-cfs/conversations" &&
+            response.request().method() === "POST",
+          { timeout: 90_000 },
+        );
+    const messagePromise = expectPersistence
+      ? page.waitForResponse(
+          (response) =>
+            /^\/api\/v1\/ask-cfs\/conversations\/[0-9a-f-]+\/messages$/i.test(
+              new URL(response.url()).pathname,
+            ) && response.request().method() === "POST",
+          { timeout: 90_000 },
+        )
+      : Promise.resolve(null);
+    const [request, created, message] = await Promise.all([
       page.waitForRequest(
         (candidate) =>
           new URL(candidate.url()).pathname.replace(/\/$/, "") === "/ai/search" &&
           candidate.method() === "POST",
         { timeout: 30_000 },
       ),
+      createdPromise,
+      messagePromise,
       panel.getByRole("button", { name: "Ask", exact: true }).click(),
     ]);
+    if (created) {
+      assert.equal(created.status(), 201, "Ask CFS conversation create failed.");
+      const payload = await created.json();
+      conversationId = payload.data?.id;
+      assert.match(conversationId ?? "", /^[0-9a-f-]{36}$/i, "Ask CFS create omitted its UUID.");
+      assert.match(payload.data?.title ?? "", /CFS-PRODUCT-V1-ACCEPTANCE-\d+/, "Ask CFS record omitted its ownership marker.");
+      rememberOwned("ask_cfs", conversationId);
+    }
+    if (expectPersistence) {
+      assert(conversationId, "Ask CFS did not expose an owned conversation UUID.");
+      assert.equal(message.status(), 201, "Ask CFS message persistence failed.");
+      assert.equal(
+        new URL(message.url()).pathname,
+        `/api/v1/ask-cfs/conversations/${conversationId}/messages`,
+        "Ask CFS message targeted a different conversation.",
+      );
+      await panel
+        .locator(
+          `[data-testid="ask-cfs-persistence-status"][data-conversation-id="${conversationId}"]`,
+        )
+        .waitFor({ timeout: 45_000 });
+    }
     const response = await request.response();
     assert(response, "Ask CFS request completed without an HTTP response.");
     assert.equal(response.status(), 200, `Ask CFS returned ${response.status()}.`);
@@ -251,6 +393,33 @@ async function askQuestions(page, questions) {
     await panel.getByText(/^Evidence used \([1-9]\d*\)$/).waitFor();
     await panel.getByText("Limitations", { exact: true }).waitFor();
   }
+  return conversationId;
+}
+
+async function isolateAskCfsConversationLists(context) {
+  const pattern = new RegExp(
+    `^${API_ORIGIN.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/api/v1/ask-cfs/conversations(?:\\?.*)?$`,
+    "i",
+  );
+  await context.route(pattern, async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    const response = await route.fetch();
+    const payload = await response.json();
+    assert(response.ok(), `Ask CFS isolation list returned ${response.status()}.`);
+    const data = (payload.data ?? []).filter((record) => ownedIds.ask_cfs.includes(record.id));
+    await route.fulfill({
+      body: JSON.stringify({
+        ...payload,
+        data,
+        pagination: { ...(payload.pagination ?? {}), total: data.length },
+      }),
+      response,
+    });
+  });
+}
+
+function rememberOwned(kind, id) {
+  if (!ownedIds[kind].includes(id)) ownedIds[kind].push(id);
 }
 
 async function selectParcel(
@@ -326,7 +495,7 @@ async function planningWorkflow(page) {
   await runCase("Planning", "Indicator Center and three grounded questions", async () => {
     await page.getByTestId("command-center-indicator-center").click();
     await page.getByTestId("indicator-center-dashboard").waitFor({ timeout: 30_000 });
-    await askQuestions(page, [
+    const conversationId = await askQuestions(page, [
       "What should I inspect first for this parcel?",
       "What does the flood review indicate?",
       "What does the school-capacity context mean?",
@@ -335,9 +504,17 @@ async function planningWorkflow(page) {
       .getByRole("textbox", { name: "Ask CFS question" })
       .first()
       .locator("xpath=ancestor::section[1]");
-    await askPanel
-      .getByRole("button", { name: "Reset conversation" })
-      .click();
+    const resetResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v1/ask-cfs/conversations/${conversationId}/reset` &&
+        response.request().method() === "POST",
+      { timeout: 45_000 },
+    );
+    await askPanel.getByRole("button", { name: "Reset conversation" }).click();
+    const reset = await resetResponse;
+    assert.equal(reset.status(), 200, "Owned Ask CFS reset failed.");
+    assert.equal((await reset.json()).data?.id, conversationId, "Ask CFS reset targeted a different conversation.");
     await askPanel
       .getByText("Grounded CFS analysis", { exact: true })
       .waitFor({ state: "hidden" });
@@ -367,6 +544,7 @@ async function planningWorkflow(page) {
       assert.equal(created.status(), 201, "Planning Snapshot create failed.");
       assert.match(createdPayload.data?.id ?? "", /^[0-9a-f-]{36}$/i, "Planning Snapshot create omitted its UUID.");
       snapshotId = createdPayload.data.id;
+      rememberOwned("planning", snapshotId);
 
       await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
       const library = page.getByTestId("planning-snapshot-library");
@@ -416,8 +594,7 @@ async function planningWorkflow(page) {
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await assertHealthyPage(page);
-  await page.getByRole("button", { name: "Return to CFS Home" }).click();
-  await page.getByText("Cabarrus FutureScape", { exact: true }).first().waitFor();
+  await navigateToHome(page);
 }
 
 async function economicsWorkflow(page) {
@@ -492,7 +669,7 @@ async function economicsWorkflow(page) {
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await assertHealthyPage(page);
-  await page.getByRole("button", { name: "Return to CFS Home" }).click();
+  await navigateToHome(page);
 }
 
 async function cleanupIntake(candidateId) {
@@ -594,7 +771,10 @@ async function investmentsWorkflow(page) {
   });
 
   await runCase("Investments", "Find Sites and Property Review", async () => {
-    await page.getByRole("button", { name: "Find Sites", exact: true }).click();
+    await page
+      .getByLabel("CFS Investments navigation")
+      .getByRole("button", { name: "Find Sites", exact: true })
+      .click();
     const responsePromise = page.waitForResponse(
       (response) =>
         new URL(response.url()).pathname === "/investment/radar/search" &&
@@ -610,7 +790,10 @@ async function investmentsWorkflow(page) {
   });
 
   await runCase("Investments", "safe disposable backend mutation", async () => {
-    await page.getByRole("button", { name: "Find Sites", exact: true }).click();
+    await page
+      .getByLabel("CFS Investments navigation")
+      .getByRole("button", { name: "Find Sites", exact: true })
+      .click();
     await page.getByRole("button", { name: /Add External Opportunity/i }).click();
     const form = page.locator('main[data-investment-page="intake"]');
     await form.getByRole("textbox", { name: "Candidate label" }).fill(TEMP_PREFIX);
@@ -714,7 +897,7 @@ async function investmentsWorkflow(page) {
     }
   });
 
-  await page.getByRole("button", { name: "Return to CFS Home" }).click();
+  await navigateToHome(page);
 }
 
 async function navigationChecks(page) {
@@ -746,6 +929,7 @@ async function offlineChecks(browser) {
     viewport: { width: 1280, height: 900 },
   });
   attachDiagnostics(context, { offline: true });
+  await isolateAskCfsConversationLists(context);
   const page = await context.newPage();
 
   await runCase("Home", "renders with loopback traffic only", async () => {
@@ -763,7 +947,7 @@ async function offlineChecks(browser) {
     if (await expand.count()) await expand.click();
     await toggleLayer(page, "Development Hotspots", "Development Activity");
     await page.getByTestId("command-center-indicator-center").click();
-    await askQuestions(page, ["What data is still missing?"]);
+    await askQuestions(page, ["What data is still missing?"], { expectPersistence: false });
   }, true);
   await runCase("Economics", "dashboard renders offline", async () => {
     await goto(page, "?app=economics");
@@ -855,7 +1039,7 @@ async function degradedDataChecks(browser) {
   }
 }
 
-async function main() {
+async function runWorkflows() {
   const architecture = spawnSync(process.execPath, ["scripts/check-enterprise-frontend.mjs"], {
     cwd: ROOT,
     env: process.env,
@@ -864,6 +1048,7 @@ async function main() {
   assert.equal(architecture.status, 0, "Product V1 frontend persistence architecture check failed.");
   report.product_persistence_architecture = "PASS";
   await waitForStack();
+  report.ownership.baseline = await captureProductBaseline(API_URL, ACCEPTANCE_PREFIX);
   const browser = await chromium.launch({
     executablePath: browserExecutable(),
     headless: true,
@@ -875,6 +1060,7 @@ async function main() {
       viewport: { width: 1440, height: 1000 },
     });
     attachDiagnostics(context);
+    await isolateAskCfsConversationLists(context);
     const page = await context.newPage();
     await planningWorkflow(page);
     await economicsWorkflow(page);
@@ -891,51 +1077,122 @@ async function main() {
       await browser.close();
     }
   }
-
-  assert(Object.keys(report.api_paths).length >= 20, "Too few local API routes drove the UI.");
-  assert((report.api_paths["POST /ai/search"] ?? 0) >= 10, "Ask CFS UI requests were incomplete.");
-  assert(
-    new Set(report.map_context_requests.map((url) => new URL(url).pathname))
-      .size === LIVE_MAP_CONTEXT_PATHS.size,
-    "Live UI did not load every same-origin map context asset.",
-  );
-  assert.equal(report.demo_data_requests.length, 0, "Live UI requested demo-data fixtures.");
-  assert.equal(
-    report.degraded.demo_data_requests.length,
-    0,
-    "Degraded live UI requested demo business fixtures.",
-  );
-  assert.deepEqual(report.diagnostics.api_failures, [], "Browser observed failed API calls.");
-  assert.deepEqual(report.diagnostics.page_errors, [], "Browser page errors were observed.");
-  assert.deepEqual(report.diagnostics.request_loops, [], "Probable request loop detected.");
-  assert.deepEqual(report.diagnostics.request_failures, [], "Unexpected request failure observed.");
-  assert.deepEqual(report.diagnostics.console_messages, [], "Console warnings or errors were observed.");
-  assert(report.disposable_cleanup?.planning_snapshot_verified, "Disposable Planning Snapshot was not archived.");
-  assert(report.disposable_cleanup?.planning_snapshot_audit_verified, "Planning Snapshot archive audit was not verified.");
-  assert(report.disposable_cleanup?.verified, "Disposable investment mutation was not cleaned.");
-  assert(report.disposable_cleanup?.recent_work_verified, "Disposable recent work was not cleaned.");
-
-  report.status = "PASS";
-  await fs.mkdir(path.join(ROOT, "logs"), { recursive: true });
-  await fs.writeFile(
-    path.join(ROOT, "logs", "local-interactions.json"),
-    JSON.stringify(report, null, 2),
-  );
-  console.log(
-    `PASS complete local interaction audit\n${JSON.stringify(
-      {
-        cases: report.cases.length,
-        offline_cases: report.offline.cases.length,
-        api_paths: Object.keys(report.api_paths).length,
-        demo_data_requests: report.demo_data_requests.length,
-        degraded_cases: report.degraded.cases.length,
-        map_context_requests: report.map_context_requests.length,
-        external_requests: report.external_requests.length,
-      },
-      null,
-      2,
-    )}`,
-  );
 }
 
-await main();
+function collectFinalInvariants() {
+  recordFinalInvariant("local_api_route_count", ">=20", Object.keys(report.api_paths).length, Object.keys(report.api_paths).length >= 20);
+  recordFinalInvariant("ask_cfs_ui_request_count", ">=10", report.api_paths["POST /ai/search"] ?? 0, (report.api_paths["POST /ai/search"] ?? 0) >= 10);
+  recordFinalInvariant(
+    "same_origin_map_context_assets",
+    LIVE_MAP_CONTEXT_PATHS.size,
+    new Set(report.map_context_requests.map((url) => new URL(url).pathname)).size,
+  );
+  recordFinalInvariant("live_demo_business_requests", [], report.demo_data_requests);
+  recordFinalInvariant("degraded_demo_business_requests", [], report.degraded.demo_data_requests);
+  recordFinalInvariant("browser_api_failures", [], report.diagnostics.api_failures);
+  recordFinalInvariant("browser_page_errors", [], report.diagnostics.page_errors);
+  recordFinalInvariant("browser_request_loops", [], report.diagnostics.request_loops);
+  recordFinalInvariant("browser_request_failures", [], report.diagnostics.request_failures);
+  recordFinalInvariant("browser_console_messages", [], report.diagnostics.console_messages);
+  recordFinalInvariant("planning_snapshot_archived", true, Boolean(report.disposable_cleanup?.planning_snapshot_verified));
+  recordFinalInvariant("planning_snapshot_archive_audit", true, Boolean(report.disposable_cleanup?.planning_snapshot_audit_verified));
+  recordFinalInvariant("investment_mutation_cleaned", true, Boolean(report.disposable_cleanup?.verified));
+  recordFinalInvariant("recent_work_cleaned", true, Boolean(report.disposable_cleanup?.recent_work_verified));
+}
+
+function recordFinalInvariant(name, expected, actual, passed = JSON.stringify(actual) === JSON.stringify(expected)) {
+  report.final_invariants.push({ actual, expected, name, passed });
+}
+
+async function persistReport() {
+  await fs.mkdir(path.dirname(REPORT_PATH), { recursive: true });
+  await fs.writeFile(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+}
+
+let primaryError = null;
+let cleanupError = null;
+try {
+  await runWorkflows();
+} catch (error) {
+  primaryError = error;
+  const failure = error instanceof Error ? error.stack ?? error.message : String(error);
+  report.failed_case ??= {
+    error: failure,
+    name: report.current_case?.name ?? "workflow orchestration",
+    product: report.current_case?.product ?? "Acceptance",
+  };
+  report.final_invariants.unshift({
+    actual: failure,
+    expected: "PASS",
+    name: "workflow_execution",
+    passed: false,
+  });
+} finally {
+  try {
+    report.ownership.cleanup = await archiveOwnedProductRecords(
+      API_URL,
+      ACCEPTANCE_PREFIX,
+      ownedIds,
+    );
+  } catch (error) {
+    cleanupError = error;
+  }
+  try {
+    if (report.ownership.baseline) {
+      const verification = await verifyProductIsolation(
+        API_URL,
+        ACCEPTANCE_PREFIX,
+        report.ownership.baseline,
+        ownedIds,
+      );
+      report.ownership.verification = verification.resources;
+      report.final_invariants.push(...verification.final_invariants);
+    }
+  } catch (error) {
+    cleanupError ??= error;
+  }
+  collectFinalInvariants();
+  const failedInvariant = report.final_invariants.find((invariant) => !invariant.passed);
+  report.final_invariant = failedInvariant ?? {
+    actual: "PASS",
+    expected: "PASS",
+    name: "all_final_invariants",
+    passed: true,
+  };
+  report.status = primaryError || cleanupError || failedInvariant ? "FAIL" : "PASS";
+  if (primaryError) {
+    report.failure = primaryError instanceof Error ? primaryError.stack ?? primaryError.message : String(primaryError);
+  }
+  if (cleanupError) {
+    report.cleanup_failure = cleanupError instanceof Error ? cleanupError.stack ?? cleanupError.message : String(cleanupError);
+  }
+  await persistReport();
+}
+
+if (primaryError) throw primaryError;
+if (cleanupError) throw cleanupError;
+const failedInvariant = report.final_invariants.find((invariant) => !invariant.passed);
+if (failedInvariant) {
+  throw new assert.AssertionError({
+    actual: failedInvariant.actual,
+    expected: failedInvariant.expected,
+    message: `Final invariant failed: ${failedInvariant.name}`,
+    operator: "deepStrictEqual",
+  });
+}
+console.log(
+  `PASS complete local interaction audit\n${JSON.stringify(
+    {
+      cases: report.cases.length,
+      offline_cases: report.offline.cases.length,
+      api_paths: Object.keys(report.api_paths).length,
+      demo_data_requests: report.demo_data_requests.length,
+      degraded_cases: report.degraded.cases.length,
+      map_context_requests: report.map_context_requests.length,
+      external_requests: report.external_requests.length,
+      final_invariant: report.final_invariant,
+    },
+    null,
+    2,
+  )}`,
+);
