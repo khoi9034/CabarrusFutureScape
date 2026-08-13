@@ -21,6 +21,7 @@ const API_URL = (process.env.CFS_API_BASE_URL ?? "http://127.0.0.1:8000").replac
   /\/$/,
   "",
 );
+const BASE_ORIGIN = new URL(BASE_URL).origin;
 const API_ORIGIN = new URL(API_URL).origin;
 const PARCEL = "CFS-PARCEL-0149726579";
 const TEMP_PREFIX = `CFS-PRESENTATION-BROWSER-${Date.now()}`;
@@ -51,6 +52,8 @@ const report = {
   diagnostics: {
     api_failures: [],
     console_messages: [],
+    optional_public_basemap_console: [],
+    optional_public_basemap_failures: [],
     page_errors: [],
     request_failures: [],
     request_loops: [],
@@ -112,6 +115,74 @@ function isLoopback(url) {
   return ["127.0.0.1", "localhost"].includes(new URL(url).hostname);
 }
 
+function isApprovedOptionalPublicBasemapRequest(value) {
+  const url = value instanceof URL ? value : new URL(value);
+  return (
+    ["server.arcgisonline.com", "services.arcgisonline.com"].includes(url.hostname) &&
+    /^\/ArcGIS\/rest\/services\/Canvas\/World_Dark_Gray_(?:Base|Reference)\/MapServer(?:\/tile\/\d+\/\d+\/\d+|\/tilemap\/\d+\/\d+\/\d+\/\d+\/\d+)?\/?$/i.test(
+      url.pathname,
+    )
+  );
+}
+
+function isApprovedOptionalPublicBasemapFailure({ error, method, url }) {
+  return (
+    method === "GET" &&
+    ["net::ERR_FAILED", "net::ERR_NETWORK_ACCESS_DENIED"].includes(error) &&
+    isApprovedOptionalPublicBasemapRequest(url) &&
+    url.origin !== BASE_ORIGIN &&
+    url.origin !== API_ORIGIN
+  );
+}
+
+function approvedOptionalPublicBasemapUrl(value) {
+  const match = String(value).match(/https:\/\/[^\s'"<>]+/i);
+  if (!match) return null;
+  try {
+    const url = new URL(match[0].replace(/[),.;]+$/, ""));
+    return isApprovedOptionalPublicBasemapRequest(url) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function approvedOptionalPublicBasemapConsoleUrl({ failures, locationUrl, text }) {
+  const approvedUrl =
+    approvedOptionalPublicBasemapUrl(locationUrl) ?? approvedOptionalPublicBasemapUrl(text);
+  const networkError = /net::(ERR_FAILED|ERR_NETWORK_ACCESS_DENIED)/i.exec(text);
+  const error = networkError ? `net::${networkError[1].toUpperCase()}` : null;
+  if (
+    approvedUrl &&
+    error &&
+    isApprovedOptionalPublicBasemapFailure({
+      error,
+      method: "GET",
+      url: new URL(approvedUrl),
+    })
+  ) {
+    return approvedUrl;
+  }
+
+  const layer = /\[@arcgis\/core\/layers\/TileLayer\] #load\(\) Failed to load layer \(title: 'Public dark-gray reference (basemap|labels)', id: 'cfs-public-reference-(basemap|labels)'\) \{error: [^}]+\}/i.exec(
+    text,
+  );
+  if (!layer || layer[1].toLowerCase() !== layer[2].toLowerCase()) return null;
+  const service = layer[1].toLowerCase() === "basemap" ? "Base" : "Reference";
+  return (
+    failures.find((failure) => {
+      const url = new URL(failure.url);
+      return (
+        url.pathname.includes(`/Canvas/World_Dark_Gray_${service}/MapServer`) &&
+        isApprovedOptionalPublicBasemapFailure({
+          error: failure.error,
+          method: failure.method,
+          url,
+        })
+      );
+    })?.url ?? null
+  );
+}
+
 function attachDiagnostics(context, { offline = false } = {}) {
   const requestCounts = new Map();
   if (offline) {
@@ -157,14 +228,23 @@ function attachDiagnostics(context, { offline = false } = {}) {
 
   context.on("requestfailed", (request) => {
     if (offline && !isLoopback(request.url())) return;
-    if (
-      request.method() === "GET" &&
-      ["net::ERR_ABORTED", "net::ERR_FAILED"].includes(request.failure()?.errorText)
-    ) {
+    const failure = {
+      error: request.failure()?.errorText ?? "failed",
+      method: request.method(),
+      url: request.url(),
+    };
+    if (isApprovedOptionalPublicBasemapFailure({ ...failure, url: new URL(failure.url) })) {
+      report.diagnostics.optional_public_basemap_failures.push({
+        ...failure,
+        classification: "optional_public_basemap_failure",
+      });
+      return;
+    }
+    if (request.method() === "GET" && failure.error === "net::ERR_ABORTED") {
       return;
     }
     report.diagnostics.request_failures.push(
-      `${request.failure()?.errorText ?? "failed"} ${request.url()}`,
+      `${failure.error} ${failure.url}`,
     );
   });
 
@@ -193,6 +273,20 @@ function attachDiagnostics(context, { offline = false } = {}) {
       if (/GL Driver Message.*GPU stall due to ReadPixels/.test(text)) return;
       if (/\[@arcgis\/core\/views\/MapView\] Font .* is not available/.test(text)) return;
       if (offline && /Failed to load resource.*ERR_BLOCKED_BY_CLIENT/.test(text)) return;
+      const approvedUrl = approvedOptionalPublicBasemapConsoleUrl({
+        failures: report.diagnostics.optional_public_basemap_failures,
+        locationUrl: message.location().url,
+        text,
+      });
+      if (approvedUrl) {
+        report.diagnostics.optional_public_basemap_console.push({
+          classification: "optional_public_basemap_failure",
+          message: text,
+          page_url: page.url(),
+          url: approvedUrl,
+        });
+        return;
+      }
       report.diagnostics.console_messages.push(
         `${page.url()} :: ${message.type()}: ${text}`,
       );
@@ -221,6 +315,7 @@ async function runCase(product, name, run, offline = false) {
 }
 
 async function goto(page, query = "") {
+  await waitForMapLifecycle(page);
   await page.goto(`${BASE_URL}/${query}`, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Return to CFS Home" }).waitFor({
     timeout: 45_000,
@@ -229,7 +324,30 @@ async function goto(page, query = "") {
   await assertHealthyPage(page);
 }
 
+async function waitForMapLifecycle(page) {
+  if (!(await page.getByTestId("cfs-arcgis-map").count())) return;
+  await page.waitForFunction(
+    () => {
+      const map = document.querySelector('[data-testid="cfs-arcgis-map"]');
+      if (!map) return true;
+      const viewState = map.getAttribute("data-arcgis-view-state");
+      if (viewState === "failed") return true;
+      return (
+        viewState === "ready" &&
+        map.getAttribute("data-map-renderer") === "interactive" &&
+        map.getAttribute("data-map-view-ready-state") === "ready" &&
+        ["disabled", "failed", "ready"].includes(
+          map.getAttribute("data-reference-basemap-state"),
+        )
+      );
+    },
+    undefined,
+    { timeout: 60_000 },
+  );
+}
+
 async function navigateToHome(page) {
+  await waitForMapLifecycle(page);
   const home = page.getByRole("button", { name: "Return to CFS Home" });
   const transition = {
     attempts: [],
@@ -269,6 +387,16 @@ async function navigateToHome(page) {
   transition.completed_at = new Date().toISOString();
   transition.status = "FAIL";
   throw new Error(`Home navigation did not change route and module state: ${JSON.stringify(transition)}`);
+}
+
+async function navigateInvestmentPage(page, name, pageId) {
+  await page
+    .getByLabel("CFS Investments navigation")
+    .getByRole("button", { name, exact: true })
+    .click();
+  const destination = page.locator(`main[data-investment-page="${pageId}"]`);
+  await destination.waitFor({ state: "visible", timeout: 30_000 });
+  return destination;
 }
 
 async function assertHealthyPage(page) {
@@ -485,6 +613,29 @@ async function planningWorkflow(page) {
 
   await runCase("Planning", "canonical parcel and local layers", async () => {
     await selectParcel(page, { expectedProvider: "local_api" });
+    await waitForMapLifecycle(page);
+    report.map_verification = await page.getByTestId("cfs-arcgis-map").evaluate((map) => ({
+      contextReady: map.getAttribute("data-context-ready"),
+      referenceBasemapState: map.getAttribute("data-reference-basemap-state"),
+      renderer: map.getAttribute("data-map-renderer"),
+      rendererState: map.getAttribute("data-map-renderer-state"),
+      viewReadyState: map.getAttribute("data-map-view-ready-state"),
+    }));
+    assert.deepEqual(
+      {
+        contextReady: report.map_verification.contextReady,
+        renderer: report.map_verification.renderer,
+        rendererState: report.map_verification.rendererState,
+        viewReadyState: report.map_verification.viewReadyState,
+      },
+      {
+        contextReady: "true",
+        renderer: "interactive",
+        rendererState: "interactive_ready",
+        viewReadyState: "ready",
+      },
+      "Parcel focus did not preserve the interactive same-origin map.",
+    );
     const expand = page.getByRole("button", { name: "Expand map layers panel" });
     if (await expand.count()) await expand.click();
     await toggleLayer(page, "Development Hotspots", "Development Activity");
@@ -592,6 +743,7 @@ async function planningWorkflow(page) {
     if (cleanupFailure) throw cleanupFailure;
   });
 
+  await waitForMapLifecycle(page);
   await page.reload({ waitUntil: "domcontentloaded" });
   await assertHealthyPage(page);
   await navigateToHome(page);
@@ -762,7 +914,7 @@ async function investmentsWorkflow(page) {
       .getByText("CFS Large Development-Land Acquisition Case Study", { exact: false })
       .first()
       .waitFor({ timeout: 45_000 });
-    await page.getByRole("button", { name: "Projects", exact: true }).click();
+    await navigateInvestmentPage(page, "Projects", "engagements");
     const library = page.getByLabel("Case Studies library");
     if (await library.count()) {
       await library.getByRole("button", { name: "Continue", exact: true }).first().click();
@@ -771,17 +923,14 @@ async function investmentsWorkflow(page) {
   });
 
   await runCase("Investments", "Find Sites and Property Review", async () => {
-    await page
-      .getByLabel("CFS Investments navigation")
-      .getByRole("button", { name: "Find Sites", exact: true })
-      .click();
+    const findSites = await navigateInvestmentPage(page, "Find Sites", "area-radar");
     const responsePromise = page.waitForResponse(
       (response) =>
         new URL(response.url()).pathname === "/investment/radar/search" &&
         response.request().method() === "POST",
       { timeout: 60_000 },
     );
-    await page.getByRole("button", { name: "Run Screening", exact: true }).click();
+    await findSites.getByRole("button", { name: "Run Screening", exact: true }).click();
     assert.equal((await responsePromise).status(), 200);
     const review = page.getByRole("button", { name: "Open Property Review" }).first();
     await review.waitFor({ timeout: 30_000 });
@@ -790,11 +939,8 @@ async function investmentsWorkflow(page) {
   });
 
   await runCase("Investments", "safe disposable backend mutation", async () => {
-    await page
-      .getByLabel("CFS Investments navigation")
-      .getByRole("button", { name: "Find Sites", exact: true })
-      .click();
-    await page.getByRole("button", { name: /Add External Opportunity/i }).click();
+    const findSites = await navigateInvestmentPage(page, "Find Sites", "area-radar");
+    await findSites.getByRole("button", { name: /Add External Opportunity/i }).click();
     const form = page.locator('main[data-investment-page="intake"]');
     await form.getByRole("textbox", { name: "Candidate label" }).fill(TEMP_PREFIX);
     await form.getByRole("textbox", { name: "Parcel ID" }).fill(PARCEL);
@@ -823,13 +969,13 @@ async function investmentsWorkflow(page) {
   });
 
   await runCase("Investments", "Reports and three grounded questions", async () => {
-    await page.getByRole("button", { name: "Find Sites", exact: true }).click();
-    await page.getByRole("button", { name: "Run Screening", exact: true }).click();
+    const findSites = await navigateInvestmentPage(page, "Find Sites", "area-radar");
+    await findSites.getByRole("button", { name: "Run Screening", exact: true }).click();
     const review = page.getByRole("button", { name: "Open Property Review" }).first();
     await review.waitFor({ timeout: 60_000 });
     await review.click();
     await page.getByRole("tablist", { name: "Property Research tabs" }).waitFor();
-    await page.getByRole("button", { name: "Reports", exact: true }).click();
+    await navigateInvestmentPage(page, "Reports", "report-studio");
     const reportResponse = page.waitForResponse(
       (response) =>
         response.url() === `${API_URL}/investment/reports/generate` &&
@@ -853,7 +999,7 @@ async function investmentsWorkflow(page) {
   });
 
   await runCase("Investments", "Underwrite, Decide, Deliver, and all artifacts", async () => {
-    await page.getByRole("button", { name: "Projects", exact: true }).click();
+    await navigateInvestmentPage(page, "Projects", "engagements");
     const library = page.getByLabel("Case Studies library");
     if (await library.count()) {
       await library.getByRole("button", { name: "Continue", exact: true }).first().click();
@@ -904,6 +1050,7 @@ async function navigationChecks(page) {
   await runCase("Navigation", "deep links, refresh, Back, Forward, and clean Home", async () => {
     await page.evaluate(() => localStorage.clear());
     await goto(page, "?app=planning");
+    await waitForMapLifecycle(page);
     await page.locator('button[aria-haspopup="menu"]').click();
     await page
       .getByRole("menuitemradio")
@@ -913,6 +1060,7 @@ async function navigationChecks(page) {
     await page.goBack();
     await page.waitForFunction(() => new URLSearchParams(location.search).get("app") === "planning");
     assert.equal(new URL(page.url()).searchParams.get("app"), "planning");
+    await waitForMapLifecycle(page);
     await page.goForward();
     await page.waitForFunction(() => new URLSearchParams(location.search).get("app") === "economics");
     assert.equal(new URL(page.url()).searchParams.get("app"), "economics");
@@ -1028,6 +1176,7 @@ async function degradedDataChecks(browser) {
       .getByText(/Indicator intelligence endpoint unavailable in live mode/)
       .first()
       .waitFor({ timeout: 30_000 });
+    await waitForMapLifecycle(page);
     await page.goto(`${BASE_URL}/?app=economics`, {
       waitUntil: "domcontentloaded",
     });
@@ -1052,7 +1201,12 @@ async function runWorkflows() {
   const browser = await chromium.launch({
     executablePath: browserExecutable(),
     headless: true,
-    args: ["--disable-gpu", "--no-sandbox"],
+    args: [
+      "--enable-unsafe-swiftshader",
+      "--enable-webgl",
+      "--no-sandbox",
+      "--use-angle=swiftshader",
+    ],
   });
   try {
     const context = await browser.newContext({
@@ -1094,6 +1248,26 @@ function collectFinalInvariants() {
   recordFinalInvariant("browser_request_loops", [], report.diagnostics.request_loops);
   recordFinalInvariant("browser_request_failures", [], report.diagnostics.request_failures);
   recordFinalInvariant("browser_console_messages", [], report.diagnostics.console_messages);
+  recordFinalInvariant(
+    "private_arcgis_requests",
+    [],
+    report.external_requests.filter((url) =>
+      /\/sharing\/rest\/(?:content\/items|oauth2)|\/oauth2\/|\/signin(?:\/|$)/i.test(url),
+    ),
+  );
+  recordFinalInvariant(
+    "optional_public_basemap_contract",
+    true,
+    (report.diagnostics.optional_public_basemap_console.length === 0 &&
+      report.diagnostics.optional_public_basemap_failures.length === 0) ||
+      (report.map_verification?.contextReady === "true" &&
+        report.map_verification?.renderer === "interactive" &&
+        report.map_verification?.rendererState === "interactive_ready" &&
+        report.map_verification?.viewReadyState === "ready" &&
+        report.diagnostics.api_failures.length === 0 &&
+        report.diagnostics.page_errors.length === 0 &&
+        report.diagnostics.request_failures.length === 0),
+  );
   recordFinalInvariant("planning_snapshot_archived", true, Boolean(report.disposable_cleanup?.planning_snapshot_verified));
   recordFinalInvariant("planning_snapshot_archive_audit", true, Boolean(report.disposable_cleanup?.planning_snapshot_audit_verified));
   recordFinalInvariant("investment_mutation_cleaned", true, Boolean(report.disposable_cleanup?.verified));
@@ -1104,6 +1278,73 @@ function recordFinalInvariant(name, expected, actual, passed = JSON.stringify(ac
   report.final_invariants.push({ actual, expected, name, passed });
 }
 
+function checkOptionalPublicBasemapClassifier() {
+  const baseUrl =
+    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer?f=json";
+  const failure = { error: "net::ERR_FAILED", method: "GET", url: baseUrl };
+  assert.equal(
+    isApprovedOptionalPublicBasemapFailure({ ...failure, url: new URL(failure.url) }),
+    true,
+    "The exact optional public basemap failure must be classified.",
+  );
+  for (const [name, url] of [
+    ["required same-origin basemap", `${BASE_ORIGIN}/demo-data/map_layers/demo_county_boundary.geojson`],
+    ["required same-origin SDK", `${BASE_ORIGIN}/arcgis-assets/chunks/runtime.js`],
+    ["CFS API", `${API_ORIGIN}/api/v1/planning/snapshots`],
+    ["unexpected TileLayer", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json"],
+    ["private Portal item", "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json"],
+    ["OAuth", "https://www.arcgis.com/sharing/rest/oauth2/authorize"],
+  ]) {
+    assert.equal(
+      isApprovedOptionalPublicBasemapFailure({ ...failure, url: new URL(url) }),
+      false,
+      `${name} failure must remain fatal.`,
+    );
+  }
+  const layerFailure =
+    "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Public dark-gray reference basemap', id: 'cfs-public-reference-basemap') {error: s}";
+  assert.equal(
+    approvedOptionalPublicBasemapConsoleUrl({
+      failures: [{ ...failure, classification: "optional_public_basemap_failure" }],
+      locationUrl: "",
+      text: layerFailure,
+    }),
+    baseUrl,
+    "The exact linked public TileLayer console failure must be classified.",
+  );
+  assert.equal(
+    approvedOptionalPublicBasemapConsoleUrl({ failures: [], locationUrl: "", text: layerFailure }),
+    null,
+    "An unlinked TileLayer console failure must remain fatal.",
+  );
+  for (const [name, text, locationUrl] of [
+    [
+      "required same-origin basemap",
+      "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'CFS same-origin basemap', id: 'cfs-same-origin-basemap') {error: s}",
+      `${BASE_ORIGIN}/demo-data/map_layers/demo_county_boundary.geojson`,
+    ],
+    [
+      "unexpected TileLayer",
+      "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'World imagery', id: 'unexpected-imagery') {error: s}",
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json",
+    ],
+    ["CFS API", "Failed to load resource: net::ERR_FAILED", `${API_ORIGIN}/api/v1/planning/snapshots`],
+    ["private Portal", "Failed to load resource: net::ERR_FAILED", "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json"],
+    ["OAuth", "Failed to load resource: net::ERR_FAILED", "https://www.arcgis.com/sharing/rest/oauth2/authorize"],
+  ]) {
+    assert.equal(
+      approvedOptionalPublicBasemapConsoleUrl({
+        failures: [{ ...failure, classification: "optional_public_basemap_failure" }],
+        locationUrl,
+        text,
+      }),
+      null,
+      `${name} console failure must remain fatal.`,
+    );
+  }
+  console.log("PASS optional public basemap classifier safety check");
+}
+
 async function persistReport() {
   await fs.mkdir(path.dirname(REPORT_PATH), { recursive: true });
   await fs.writeFile(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, "utf8");
@@ -1111,6 +1352,10 @@ async function persistReport() {
 
 let primaryError = null;
 let cleanupError = null;
+if (process.argv.includes("--check-optional-basemap-classifier")) {
+  checkOptionalPublicBasemapClassifier();
+  process.exit(0);
+}
 try {
   await runWorkflows();
 } catch (error) {
