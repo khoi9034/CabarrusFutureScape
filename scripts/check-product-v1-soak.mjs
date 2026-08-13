@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const minimumSeconds = 45 * 60;
@@ -52,19 +53,42 @@ let primaryFailure = null;
 let canonicalRelationCounts = null;
 const frontendPersistenceRuns = [];
 
+if (process.argv.includes("--check-local-environment")) {
+  const environment = localAcceptanceEnvironment();
+  assert.equal(environment.DATABASE_URL, "");
+  assert.equal(environment.POSTGRES_HOST, "localhost");
+  assert.equal(environment.POSTGRES_PORT, "5433");
+  assert.equal(environment.POSTGRES_DB, "cfs_dev");
+  assert.equal(environment.CFS_RUNTIME_MODE, "local");
+  assert.equal(environment.CFS_DATA_PROVIDER, "local_api");
+  assert.equal(
+    path.resolve(environment.CFS_PYTHON),
+    path.resolve(
+      process.env.CFS_PYTHON?.trim() ||
+        (existsSync(repositoryPython()) ? repositoryPython() : "python"),
+    ),
+  );
+  console.log(
+    JSON.stringify(
+      {
+        database: `${environment.POSTGRES_HOST}:${environment.POSTGRES_PORT}/${environment.POSTGRES_DB}`,
+        database_url_cleared: environment.DATABASE_URL === "",
+        python: environment.CFS_PYTHON,
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(0);
+}
+
+if (process.argv.includes("--migration-preflight")) {
+  runNpm("db:migrate");
+  process.exit(0);
+}
+
 try {
-  runNpm("db:migrate", false, {
-    CFS_ARTIFACT_PROVIDER: "local_file",
-    CFS_AUTH_MODE: "local_dev",
-    CFS_DATABASE_AUTH_MODE: "password",
-    CFS_DATA_PROVIDER: "local_api",
-    CFS_JOB_PROVIDER: "inline",
-    CFS_RUNTIME_MODE: "local",
-    DATABASE_URL: "",
-    POSTGRES_DB: "cfs_dev",
-    POSTGRES_HOST: "localhost",
-    POSTGRES_PORT: "5433",
-  });
+  runNpm("db:migrate");
   runNpm("present:cfs");
   runAcceptanceRound();
   canonicalRelationCounts = readCanonicalRelationCounts();
@@ -619,12 +643,43 @@ function runNpm(script, bestEffort = false, environment = {}, scriptArguments = 
   const npmCli = process.env.npm_execpath;
   if (!npmCli) throw new Error("npm_execpath is unavailable.");
   const result = spawnSync(process.execPath, [npmCli, "run", script, ...scriptArguments], {
-    env: { ...process.env, ...environment },
+    env: localAcceptanceEnvironment(environment),
     stdio: "inherit",
   });
   if (!bestEffort && result.status !== 0) {
     throw new Error(`npm run ${script} failed with exit code ${result.status ?? 1}.`);
   }
+}
+
+function localAcceptanceEnvironment(environment = {}) {
+  const python = process.env.CFS_PYTHON?.trim() ||
+    (existsSync(repositoryPython()) ? repositoryPython() : "python");
+  return {
+    ...process.env,
+    ...environment,
+    CFS_ARTIFACT_PROVIDER: "local_file",
+    CFS_AUTH_MODE: "local_dev",
+    CFS_DATABASE_AUTH_MODE: "password",
+    CFS_DATA_PROVIDER: "local_api",
+    CFS_JOB_PROVIDER: "inline",
+    CFS_PYTHON: python,
+    CFS_RUNTIME_MODE: "local",
+    DATABASE_URL: "",
+    PATH: path.isAbsolute(python)
+      ? `${path.dirname(python)}${path.delimiter}${process.env.PATH ?? ""}`
+      : process.env.PATH,
+    POSTGRES_DB: "cfs_dev",
+    POSTGRES_HOST: "localhost",
+    POSTGRES_PORT: "5433",
+  };
+}
+
+function repositoryPython() {
+  return path.join(
+    process.cwd(),
+    ".venv",
+    process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
+  );
 }
 
 function restartManifestNeedsCleanup() {
