@@ -89,7 +89,10 @@ export function getParcelStatistics(
   params: ParcelStatisticsParams = {},
   options?: ApiRequestOptions,
 ) {
-  return apiGet<ParcelStatisticsResponse>("/parcels/statistics", params, options);
+  return apiGet<ParcelStatisticsResponse>("/parcels/statistics", params, {
+    ...options,
+    timeoutMs: options?.timeoutMs ?? 45_000,
+  });
 }
 
 export function getParcelZoningSummary(

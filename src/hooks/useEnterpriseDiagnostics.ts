@@ -146,7 +146,7 @@ export function useEnterpriseDiagnostics() {
         id: "development",
         label: "Development intelligence",
         run: async () => {
-          await getDevelopmentStatistics({}, options);
+          await getDevelopmentStatistics({}, { signal: controller.signal });
           return {
             detail: "Aggregate endpoint available",
             status: "ok",

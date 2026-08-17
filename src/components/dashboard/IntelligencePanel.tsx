@@ -2173,7 +2173,7 @@ async function loadWsaccExploreData(): Promise<WsaccExploreData> {
   if (USE_BACKEND_API) {
     const [stats, geography] = await Promise.all([
       apiGet<WsaccStatisticsResponse>("/wsacc/statistics", undefined, {
-        timeoutMs: 12000,
+        timeoutMs: 45000,
       }),
       apiGet<WsaccGeographyResponse>(
         "/wsacc/summary-by-geography",

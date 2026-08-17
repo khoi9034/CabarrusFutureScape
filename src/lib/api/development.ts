@@ -108,7 +108,10 @@ export function getDevelopmentStatistics(
   return apiGet<DevelopmentStatisticsResponse>(
     "/development/statistics",
     params,
-    options,
+    {
+      ...options,
+      timeoutMs: options?.timeoutMs ?? 45_000,
+    },
   );
 }
 
