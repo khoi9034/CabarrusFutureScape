@@ -28,6 +28,7 @@
     "check:enterprise-readiness": "python scripts/check_enterprise_readiness.py",
     "check:frontend-persistence": "node scripts/check-frontend-persistence.mjs",
     "check:interactive-map": "node scripts/check-interactive-map.mjs",
+    "check:map-classification": "node scripts/map-acceptance-classification.mjs",
     "check:map-resilience": "node scripts/check-map-resilience.mjs",
     "check:runtime-config": "node scripts/check-runtime-config.mjs",
     "check:api-contracts": "python -m pytest backend/tests/product_v1/test_api_contracts.py -q",

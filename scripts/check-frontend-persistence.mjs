@@ -12,8 +12,33 @@ import {
   captureProductBaseline,
   verifyProductIsolation,
 } from "./product-acceptance-isolation.mjs";
+import {
+  classifyArcGISConsoleFailure,
+  classifyArcGISHttpFailure,
+  classifyArcGISRequestFailure,
+  classifyPageError,
+  isApprovedOptionalPublicMapResource,
+  isApprovedPublicArcgisRequest,
+  isExternalArcgisRequest,
+  isMapDiagnosticRequest,
+  mapDiagnosticRequestKey,
+  optionalPublicMapResources,
+  redactMapDiagnosticText,
+  redactMapDiagnosticUrl,
+  REQUIRED_CFS_BASEMAP_ID,
+  REQUIRED_CFS_CONTEXT_LAYER_IDS,
+  REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
+  resolveMapDiagnostic,
+  runClassificationSafetyMatrix,
+} from "./map-acceptance-classification.mjs";
 
 const ROOT = process.cwd();
+const REPOSITORY_PYTHON = path.join(
+  ROOT,
+  ".venv",
+  process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
+);
+const PYTHON = process.env.CFS_PYTHON?.trim() || (existsSync(REPOSITORY_PYTHON) ? REPOSITORY_PYTHON : "python");
 const LOCAL_URL = (process.env.CFS_LOCAL_BASE_URL ?? "http://127.0.0.1:3000").replace(/\/$/, "");
 const API_URL = (process.env.CFS_API_BASE_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
 const LOCAL_ORIGIN = new URL(LOCAL_URL).origin;
@@ -26,13 +51,32 @@ const RESTART_LABEL = process.env.CFS_FRONTEND_PERSISTENCE_RESTART_LABEL ?? null
 const FORCE_RESTART_CLEANUP = process.env.CFS_FRONTEND_PERSISTENCE_FORCE_CLEANUP === "true";
 const FORCE_OPTIONAL_BASEMAP_FAILURE =
   process.env.CFS_FRONTEND_PERSISTENCE_TEST_OPTIONAL_BASEMAP_FAILURE === "true";
-const OPTIONAL_BASEMAP_FAILURE_TEST_URLS = [
-  "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/10/405/280",
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tilemap/10/384/256/32/32?f=json",
+const FORCE_REQUIRED_HEALTH_FAILURE_PATH =
+  process.env.CFS_FRONTEND_PERSISTENCE_TEST_REQUIRED_HEALTH_FAILURE_PATH?.trim() || null;
+const REQUIRED_HEALTH_PATHS = new Set(["/ai/status", "/health/database", "/health/ready"]);
+const PLANNER_PERMISSIONS = [
+  "ask_cfs:use", "data:read", "planning:write", "projects:write", "reports:read", "reports:write", "sources:read",
 ];
-assert(["authorization", "cleanup", "full", "map-fallback", "seed", "verify"].includes(PHASE), `Unsupported frontend persistence phase ${PHASE}.`);
+const ADMINISTRATOR_PERMISSIONS = [
+  "administration:write", "artifacts:download", "ask_cfs:use", "audit:read",
+  "data:read", "economics:write", "ingestion:apply", "ingestion:dry_run",
+  "investments:write", "planning:write", "projects:write", "reports:read",
+  "reports:write", "sources:read", "sources:write",
+];
+assert(
+  !FORCE_REQUIRED_HEALTH_FAILURE_PATH || REQUIRED_HEALTH_PATHS.has(FORCE_REQUIRED_HEALTH_FAILURE_PATH),
+  `Unsupported required health failure path ${FORCE_REQUIRED_HEALTH_FAILURE_PATH}.`,
+);
+const OPTIONAL_PUBLIC_MAP_RESOURCES = optionalPublicMapResources();
+const OPTIONAL_BASEMAP_FAILURE_TEST_URLS = [
+  `${OPTIONAL_PUBLIC_MAP_RESOURCES[1].serviceUrl}/tile/10/405/280`,
+  `${OPTIONAL_PUBLIC_MAP_RESOURCES[0].serviceUrl}/tilemap/10/384/256/32/32?f=json`,
+];
+assert(["authorization", "cleanup", "full", "health-drain", "map-fallback", "seed", "verify"].includes(PHASE), `Unsupported frontend persistence phase ${PHASE}.`);
 if (process.argv.includes("--check-optional-basemap-classifier")) {
-  checkOptionalPublicBasemapClassifier();
+  const results = runClassificationSafetyMatrix();
+  assert.equal(results.length, 64);
+  console.log("PASS shared ArcGIS acceptance classifier and required-fallback negative proof");
   process.exit(0);
 }
 const protectedPaths = [
@@ -50,6 +94,7 @@ const report = {
   authorization: {
     backend_enforcement: "Covered by Product V1 authorization tests; this browser check verifies role-gated controls and denial UX.",
     cases: [],
+    health_checks: [],
   },
   branch_head: git("rev-parse", "HEAD"),
   checked_at: new Date().toISOString(),
@@ -57,11 +102,14 @@ const report = {
   database: {},
   demo: { base_url: null, product_api_requests: [], session_keys: [] },
   diagnostics: {
+    accepted_stale_required_api_requests: [],
     api_failures: [],
     console: [],
     expected_console: [],
+    health_request_lifecycle: [],
     optional_public_basemap_console: [],
     optional_public_basemap_failures: [],
+    map_diagnostics: [],
     page_errors: [],
     request_failures: [],
     unexpected_external_arcgis_requests: [],
@@ -84,11 +132,157 @@ const cleanup = [];
 let browser;
 let demoServer;
 let primaryError;
+const pendingMapDiagnostics = [];
+const pageAcceptanceLifecycles = new WeakMap();
+const acceptedTeardownPages = new WeakSet();
+const pageAuthorizationRoles = new WeakMap();
+const pageNavigationEpochs = new WeakMap();
+const lastMapHealthByPage = new WeakMap();
+const pageSuccessfulRequestKeys = new WeakMap();
+const pageSuccessfulHealthPathsByEpoch = new WeakMap();
+const acceptedHealthPollRouteRequests = new WeakSet();
+const pageDirectEvidence = new WeakMap();
+const diagnosticDirectEvidence = new WeakMap();
+const requiredRequestFailureEvidence = [];
+const contextPendingRequiredApiRequests = new WeakMap();
+const healthRequestLifecycles = new WeakMap();
+let requestSequence = 0;
+
+const emptyDirectEvidence = () => ({
+  apiFailures: 0,
+  consoleErrors: 0,
+  pageErrors: 0,
+  privateArcgisRequests: 0,
+  requiredRequestFailures: 0,
+});
+
+function directEvidenceForPage(
+  page,
+  generation = pageAcceptanceLifecycles.get(page)?.startedGeneration ?? 0,
+) {
+  return {
+    ...emptyDirectEvidence(),
+    ...pageDirectEvidence.get(page)?.get(generation),
+  };
+}
+
+function recordDirectEvidence(page, generation, key) {
+  if (!page) return;
+  const byGeneration = pageDirectEvidence.get(page) ?? new Map();
+  const evidence = byGeneration.get(generation ?? 0) ?? emptyDirectEvidence();
+  evidence[key] += 1;
+  byGeneration.set(generation ?? 0, evidence);
+  pageDirectEvidence.set(page, byGeneration);
+}
+
+function isRequiredApiWork(url) {
+  return url.origin === API_ORIGIN;
+}
+
+async function waitForRequiredApiDrain(context, label) {
+  const deadline = Date.now() + 60_000;
+  let quietSince = null;
+  while (Date.now() < deadline) {
+    const pending = contextPendingRequiredApiRequests.get(context);
+    if (!pending?.size) {
+      quietSince ??= Date.now();
+      if (Date.now() - quietSince >= 500) return;
+    } else {
+      quietSince = null;
+    }
+    await delay(100);
+  }
+  const pendingEntries = [...(contextPendingRequiredApiRequests.get(context)?.values() ?? [])];
+  const pending = pendingEntries
+    .slice(0, 8)
+    .map(({ method, url }) => `${method} ${redactMapDiagnosticUrl(url)}`);
+  throw new Error(`${label} left required API requests pending: ${pending.join(", ")}`);
+}
+
+function reconcileSupersededRequiredApiRequests(page) {
+  const pending = contextPendingRequiredApiRequests.get(page.context());
+  if (!pending?.size) return;
+
+  const currentEpoch = pageNavigationEpochs.get(page) ?? 0;
+  const provenGeneration = acceptanceLifecycle(page).provenGeneration;
+  for (const [request, entry] of pending) {
+    const supersededByGeneration =
+      entry.acceptanceGeneration !== null && entry.acceptanceGeneration < provenGeneration;
+    const supersededByNavigation =
+      entry.navigationEpoch !== null && entry.navigationEpoch < currentEpoch;
+    if (
+      entry.page !== page ||
+      (!supersededByGeneration && !supersededByNavigation)
+    ) {
+      continue;
+    }
+    const pathname = new URL(entry.url).pathname;
+    if (entry.method !== "GET" || !REQUIRED_HEALTH_PATHS.has(pathname)) continue;
+    const successfulPaths = pageSuccessfulHealthPathsByEpoch
+      .get(page)
+      ?.get(entry.navigationEpoch);
+    if (![...REQUIRED_HEALTH_PATHS].every((path) => successfulPaths?.has(path))) continue;
+    assert(
+      entry.responseStatus === null ||
+        (entry.responseStatus >= 200 && entry.responseStatus < 300),
+      `Accepted navigation observed a failed required health response: HTTP ${entry.responseStatus} ${redactMapDiagnosticUrl(entry.url)}`,
+    );
+    report.diagnostics.accepted_stale_required_api_requests.push({
+      acceptance_generation: entry.acceptanceGeneration,
+      current_navigation_epoch: currentEpoch,
+      method: entry.method,
+      observed_navigation_epoch: entry.navigationEpoch,
+      page_url: redactMapDiagnosticUrl(page.url()),
+      proven_generation: provenGeneration,
+      request_id: entry.requestId,
+      request_sequence: entry.sequence,
+      started_at: entry.startedAt,
+      url: redactMapDiagnosticUrl(entry.url),
+    });
+    const healthLifecycle = healthRequestLifecycles.get(request);
+    if (healthLifecycle) {
+      healthLifecycle.accepted_superseded_at = new Date().toISOString();
+      healthLifecycle.terminal_state = "accepted_navigation_superseded";
+    }
+    pending.delete(request);
+  }
+}
+
+function recordDiagnosticDirectEvidence(diagnostic, page, generation, key) {
+  recordDirectEvidence(page, generation, key);
+  if (page) diagnosticDirectEvidence.set(diagnostic, { generation, key, page });
+}
+
+function reconcileDiagnosticDirectEvidence(diagnostic) {
+  const recorded = diagnosticDirectEvidence.get(diagnostic);
+  if (!recorded) return;
+  const evidence = pageDirectEvidence
+    .get(recorded.page)
+    ?.get(recorded.generation ?? 0);
+  if (evidence) evidence[recorded.key] = Math.max(0, evidence[recorded.key] - 1);
+  diagnosticDirectEvidence.delete(diagnostic);
+}
+
+function assertBrowserDiagnosticsHealthy() {
+  assert.deepEqual(
+    report.diagnostics.map_diagnostics.filter((diagnostic) => diagnostic.fatal === true),
+    [],
+    "Fatal structured map diagnostics were observed.",
+  );
+  assert.deepEqual(report.diagnostics.api_failures, [], "Browser observed unexpected API failures.");
+  assert.deepEqual(report.diagnostics.page_errors, [], "Browser page errors were observed.");
+  assert.deepEqual(report.diagnostics.request_failures, [], "Browser request failures were observed.");
+  assert.deepEqual(
+    report.diagnostics.unexpected_external_arcgis_requests,
+    [],
+    "Browser requested an unexpected external ArcGIS resource.",
+  );
+}
 
 try {
   if (PHASE === "cleanup") await waitForProductApi();
   else await waitForLocalStack();
-  if (["authorization", "full", "map-fallback", "verify"].includes(PHASE)) {
+  if (["authorization", "full", "health-drain", "map-fallback", "verify"].includes(PHASE)) {
     report.ownership.baseline = await captureProductBaseline(API_URL, PREFIX);
   }
   report.local.principal = await readApi("/api/v1/me");
@@ -103,9 +297,13 @@ try {
     const localContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     attachDiagnostics(localContext, "local");
     if (FORCE_OPTIONAL_BASEMAP_FAILURE) {
-      await localContext.route(
-        /^https:\/\/(?:server|services)\.arcgisonline\.com\/ArcGIS\/rest\/services\/Canvas\/World_Dark_Gray_(?:Base|Reference)\/MapServer(?:\/tile\/\d+\/\d+\/\d+|\/tilemap\/\d+\/\d+\/\d+\/\d+\/\d+)?(?:\?.*)?$/i,
-        (route) => route.abort("failed"),
+      await localContext.route("**/*", (route) =>
+        isApprovedOptionalPublicMapResource(
+          route.request().url(),
+          OPTIONAL_PUBLIC_MAP_RESOURCES,
+        )
+          ? route.abort("failed")
+          : route.continue(),
       );
     }
     try {
@@ -116,7 +314,7 @@ try {
       } else if (PHASE === "authorization") {
         const askConversationId = await localAskCfs(localContext);
         await localPermissionDenial(localContext, askConversationId);
-      } else if (PHASE !== "map-fallback") {
+      } else if (!["health-drain", "map-fallback"].includes(PHASE)) {
         await localPlanning(localContext);
         await localEconomicsAndBucket(localContext);
         await localInvestmentsBucket(localContext);
@@ -127,10 +325,12 @@ try {
       }
       await assertOptionalPublicBasemapFallback(localContext);
     } finally {
-      await localContext.close();
+      await closeAcceptedContext(localContext);
     }
 
-    if (PHASE === "full") {
+    if (PHASE === "health-drain") {
+      await localHealthDrainVerification();
+    } else if (PHASE === "full") {
       await localAuthorizationMatrix();
       await assertLocalNetworkCoverage();
       report.database = verifyDatabaseRecords();
@@ -138,20 +338,22 @@ try {
       runOwnedRestartProof();
     }
   }
+  await resolveAllMapDiagnostics();
   reconcileExpectedConsoleErrors();
-  assert.deepEqual(report.diagnostics.api_failures, [], "Browser observed unexpected API failures.");
-  assert.deepEqual(report.diagnostics.page_errors, [], "Browser page errors were observed.");
-  assert.deepEqual(report.diagnostics.request_failures, [], "Browser request failures were observed.");
-  assert.deepEqual(
-    report.diagnostics.unexpected_external_arcgis_requests,
-    [],
-    "Browser requested an unexpected external ArcGIS resource.",
-  );
+  assertBrowserDiagnosticsHealthy();
   const optionalBasemapFailureObserved =
     report.diagnostics.optional_public_basemap_failures.length > 0 ||
     report.diagnostics.optional_public_basemap_console.length > 0;
   assert(
-    !optionalBasemapFailureObserved || report.optional_public_basemap_verification?.status === "PASS",
+    !optionalBasemapFailureObserved ||
+      report.optional_public_basemap_verification?.status === "PASS" ||
+      [
+        ...report.diagnostics.optional_public_basemap_failures,
+        ...report.diagnostics.optional_public_basemap_console,
+      ].every(
+        (diagnostic) =>
+          diagnostic.fatal === false && diagnostic.fallback_healthy === true,
+      ),
     "Optional public basemap failure was not backed by a successful interactive fallback proof.",
   );
   assert(
@@ -161,6 +363,11 @@ try {
   assert(
     PHASE !== "map-fallback" || optionalBasemapFailureObserved,
     "The map-fallback phase did not observe an optional public basemap failure.",
+  );
+  assert.deepEqual(
+    pendingMapDiagnostics.filter((entry) => !entry.resolved).map((entry) => entry.record),
+    [],
+    "Map diagnostics remained unresolved.",
   );
   assert.deepEqual(report.diagnostics.console, [], "Browser console errors or warnings were observed.");
   report.status = "PASS";
@@ -364,7 +571,7 @@ async function seedRestartRecords(context) {
       report.restart_manifest = manifest;
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 }
 
@@ -436,7 +643,7 @@ async function verifyRestartRecords(context) {
       report.database = verifyDatabaseRecords(restartDatabaseRecords(manifest));
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 
   manifest.processes[RESTART_LABEL] = processEvidence;
@@ -536,6 +743,7 @@ async function cleanupRestartRecords() {
 
 function runOwnedRestartProof() {
   try {
+    runNpmScript("present:cfs");
     runFrontendPersistencePhase("seed", "standalone-seed");
     runNpmScript("present:cfs", {}, ["--", "-FrontendOnly"]);
     runFrontendPersistencePhase("verify", "frontend-only");
@@ -621,14 +829,13 @@ async function localPlanning(context) {
       const staleListFulfilled = new Promise((resolve) => { signalStaleListFulfilled = resolve; });
       const staleListReady = new Promise((resolve) => { signalStaleListReady = resolve; });
       const staleListHeld = new Promise((resolve) => { releaseStaleList = resolve; });
-      await page.route(`${API_URL}/api/v1/planning/snapshots*`, async (route) => {
-        if (route.request().method() !== "GET") return route.continue();
+      await routeMethodOnce(page, `${API_URL}/api/v1/planning/snapshots*`, "GET", async (route) => {
         const response = await route.fetch();
         signalStaleListReady();
         await staleListHeld;
         await route.fulfill({ response });
         signalStaleListFulfilled();
-      }, { times: 1 });
+      });
       try {
         await goto(page, LOCAL_URL, "?app=planning");
         await staleListReady;
@@ -681,8 +888,7 @@ async function localPlanning(context) {
       await section.click();
 
       const patchPattern = new RegExp(`^/api/v1/planning/snapshots/${id}$`);
-      await page.route(`${API_URL}/api/v1/planning/snapshots/${id}*`, async (route) => {
-        if (route.request().method() !== "PATCH") return route.continue();
+      await routeMethodOnce(page, `${API_URL}/api/v1/planning/snapshots/${id}*`, "PATCH", async (route) => {
         await route.fulfill({
           body: JSON.stringify({
             error: { code: "conflict", message: "The record changed after it was loaded." },
@@ -692,7 +898,7 @@ async function localPlanning(context) {
           contentType: "application/json",
           status: 409,
         });
-      }, { times: 1 });
+      });
       await page.getByTestId("planning-snapshot-save-changes").click();
       await planningStatus(page, ["conflict"]);
       assert(await page.getByTestId("planning-snapshot-create-version").isDisabled());
@@ -749,14 +955,13 @@ async function localPlanning(context) {
       const reloadHeld = new Promise((resolve) => { releaseReload = resolve; });
       const reloadReady = new Promise((resolve) => { signalReloadReady = resolve; });
       const reloadFulfilled = new Promise((resolve) => { signalReloadFulfilled = resolve; });
-      await page.route(`${API_URL}/api/v1/planning/snapshots*`, async (route) => {
-        if (route.request().method() !== "GET") return route.continue();
+      await routeMethodOnce(page, `${API_URL}/api/v1/planning/snapshots*`, "GET", async (route) => {
         const response = await route.fetch();
         signalReloadReady();
         await reloadHeld;
         await route.fulfill({ response });
         signalReloadFulfilled();
-      }, { times: 1 });
+      });
       try {
         await page.getByTestId("planning-snapshot-reload").click();
         await reloadReady;
@@ -820,7 +1025,10 @@ async function localPlanning(context) {
       });
       await planningReportStatus(page, ["saved"], draftId);
 
-      const reportListResponse = page.waitForResponse(isProductResponse("GET", /^\/api\/v1\/reports$/));
+      const reportListResponse = page.waitForResponse(
+        isProductResponse("GET", /^\/api\/v1\/reports$/),
+        { timeout: 60_000 },
+      );
       await reloadPage(page);
       await openPlanningSnapshot(page, id);
       assert.equal((await reportListResponse).status(), 200);
@@ -878,7 +1086,7 @@ async function localPlanning(context) {
       assert(!(await readApi("/api/v1/planning/snapshots?page_size=100")).some((record) => record.id === id));
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 }
 
@@ -894,12 +1102,11 @@ async function localEconomicsAndBucket(context) {
       let signalFirstSaveStarted;
       const firstSaveHeld = new Promise((resolve) => { releaseFirstSave = resolve; });
       const firstSaveStarted = new Promise((resolve) => { signalFirstSaveStarted = resolve; });
-      await page.route(`${API_URL}/api/v1/economics/scenarios`, async (route) => {
-        if (route.request().method() !== "POST") return route.continue();
+      await routeMethodOnce(page, `${API_URL}/api/v1/economics/scenarios`, "POST", async (route) => {
         signalFirstSaveStarted();
         await firstSaveHeld;
         await route.continue();
-      }, { times: 1 });
+      });
       let first;
       try {
         first = await productWrite(page, "POST", /^\/api\/v1\/economics\/scenarios$/, async () => {
@@ -1072,7 +1279,7 @@ async function localEconomicsAndBucket(context) {
       assert(scenarioIds.every((id) => !activeScenarios.some((record) => record.id === id)));
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 }
 
@@ -1124,7 +1331,7 @@ async function localInvestmentsBucket(context) {
       markClean(id, "ui_archive");
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 }
 
@@ -1189,7 +1396,7 @@ async function localAskCfs(context) {
       assert(audit.some((event) => event.action === "ask_cfs_reset"));
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
   assert.match(ownedConversationId ?? "", /^[0-9a-f-]{36}$/i, "Ask CFS ownership proof omitted its UUID.");
   return ownedConversationId;
@@ -1347,7 +1554,7 @@ async function localMalformedProductRecords(context) {
       }
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 }
 
@@ -1356,8 +1563,7 @@ async function localPermissionDenial(context, ownedAskConversationId) {
   const page = await context.newPage();
   try {
     await runCase("Authorization", "UI does not report a denied write as saved", async () => {
-      await page.route(`${API_URL}/api/v1/planning/snapshots`, async (route) => {
-        if (route.request().method() !== "POST") return route.continue();
+      await routeMethodOnce(page, `${API_URL}/api/v1/planning/snapshots`, "POST", async (route) => {
         await route.fulfill({
           body: JSON.stringify({
             error: { code: "forbidden", message: "planning:write permission is required." },
@@ -1367,7 +1573,7 @@ async function localPermissionDenial(context, ownedAskConversationId) {
           contentType: "application/json",
           status: 403,
         });
-      }, { times: 1 });
+      });
       await goto(page, LOCAL_URL, "?app=planning");
       await page.getByTestId("planning-snapshot-save").click();
       const statuses = page.getByTestId("planning-persistence-status");
@@ -1383,10 +1589,9 @@ async function localPermissionDenial(context, ownedAskConversationId) {
     });
 
     await runCase("Authorization", "Economics and Report Bucket denied writes remain unsaved", async () => {
-      await page.route(`${API_URL}/api/v1/economics/scenarios`, async (route) => {
-        if (route.request().method() !== "POST") return route.continue();
+      await routeMethodOnce(page, `${API_URL}/api/v1/economics/scenarios`, "POST", async (route) => {
         await forbidden(route, "economics:write permission is required.");
-      }, { times: 1 });
+      });
       await gotoEconomicScenario(page, LOCAL_URL);
       await page.getByTestId("economic-scenario-name").fill(`${PREFIX} Denied Economics`);
       const scenarioDenied = page.waitForResponse(isProductResponse("POST", /^\/api\/v1\/economics\/scenarios$/));
@@ -1396,10 +1601,9 @@ async function localPermissionDenial(context, ownedAskConversationId) {
       await poll(async () => /permission|forbidden|cannot|not authorized/i.test(await scenarioStatus.innerText()));
       assert.doesNotMatch(await scenarioStatus.innerText(), /^Saved/i);
 
-      await page.route(`${API_URL}/api/v1/reports/bucket`, async (route) => {
-        if (route.request().method() !== "POST") return route.continue();
+      await routeMethodOnce(page, `${API_URL}/api/v1/reports/bucket`, "POST", async (route) => {
         await forbidden(route, "reports:write permission is required.");
-      }, { times: 1 });
+      });
       const bucketDenied = page.waitForResponse(isProductResponse("POST", /^\/api\/v1\/reports\/bucket$/));
       await page.getByRole("button", { name: "Add memo to Report Bucket", exact: true }).click();
       assert.equal((await bucketDenied).status(), 403);
@@ -1420,10 +1624,9 @@ async function localPermissionDenial(context, ownedAskConversationId) {
         `^${escapeRegExp(API_URL)}/api/v1/ask-cfs/conversations(?:/[0-9a-f-]+/messages)?$`,
         "i",
       );
-      await page.route(deniedAskWrite, async (route) => {
-        if (route.request().method() !== "POST") return route.continue();
+      await routeMethodOnce(page, deniedAskWrite, "POST", async (route) => {
         await forbidden(route, "ask_cfs:use permission is required.");
-      }, { times: 1 });
+      });
       try {
         await goto(page, LOCAL_URL, "?app=planning");
         await openPlanningAskCfs(page);
@@ -1472,8 +1675,115 @@ async function localPermissionDenial(context, ownedAskConversationId) {
       }
     });
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
+}
+
+async function localHealthDrainVerification() {
+  if (FORCE_REQUIRED_HEALTH_FAILURE_PATH) {
+    await runRoleCase("Administrator", ADMINISTRATOR_PERMISSIONS, async (page) => {
+      const target = new RegExp(
+        `^${escapeRegExp(API_URL + FORCE_REQUIRED_HEALTH_FAILURE_PATH)}(?:\\?.*)?$`,
+        "i",
+      );
+      await page.route(target, async (route) => {
+        if (route.request().method() !== "GET") return route.continue();
+        await route.fulfill({
+          body: JSON.stringify({ detail: `Forced required health failure for ${FORCE_REQUIRED_HEALTH_FAILURE_PATH}.` }),
+          contentType: "application/json",
+          headers: { "X-Request-ID": `${PREFIX}-required-health-failure` },
+          status: 503,
+        });
+      });
+      await goto(page, LOCAL_URL, "?app=planning");
+      const state = await assertLocalRuntimeHealth(page, FORCE_REQUIRED_HEALTH_FAILURE_PATH);
+      await poll(() => report.diagnostics.map_diagnostics.some(
+        (diagnostic) =>
+          diagnostic.classification === "required_cfs_api_failure" &&
+          diagnostic.fatal === true &&
+          diagnostic.url &&
+          new URL(diagnostic.url).pathname === FORCE_REQUIRED_HEALTH_FAILURE_PATH,
+      ));
+      try {
+        assertBrowserDiagnosticsHealthy();
+      } catch (error) {
+        throw new Error(
+          `REQUIRED_HEALTH_FAILURE_DETECTED ${FORCE_REQUIRED_HEALTH_FAILURE_PATH} ${JSON.stringify(state)}`,
+          { cause: error },
+        );
+      }
+      throw new Error(`Required health gate accepted ${FORCE_REQUIRED_HEALTH_FAILURE_PATH}.`);
+    });
+    return;
+  }
+
+  await runRoleCase("Planner", PLANNER_PERMISSIONS, async (page, setPrincipal) => {
+    await goto(page, LOCAL_URL, "?app=planning");
+    await assertLocalRuntimeHealth(page);
+    report.authorization.cases.push({
+      action: "Required health generation completes before role transition",
+      expected: "API Ready, database Connected, and grounded Ask CFS",
+      role: "Planner",
+      status: "PASS",
+    });
+    setPrincipal("Administrator", ADMINISTRATOR_PERMISSIONS);
+    await page.route(
+      new RegExp(`^${escapeRegExp(API_URL)}/(?:ai/status|health/(?:database|ready))(?:\\?.*)?$`, "i"),
+      async (route) => {
+        if (route.request().method() !== "GET") return route.continue();
+        try {
+          const response = await route.fetch();
+          await delay(750);
+          await route.fulfill({ response });
+        } catch (error) {
+          const lifecycle = acceptanceLifecycle(page);
+          if (
+            acceptedHealthPollRouteRequests.has(route.request()) ||
+            lifecycle.startedGeneration > lifecycle.provenGeneration ||
+            acceptedTeardownPages.has(page)
+          ) {
+            return;
+          }
+          throw error;
+        }
+      },
+    );
+    await reloadPage(page);
+    await assertLocalRuntimeHealth(page);
+    await assertCurrentPrincipalRole(page, "Administrator");
+    report.authorization.cases.push({
+      action: "Planner to Administrator principal transition",
+      expected: "same page and context reload with a healthy current poll generation",
+      role: "Administrator",
+      status: "PASS",
+    });
+    for (let iteration = 1; iteration <= 5; iteration += 1) {
+      await gotoDataAdministration(page);
+      await goto(page, LOCAL_URL, "?app=planning");
+      await assertLocalRuntimeHealth(page);
+      report.authorization.cases.push({
+        action: "Planning to data administration to Planning health lifecycle",
+        expected: "current health generation completes with no stale pending request leak",
+        iteration,
+        role: "Administrator",
+        status: "PASS",
+      });
+    }
+
+    await gotoHomeDuringHealthPoll(page);
+    await goto(page, LOCAL_URL, "?app=planning");
+    await assertLocalRuntimeHealth(page);
+    await waitForNextHealthyPoll(page);
+    await gotoHomeDuringHealthPoll(page);
+    await goto(page, LOCAL_URL, "?app=planning");
+    await assertLocalRuntimeHealth(page);
+    report.authorization.cases.push({
+      action: "Home to Planning to Home during active TopNav polling",
+      expected: "accepted navigation retires only stale idempotent work and polling resumes healthy",
+      role: "Administrator",
+      status: "PASS",
+    });
+  }, "Planner to Administrator health lifecycle");
 }
 
 async function localAuthorizationMatrix() {
@@ -1499,7 +1809,7 @@ async function localAuthorizationMatrix() {
 
   await runRoleCase(
     "Planner",
-    ["ask_cfs:use", "data:read", "planning:write", "projects:write", "reports:read", "reports:write", "sources:read"],
+    PLANNER_PERMISSIONS,
     async (page) => {
       await goto(page, LOCAL_URL, "?app=planning");
       await waitForInteractiveMap(page);
@@ -1600,8 +1910,7 @@ async function localAuthorizationMatrix() {
     async (page) => {
       await goto(page, LOCAL_URL, "?app=planning");
       await assertVisiblePlanningSavesDisabled(page);
-      await page.goto(`${LOCAL_URL}/data-administration`, { waitUntil: "domcontentloaded" });
-      await page.getByTestId("data-administration-summary").waitFor({ timeout: 90_000 });
+      await gotoDataAdministration(page);
       assert.match(await page.getByTestId("data-administration-page").innerText(), /source|ingestion|quality/i);
       await goto(page, LOCAL_URL, "?app=planning");
       report.authorization.cases.push({
@@ -1615,17 +1924,11 @@ async function localAuthorizationMatrix() {
 
   await runRoleCase(
     "Administrator",
-    [
-      "administration:write", "artifacts:download", "ask_cfs:use", "audit:read",
-      "data:read", "economics:write", "ingestion:apply", "ingestion:dry_run",
-      "investments:write", "planning:write", "projects:write", "reports:read",
-      "reports:write", "sources:read", "sources:write",
-    ],
+    ADMINISTRATOR_PERMISSIONS,
     async (page) => {
       await goto(page, LOCAL_URL, "?app=planning");
       await poll(async () => !(await page.getByTestId("planning-snapshot-save").first().isDisabled()));
-      await page.goto(`${LOCAL_URL}/data-administration`, { waitUntil: "domcontentloaded" });
-      await page.getByTestId("data-administration-summary").waitFor({ timeout: 90_000 });
+      await gotoDataAdministration(page);
       await goto(page, LOCAL_URL, "?app=planning");
       report.authorization.cases.push({
         action: "Product workspace writes and data-administration status visible",
@@ -1649,20 +1952,22 @@ async function assertVisiblePlanningSavesDisabled(page) {
   });
 }
 
-async function runRoleCase(role, permissions, run) {
+async function runRoleCase(role, permissions, run, caseName = `${role} UI permission matrix`) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   attachDiagnostics(context, `authorization-${role.toLowerCase()}`);
+  let currentPermissions = permissions;
+  let currentRole = role;
   await context.route(new RegExp(`^${escapeRegExp(API_URL)}/api/v1/me(?:\\?.*)?$`), async (route) => {
     if (route.request().method() !== "GET") return route.continue();
-    const requestId = `${PREFIX}-${role.toLowerCase()}`;
+    const requestId = `${PREFIX}-${currentRole.toLowerCase()}`;
     await route.fulfill({
       body: JSON.stringify({
         data: {
           authenticated: true,
           organization_id: report.local.principal.organization_id,
-          permissions,
-          roles: [role],
-          subject: `${role.toLowerCase()}-browser-check`,
+          permissions: currentPermissions,
+          roles: [currentRole],
+          subject: `${currentRole.toLowerCase()}-browser-check`,
           user_id: report.local.principal.user_id,
         },
         provenance: { api_version: "v1", data_provider: "local_api", runtime_mode: "local" },
@@ -1675,15 +1980,196 @@ async function runRoleCase(role, permissions, run) {
     });
   });
   const page = await context.newPage();
+  pageAuthorizationRoles.set(page, currentRole);
   try {
-    await runCase("Authorization", `${role} UI permission matrix`, () => run(page));
-    await page.getByRole("button", { name: /Open (?:dashboard|economics|investment) controls/i }).click();
-    const principalStatus = page.getByTestId("product-principal-status");
+    await runCase("Authorization", caseName, () =>
+      run(page, (nextRole, nextPermissions) => {
+        currentPermissions = nextPermissions;
+        currentRole = nextRole;
+        pageAuthorizationRoles.set(page, nextRole);
+      }));
+    await assertCurrentPrincipalRole(page, currentRole);
+  } finally {
+    await closeAcceptedContext(context);
+  }
+}
+
+async function assertCurrentPrincipalRole(page, role) {
+  const controls = page.getByRole("button", { name: /Open (?:dashboard|economics|investment) controls/i });
+  await controls.click();
+  const principalStatus = page.getByTestId("product-principal-status");
+  try {
     await principalStatus.waitFor({ timeout: 30_000 });
     assert.match(await principalStatus.innerText(), new RegExp(role, "i"));
   } finally {
-    await context.close();
+    if (await principalStatus.isVisible().catch(() => false)) await controls.click();
   }
+}
+
+async function assertLocalRuntimeHealth(page, expectedFailurePath = null) {
+  const controls = page.getByRole("button", { name: /Open (?:dashboard|economics|investment) controls/i });
+  await controls.click();
+  const runtime = page.getByTestId("local-runtime-status");
+  try {
+    await runtime.waitFor({ timeout: 30_000 });
+    await page.waitForFunction(
+      (failurePath) => {
+        const api = document.querySelector('[data-testid="local-runtime-api"]')?.textContent?.trim();
+        const database = document.querySelector('[data-testid="local-runtime-database"]')?.textContent?.trim();
+        const ask = document.querySelector('[data-testid="local-runtime-ask"]')?.textContent?.trim();
+        if (failurePath === "/health/ready") {
+          return api === "Unavailable" && database === "Connected" && ask === "Grounded local answers";
+        }
+        if (failurePath === "/health/database") {
+          return api === "Ready" && database === "Local database unavailable" && ask === "Grounded local answers";
+        }
+        if (failurePath === "/ai/status") {
+          return api === "Ready" && database === "Connected" && ask === "Grounded answers unavailable";
+        }
+        return (
+          api === "Ready" &&
+          database === "Connected" &&
+          ["Grounded local answers", "OpenAI with grounded fallback"].includes(ask ?? "")
+        );
+      },
+      expectedFailurePath,
+      { timeout: 30_000 },
+    );
+    const state = await page.evaluate(() => {
+      const events = (window.__cfsTechnicalEvents ?? []).filter((entry) => entry.event === "api_readiness");
+      return {
+        api: document.querySelector('[data-testid="local-runtime-api"]')?.textContent?.trim() ?? null,
+        ask: document.querySelector('[data-testid="local-runtime-ask"]')?.textContent?.trim() ?? null,
+        database: document.querySelector('[data-testid="local-runtime-database"]')?.textContent?.trim() ?? null,
+        technical_event: events.at(-1) ?? null,
+      };
+    });
+    report.authorization.health_checks.push({
+      acceptance_generation: acceptanceLifecycle(page).provenGeneration,
+      expected_failure_path: expectedFailurePath,
+      navigation_epoch: pageNavigationEpochs.get(page) ?? 0,
+      observed_at: new Date().toISOString(),
+      page_url: redactMapDiagnosticUrl(page.url()),
+      ...state,
+    });
+    return state;
+  } finally {
+    if (await runtime.isVisible().catch(() => false)) await controls.click();
+  }
+}
+
+async function waitForNextHealthyPoll(page) {
+  const previousCount = await page.evaluate(
+    () => (window.__cfsTechnicalEvents ?? []).filter((entry) => entry.event === "api_readiness").length,
+  );
+  const sequenceBefore = requestSequence;
+  const navigationEpoch = pageNavigationEpochs.get(page) ?? 0;
+  await page.waitForFunction(
+    (count) => {
+      const events = (window.__cfsTechnicalEvents ?? []).filter((entry) => entry.event === "api_readiness");
+      const latest = events.at(-1);
+      return (
+        events.length > count &&
+        latest?.detail?.api_ready === true &&
+        latest.detail.database_ready === true &&
+        ["Grounded local answers", "OpenAI with grounded fallback"].includes(
+          latest.detail.ask_mode ?? "",
+        )
+      );
+    },
+    previousCount,
+    { timeout: 30_000 },
+  );
+  await poll(() => {
+    const lifecycles = report.diagnostics.health_request_lifecycle.filter(
+      (entry) =>
+        entry.authorization_role === "Administrator" &&
+        entry.navigation_epoch === navigationEpoch &&
+        entry.request_sequence > sequenceBefore,
+    );
+    const pending = [...(contextPendingRequiredApiRequests.get(page.context())?.values() ?? [])]
+      .filter(
+        (entry) =>
+          entry.page === page &&
+          entry.method === "GET" &&
+          entry.navigationEpoch === navigationEpoch &&
+          REQUIRED_HEALTH_PATHS.has(new URL(entry.url).pathname),
+      );
+    return (
+      pending.length === 0 &&
+      [...REQUIRED_HEALTH_PATHS].every((path) =>
+        lifecycles.some(
+          (entry) =>
+            entry.endpoint === path &&
+            entry.status === 200 &&
+            entry.body_completed_at &&
+            entry.request_finished_at &&
+            !entry.request_failed_at,
+        ),
+      )
+    );
+  }, 15_000);
+}
+
+async function gotoHomeDuringHealthPoll(page) {
+  const navigationEpoch = pageNavigationEpochs.get(page) ?? 0;
+  const activeHealthGets = () =>
+    [...(contextPendingRequiredApiRequests.get(page.context()) ?? [])]
+      .filter(
+        ([, entry]) =>
+          entry.page === page &&
+          entry.method === "GET" &&
+          entry.navigationEpoch === navigationEpoch &&
+          REQUIRED_HEALTH_PATHS.has(new URL(entry.url).pathname),
+      );
+  await poll(
+    () => new Set(activeHealthGets().map(([, entry]) => new URL(entry.url).pathname)).size === REQUIRED_HEALTH_PATHS.size,
+    25_000,
+  );
+  const activeRequests = activeHealthGets();
+  const activeEndpoints = [...new Set(
+    activeRequests.map(([, entry]) => new URL(entry.url).pathname),
+  )].sort();
+  for (const [request] of activeRequests) acceptedHealthPollRouteRequests.add(request);
+  const reconciledBefore = report.diagnostics.accepted_stale_required_api_requests.length;
+  // ponytail: bypass the normal drain only to force the accepted client-side navigation edge under test.
+  const generation = beginAcceptanceTransition(page);
+  await page.getByRole("button", { name: "Return to CFS Home", exact: true }).click();
+  await page.getByTestId("cfs-master-home").waitFor({ timeout: 60_000 });
+  await poll(
+    async () =>
+      !new URL(page.url()).searchParams.has("app") &&
+      (await page.getByRole("button", { name: "Return to CFS Home", exact: true }).count()) === 0,
+    30_000,
+  );
+  const text = await page.locator("body").innerText();
+  assert(!/Application error|Internal Server Error|Unhandled Runtime Error/i.test(text));
+  proveAcceptanceTransition(page, generation);
+  const terminalRequests = activeRequests.map(([request, entry]) => {
+    const lifecycle = healthRequestLifecycles.get(request);
+    assert(
+      lifecycle?.body_completed_at || lifecycle?.request_failed_at || lifecycle?.accepted_superseded_at,
+      `Accepted Home navigation left health request ${entry.sequence} without a terminal lifecycle state.`,
+    );
+    return {
+      endpoint: new URL(entry.url).pathname,
+      request_sequence: entry.sequence,
+      terminal_state:
+        lifecycle.terminal_state ??
+        (lifecycle.request_failed_at ? "request_failed" : "body_completed"),
+    };
+  });
+  report.authorization.health_checks.push({
+    acceptance_generation: generation,
+    active_poll_endpoints_at_navigation: activeEndpoints,
+    navigation_epoch: pageNavigationEpochs.get(page) ?? 0,
+    observed_at: new Date().toISOString(),
+    page_url: redactMapDiagnosticUrl(page.url()),
+    reconciled_stale_requests:
+      report.diagnostics.accepted_stale_required_api_requests.length - reconciledBefore,
+    terminal_requests: terminalRequests,
+    transition: "Planning to Home during active TopNav polling",
+  });
 }
 
 async function localBrowserStorageCheck(context) {
@@ -1708,7 +2194,7 @@ async function localBrowserStorageCheck(context) {
     );
     report.local.browser_storage = storage;
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 }
 
@@ -1860,8 +2346,8 @@ async function demoChecks() {
       );
     });
   } finally {
-    await page.close();
-    await context.close();
+    await closeAcceptedPage(page);
+    await closeAcceptedContext(context);
   }
 
   const cleanContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -1870,6 +2356,7 @@ async function demoChecks() {
     if (url.pathname.startsWith("/api/v1/") || url.origin === API_ORIGIN) return route.abort("blockedbyclient");
     return route.continue();
   });
+  attachDiagnostics(cleanContext, "demo-clean", { ignoreBlockedApi: true });
   const cleanPage = await cleanContext.newPage();
   try {
     await goto(cleanPage, baseUrl, "?app=planning", true);
@@ -1885,7 +2372,7 @@ async function demoChecks() {
     await gotoEconomicBucket(cleanPage, baseUrl, false);
     assert.equal(await cleanPage.getByTestId("report-bucket-item").count(), 0);
   } finally {
-    await cleanContext.close();
+    await closeAcceptedContext(cleanContext);
   }
   assert.deepEqual(report.demo.product_api_requests, [], "DEMO attempted Product V1 API requests.");
 }
@@ -1898,7 +2385,7 @@ async function gotoEconomicScenario(page, baseUrl, navigate = true) {
   }
   const toolsButton = page.getByRole("button", { name: /Power BI & Tools:/ });
   await toolsButton.waitFor({ timeout: 60_000 });
-  await toolsButton.click();
+  await toolsButton.click({ timeout: 90_000 });
   const dataTables = page.getByRole("tab", { name: "Data Tables" });
   await dataTables.waitFor({ timeout: 45_000 });
   await dataTables.click();
@@ -1922,7 +2409,7 @@ async function gotoEconomicBucket(page, baseUrl, navigate = true) {
   }
   const toolsButton = page.getByRole("button", { name: /Power BI & Tools:/ });
   await toolsButton.waitFor({ timeout: 60_000 });
-  await toolsButton.click();
+  await toolsButton.click({ timeout: 90_000 });
   const bucket = page.getByRole("tab", { name: "Report Bucket", exact: true });
   await bucket.waitFor({ timeout: 45_000 });
   await bucket.click();
@@ -1963,11 +2450,20 @@ async function waitForInteractiveMap(page) {
 
 async function openPlanningAskCfs(page) {
   const query = page.getByTestId("ask-cfs-query").first();
-  if (await query.isVisible().catch(() => false)) return;
-  const indicatorCenter = page.getByTestId("command-center-indicator-center");
-  await indicatorCenter.waitFor({ timeout: 45_000 });
-  await indicatorCenter.click();
-  await query.waitFor({ timeout: 45_000 });
+  if (!(await query.isVisible().catch(() => false))) {
+    const intelligenceBrief = page.locator("#cfs-intelligence-brief");
+    if (await intelligenceBrief.getByRole("heading", { name: "Countywide indicators", exact: true }).isVisible()) {
+      await intelligenceBrief.getByText("Land Opportunity Screener", { exact: true }).waitFor({ timeout: 45_000 });
+    }
+    await waitForRequiredApiDrain(page.context(), "Planning workspace switch");
+    const indicatorCenter = page.getByTestId("command-center-indicator-center");
+    await indicatorCenter.waitFor({ timeout: 45_000 });
+    await indicatorCenter.click();
+    await query.waitFor({ timeout: 45_000 });
+    await waitForRequiredApiDrain(page.context(), "Ask CFS startup");
+    return;
+  }
+  await waitForRequiredApiDrain(page.context(), "Ask CFS startup");
 }
 
 async function isolateAskCfsConversationList(page, allowedIds = []) {
@@ -1998,7 +2494,7 @@ async function overrideProductList(page, apiPath, data) {
   const pattern = new RegExp(`^${escapeRegExp(API_URL + apiPath)}(?:\\?.*)?$`, "i");
   const handler = async (route) => {
     if (route.request().method() !== "GET") return route.continue();
-    const response = await route.fetch();
+    const response = await route.fetch({ maxRetries: 1 });
     const payload = await response.json();
     assert(response.ok(), `${apiPath} override returned ${response.status()}.`);
     assert(Array.isArray(payload.data), `${apiPath} override omitted data.`);
@@ -2104,6 +2600,15 @@ async function forbidden(route, message) {
   });
 }
 
+async function routeMethodOnce(page, url, method, handler) {
+  let handled = false;
+  await page.route(url, async (route) => {
+    if (handled || route.request().method() !== method) return route.continue();
+    handled = true;
+    await handler(route);
+  });
+}
+
 function registerUnexpectedCreates(entries) {
   if (entries.length < 2) return;
   const createKinds = new Map([
@@ -2129,34 +2634,246 @@ function isProductResponse(method, pathname) {
 }
 
 function attachDiagnostics(context, mode, { ignoreBlockedApi = false } = {}) {
+  const requestMapLifecycle = new WeakMap();
   context.on("request", (request) => {
-    if (mode !== "local") return;
     const url = new URL(request.url());
+    const page = requestPage(request);
+    const approvedPublicArcgis = isApprovedPublicArcgisRequest(
+      url,
+      OPTIONAL_PUBLIC_MAP_RESOURCES,
+      request.headers(),
+    );
+    const acceptanceGeneration = page
+      ? acceptanceLifecycle(page).startedGeneration
+      : null;
+    const sequence = ++requestSequence;
+    requestMapLifecycle.set(request, {
+      acceptanceGeneration,
+      navigationEpoch: page ? (pageNavigationEpochs.get(page) ?? 0) : null,
+      observedAttempt: page
+        ? page
+            .evaluate(
+              () =>
+                document
+                  .querySelector('[data-testid="cfs-arcgis-map"]')
+                  ?.getAttribute("data-map-initialization-attempt") ?? null,
+            )
+            .catch(() => null)
+        : Promise.resolve(null),
+      page,
+      pageUrl: page ? redactMapDiagnosticUrl(page.url()) : null,
+      requestKey: mapDiagnosticRequestKey(
+        url,
+        OPTIONAL_PUBLIC_MAP_RESOURCES,
+        request.method(),
+      ),
+      sequence,
+    });
+    if (isRequiredApiWork(url)) {
+      const pending = contextPendingRequiredApiRequests.get(context) ?? new Map();
+      pending.set(request, {
+        acceptanceGeneration,
+        method: request.method(),
+        navigationEpoch: page ? (pageNavigationEpochs.get(page) ?? 0) : null,
+        page,
+        requestId: request.headers()["x-request-id"] ?? null,
+        responseStatus: null,
+        sequence,
+        startedAt: new Date().toISOString(),
+        url: url.href,
+      });
+      contextPendingRequiredApiRequests.set(context, pending);
+      if (request.method() === "GET" && REQUIRED_HEALTH_PATHS.has(url.pathname)) {
+        const lifecycle = {
+          acceptance_generation: acceptanceGeneration,
+          authorization_role: page ? (pageAuthorizationRoles.get(page) ?? null) : null,
+          endpoint: url.pathname,
+          fetch_started_at: new Date().toISOString(),
+          mode,
+          navigation_epoch: page ? (pageNavigationEpochs.get(page) ?? 0) : null,
+          page_url: page ? redactMapDiagnosticUrl(page.url()) : null,
+          request_id: request.headers()["x-request-id"] ?? null,
+          request_sequence: sequence,
+        };
+        healthRequestLifecycles.set(request, lifecycle);
+        report.diagnostics.health_request_lifecycle.push(lifecycle);
+      }
+    }
     if (
-      isExternalArcgisRequest(url) &&
-      !isApprovedPublicArcgisRequest(url)
+      isExternalArcgisRequest(url, { apiOrigin: API_ORIGIN, appOrigin: LOCAL_ORIGIN }) &&
+      !approvedPublicArcgis
     ) {
-      report.diagnostics.unexpected_external_arcgis_requests.push(`${mode}: ${url.href}`);
+      report.diagnostics.unexpected_external_arcgis_requests.push(
+        `${mode}: ${redactMapDiagnosticUrl(url)}`,
+      );
+      recordDirectEvidence(
+        page,
+        acceptanceGeneration,
+        "privateArcgisRequests",
+      );
     }
   });
   context.on("requestfailed", (request) => {
     const url = new URL(request.url());
     const error = request.failure()?.errorText ?? "failed";
+    const healthLifecycle = healthRequestLifecycles.get(request);
+    if (healthLifecycle) {
+      healthLifecycle.failure = redactMapDiagnosticText(error);
+      healthLifecycle.request_failed_at = new Date().toISOString();
+    }
+    const observation = requestMapLifecycle.get(request);
+    const page = observation?.page ?? requestPage(request);
+    contextPendingRequiredApiRequests.get(context)?.delete(request);
     if (ignoreBlockedApi && (url.origin === API_ORIGIN || url.pathname.startsWith("/api/v1/"))) return;
-    if (request.method() === "GET" && error === "net::ERR_ABORTED") return;
-    if (isApprovedOptionalPublicBasemapFailure({ error, method: request.method(), mode, url })) {
-      report.diagnostics.optional_public_basemap_failures.push({
-        classification: "optional_public_basemap_failure",
-        error,
-        mode,
-        url: url.href,
-      });
+    if (
+      !isMapDiagnosticRequest(url, {
+        apiOrigin: API_ORIGIN,
+        appOrigin: LOCAL_ORIGIN,
+        resources: OPTIONAL_PUBLIC_MAP_RESOURCES,
+      })
+    ) {
+      if (
+        ["GET", "HEAD"].includes(request.method()) &&
+        error === "net::ERR_ABORTED" &&
+        /\.(?:pptx|xlsx)$/i.test(url.pathname)
+      ) {
+        return;
+      }
+      report.diagnostics.request_failures.push(
+        `${mode}: ${redactMapDiagnosticText(error)} ${redactMapDiagnosticUrl(url)}`,
+      );
       return;
     }
-    report.diagnostics.request_failures.push(`${mode}: ${error} ${request.url()}`);
+    const diagnostic = classifyArcGISRequestFailure(
+      { error, headers: request.headers(), method: request.method(), url: url.href },
+      {
+        apiOrigin: API_ORIGIN,
+        appOrigin: LOCAL_ORIGIN,
+        resources: OPTIONAL_PUBLIC_MAP_RESOURCES,
+      },
+    );
+    if (
+      ["optional_public_basemap_candidate", "required_request_cancellation_candidate"].includes(
+        diagnostic.classification,
+      )
+    ) {
+      if (page) {
+        observeMapDiagnostic(diagnostic, {
+          mode,
+          observation,
+          page,
+          source: "requestfailed",
+        });
+      }
+      else {
+        const result = {
+          ...resolveMapDiagnostic(diagnostic, { health: {}, lifecycle: "unknown" }),
+          mode,
+          source: "requestfailed",
+        };
+        report.diagnostics.map_diagnostics.push(result);
+        if (result.fatal) requiredRequestFailureEvidence.push(result);
+        report.diagnostics.request_failures.push(
+          `${mode}: map diagnostic had no authoritative page for fallback health: ${redactMapDiagnosticUrl(url)}`,
+        );
+      }
+      return;
+    }
+    if (diagnostic.fatal === false) {
+      report.diagnostics.map_diagnostics.push({ ...diagnostic, mode, source: "requestfailed" });
+      return;
+    }
+    report.diagnostics.map_diagnostics.push({ ...diagnostic, mode, source: "requestfailed" });
+    requiredRequestFailureEvidence.push(diagnostic);
+    recordDirectEvidence(
+      page,
+      observation?.acceptanceGeneration,
+      "requiredRequestFailures",
+    );
+    report.diagnostics.request_failures.push(
+      `${mode}: ${diagnostic.reason} ${diagnostic.error ?? redactMapDiagnosticText(error)} ${redactMapDiagnosticUrl(request.url())}`,
+    );
+  });
+  context.on("requestfinished", (request) => {
+    const healthLifecycle = healthRequestLifecycles.get(request);
+    if (healthLifecycle) healthLifecycle.request_finished_at = new Date().toISOString();
+    contextPendingRequiredApiRequests.get(context)?.delete(request);
   });
   context.on("response", async (response) => {
     const url = new URL(response.url());
+    const observation = requestMapLifecycle.get(response.request());
+    const healthLifecycle = healthRequestLifecycles.get(response.request());
+    const pendingEntry = contextPendingRequiredApiRequests.get(context)?.get(response.request());
+    if (pendingEntry) pendingEntry.responseStatus = response.status();
+    if (healthLifecycle) {
+      healthLifecycle.backend_process_ms = Number(response.headers()["x-cfs-process-time-ms"] ?? NaN);
+      healthLifecycle.response_headers_at = new Date().toISOString();
+      healthLifecycle.response_request_id = response.headers()["x-request-id"] ?? null;
+      healthLifecycle.status = response.status();
+    }
+    if (url.origin === API_ORIGIN) {
+      if (
+        healthLifecycle &&
+        response.status() >= 400 &&
+        !ignoreBlockedApi
+      ) {
+        const diagnostic = classifyArcGISHttpFailure(
+          {
+            headers: response.request().headers(),
+            method: response.request().method(),
+            status: response.status(),
+            url: url.href,
+          },
+          {
+            apiOrigin: API_ORIGIN,
+            appOrigin: LOCAL_ORIGIN,
+            resources: OPTIONAL_PUBLIC_MAP_RESOURCES,
+          },
+        );
+        report.diagnostics.map_diagnostics.push({ ...diagnostic, mode, source: "response" });
+        if (diagnostic.fatal) {
+          requiredRequestFailureEvidence.push(diagnostic);
+          recordDirectEvidence(
+            observation?.page ?? requestPage(response.request()),
+            observation?.acceptanceGeneration,
+            "requiredRequestFailures",
+          );
+          report.diagnostics.request_failures.push(
+            `${mode}: ${diagnostic.reason} HTTP ${response.status()} ${redactMapDiagnosticUrl(url)}`,
+          );
+        }
+        healthLifecycle.fatal_classified_at = new Date().toISOString();
+      }
+      const completionError = await response.finished().catch((error) => error);
+      if (healthLifecycle) {
+        healthLifecycle.body_completed_at = completionError ? null : new Date().toISOString();
+        healthLifecycle.body_error = completionError ? redactMapDiagnosticText(String(completionError)) : null;
+      }
+      if (
+        !completionError &&
+        response.status() >= 200 &&
+        response.status() < 300 &&
+        healthLifecycle &&
+        observation?.page &&
+        observation.navigationEpoch !== null
+      ) {
+        const byEpoch = pageSuccessfulHealthPathsByEpoch.get(observation.page) ?? new Map();
+        const paths = byEpoch.get(observation.navigationEpoch) ?? new Set();
+        paths.add(url.pathname);
+        byEpoch.set(observation.navigationEpoch, paths);
+        pageSuccessfulHealthPathsByEpoch.set(observation.page, byEpoch);
+      }
+      if (!completionError) contextPendingRequiredApiRequests.get(context)?.delete(response.request());
+    }
+    if (response.status() >= 200 && response.status() < 300 && observation?.page && observation.requestKey) {
+      const successes = pageSuccessfulRequestKeys.get(observation.page) ?? new Map();
+      successes.set(
+        observation.requestKey,
+        Math.max(successes.get(observation.requestKey) ?? 0, observation.sequence),
+      );
+      pageSuccessfulRequestKeys.set(observation.page, successes);
+    }
+    let expectedProductFailure = false;
     if (
       (mode === "local" || mode.startsWith("authorization-")) &&
       url.origin === API_ORIGIN &&
@@ -2176,171 +2893,428 @@ function attachDiagnostics(context, mode, { ignoreBlockedApi = false } = {}) {
         // Diagnostics retain HTTP metadata when a response body is unavailable.
       }
       report.local.product_requests.push(entry);
-      if (response.status() >= 400 && !isExpectedProductFailure(entry)) {
+      expectedProductFailure = isExpectedProductFailure(entry);
+      if (response.status() >= 400 && !expectedProductFailure) {
         report.diagnostics.api_failures.push(`${entry.status} ${entry.method} ${entry.path}`);
+        recordDirectEvidence(
+          observation?.page ?? requestPage(response.request()),
+          observation?.acceptanceGeneration,
+          "apiFailures",
+        );
+      }
+    }
+    if (
+      response.status() >= 400 &&
+      !healthLifecycle?.fatal_classified_at &&
+      !expectedProductFailure &&
+      !ignoreBlockedApi &&
+      isMapDiagnosticRequest(url, {
+        apiOrigin: API_ORIGIN,
+        appOrigin: LOCAL_ORIGIN,
+        resources: OPTIONAL_PUBLIC_MAP_RESOURCES,
+      })
+    ) {
+      const diagnostic = classifyArcGISHttpFailure(
+        {
+          headers: response.request().headers(),
+          method: response.request().method(),
+          status: response.status(),
+          url: url.href,
+        },
+        {
+          apiOrigin: API_ORIGIN,
+          appOrigin: LOCAL_ORIGIN,
+          resources: OPTIONAL_PUBLIC_MAP_RESOURCES,
+        },
+      );
+      if (diagnostic.classification === "optional_public_basemap_candidate" && observation?.page) {
+        observeMapDiagnostic(diagnostic, {
+          mode,
+          observation,
+          page: observation.page,
+          source: "response",
+        });
+      } else {
+        report.diagnostics.map_diagnostics.push({ ...diagnostic, mode, source: "response" });
+        if (diagnostic.fatal) {
+          requiredRequestFailureEvidence.push(diagnostic);
+          recordDirectEvidence(
+            observation?.page ?? requestPage(response.request()),
+            observation?.acceptanceGeneration,
+            "requiredRequestFailures",
+          );
+          report.diagnostics.request_failures.push(
+            `${mode}: ${diagnostic.reason} HTTP ${response.status()} ${redactMapDiagnosticUrl(url)}`,
+          );
+        }
       }
     }
   });
   context.on("page", (page) => {
-    page.on("pageerror", (error) => report.diagnostics.page_errors.push(`${mode}: ${error.message}`));
+    acceptanceLifecycle(page);
+    pageNavigationEpochs.set(page, 0);
+    page.on("framenavigated", (frame) => {
+      if (frame === page.mainFrame()) {
+        pageNavigationEpochs.set(page, (pageNavigationEpochs.get(page) ?? 0) + 1);
+      }
+    });
+    page.on("pageerror", (error) => {
+      const diagnostic = classifyPageError(error);
+      report.diagnostics.map_diagnostics.push({
+        ...diagnostic,
+        mode,
+        page_url: redactMapDiagnosticUrl(page.url()),
+      });
+      report.diagnostics.page_errors.push(`${mode}: ${diagnostic.message}`);
+      recordDirectEvidence(
+        page,
+        acceptanceLifecycle(page).startedGeneration,
+        "pageErrors",
+      );
+    });
     page.on("console", (message) => {
       if (!['error', 'warning'].includes(message.type())) return;
       const text = message.text();
-      if (/GL Driver Message.*GPU stall|Font .* is not available|ERR_BLOCKED_BY_CLIENT/.test(text)) return;
-      const approvedUrl = approvedOptionalPublicBasemapConsoleUrl({
-        failures: report.diagnostics.optional_public_basemap_failures,
+      if (/GL Driver Message.*GPU stall|Font .* is not available/.test(text)) return;
+      if (
+        ignoreBlockedApi &&
+        /ERR_BLOCKED_BY_CLIENT/.test(text) &&
+        (message.location().url.startsWith(`${API_ORIGIN}/`) ||
+          message.location().url.includes("/api/v1/"))
+      ) {
+        return;
+      }
+      const diagnostic = classifyArcGISConsoleFailure({
         locationUrl: message.location().url,
-        mode,
         text,
+      }, {
+        apiOrigin: API_ORIGIN,
+        appOrigin: LOCAL_ORIGIN,
+        resources: OPTIONAL_PUBLIC_MAP_RESOURCES,
       });
-      if (approvedUrl) {
-        report.diagnostics.optional_public_basemap_console.push({
-          classification: "optional_public_basemap_failure",
-          message: text,
+      if (diagnostic.classification === "optional_public_basemap_candidate") {
+        observeMapDiagnostic(diagnostic, { mode, page, source: "console" });
+        return;
+      }
+      if (diagnostic.fatal === false) {
+        report.diagnostics.map_diagnostics.push({
+          ...diagnostic,
           mode,
-          url: approvedUrl,
+          page_url: redactMapDiagnosticUrl(page.url()),
+          source: "console",
         });
         return;
       }
-      report.diagnostics.console.push(`${mode}: ${message.type()}: ${text}`);
+      const consoleEntry =
+        `${mode}: ${message.type()}: ${diagnostic.message ?? "[diagnostic redacted]"} (${diagnostic.reason})`;
+      const record = {
+        ...diagnostic,
+        console_entry: consoleEntry,
+        mode,
+        page_url: redactMapDiagnosticUrl(page.url()),
+        source: "console",
+      };
+      report.diagnostics.map_diagnostics.push(record);
+      report.diagnostics.console.push(consoleEntry);
+      recordDiagnosticDirectEvidence(
+        record,
+        page,
+        acceptanceLifecycle(page).startedGeneration,
+        "consoleErrors",
+      );
     });
   });
 }
 
-function isApprovedOptionalPublicBasemapRequest(value) {
-  const url = value instanceof URL ? value : new URL(value);
-  return (
-    ["server.arcgisonline.com", "services.arcgisonline.com"].includes(url.hostname) &&
-    /^\/ArcGIS\/rest\/services\/Canvas\/World_Dark_Gray_(?:Base|Reference)\/MapServer(?:\/tile\/\d+\/\d+\/\d+|\/tilemap\/\d+\/\d+\/\d+\/\d+\/\d+)?\/?$/i.test(
-      url.pathname,
-    )
-  );
+function observeMapDiagnostic(diagnostic, { mode, observation = null, page, source }) {
+  const record = {
+    ...diagnostic,
+    mode,
+    navigation_epoch:
+      observation?.navigationEpoch ?? (page ? (pageNavigationEpochs.get(page) ?? 0) : null),
+    page_url:
+      observation?.pageUrl ?? (page ? redactMapDiagnosticUrl(page.url()) : null),
+    source,
+  };
+  report.diagnostics.map_diagnostics.push(record);
+  pendingMapDiagnostics.push({
+    acceptanceGeneration:
+      observation?.acceptanceGeneration ?? acceptanceLifecycle(page).startedGeneration,
+    acceptanceTeardownStarted: acceptedTeardownPages.has(page),
+    failureGeneration: acceptanceLifecycle(page).startedGeneration,
+    page,
+    record,
+    requestKey: observation?.requestKey ?? record.request_key ?? null,
+    requestSequence: observation?.sequence ?? null,
+    observedAttempt:
+      observation?.observedAttempt ??
+      (page
+        ? page
+            .getByTestId("cfs-arcgis-map")
+            .getAttribute("data-map-initialization-attempt")
+            .catch(() => null)
+        : Promise.resolve(null)),
+    resolved: false,
+  });
 }
 
-function isApprovedOptionalPublicBasemapFailure({ error, method, mode, url }) {
-  return (
-    (mode === "local" ||
-      (mode === "authorization-planner" &&
-        ["net::ERR_FAILED", "net::ERR_NETWORK_ACCESS_DENIED"].includes(error))) &&
-    method === "GET" &&
-    isApprovedOptionalPublicBasemapRequest(url) &&
-    url.origin !== LOCAL_ORIGIN &&
-    url.origin !== API_ORIGIN
+async function resolveMapDiagnosticsForPage(page) {
+  reconcileExpectedConsoleErrors();
+  const pending = pendingMapDiagnostics
+    .filter((entry) => !entry.resolved && entry.page === page);
+  if (!pending.length) return;
+  const cachedHealth = lastMapHealthByPage.get(page);
+  const currentHealth =
+    !page.isClosed() && (await page.getByTestId("cfs-arcgis-map").count())
+      ? await readRequiredMapHealth(page)
+      : null;
+  const currentEpoch = pageNavigationEpochs.get(page) ?? 0;
+  const lifecycle = acceptanceLifecycle(page);
+  const baseHealth = currentHealth ?? cachedHealth;
+  const directEvidence = Object.freeze(directEvidenceForPage(page));
+  const baseEvidence = baseHealth ? { ...baseHealth, ...directEvidence } : directEvidence;
+  const required = pending.filter(
+    (entry) => entry.record.classification === "required_request_cancellation_candidate",
   );
-}
+  const requiredSet = new Set(required);
+  const optional = pending.filter((entry) => !requiredSet.has(entry));
 
-function approvedOptionalPublicBasemapConsoleUrl({ failures, locationUrl, mode, text }) {
-  const approvedUrl = approvedOptionalPublicBasemapUrl(locationUrl) ?? approvedOptionalPublicBasemapUrl(text);
-  const networkError = /net::(ERR_FAILED|ERR_NETWORK_ACCESS_DENIED)/i.exec(text);
-  const error = networkError ? `net::${networkError[1].toUpperCase()}` : /blocked by CORS/i.test(text) ? "cors" : null;
-  if (
-    approvedUrl &&
-    error &&
-    isApprovedOptionalPublicBasemapFailure({ error, method: "GET", mode, url: new URL(approvedUrl) })
-  ) {
-    return approvedUrl;
+  async function resolveEntry(entry, evidence) {
+    const observedAttempt = await entry.observedAttempt;
+    const navigationStale = entry.record.navigation_epoch !== currentEpoch;
+    const crossedAcceptedNavigation =
+      navigationStale &&
+      entry.acceptanceGeneration < lifecycle.provenGeneration;
+    const transitionGeneration = crossedAcceptedNavigation
+      ? lifecycle.provenGeneration
+      : entry.failureGeneration;
+    const acceptanceTransitionSucceeded =
+      entry.acceptanceGeneration < transitionGeneration &&
+      transitionGeneration <= lifecycle.provenGeneration;
+    const stale =
+      acceptanceTransitionSucceeded ||
+      navigationStale ||
+      (observedAttempt &&
+        (currentHealth?.initializationAttempt ?? cachedHealth?.initializationAttempt) &&
+        observedAttempt !==
+          (currentHealth?.initializationAttempt ?? cachedHealth?.initializationAttempt));
+    const health = currentHealth ?? (page.isClosed() || stale ? cachedHealth : null);
+    const currentEvidence = health ? { ...health, ...evidence } : evidence;
+    const successfulSequence = entry.requestKey
+      ? pageSuccessfulRequestKeys.get(page)?.get(entry.requestKey) ?? 0
+      : 0;
+    const acceptanceTeardownSucceeded =
+      page.isClosed() && entry.acceptanceTeardownStarted;
+    const replacementSucceeded =
+      entry.requestSequence !== null && successfulSequence > entry.requestSequence;
+    if (
+      entry.record.classification === "required_request_cancellation_candidate" &&
+      !page.isClosed() &&
+      !acceptanceTransitionSucceeded &&
+      !replacementSucceeded &&
+      !(stale && entry.record.stale_lifecycle_eligible === true)
+    ) {
+      return null;
+    }
+    Object.assign(entry.record, {
+      acceptance_failure_generation: entry.failureGeneration,
+      acceptance_observed_generation: entry.acceptanceGeneration,
+      acceptance_proven_generation: lifecycle.provenGeneration,
+      acceptance_teardown_succeeded: acceptanceTeardownSucceeded,
+      acceptance_transition_succeeded:
+        acceptanceTransitionSucceeded || acceptanceTeardownSucceeded,
+      replacement_succeeded: replacementSucceeded,
+    });
+    const result = resolveMapDiagnostic(entry.record, {
+      health: currentEvidence,
+      lifecycle: page.isClosed()
+        ? stale
+          ? "destroyed"
+          : "acceptance_teardown"
+        : stale
+          ? "stale"
+          : "current",
+    });
+    Object.assign(entry.record, result, {
+      current_attempt: currentEvidence.initializationAttempt ?? null,
+      observed_attempt: observedAttempt,
+    });
+    return result;
   }
 
-  const layer = /\[@arcgis\/core\/layers\/TileLayer\] #load\(\) Failed to load layer \(title: 'Public dark-gray reference (basemap|labels)', id: 'cfs-public-reference-(basemap|labels)'\) \{error: [^}]+\}/i.exec(
-    text,
-  );
-  if (!layer || layer[1].toLowerCase() !== layer[2].toLowerCase()) return null;
-  const service = layer[1].toLowerCase() === "basemap" ? "Base" : "Reference";
-  return (
-    failures.find((failure) => {
-      const url = new URL(failure.url);
-      return (
-        failure.mode === mode &&
-        url.pathname.includes(`/Canvas/World_Dark_Gray_${service}/MapServer`) &&
-        isApprovedOptionalPublicBasemapFailure({ error: failure.error, method: "GET", mode, url })
+  const results = new Map();
+  for (const entry of required) {
+    results.set(entry, await resolveEntry(entry, baseEvidence));
+  }
+  const independentlyFatalRequired = required.filter((entry) => {
+    const result = results.get(entry);
+    return Boolean(
+      result?.fatal &&
+      entry.record.acceptance_teardown_succeeded !== true &&
+      entry.record.acceptance_transition_succeeded !== true &&
+      entry.record.replacement_succeeded !== true
+    );
+  });
+  const optionalEvidence = Object.freeze({
+    ...baseEvidence,
+    requiredRequestFailures:
+      Number(baseEvidence.requiredRequestFailures ?? 0) +
+      independentlyFatalRequired.length,
+  });
+  if (![...results.values()].some((result) => result === null)) {
+    for (const entry of optional) {
+      results.set(entry, await resolveEntry(entry, optionalEvidence));
+    }
+  }
+
+  for (const entry of pending) {
+    const result = results.get(entry);
+    if (!result) continue;
+    entry.resolved = true;
+    if (requiredSet.has(entry) && result.fatal) {
+      if (independentlyFatalRequired.includes(entry)) {
+        requiredRequestFailureEvidence.push(result);
+        recordDirectEvidence(
+          page,
+          entry.acceptanceGeneration,
+          "requiredRequestFailures",
+        );
+      }
+      report.diagnostics.request_failures.push(
+        `${entry.record.mode}: ${entry.record.page_url} :: ${result.reason}`,
       );
-    })?.url ?? null
-  );
-}
-
-function checkOptionalPublicBasemapClassifier() {
-  const requestCases = [
-    ["approved Base tile network denied", true, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/10/405/280"],
-    ["approved Reference tile network denied", true, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/10/405/280"],
-    ["approved numeric tilemap network denied", true, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tilemap/10/384/256/32/32?f=json"],
-    ["approved Canvas ERR_FAILED", true, "authorization-planner", "GET", "net::ERR_FAILED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer?f=json"],
-    ["CFS API network denied", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${API_ORIGIN}/api/v1/planning/snapshots`],
-    ["parcel API network denied", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${API_ORIGIN}/parcels/search?q=test`],
-    ["same-origin SDK asset failure", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${LOCAL_ORIGIN}/arcgis-assets/chunks/runtime.js`],
-    ["required bundled context failure", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", `${LOCAL_ORIGIN}/demo-data/map/demo_transportation_context.geojson`],
-    ["unexpected ArcGIS MapServer", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json"],
-    ["Portal item", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json"],
-    ["OAuth sign-in", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/oauth2/authorize"],
-    ["arbitrary external request", false, "authorization-planner", "GET", "net::ERR_NETWORK_ACCESS_DENIED", "https://example.com/unrelated.json"],
-    ["non-GET approved Canvas request", false, "authorization-planner", "POST", "net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer?f=json"],
-  ];
-  for (const [name, expected, mode, method, error, value] of requestCases) {
-    assert.equal(
-      isApprovedOptionalPublicBasemapFailure({ error, method, mode, url: new URL(value) }),
-      expected,
-      name,
-    );
-    console.log(`PASS ${expected ? "optional" : "fatal"}: ${name}`);
-  }
-
-  const baseUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer?f=json";
-  const referenceUrl = "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer?f=json";
-  const failures = [
-    { error: "net::ERR_NETWORK_ACCESS_DENIED", mode: "authorization-planner", url: baseUrl },
-    { error: "net::ERR_NETWORK_ACCESS_DENIED", mode: "authorization-planner", url: referenceUrl },
-  ];
-  const consoleCases = [
-    ["approved Base console network denied", true, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", baseUrl, failures],
-    ["approved Reference console network denied", true, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", referenceUrl, failures],
-    ["approved Base console ERR_FAILED", true, "authorization-planner", "Failed to load resource: net::ERR_FAILED", baseUrl, failures],
-    ["approved Reference console ERR_FAILED", true, "authorization-planner", "Failed to load resource: net::ERR_FAILED", referenceUrl, failures],
-    ["approved Base layer failure with matching request", true, "authorization-planner", "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Public dark-gray reference basemap', id: 'cfs-public-reference-basemap') {error: s}", "", failures],
-    ["approved Reference layer failure with matching request", true, "authorization-planner", "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Public dark-gray reference labels', id: 'cfs-public-reference-labels') {error: s}", "", failures],
-    ["generic JavaScript console error", false, "authorization-planner", "TypeError: cannot read properties of undefined", `${LOCAL_ORIGIN}/planning`, []],
-    ["CFS API 500 console error", false, "authorization-planner", "Failed to load resource: the server responded with a status of 500", `${API_ORIGIN}/api/v1/planning/snapshots`, []],
-    ["parcel endpoint console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", `${API_ORIGIN}/parcels/search?q=test`, []],
-    ["same-origin SDK console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", `${LOCAL_ORIGIN}/arcgis-assets/chunks/runtime.js`, []],
-    ["unexpected Esri MapServer console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json", []],
-    ["Portal item console error", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json", []],
-    ["OAuth sign-in console error", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://www.arcgis.com/sharing/rest/oauth2/authorize", []],
-    ["authorization 403 application error", false, "authorization-planner", "Authorization failed: 403 Forbidden", `${API_ORIGIN}/api/v1/planning/snapshots`, []],
-    ["arbitrary external console failure", false, "authorization-planner", "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED", "https://example.com/unrelated.json", []],
-    ["unlinked approved layer failure", false, "authorization-planner", "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Public dark-gray reference basemap', id: 'cfs-public-reference-basemap') {error: s}", "", []],
-  ];
-  for (const [name, expected, mode, text, locationUrl, observedFailures] of consoleCases) {
-    assert.equal(
-      Boolean(approvedOptionalPublicBasemapConsoleUrl({ failures: observedFailures, locationUrl, mode, text })),
-      expected,
-      name,
-    );
-    console.log(`PASS ${expected ? "optional" : "fatal"} console: ${name}`);
+    }
+    if (!requiredSet.has(entry)) {
+      (entry.record.source === "console"
+        ? report.diagnostics.optional_public_basemap_console
+        : report.diagnostics.optional_public_basemap_failures
+      ).push(entry.record);
+    }
   }
 }
 
-function isApprovedPublicArcgisRequest(url) {
-  return (
-    isApprovedOptionalPublicBasemapRequest(url) ||
-    (url.hostname === "static.arcgis.com" &&
-      /^\/attribution\/Canvas\/World_Dark_Gray_(?:Base|Reference)(?:\/|$)/i.test(url.pathname))
-  );
+async function resolveAllMapDiagnostics() {
+  for (const page of new Set(
+    pendingMapDiagnostics.filter((entry) => !entry.resolved).map((entry) => entry.page),
+  )) {
+    if (page) await resolveMapDiagnosticsForPage(page);
+  }
 }
 
-function isExternalArcgisRequest(url) {
-  return (
-    url.origin !== LOCAL_ORIGIN &&
-    url.origin !== API_ORIGIN &&
-    /(?:arcgis|esri)/i.test(url.hostname)
-  );
+async function readRequiredMapHealth(page) {
+  const state = await page.evaluate(({ requiredBasemapId, requiredIds, requiredLabelId }) => {
+    const map = document.querySelector('[data-testid="cfs-arcgis-map"]');
+    const debug = window.__cfsGetMapDebugState?.();
+    return {
+      activeMapInteractive:
+        map?.getAttribute("data-map-renderer") === "interactive" &&
+        map.getAttribute("data-map-renderer-state") === "interactive_ready" &&
+        map.getAttribute("data-map-view-ready-state") === "ready" &&
+        debug?.ready === true &&
+        debug?.readyState === "ready",
+      currentMapAuthoritative:
+        document.querySelectorAll('[data-testid="cfs-arcgis-map"]').length === 1 &&
+        document.querySelectorAll(".esri-view-root").length === 1,
+      initializationAttempt: map?.getAttribute("data-map-initialization-attempt") ?? null,
+      requiredLayersReady: requiredIds.every((id) => {
+        const layer = debug?.layers?.find((candidate) => candidate.id === id);
+        return layer?.visible === true && Number(layer.graphicsCount) > 0;
+      }) &&
+        (map?.getAttribute("data-reference-basemap-state") !== "failed" ||
+          (() => {
+            const labels = debug?.layers?.find((candidate) => candidate.id === requiredLabelId);
+            return labels?.visible === true && Number(labels.graphicsCount) > 0;
+          })()),
+      sameOriginBasemapReady: debug?.basemapId === requiredBasemapId,
+      sameOriginContextReady:
+        map?.getAttribute("data-context-ready") === "true" &&
+        map.getAttribute("data-static-context-ready") === "true",
+      parcelInteractionReady:
+        document.querySelector('input[aria-label="Search parcels"]:not(:disabled)') !== null,
+    };
+  }, {
+    requiredBasemapId: REQUIRED_CFS_BASEMAP_ID,
+    requiredIds: REQUIRED_CFS_CONTEXT_LAYER_IDS,
+    requiredLabelId: REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
+  });
+  const health = {
+    ...state,
+    ...directEvidenceForPage(page),
+    parcelInteractionRequired: true,
+    navigationEpoch: pageNavigationEpochs.get(page) ?? 0,
+    pageUrl: redactMapDiagnosticUrl(page.url()),
+  };
+  if (health.activeMapInteractive && health.currentMapAuthoritative) {
+    lastMapHealthByPage.set(page, health);
+  }
+  return health;
 }
 
-function approvedOptionalPublicBasemapUrl(value) {
-  const match = String(value).match(/https:\/\/[^\s'"<>]+/i);
-  if (!match) return null;
+function requestPage(request) {
   try {
-    const url = new URL(match[0].replace(/[),.;]+$/, ""));
-    return isApprovedOptionalPublicBasemapRequest(url) ? url.href : null;
+    return request.frame().page();
   } catch {
     return null;
+  }
+}
+
+function acceptanceLifecycle(page) {
+  let lifecycle = pageAcceptanceLifecycles.get(page);
+  if (!lifecycle) {
+    lifecycle = { provenGeneration: 0, startedGeneration: 0 };
+    pageAcceptanceLifecycles.set(page, lifecycle);
+  }
+  return lifecycle;
+}
+
+function beginAcceptanceTransition(page) {
+  const lifecycle = acceptanceLifecycle(page);
+  lifecycle.startedGeneration += 1;
+  return lifecycle.startedGeneration;
+}
+
+function proveAcceptanceTransition(page, generation) {
+  const lifecycle = acceptanceLifecycle(page);
+  assert.equal(
+    lifecycle.startedGeneration,
+    generation,
+    "Acceptance navigation generations overlapped before destination proof.",
+  );
+  lifecycle.provenGeneration = generation;
+  reconcileSupersededRequiredApiRequests(page);
+}
+
+async function cacheMapHealthBeforeTeardown(page) {
+  if (
+    !page.isClosed() &&
+    (await page.getByTestId("cfs-arcgis-map").count())
+  ) {
+    await readRequiredMapHealth(page);
+  }
+}
+
+async function closeAcceptedPage(page) {
+  if (page.isClosed()) return;
+  await cacheMapHealthBeforeTeardown(page);
+  await waitForRequiredApiDrain(page.context(), "Page teardown");
+  acceptedTeardownPages.add(page);
+  await page.close();
+}
+
+async function closeAcceptedContext(context) {
+  const pages = context.pages().filter((page) => !page.isClosed());
+  for (const page of pages) await cacheMapHealthBeforeTeardown(page);
+  await waitForRequiredApiDrain(context, "Context teardown");
+  for (const page of pages) acceptedTeardownPages.add(page);
+  try {
+    await context.close();
+    assert.equal(
+      contextPendingRequiredApiRequests.get(context)?.size ?? 0,
+      0,
+      "Context close left required API requests without a terminal event.",
+    );
+  } finally {
+    contextPendingRequiredApiRequests.delete(context);
   }
 }
 
@@ -2348,7 +3322,8 @@ async function assertOptionalPublicBasemapFallback(context) {
   const observed =
     FORCE_OPTIONAL_BASEMAP_FAILURE ||
     report.diagnostics.optional_public_basemap_failures.length > 0 ||
-    report.diagnostics.optional_public_basemap_console.length > 0;
+    report.diagnostics.optional_public_basemap_console.length > 0 ||
+    pendingMapDiagnostics.some((entry) => !entry.resolved);
   if (!observed) return;
 
   const page = await context.newPage();
@@ -2370,9 +3345,12 @@ async function assertOptionalPublicBasemapFallback(context) {
       await page.evaluate(async (urls) => {
         await Promise.all(urls.map((url) => fetch(url).catch(() => undefined)));
       }, OPTIONAL_BASEMAP_FAILURE_TEST_URLS);
+      await resolveMapDiagnosticsForPage(page);
       await poll(async () =>
         OPTIONAL_BASEMAP_FAILURE_TEST_URLS.every((url) =>
-          report.diagnostics.optional_public_basemap_failures.some((failure) => failure.url === url),
+          report.diagnostics.optional_public_basemap_failures.some(
+            (failure) => failure.url === redactMapDiagnosticUrl(url),
+          ),
         ),
       );
     }
@@ -2441,6 +3419,7 @@ async function assertOptionalPublicBasemapFallback(context) {
       .filter({ hasText: parcelId })
       .first();
     await option.waitFor({ timeout: 30_000 });
+    const parcelSelectionGeneration = beginAcceptanceTransition(page);
     await option.click();
     await page.getByText(parcelId, { exact: true }).first().waitFor();
     await page.waitForFunction(
@@ -2453,6 +3432,8 @@ async function assertOptionalPublicBasemapFallback(context) {
       },
       beforeExtent,
     );
+    await waitForRequiredApiDrain(page.context(), "Parcel selection");
+    proveAcceptanceTransition(page, parcelSelectionGeneration);
     await page.getByTestId("command-center-explore-intelligence").click();
     const expand = page.getByRole("button", { name: "Expand map layers panel", exact: true });
     if ((await expand.count()) && (await expand.isVisible())) await expand.click();
@@ -2511,10 +3492,11 @@ async function assertOptionalPublicBasemapFallback(context) {
       ],
       map_renderer: "interactive",
       parcel_focus: parcelId,
+      fallback_healthy: true,
       status: "PASS",
     };
   } finally {
-    await page.close();
+    await closeAcceptedPage(page);
   }
 }
 
@@ -2531,12 +3513,28 @@ function reconcileExpectedConsoleErrors() {
     if (!isExpectedProductFailure(entry)) continue;
     allowances.set(entry.status, (allowances.get(entry.status) ?? 0) + 1);
   }
+  for (const message of report.diagnostics.expected_console) {
+    const status = Number(/server responded with a status of (403|409)/i.exec(message)?.[1]);
+    if (!status) continue;
+    allowances.set(status, Math.max(0, (allowances.get(status) ?? 0) - 1));
+  }
   report.diagnostics.console = report.diagnostics.console.filter((message) => {
     const status = Number(/server responded with a status of (403|409)/i.exec(message)?.[1]);
     const remaining = allowances.get(status) ?? 0;
     if (!remaining) return true;
     allowances.set(status, remaining - 1);
     report.diagnostics.expected_console.push(message);
+    const diagnostic = report.diagnostics.map_diagnostics.find(
+      (candidate) => candidate.fatal === true && candidate.console_entry === message,
+    );
+    if (diagnostic) {
+      reconcileDiagnosticDirectEvidence(diagnostic);
+      Object.assign(diagnostic, {
+        classification: "expected_product_console_failure",
+        fatal: false,
+        reason: `Expected Product V1 HTTP ${status} console evidence was reconciled to its accepted response.`,
+      });
+    }
     return false;
   });
 }
@@ -2549,12 +3547,60 @@ async function waitForProductTraffic(start, predicate, minimum = 1) {
 }
 
 async function goto(page, baseUrl, query, demo = false) {
+  await waitForRequiredApiDrain(page.context(), "Navigation");
+  const generation = beginAcceptanceTransition(page);
   await page.goto(`${baseUrl}/${query}`, { waitUntil: "domcontentloaded" });
   await waitForLoadedPage(page);
   await page.getByRole("button", { name: "Return to CFS Home" }).waitFor({ timeout: 60_000 });
   if (demo) await page.waitForFunction(() => document.body.textContent?.includes("Portfolio Demo"));
   const text = await page.locator("body").innerText();
   assert(!/Application error|Internal Server Error|Unhandled Runtime Error/i.test(text));
+  proveAcceptanceTransition(page, generation);
+  if (new URL(`${baseUrl}/${query}`).searchParams.get("app") === "planning") {
+    await settlePlanningMapDiagnostics(page);
+  }
+}
+
+async function gotoDataAdministration(page) {
+  await waitForRequiredApiDrain(page.context(), "Data-administration navigation");
+  const generation = beginAcceptanceTransition(page);
+  await page.goto(`${LOCAL_URL}/data-administration`, { waitUntil: "domcontentloaded" });
+  const summary = page.getByTestId("data-administration-summary");
+  await page.waitForFunction(
+    () =>
+      Boolean(document.querySelector('[data-testid="data-administration-summary"]')) ||
+      [...document.querySelectorAll("h2")].some(
+        (heading) => heading.textContent?.trim() === "Status unavailable",
+      ),
+    null,
+    { timeout: 90_000 },
+  );
+  if (!(await summary.isVisible())) {
+    const errorPanel = page
+      .getByRole("heading", { name: "Status unavailable", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    throw new Error(`Data-administration status failed: ${await errorPanel.innerText()}`);
+  }
+  proveAcceptanceTransition(page, generation);
+}
+
+async function settlePlanningMapDiagnostics(page) {
+  await page.waitForFunction(
+    () => {
+      const map = document.querySelector('[data-testid="cfs-arcgis-map"]');
+      return (
+        map?.getAttribute("data-map-renderer") === "interactive" &&
+        map.getAttribute("data-map-renderer-state") === "interactive_ready" &&
+        map.getAttribute("data-map-view-ready-state") === "ready"
+      );
+    },
+    null,
+    { timeout: 90_000 },
+  );
+  await delay(50);
+  await waitForRequiredApiDrain(page.context(), "Planning startup");
+  await readRequiredMapHealth(page);
+  await resolveMapDiagnosticsForPage(page);
 }
 
 async function waitForLoadedPage(page) {
@@ -2563,8 +3609,17 @@ async function waitForLoadedPage(page) {
 }
 
 async function reloadPage(page) {
+  await waitForRequiredApiDrain(page.context(), "Reload");
+  const generation = beginAcceptanceTransition(page);
   await page.reload({ waitUntil: "domcontentloaded" });
   await waitForLoadedPage(page);
+  await page.getByRole("button", { name: "Return to CFS Home" }).waitFor({ timeout: 60_000 });
+  const text = await page.locator("body").innerText();
+  assert(!/Application error|Internal Server Error|Unhandled Runtime Error/i.test(text));
+  proveAcceptanceTransition(page, generation);
+  if (new URL(page.url()).searchParams.get("app") === "planning") {
+    await settlePlanningMapDiagnostics(page);
+  }
 }
 
 async function readApi(resourcePath) {
@@ -2723,7 +3778,7 @@ with get_engine().connect() as connection:
     transaction.rollback()
 print(json.dumps(result))
 `;
-  const result = spawnSync("python", ["-c", code, JSON.stringify(records)], {
+  const result = spawnSync(PYTHON, ["-c", code, JSON.stringify(records)], {
     cwd: path.join(ROOT, "backend"),
     encoding: "utf8",
     env: {

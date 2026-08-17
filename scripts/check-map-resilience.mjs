@@ -2,6 +2,23 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium } from "playwright-core";
+import {
+  classifyArcGISConsoleFailure,
+  classifyArcGISHttpFailure,
+  classifyArcGISRequestFailure,
+  classifyPageError,
+  isApprovedPublicArcgisRequest,
+  isExternalArcgisRequest,
+  isMapDiagnosticRequest,
+  mapDiagnosticRequestKey,
+  optionalPublicMapResources,
+  redactMapDiagnosticUrl,
+  REQUIRED_CFS_BASEMAP_ID,
+  REQUIRED_CFS_CONTEXT_LAYER_IDS,
+  REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
+  resolveMapDiagnostic,
+  runClassificationSafetyMatrix,
+} from "./map-acceptance-classification.mjs";
 
 const baseUrl = (
   process.env.CFS_MAP_BASE_URL ??
@@ -9,6 +26,18 @@ const baseUrl = (
   "http://127.0.0.1:3000"
 ).replace(/\/$/, "");
 const origin = new URL(baseUrl).origin;
+const apiOrigin = new URL(
+  process.env.CFS_API_BASE_URL ?? "http://127.0.0.1:8000",
+).origin;
+const optionalPublicResources = optionalPublicMapResources();
+const classifierOnly = process.argv.includes("--check-map-classifier");
+const requiredFailureProbe = process.argv.includes("--probe-required-map-failure");
+if (classifierOnly) {
+  const matrix = runClassificationSafetyMatrix();
+  assert.equal(matrix.length, 64);
+  console.log("PASS map resilience shared classifier matrix");
+  process.exit(0);
+}
 const executablePath = [
   process.env.CFS_BROWSER_EXECUTABLE,
   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -34,178 +63,714 @@ const diagnostics = {
   expectedRendererErrors: [],
   externalArcgisRequests: [],
   loops: [],
+  mapDiagnostics: [],
+  optionalPublicBasemapFailures: [],
   pageErrors: [],
   requestFailures: [],
+  requiredFailureNegativeProofs: [],
+  unexpectedExternalArcgisRequests: [],
 };
-
-function isPublicCanvasUrl(value) {
-  try {
-    const url = new URL(value);
-    return (
-      (["server.arcgisonline.com", "services.arcgisonline.com"].includes(url.hostname) &&
-        url.pathname.includes("/Canvas/World_Dark_Gray_")) ||
-      (url.hostname === "static.arcgis.com" &&
-        url.pathname.includes("/attribution/Canvas/World_Dark_Gray_"))
-    );
-  } catch {
-    return false;
-  }
-}
 
 async function run(
   name,
   configure = async () => {},
   verify = async () => {},
   expectedRenderer = "interactive",
+  expectedRequiredClassification = null,
 ) {
   const context = await browser.newContext();
   const counts = new Map();
+  const requestEpochs = new WeakMap();
+  const requestObservations = new WeakMap();
+  const successfulRequestKeys = new Map();
+  let requestSequence = 0;
+  const healthyScenario = expectedRequiredClassification === null;
+  const scenario = {
+    acceptanceGeneration: 0,
+    acceptanceLifecycle: [],
+    apiFailures: [],
+    currentHealth: null,
+    dependentFailures: [],
+    destroyed: false,
+    expectedRequiredClassification,
+    expectedRequiredFailures: [],
+    expectedOptionalFatal: [],
+    fatalConsole: [],
+    fatalRequests: [],
+    forcedRendererFailureActive:
+      expectedRenderer === "static" && expectedRequiredClassification === null,
+    navigationEpoch: 0,
+    name,
+    optionalCandidates: [],
+    pageErrors: [],
+    pendingRequiredRequests: new Map(),
+    successfulRequestKeys,
+    terminalSuccessfulRequestKeys: new Map(),
+    provenAcceptanceGeneration: 0,
+    teardownCompleted: false,
+    teardownGeneration: null,
+    teardownStarted: false,
+    trackRequiredRequests: healthyScenario,
+  };
   context.on("request", (request) => {
+    requestEpochs.set(request, scenario.navigationEpoch);
     const url = new URL(request.url());
+    const sequence = ++requestSequence;
+    requestObservations.set(request, {
+      acceptanceGeneration: scenario.acceptanceGeneration,
+      acceptanceLifecycleLabel: scenario.acceptanceLifecycle.at(-1)?.label ?? null,
+      requestKey: mapDiagnosticRequestKey(
+        url,
+        optionalPublicResources,
+        request.method(),
+      ),
+      sequence,
+    });
+    if (scenario.trackRequiredRequests && isRequiredRouteRequest(url)) {
+      scenario.pendingRequiredRequests.set(request, {
+        acceptanceGeneration: scenario.acceptanceGeneration,
+        method: request.method(),
+        lastLifecycleEvent: "request",
+        navigationEpoch: scenario.navigationEpoch,
+        requestId: request.headers()["x-request-id"] ?? null,
+        responseStatus: null,
+        sequence,
+        startedAt: new Date().toISOString(),
+        startedMs: Date.now(),
+        url: url.href,
+      });
+    }
     const count = (counts.get(request.url()) ?? 0) + 1;
     counts.set(request.url(), count);
-    if (count === 26) diagnostics.loops.push(`${name}: ${request.url()}`);
+    if (count === 26) diagnostics.loops.push(`${name}: ${redactMapDiagnosticUrl(request.url())}`);
     if (url.pathname.startsWith("/arcgis-assets/")) {
-      diagnostics.arcgisAssetRequests.add(url.href);
+      diagnostics.arcgisAssetRequests.add(redactMapDiagnosticUrl(url));
     }
     if (url.origin !== origin && /(?:arcgis|esri)/i.test(url.hostname)) {
-      diagnostics.externalArcgisRequests.push(`${name}: ${url.href}`);
+      diagnostics.externalArcgisRequests.push(`${name}: ${redactMapDiagnosticUrl(url)}`);
+    }
+    if (
+      isExternalArcgisRequest(url, { apiOrigin, appOrigin: origin }) &&
+      !isApprovedPublicArcgisRequest(
+        url,
+        optionalPublicResources,
+        request.headers(),
+      )
+    ) {
+      diagnostics.unexpectedExternalArcgisRequests.push(
+        `${name}: ${redactMapDiagnosticUrl(url)}`,
+      );
     }
   });
   context.on("requestfailed", (request) => {
     const url = new URL(request.url());
+    scenario.pendingRequiredRequests.delete(request);
+    const diagnostic = classifyArcGISRequestFailure(
+      {
+        error: request.failure()?.errorText ?? "failed",
+        headers: request.headers(),
+        method: request.method(),
+        url: url.href,
+      },
+      { apiOrigin, appOrigin: origin, resources: optionalPublicResources },
+    );
     if (
-      (name === "ArcGIS asset failure" &&
+      (expectedRequiredClassification === "required_arcgis_sdk_failure" &&
         url.pathname.startsWith("/arcgis-assets/")) ||
-      (name === "required context failure" &&
+      (expectedRequiredClassification === "required_same_origin_context_failure" &&
         url.pathname.endsWith("/demo_transportation_context.geojson"))
     ) {
-      diagnostics.expectedRendererErrors.push(`${name}: ${url.href}`);
+      assert.equal(diagnostic.fatal, true, "A forced required request was not classified fatal.");
+      scenario.expectedRequiredFailures.push(diagnostic);
+      diagnostics.mapDiagnostics.push({ ...diagnostic, scenario: name });
+      diagnostics.expectedRendererErrors.push(
+        `${name}: ${diagnostic.reason} ${redactMapDiagnosticUrl(url)}`,
+      );
       return;
     }
-    if (url.origin === origin) {
-      diagnostics.requestFailures.push(
-        `${name}: ${request.failure()?.errorText ?? "failed"} ${url.href}`,
+    if (
+      ["optional_public_basemap_candidate", "required_request_cancellation_candidate"].includes(
+        diagnostic.classification,
+      )
+    ) {
+      const observation = requestObservations.get(request);
+      const record = {
+        ...diagnostic,
+        acceptance_generation:
+          observation?.acceptanceGeneration ?? scenario.acceptanceGeneration,
+        acceptance_lifecycle: observation?.acceptanceLifecycleLabel ?? null,
+        navigation_epoch: requestEpochs.get(request) ?? scenario.navigationEpoch,
+        request_key: observation?.requestKey ?? diagnostic.request_key ?? null,
+        request_sequence: observation?.sequence ?? null,
+        scenario: name,
+      };
+      diagnostics.mapDiagnostics.push(record);
+      scenario.optionalCandidates.push(record);
+      return;
+    }
+    if (diagnostic.fatal === false) {
+      diagnostics.mapDiagnostics.push({ ...diagnostic, scenario: name });
+      return;
+    }
+    if (
+      url.origin === origin ||
+      url.origin === apiOrigin ||
+      isExternalArcgisRequest(url, { apiOrigin, appOrigin: origin })
+    ) {
+      const message = `${name}: ${diagnostic.reason} ${redactMapDiagnosticUrl(url)}`;
+      scenario.fatalRequests.push(message);
+      diagnostics.mapDiagnostics.push({ ...diagnostic, scenario: name });
+      diagnostics.requestFailures.push(message);
+    }
+  });
+  context.on("response", (response) => {
+    const url = new URL(response.url());
+    const observation = requestObservations.get(response.request());
+    const pendingRequired = scenario.pendingRequiredRequests.get(response.request());
+    if (pendingRequired) {
+      pendingRequired.responseStatus = response.status();
+      pendingRequired.lastLifecycleEvent = "response";
+    }
+    if (response.status() >= 200 && response.status() < 300 && observation?.requestKey) {
+      successfulRequestKeys.set(
+        observation.requestKey,
+        Math.max(successfulRequestKeys.get(observation.requestKey) ?? 0, observation.sequence),
       );
     }
+    if (
+      response.status() >= 400 &&
+      (url.origin === apiOrigin ||
+        (url.origin === origin && /^\/(?:api\/v1|parcels)(?:\/|$)/i.test(url.pathname)))
+    ) {
+      scenario.apiFailures.push(
+        `${response.status()} ${response.request().method()} ${redactMapDiagnosticUrl(url)}`,
+      );
+    }
+    if (
+      response.status() >= 400 &&
+      isMapDiagnosticRequest(url, {
+        apiOrigin,
+        appOrigin: origin,
+        resources: optionalPublicResources,
+      })
+    ) {
+      const diagnostic = classifyArcGISHttpFailure(
+        {
+          headers: response.request().headers(),
+          method: response.request().method(),
+          status: response.status(),
+          url: url.href,
+        },
+        { apiOrigin, appOrigin: origin, resources: optionalPublicResources },
+      );
+      if (diagnostic.classification === "optional_public_basemap_candidate") {
+        const record = {
+          ...diagnostic,
+          acceptance_generation:
+            observation?.acceptanceGeneration ?? scenario.acceptanceGeneration,
+          acceptance_lifecycle: observation?.acceptanceLifecycleLabel ?? null,
+          navigation_epoch:
+            requestEpochs.get(response.request()) ?? scenario.navigationEpoch,
+          request_key: observation?.requestKey ?? diagnostic.request_key ?? null,
+          request_sequence: observation?.sequence ?? null,
+          scenario: name,
+        };
+        diagnostics.mapDiagnostics.push(record);
+        scenario.optionalCandidates.push(record);
+      } else if (diagnostic.fatal) {
+        const message = `${name}: ${diagnostic.reason} HTTP ${response.status()} ${redactMapDiagnosticUrl(url)}`;
+        scenario.fatalRequests.push(message);
+        diagnostics.mapDiagnostics.push({ ...diagnostic, scenario: name });
+        diagnostics.requestFailures.push(message);
+      }
+    }
+  });
+  context.on("requestfinished", (request) => {
+    completeRequiredRouteRequest(scenario, request);
   });
   const page = await context.newPage();
   page.setDefaultTimeout(60_000);
   page.on("framenavigated", (frame) => {
-    if (frame === page.mainFrame()) counts.clear();
+    if (frame === page.mainFrame()) {
+      counts.clear();
+      scenario.navigationEpoch += 1;
+    }
   });
   page.on("pageerror", (error) => {
-    if (expectedRenderer === "static" && error.message === "s" && !error.stack) {
+    const diagnostic = classifyPageError(error);
+    if (
+      scenario.forcedRendererFailureActive &&
+      error.message === "s" &&
+      !error.stack
+    ) {
+      diagnostics.mapDiagnostics.push({
+        ...diagnostic,
+        classification: "expected_forced_webgl_page_exception",
+        fatal: false,
+        scenario: name,
+      });
       diagnostics.expectedRendererErrors.push(`${name}: pageerror ${error.message}`);
       return;
     }
-    diagnostics.pageErrors.push(`${name}: ${error.stack || error.message || error.name}`);
+    const message = `${name}: ${diagnostic.message}`;
+    scenario.pageErrors.push(message);
+    diagnostics.mapDiagnostics.push({ ...diagnostic, scenario: name });
+    diagnostics.pageErrors.push(message);
   });
   page.on("console", (message) => {
     if (!['error', 'warning'].includes(message.type())) return;
     const text = message.text();
     if (/GL Driver Message.*GPU stall due to ReadPixels/.test(text)) return;
+    if (/\[@arcgis\/core\/views\/MapView\] Font .* is not available/.test(text)) return;
     if (
-      (isPublicCanvasUrl(message.location().url) && /Failed to load resource/.test(text)) ||
-      /Failed to load layer \(title: 'Public dark-gray reference (?:basemap|labels)'/.test(text)
+      scenario.forcedRendererFailureActive &&
+      /^\[@arcgis\/core\/views\/MapView\] #validate\(\) WebGL2 is required but not supported\.$/.test(
+        text,
+      )
     ) {
+      diagnostics.mapDiagnostics.push({
+        classification: "expected_forced_webgl_console_warning",
+        event_type: "console",
+        fallback_healthy: null,
+        fatal: false,
+        message: text,
+        reason: "The forced WebGL-negative scenario produced its expected pre-retry MapView validation warning.",
+        scenario: name,
+      });
       diagnostics.expectedRendererErrors.push(`${name}: console ${text}`);
       return;
     }
+    const diagnostic = classifyArcGISConsoleFailure(
+      { locationUrl: message.location().url, text },
+      { apiOrigin, appOrigin: origin, resources: optionalPublicResources },
+    );
+    if (diagnostic.classification === "optional_public_basemap_candidate") {
+      const record = {
+        ...diagnostic,
+        acceptance_generation: scenario.acceptanceGeneration,
+        acceptance_lifecycle: scenario.acceptanceLifecycle.at(-1)?.label ?? null,
+        navigation_epoch: scenario.navigationEpoch,
+        page_url: redactMapDiagnosticUrl(page.url()),
+        scenario: name,
+      };
+      diagnostics.mapDiagnostics.push(record);
+      scenario.optionalCandidates.push(record);
+      return;
+    }
+    if (diagnostic.fatal === false) {
+      diagnostics.mapDiagnostics.push({ ...diagnostic, scenario: name });
+      return;
+    }
     if (
-      name === "ArcGIS asset failure" &&
+      expectedRequiredClassification === "required_arcgis_sdk_failure" &&
       (message.location().url.includes("/arcgis-assets/") ||
         /wasm streaming compile failed|falling back to ArrayBuffer|failed to asynchronously prepare wasm|Aborted\(both async and sync fetching/i.test(
           text,
         ))
     ) {
+      const required = {
+        ...diagnostic,
+        classification: "required_arcgis_sdk_failure",
+        fatal: true,
+        reason: "Forced required same-origin ArcGIS SDK failure surfaced in the console.",
+      };
+      scenario.expectedRequiredFailures.push(required);
+      diagnostics.mapDiagnostics.push({ ...required, scenario: name });
       diagnostics.expectedRendererErrors.push(`${name}: console ${text}`);
       return;
     }
     if (
-      name === "required context failure" &&
+      expectedRequiredClassification === "required_same_origin_context_failure" &&
       message.location().url.endsWith("/demo_transportation_context.geojson")
     ) {
+      const required = {
+        ...diagnostic,
+        classification: "required_same_origin_context_failure",
+        fatal: true,
+        reason: "Forced required same-origin context failure surfaced in the console.",
+      };
+      scenario.expectedRequiredFailures.push(required);
+      diagnostics.mapDiagnostics.push({ ...required, scenario: name });
       diagnostics.expectedRendererErrors.push(`${name}: console ${text}`);
       return;
     }
-    if (expectedRenderer === "static" && /webgl|rendering-error/i.test(text)) {
-      diagnostics.expectedRendererErrors.push(`${name}: console ${text}`);
-      return;
-    }
-    diagnostics.console.push(`${name}: ${message.type()}: ${text}`);
+    const fatalMessage = `${name}: ${message.type()}: ${diagnostic.message ?? "[diagnostic redacted]"} (${diagnostic.reason})`;
+    scenario.fatalConsole.push(fatalMessage);
+    diagnostics.mapDiagnostics.push({ ...diagnostic, scenario: name });
+    diagnostics.console.push(fatalMessage);
   });
 
   await configure(context, page);
+  let primaryError = null;
   try {
-    await page.goto(`${baseUrl}/?app=planning`, {
-      waitUntil: "domcontentloaded",
-      timeout: 45_000,
-    });
-    if (expectedRenderer === "interactive") {
-      await assertInteractiveMap(page);
-    } else {
-      await assertEmergencyFallback(page);
+    await runAcceptanceLifecycle(
+      scenario,
+      "initial Planning navigation",
+      () =>
+        page.goto(`${baseUrl}/?app=planning`, {
+          waitUntil: "domcontentloaded",
+          timeout: 45_000,
+        }),
+      () =>
+        expectedRenderer === "interactive"
+          ? assertInteractiveMap(page)
+          : assertEmergencyFallback(page),
+    );
+    await verify(context, page, scenario);
+    if (scenario.trackRequiredRequests) {
+      await waitForRequiredRouteRequests(scenario, `${name} verification`);
     }
-    await verify(context, page);
+    scenario.currentHealth = await readRequiredMapHealth(page, scenario);
+    resolveScenarioCandidates(scenario);
+    if (expectedRequiredClassification) {
+      assert(
+        scenario.expectedRequiredFailures.some(
+          (diagnostic) =>
+            diagnostic.classification === expectedRequiredClassification && diagnostic.fatal === true,
+        ),
+        `${name} did not prove ${expectedRequiredClassification} remains fatal.`,
+      );
+      assert(
+        scenario.expectedRequiredFailures.every((diagnostic) => diagnostic.fatal === true),
+        `${name} masked a required failure as optional.`,
+      );
+      assert.equal(
+        diagnostics.optionalPublicBasemapFailures.filter(
+          (diagnostic) => diagnostic.scenario === name,
+        ).length,
+        0,
+        `${name} accepted an optional enhancement failure despite an active required failure.`,
+      );
+      diagnostics.requiredFailureNegativeProofs.push({
+        classification: expectedRequiredClassification,
+        fatal: true,
+        optional_masking_blocked: true,
+        optional_candidates_observed: scenario.expectedOptionalFatal.length,
+        scenario: name,
+      });
+    }
+    assert.deepEqual(scenario.pageErrors, [], `${name} page errors were observed.`);
+    assert.deepEqual(scenario.dependentFailures, [], `${name} dependent map failures were observed.`);
+    assert.deepEqual(scenario.fatalConsole, [], `${name} fatal console errors were observed.`);
+    assert.deepEqual(scenario.fatalRequests, [], `${name} fatal requests were observed.`);
+    assert.deepEqual(scenario.apiFailures, [], `${name} API response failures were observed.`);
     results.push(name);
     console.log(`PASS map resilience: ${name}`);
+  } catch (error) {
+    primaryError = error;
+    throw error;
   } finally {
-    await context.close();
+    if (!primaryError && scenario.trackRequiredRequests) {
+      await waitForRequiredRouteRequests(scenario, `${name} teardown`);
+      if (scenario.optionalCandidates.length && scenario.currentHealth) {
+        resolveScenarioCandidates(scenario);
+      }
+    }
+    scenario.teardownGeneration = ++scenario.acceptanceGeneration;
+    scenario.teardownStarted = true;
+    scenario.destroyed = true;
+    try {
+      await context.close();
+      scenario.teardownCompleted = true;
+    } catch (closeError) {
+      if (!primaryError) throw closeError;
+    }
+    await delay(0);
+    if (scenario.optionalCandidates.length && scenario.currentHealth) {
+      resolveScenarioCandidates(scenario, "acceptance_teardown");
+    }
+    if (!primaryError) {
+      assert.equal(
+        scenario.optionalCandidates.length,
+        0,
+        `${name} left optional diagnostics unresolved during lifecycle teardown.`,
+      );
+      assert.deepEqual(scenario.dependentFailures, [], `${name} late dependent map failures were observed.`);
+      assert.deepEqual(scenario.fatalConsole, [], `${name} late fatal console errors were observed.`);
+      assert.deepEqual(scenario.fatalRequests, [], `${name} late fatal requests were observed.`);
+      assert.equal(
+        scenario.pendingRequiredRequests.size,
+        0,
+        `${name} retained required route requests after teardown: ${formatPendingRequiredRequests(scenario)}`,
+      );
+    }
   }
 }
 
+async function runAcceptanceLifecycle(scenario, label, navigate, prove) {
+  const generation = ++scenario.acceptanceGeneration;
+  const lifecycle = { generation, label, proven: false };
+  scenario.acceptanceLifecycle.push(lifecycle);
+  const navigationResult = await navigate();
+  const proofResult = await prove(navigationResult);
+  if (scenario.trackRequiredRequests) {
+    await waitForRequiredRouteRequests(scenario, label);
+  }
+  lifecycle.proven = true;
+  scenario.provenAcceptanceGeneration = Math.max(
+    scenario.provenAcceptanceGeneration,
+    generation,
+  );
+  return proofResult;
+}
+
+function isRequiredRouteRequest(url) {
+  return (
+    url.origin === apiOrigin ||
+    (url.origin === origin &&
+      isMapDiagnosticRequest(url, {
+        apiOrigin,
+        appOrigin: origin,
+        resources: optionalPublicResources,
+      }))
+  );
+}
+
+function completeRequiredRouteRequest(scenario, request) {
+  const entry = scenario.pendingRequiredRequests.get(request);
+  if (!entry) return;
+  scenario.pendingRequiredRequests.delete(request);
+  if (entry.responseStatus >= 200 && entry.responseStatus < 300) {
+    const key = `${entry.method}:${new URL(entry.url).origin}${new URL(entry.url).pathname}`;
+    scenario.terminalSuccessfulRequestKeys.set(
+      key,
+      Math.max(scenario.terminalSuccessfulRequestKeys.get(key) ?? 0, entry.sequence),
+    );
+  }
+}
+
+async function waitForRequiredRouteRequests(scenario, label) {
+  const deadline = Date.now() + 60_000;
+  let quietSince = null;
+  while (Date.now() < deadline) {
+    if (scenario.pendingRequiredRequests.size === 0) {
+      quietSince ??= Date.now();
+      if (Date.now() - quietSince >= 500) {
+        return;
+      }
+    } else {
+      quietSince = null;
+    }
+    await delay(100);
+  }
+  throw new Error(`${label} left required route requests pending: ${formatPendingRequiredRequests(scenario)}`);
+}
+
+function formatPendingRequiredRequests(scenario) {
+  return [...scenario.pendingRequiredRequests.values()]
+    .slice(0, 8)
+    .map(
+      (entry) =>
+        `${entry.method} ${redactMapDiagnosticUrl(entry.url)} request_id=${entry.requestId ?? "none"} generation=${entry.acceptanceGeneration} epoch=${entry.navigationEpoch} status=${entry.responseStatus ?? "none"} last=${entry.lastLifecycleEvent} started=${entry.startedAt}`,
+    )
+    .join(", ");
+}
+
+function resolveScenarioCandidates(scenario, lifecycleOverride = null) {
+  const candidates = scenario.optionalCandidates.splice(0);
+  const requiredCancellations = candidates.filter(
+    (candidate) =>
+      candidate.classification === "required_request_cancellation_candidate",
+  );
+  const optionalCandidates = candidates.filter(
+    (candidate) =>
+      candidate.classification === "optional_public_basemap_candidate",
+  );
+  const baseHealth = Object.freeze({ ...readScenarioPrimaryHealth(scenario) });
+  for (const candidate of candidates) {
+    Object.assign(candidate, {
+      acceptance_teardown_succeeded: Boolean(
+        lifecycleOverride === "acceptance_teardown" &&
+          scenario.teardownCompleted &&
+          scenario.provenAcceptanceGeneration === scenario.teardownGeneration - 1 &&
+          Number(candidate.acceptance_generation) <= scenario.teardownGeneration,
+      ),
+      acceptance_transition_succeeded: hasProvenAcceptanceTransition(
+        scenario,
+        candidate,
+      ),
+      replacement_succeeded:
+        candidate.request_key && candidate.request_sequence !== null
+          ? (scenario.successfulRequestKeys.get(candidate.request_key) ?? 0) >
+            candidate.request_sequence
+          : false,
+    });
+  }
+
+  const requiredOutcomes = requiredCancellations.map((candidate) => {
+    const lifecycle = scenarioCandidateLifecycle(
+      scenario,
+      candidate,
+      lifecycleOverride,
+    );
+    const result = resolveMapDiagnostic(candidate, {
+      health: baseHealth,
+      lifecycle,
+    });
+    Object.assign(candidate, result);
+    return {
+      candidate,
+      independentlyFatal:
+        result.fatal === true &&
+        !hasCancellationLifecycleProof(candidate, lifecycle),
+      result,
+    };
+  });
+  const newPrimaryRequiredFailures = requiredOutcomes.filter(
+    (outcome) => outcome.independentlyFatal,
+  ).length;
+  const optionalHealth = Object.freeze({
+    ...baseHealth,
+    requiredRequestFailures:
+      Number(baseHealth.requiredRequestFailures) + newPrimaryRequiredFailures,
+  });
+  const optionalOutcomes = optionalCandidates.map((candidate) => {
+    const result = resolveMapDiagnostic(candidate, {
+      health: optionalHealth,
+      lifecycle: scenarioCandidateLifecycle(
+        scenario,
+        candidate,
+        lifecycleOverride,
+      ),
+    });
+    Object.assign(candidate, result);
+    return { candidate, result };
+  });
+
+  const expectedRequiredFailure =
+    scenario.expectedRequiredClassification &&
+    scenario.expectedRequiredFailures.some(
+      (diagnostic) =>
+        diagnostic.classification === scenario.expectedRequiredClassification &&
+        diagnostic.fatal === true,
+    );
+
+  for (const outcome of requiredOutcomes) {
+    if (!outcome.result.fatal) continue;
+    if (expectedRequiredFailure || !outcome.independentlyFatal) {
+      recordDependentScenarioFailure(
+        outcome.candidate,
+        scenario,
+        expectedRequiredFailure,
+      );
+    } else {
+      recordPrimaryScenarioFailure(outcome.candidate, scenario);
+    }
+  }
+  for (const outcome of optionalOutcomes) {
+    if (outcome.result.fatal) {
+      recordDependentScenarioFailure(
+        outcome.candidate,
+        scenario,
+        expectedRequiredFailure,
+      );
+    } else {
+      diagnostics.optionalPublicBasemapFailures.push(outcome.candidate);
+    }
+  }
+}
+
+function recordPrimaryScenarioFailure(candidate, scenario) {
+  const fatalMessage = `${scenario.name}: ${candidate.reason}`;
+  diagnostics.requestFailures.push(fatalMessage);
+  scenario.fatalRequests.push(fatalMessage);
+}
+
+function recordDependentScenarioFailure(candidate, scenario, expected) {
+  Object.assign(candidate, {
+    expected_required_failure_context: expected
+      ? scenario.expectedRequiredClassification
+      : null,
+    optional_masking_blocked: Boolean(expected),
+  });
+  if (expected) {
+    scenario.expectedOptionalFatal.push(candidate);
+    return;
+  }
+  const fatalMessage = `${scenario.name}: ${candidate.reason}`;
+  diagnostics.console.push(fatalMessage);
+  scenario.dependentFailures.push(fatalMessage);
+}
+
+function readScenarioPrimaryHealth(scenario) {
+  return {
+    ...(scenario.currentHealth ?? {}),
+    apiFailures: scenario.apiFailures.length,
+    consoleErrors: scenario.fatalConsole.length,
+    pageErrors: scenario.pageErrors.length,
+    privateArcgisRequests: diagnostics.unexpectedExternalArcgisRequests.filter((entry) =>
+      entry.startsWith(`${scenario.name}:`),
+    ).length,
+    requiredRequestFailures:
+      scenario.fatalRequests.length + scenario.expectedRequiredFailures.length,
+  };
+}
+
+function hasProvenAcceptanceTransition(scenario, candidate) {
+  const generation = Number(candidate.acceptance_generation);
+  return (
+    Number.isInteger(generation) &&
+    generation < scenario.provenAcceptanceGeneration
+  );
+}
+
+function scenarioCandidateLifecycle(scenario, candidate, override) {
+  if (override) return override;
+  return candidate.acceptance_transition_succeeded ||
+    scenario.destroyed ||
+    candidate.navigation_epoch !== scenario.navigationEpoch
+    ? "stale"
+    : "current";
+}
+
+function hasCancellationLifecycleProof(candidate, lifecycle) {
+  return Boolean(
+    candidate.replacement_succeeded ||
+      (lifecycle === "stale" && candidate.acceptance_transition_succeeded) ||
+      (lifecycle === "acceptance_teardown" &&
+        candidate.acceptance_teardown_succeeded) ||
+      (["destroyed", "stale"].includes(lifecycle) &&
+        candidate.stale_lifecycle_eligible === true),
+  );
+}
+
 try {
+  if (requiredFailureProbe) {
+    await run(
+      "required context failure",
+      async (context) => {
+        await context.route("**/demo_transportation_context.geojson", (route) =>
+          route.abort("failed"),
+        );
+      },
+      async (_context, page) => {
+        await page.getByRole("button", { name: "Retry interactive map" }).waitFor();
+      },
+      "static",
+      "required_same_origin_context_failure",
+    );
+    throw new Error("REQUIRED_MAP_FAILURE_DETECTED");
+  }
   await run("normal clean context");
-  await run("second clean context");
-  await run("third clean context");
-  let delayedAssetRequests = 0;
   await run(
-    "slow ArcGIS assets",
+    "external ArcGIS blocked",
     async (context) => {
-      await context.route("**/arcgis-assets/**", async (route) => {
-        delayedAssetRequests += 1;
-        await delay(1_500);
-        await route.continue();
+      await context.route("**/*", (route) => {
+        const url = new URL(route.request().url());
+        return url.origin !== origin && /(?:arcgis|esri)/i.test(url.hostname)
+          ? route.abort("failed")
+          : route.continue();
       });
     },
-    async () => {
-      assert(delayedAssetRequests > 0, "No ArcGIS asset request was delayed.");
-    },
-  );
-  let forcedAssetFailures = 0;
-  await run(
-    "ArcGIS asset failure",
-    async (context) => {
-      await context.route("**/arcgis-assets/**", (route) => {
-        forcedAssetFailures += 1;
-        return route.abort("failed");
-      });
-    },
-    async () => {
-      assert(forcedAssetFailures > 0, "No same-origin ArcGIS asset request was forced to fail.");
-    },
-  );
-  await run(
-    "required context failure",
-    async (context) => {
-      await context.route("**/demo_transportation_context.geojson", (route) =>
-        route.abort("failed"),
+    async (_context, _page, scenario) => {
+      assert(
+        scenario.optionalCandidates.some(
+          (candidate) => candidate.classification === "optional_public_basemap_candidate",
+        ),
+        "External ArcGIS blocking produced no optional public map diagnostic.",
       );
     },
-    async (_context, page) => {
-      await page.getByRole("button", { name: "Retry interactive map" }).waitFor();
-    },
-    "static",
   );
-  await run("external ArcGIS blocked", async (context) => {
-    await context.route("**/*", (route) => {
-      const url = new URL(route.request().url());
-      return url.origin !== origin && /(?:arcgis|esri)/i.test(url.hostname)
-        ? route.abort("blockedbyclient")
-        : route.continue();
-    });
-  });
   await run(
     "mobile viewport",
     async (_context, page) => {
@@ -216,6 +781,10 @@ try {
         () => document.documentElement.scrollWidth > window.innerWidth + 1,
       );
       assert.equal(overflow, false, "Map page has mobile horizontal overflow.");
+      const showIntelligence = page.getByRole("button", { name: "Show Intelligence" });
+      if (await showIntelligence.isVisible()) await showIntelligence.click();
+      await page.getByText("Land Opportunity Screener", { exact: true }).waitFor();
+      await assertParcelLookupAndFocus(page, { exerciseComponentFocusMode: false });
     },
   );
   await run(
@@ -235,17 +804,24 @@ try {
         };
       });
     },
-    async (_context, page) => {
+    async (_context, page, scenario) => {
       const map = page.getByTestId("cfs-arcgis-map");
       const previousAttempt = Number(
         (await map.getAttribute("data-map-initialization-attempt")) ?? 0,
       );
+      await delay(0);
+      scenario.forcedRendererFailureActive = false;
       await page.evaluate(() => window.__cfsRestoreWebGl?.());
-      await Promise.all([
-        page.waitForNavigation({ timeout: 30_000, waitUntil: "domcontentloaded" }),
-        page.getByRole("button", { name: "Retry interactive map" }).click(),
-      ]);
-      await assertInteractiveMap(page);
+      await runAcceptanceLifecycle(
+        scenario,
+        "forced WebGL retry",
+        () =>
+          Promise.all([
+            page.waitForNavigation({ timeout: 30_000, waitUntil: "domcontentloaded" }),
+            page.getByRole("button", { name: "Retry interactive map" }).click(),
+          ]),
+        () => assertInteractiveMap(page),
+      );
       assert(
         Number(await map.getAttribute("data-map-initialization-attempt")) > previousAttempt ||
           Number(await map.getAttribute("data-map-initialization-attempt")) === 1,
@@ -255,114 +831,63 @@ try {
     "static",
   );
   await run(
-    "route return and repeated refresh",
+    "route return",
     async () => {},
-    async (_context, page) => {
-      await page.goto(`${baseUrl}/?app=economics`, { waitUntil: "domcontentloaded" });
-      await page.goto(`${baseUrl}/?app=planning`, { waitUntil: "domcontentloaded" });
-      await assertInteractiveMap(page);
-      for (let index = 0; index < 10; index += 1) {
-        await page.reload({ waitUntil: "domcontentloaded" });
-        await assertInteractiveMap(page);
-      }
-      for (let index = 0; index < 10; index += 1) {
-        await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
-        await page.goto(`${baseUrl}/?app=planning`, { waitUntil: "domcontentloaded" });
-        await assertInteractiveMap(page);
-      }
-      await page.goto(`${baseUrl}/?app=economics`, { waitUntil: "domcontentloaded" });
-      await page.goBack({ waitUntil: "domcontentloaded" });
-      await assertInteractiveMap(page);
-      await page.goForward({ waitUntil: "domcontentloaded" });
-      await page.goBack({ waitUntil: "domcontentloaded" });
-      await assertInteractiveMap(page);
-      await page.waitForLoadState("networkidle", { timeout: 60_000 });
+    verifyRouteReturn,
+  );
+  await run(
+    "reload recovery",
+    async () => {},
+    async (_context, page, scenario) => {
+      const summaryKey = `GET:${apiOrigin}/wsacc/summary-by-geography`;
+      const previousSuccess = scenario.terminalSuccessfulRequestKeys.get(summaryKey) ?? 0;
+      await runAcceptanceLifecycle(
+        scenario,
+        "Planning reload",
+        () => page.reload({ waitUntil: "domcontentloaded" }),
+        () => assertInteractiveMap(page),
+      );
+      assert(
+        (scenario.terminalSuccessfulRequestKeys.get(summaryKey) ?? 0) > previousSuccess,
+        "Reloaded Planning did not finish a new WSACC geography summary request.",
+      );
     },
   );
   await run(
-    "parcel focus and overlays",
+    "parcel focus",
     async () => {},
     async (_context, page) => {
-      const map = page.getByTestId("cfs-arcgis-map");
-      const search = page.getByRole("combobox", { name: "Search parcels" });
-      const runtimeToggle = page.getByRole("button", { name: "Open dashboard controls" });
-      await runtimeToggle.click();
-      const parcelId = (await page.getByTestId("local-runtime-status").count())
-        ? "CFS-PARCEL-0149726579"
-        : "CFS-PARCEL-0149780354";
-      await runtimeToggle.click();
-      await search.fill(parcelId);
-      await page
-        .getByRole("option", { name: new RegExp(parcelId) })
-        .click();
-      await page.getByText(parcelId, { exact: true }).first().waitFor();
-      await page.waitForFunction(
-        () => Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) > 9,
-      );
-      const focusedExtent = await map.getAttribute("data-map-extent");
-      assert(focusedExtent, "Parcel Lookup did not publish a focused map extent.");
-      const mapBounds = await map.boundingBox();
-      assert(mapBounds, "Interactive map bounds are unavailable.");
-      await page.mouse.move(mapBounds.x + mapBounds.width * 0.7, mapBounds.y + mapBounds.height * 0.35);
-      await page.mouse.down();
-      await page.mouse.move(mapBounds.x + mapBounds.width * 0.45, mapBounds.y + mapBounds.height * 0.6, {
-        steps: 8,
-      });
-      await page.mouse.up();
-      await page.waitForFunction(
-        (extent) => document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-extent") !== extent,
-        focusedExtent,
-      );
-      await page.getByRole("button", { name: "Focus Map", exact: true }).click();
-      await page.waitForFunction(
-        (extent) => {
-          const current = document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-extent");
-          if (!current) return false;
-          const [xmin, ymin, xmax, ymax] = current.split(",").map(Number);
-          const center = (value) => {
-            const [left, bottom, right, top] = value.split(",").map(Number);
-            return [(left + right) / 2, (bottom + top) / 2];
-          };
-          const [expectedX, expectedY] = center(extent);
-          return expectedX >= xmin && expectedX <= xmax && expectedY >= ymin && expectedY <= ymax;
-        },
-        focusedExtent,
-      );
-      await page.getByRole("button", { name: "Exit map focus", exact: true }).click();
-      await page.getByTestId("command-center-explore-intelligence").click();
-      const expand = page.getByRole("button", {
-        name: "Expand map layers panel",
-        exact: true,
-      });
-      if ((await expand.count()) && (await expand.isVisible())) await expand.click();
-      const parcelCard = page
-        .locator("article")
-        .filter({ has: page.getByText("Parcel Intelligence", { exact: true }) })
-        .first();
-      if (!(await parcelCard.isVisible())) {
-        await page
-          .locator("details")
-          .filter({ has: page.getByText("Planning", { exact: true }) })
-          .first()
-          .locator("summary")
-          .click();
-      }
-      const showParcels = parcelCard.getByRole("button", {
-        name: "Show Parcel Intelligence",
-        exact: true,
-      });
-      if (await showParcels.count()) await showParcels.click();
-      await assertRuntimeLayers(page, [
-        "county-boundary",
-        "cfs-local-hydrography",
-        "cfs-local-municipalities",
-        "transportation-context",
-        "parcel-intelligence",
-      ]);
-      await page.getByRole("button", { name: "Zoom in" }).click();
-      await page.getByRole("button", { name: "Zoom out" }).click();
-      await page.getByRole("button", { name: "Reset to Cabarrus County" }).click();
+      await assertParcelLookupAndFocus(page);
     },
+  );
+
+  let forcedAssetFailures = 0;
+  await run(
+    "ArcGIS asset failure",
+    async (context) => {
+      await context.route("**/arcgis-assets/**", (route) => {
+        forcedAssetFailures += 1;
+        return route.abort("failed");
+      });
+    },
+    async () => {
+      assert(forcedAssetFailures > 0, "No same-origin ArcGIS asset request was forced to fail.");
+    },
+    "interactive",
+    "required_arcgis_sdk_failure",
+  );
+  await run(
+    "required context failure",
+    async (context) => {
+      await context.route("**/demo_transportation_context.geojson", (route) =>
+        route.abort("failed"),
+      );
+    },
+    async (_context, page) => {
+      await page.getByRole("button", { name: "Retry interactive map" }).waitFor();
+    },
+    "static",
+    "required_same_origin_context_failure",
   );
 
   const manifestResponse = await fetch(`${baseUrl}/arcgis-assets/manifest.json`);
@@ -391,6 +916,7 @@ try {
   }
   results.push("versioned same-origin ArcGIS assets");
 
+  assert.equal(results.length, 10, "Map Resilience did not run all 10 scenarios.");
   assert.deepEqual(diagnostics.loops, [], "A map request loop was detected.");
   assert.deepEqual(diagnostics.pageErrors, [], `Uncaught map errors: ${diagnostics.pageErrors.join(" | ")}`);
   assert.deepEqual(diagnostics.console, [], `Map console errors: ${diagnostics.console.join(" | ")}`);
@@ -399,15 +925,21 @@ try {
     [],
     `Same-origin map request failures: ${diagnostics.requestFailures.join(" | ")}`,
   );
-  const unexpectedArcgisRequests = diagnostics.externalArcgisRequests.filter(
-    (entry) => {
-      return !isPublicCanvasUrl(entry.slice(entry.indexOf("https://")));
-    },
+  assert.deepEqual(
+    diagnostics.unexpectedExternalArcgisRequests,
+    [],
+    `Unexpected Portal or authenticated ArcGIS requests: ${diagnostics.unexpectedExternalArcgisRequests.join(" | ")}`,
   );
   assert.deepEqual(
-    unexpectedArcgisRequests,
-    [],
-    `Unexpected Portal or authenticated ArcGIS requests: ${unexpectedArcgisRequests.join(" | ")}`,
+    diagnostics.requiredFailureNegativeProofs.map((proof) => proof.classification).sort(),
+    ["required_arcgis_sdk_failure", "required_same_origin_context_failure"],
+    "Required same-origin failure negative proofs were incomplete.",
+  );
+  assert(
+    diagnostics.optionalPublicBasemapFailures.every(
+      (failure) => failure.fatal === false && failure.fallback_healthy === true,
+    ),
+    "An optional public ArcGIS failure was accepted without a healthy required fallback.",
   );
   console.log(
     JSON.stringify(
@@ -415,6 +947,8 @@ try {
         arcgis_sdk_version: manifest.sdkVersion,
         expected_forced_renderer_errors: diagnostics.expectedRendererErrors.length,
         failed: 0,
+        optional_public_basemap_failures: diagnostics.optionalPublicBasemapFailures.length,
+        required_failure_negative_proofs: diagnostics.requiredFailureNegativeProofs,
         scenarios: results.length,
       },
       null,
@@ -423,6 +957,143 @@ try {
   );
 } finally {
   await browser.close();
+}
+
+async function verifyRouteReturn(_context, page, scenario) {
+  const summaryKey = `GET:${apiOrigin}/wsacc/summary-by-geography`;
+  const previousSuccess = scenario.terminalSuccessfulRequestKeys.get(summaryKey) ?? 0;
+  await runAcceptanceLifecycle(
+    scenario,
+    "Planning to Economics",
+    () => page.goto(`${baseUrl}/?app=economics`, { waitUntil: "domcontentloaded" }),
+    () => assertNoActiveMap(page, "Economics route"),
+  );
+  await runAcceptanceLifecycle(
+    scenario,
+    "Economics to Planning",
+    () => page.goto(`${baseUrl}/?app=planning`, { waitUntil: "domcontentloaded" }),
+    () => assertInteractiveMap(page),
+  );
+  assert(
+    (scenario.terminalSuccessfulRequestKeys.get(summaryKey) ?? 0) > previousSuccess,
+    "Returned Planning route did not finish a new WSACC geography summary request.",
+  );
+}
+
+async function assertParcelLookupAndFocus(
+  page,
+  { exerciseComponentFocusMode = true } = {},
+) {
+  const map = page.getByTestId("cfs-arcgis-map");
+  const search = page.getByRole("combobox", { name: "Search parcels" });
+  const runtimeToggle = page.getByRole("button", { name: "Open dashboard controls" });
+  await runtimeToggle.click();
+  const parcelId = (await page.getByTestId("local-runtime-status").count())
+    ? "CFS-PARCEL-0149726579"
+    : "CFS-PARCEL-0149780354";
+  await runtimeToggle.click();
+  await search.fill(parcelId);
+  await page.getByRole("option", { name: new RegExp(parcelId) }).click();
+  await page.getByText(parcelId, { exact: true }).first().waitFor();
+  await page.waitForFunction(
+    () => Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) > 9,
+  );
+  const focusedExtent = await map.getAttribute("data-map-extent");
+  assert(focusedExtent, "Parcel Lookup did not publish a focused map extent.");
+  if (!exerciseComponentFocusMode) return;
+  const mapBounds = await map.boundingBox();
+  assert(mapBounds, "Interactive map bounds are unavailable.");
+  await page.mouse.move(mapBounds.x + mapBounds.width * 0.7, mapBounds.y + mapBounds.height * 0.35);
+  await page.mouse.down();
+  await page.mouse.move(mapBounds.x + mapBounds.width * 0.45, mapBounds.y + mapBounds.height * 0.6, {
+    steps: 8,
+  });
+  await page.mouse.up();
+  await page.waitForFunction(
+    (extent) => document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-extent") !== extent,
+    focusedExtent,
+  );
+  await page.getByRole("button", { name: "Focus Map", exact: true }).click();
+  await page.waitForFunction(
+    (extent) => {
+      const current = document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-extent");
+      if (!current) return false;
+      const [xmin, ymin, xmax, ymax] = current.split(",").map(Number);
+      const center = (value) => {
+        const [left, bottom, right, top] = value.split(",").map(Number);
+        return [(left + right) / 2, (bottom + top) / 2];
+      };
+      const [expectedX, expectedY] = center(extent);
+      return expectedX >= xmin && expectedX <= xmax && expectedY >= ymin && expectedY <= ymax;
+    },
+    focusedExtent,
+  );
+  await page.getByRole("button", { name: "Exit map focus", exact: true }).click();
+}
+
+async function assertNoActiveMap(page, label) {
+  await page.waitForFunction(
+    () =>
+      !document.querySelector('[data-testid="cfs-arcgis-map"]') &&
+      document.querySelectorAll(".esri-view-root").length === 0 &&
+      typeof window.__cfsGetMapDebugState !== "function",
+    null,
+    { timeout: 30_000 },
+  );
+  assert.equal(
+    await page.locator(".esri-view-root").count(),
+    0,
+    `${label} retained a stale MapView.`,
+  );
+}
+
+async function readRequiredMapHealth(page, scenario) {
+  const state = await page.evaluate(({ requiredBasemapId, requiredIds, requiredLabelId }) => {
+    const map = document.querySelector('[data-testid="cfs-arcgis-map"]');
+    const debug = window.__cfsGetMapDebugState?.();
+    return {
+      activeMapInteractive:
+        map?.getAttribute("data-map-renderer") === "interactive" &&
+        map.getAttribute("data-map-renderer-state") === "interactive_ready" &&
+        map.getAttribute("data-map-view-ready-state") === "ready" &&
+        debug?.ready === true &&
+        debug?.readyState === "ready",
+      currentMapAuthoritative:
+        document.querySelectorAll('[data-testid="cfs-arcgis-map"]').length === 1 &&
+        document.querySelectorAll(".esri-view-root").length === 1,
+      requiredLayersReady: requiredIds.every((id) => {
+        const layer = debug?.layers?.find((candidate) => candidate.id === id);
+        return layer?.visible === true && Number(layer.graphicsCount) > 0;
+      }) &&
+        (map?.getAttribute("data-reference-basemap-state") !== "failed" ||
+          (() => {
+            const labels = debug?.layers?.find((candidate) => candidate.id === requiredLabelId);
+            return labels?.visible === true && Number(labels.graphicsCount) > 0;
+          })()),
+      sameOriginBasemapReady: debug?.basemapId === requiredBasemapId,
+      sameOriginContextReady:
+        map?.getAttribute("data-context-ready") === "true" &&
+        map.getAttribute("data-static-context-ready") === "true",
+      parcelInteractionReady:
+        document.querySelector('input[aria-label="Search parcels"]:not(:disabled)') !== null,
+    };
+  }, {
+    requiredBasemapId: REQUIRED_CFS_BASEMAP_ID,
+    requiredIds: REQUIRED_CFS_CONTEXT_LAYER_IDS,
+    requiredLabelId: REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
+  });
+  return {
+    ...state,
+    apiFailures: scenario.apiFailures.length,
+    consoleErrors: scenario.fatalConsole.length,
+    pageErrors: scenario.pageErrors.length,
+    parcelInteractionRequired: true,
+    privateArcgisRequests: diagnostics.unexpectedExternalArcgisRequests.filter((entry) =>
+      entry.startsWith(`${scenario.name}:`),
+    ).length,
+    requiredRequestFailures:
+      scenario.fatalRequests.length + scenario.expectedRequiredFailures.length,
+  };
 }
 
 async function assertInteractiveMap(page) {
@@ -486,6 +1157,17 @@ async function assertInteractiveMap(page) {
   assert(Number(state.debug?.layerViewCount) >= 5, "MapView is missing required layerViews.");
   assert(Number(state.debug?.scale) > 0, "MapView scale is invalid.");
   assert(Number.isFinite(state.debug?.extent?.xmin), "MapView extent is invalid.");
+  assert.equal(
+    await page.locator(".esri-view-root").count(),
+    1,
+    "More than one active MapView root was mounted.",
+  );
+  const layerIds = (state.debug?.layers ?? []).map((layer) => layer.id);
+  assert.equal(
+    new Set(layerIds).size,
+    layerIds.length,
+    "The active MapView contains duplicate layer identities.",
+  );
   await assertRuntimeLayers(page, [
     "county-boundary",
     "cfs-local-hydrography",

@@ -5,6 +5,21 @@ import { createServer } from "node:net";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium } from "playwright-core";
+import {
+  classifyArcGISConsoleFailure,
+  classifyArcGISHttpFailure,
+  classifyArcGISRequestFailure,
+  classifyPageError,
+  isApprovedPublicArcgisRequest,
+  isExternalArcgisRequest,
+  isMapDiagnosticRequest,
+  redactMapDiagnosticText,
+  redactMapDiagnosticUrl,
+  REQUIRED_CFS_BASEMAP_ID,
+  REQUIRED_CFS_CONTEXT_LAYER_IDS,
+  REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
+  resolveMapDiagnostic,
+} from "./map-acceptance-classification.mjs";
 
 const root = process.cwd();
 const externalBaseUrl = process.env.CFS_DEMO_BASE_URL?.replace(/\/$/, "");
@@ -13,14 +28,50 @@ const results = [];
 const controls = new Map();
 const diagnostics = {
   blockedRequests: [],
+  browserRequestCancellations: [],
   consoleMessages: [],
+  dependentOptionalFailures: [],
   external404s: [],
+  mapDiagnostics: [],
+  optionalPublicBasemapConsole: [],
+  optionalPublicBasemapFailures: [],
   pageErrors: [],
+  primaryMapFailures: [],
   requestFailures: [],
   requestLoops: [],
   sameOrigin404s: [],
 };
+const pendingMapDiagnostics = [];
+const activeAcceptanceLifecycleByPage = new WeakMap();
+const lastMapHealthByPage = new WeakMap();
+const pageAcceptanceGenerations = new WeakMap();
+const pageDirectEvidence = new WeakMap();
+let acceptanceLifecycleGeneration = 0;
 let server;
+
+const emptyDirectEvidence = () => ({
+  apiFailures: 0,
+  consoleErrors: 0,
+  pageErrors: 0,
+  privateArcgisRequests: 0,
+  requiredRequestFailures: 0,
+});
+
+function directEvidenceForPage(page, generation = pageAcceptanceGenerations.get(page) ?? 0) {
+  return {
+    ...emptyDirectEvidence(),
+    ...pageDirectEvidence.get(page)?.get(generation),
+  };
+}
+
+function recordDirectEvidence(page, generation, key) {
+  if (!page) return;
+  const byGeneration = pageDirectEvidence.get(page) ?? new Map();
+  const evidence = byGeneration.get(generation ?? 0) ?? emptyDirectEvidence();
+  evidence[key] += 1;
+  byGeneration.set(generation ?? 0, evidence);
+  pageDirectEvidence.set(page, byGeneration);
+}
 
 function record(product, name, touched = []) {
   results.push({ product, name });
@@ -113,7 +164,7 @@ function isForbiddenBackend(url, origin) {
   const port = parsed.port;
   const sameOrigin = parsed.origin === origin;
   const backendHost =
-    (!sameOrigin && /(?:arcgis|esri)/i.test(host)) ||
+    isExternalArcgisRequest(parsed, { appOrigin: origin }) ||
     host === "basemaps.arcgis.com" ||
     host === "services.arcgis.com" ||
     host.endsWith(".arcgisonline.com") ||
@@ -129,52 +180,459 @@ function isForbiddenBackend(url, origin) {
 
 function attachDiagnostics(context, origin) {
   const requestCounts = new Map();
+  const requestObservations = new WeakMap();
   context.route("**/*", async (route) => {
-    const url = route.request().url();
+    const request = route.request();
+    const url = request.url();
     if (isForbiddenBackend(url, origin)) {
-      diagnostics.blockedRequests.push(url);
-      await route.abort("blockedbyclient");
+      const approvedOptional = isApprovedPublicArcgisRequest(
+        url,
+        undefined,
+        request.headers(),
+      );
+      if (!approvedOptional) {
+        diagnostics.blockedRequests.push(redactMapDiagnosticUrl(url));
+        const page = requestPage(request);
+        recordDirectEvidence(
+          page,
+          pageAcceptanceGenerations.get(page),
+          isExternalArcgisRequest(url, { appOrigin: origin })
+            ? "privateArcgisRequests"
+            : "apiFailures",
+        );
+      }
+      await route.abort(approvedOptional ? "failed" : "blockedbyclient");
       return;
     }
     await route.continue();
   });
   context.on("request", (request) => {
+    const page = requestPage(request);
+    const lifecycle = currentAcceptanceLifecycle(page);
+    requestObservations.set(request, {
+      acceptanceGeneration:
+        lifecycle?.generation ?? (page ? (pageAcceptanceGenerations.get(page) ?? 0) : null),
+      lifecycle,
+      page,
+    });
     if (new URL(request.url()).pathname === "/favicon.ico") return;
     const count = (requestCounts.get(request.url()) ?? 0) + 1;
     requestCounts.set(request.url(), count);
-    if (count === 26) diagnostics.requestLoops.push(request.url());
+    if (count === 26) diagnostics.requestLoops.push(redactMapDiagnosticUrl(request.url()));
   });
   context.on("requestfailed", (request) => {
-    if (isForbiddenBackend(request.url(), origin)) return;
+    const mapDiagnostic = isMapDiagnosticRequest(request.url(), { appOrigin: origin });
+    if (isForbiddenBackend(request.url(), origin) && !mapDiagnostic) return;
     if (/\.(?:pptx|xlsx)$/i.test(new URL(request.url()).pathname) && request.failure()?.errorText === "net::ERR_ABORTED") return;
+    if (mapDiagnostic) {
+      const diagnostic = classifyArcGISRequestFailure(
+        {
+          error: request.failure()?.errorText ?? "failed",
+          headers: request.headers(),
+          method: request.method(),
+          url: request.url(),
+        },
+        { appOrigin: origin },
+      );
+      if (
+        ["optional_public_basemap_candidate", "required_request_cancellation_candidate"].includes(
+          diagnostic.classification,
+        )
+      ) {
+        const observation = requestObservations.get(request);
+        const page = observation?.page ?? requestPage(request);
+        observeOptionalMapDiagnostic(diagnostic, {
+          lifecycle: observation?.lifecycle ?? currentAcceptanceLifecycle(page),
+          page,
+          source: "requestfailed",
+        });
+      } else {
+        const observation = requestObservations.get(request);
+        recordMapDiagnostic(diagnostic, {
+          generation: observation?.acceptanceGeneration,
+          page: observation?.page ?? requestPage(request),
+          source: "requestfailed",
+        });
+      }
+      return;
+    }
     if (new URL(request.url()).origin === origin) {
-      diagnostics.requestFailures.push(`${request.failure()?.errorText ?? "failed"} ${request.url()}`);
+      diagnostics.requestFailures.push(
+        `${redactMapDiagnosticText(request.failure()?.errorText ?? "failed")} ${redactMapDiagnosticUrl(request.url())}`,
+      );
     }
   });
   context.on("response", (response) => {
+    let optionalMapFailure = false;
+    if (
+      response.status() >= 400 &&
+      isMapDiagnosticRequest(response.url(), { appOrigin: origin })
+    ) {
+      const diagnostic = classifyArcGISHttpFailure(
+        {
+          headers: response.request().headers(),
+          method: response.request().method(),
+          status: response.status(),
+          url: response.url(),
+        },
+        { appOrigin: origin },
+      );
+      optionalMapFailure = diagnostic.classification === "optional_public_basemap_candidate";
+      if (optionalMapFailure) {
+        const observation = requestObservations.get(response.request());
+        const page = observation?.page ?? requestPage(response.request());
+        observeOptionalMapDiagnostic(diagnostic, {
+          lifecycle: observation?.lifecycle ?? currentAcceptanceLifecycle(page),
+          page,
+          source: "response",
+        });
+      } else {
+        const observation = requestObservations.get(response.request());
+        recordMapDiagnostic(diagnostic, {
+          generation: observation?.acceptanceGeneration,
+          page: observation?.page ?? requestPage(response.request()),
+          source: "response",
+        });
+      }
+    }
     if (response.status() === 404) {
-      if (new URL(response.url()).origin === origin) diagnostics.sameOrigin404s.push(response.url());
-      else diagnostics.external404s.push(response.url());
+      if (optionalMapFailure) return;
+      if (new URL(response.url()).origin === origin) {
+        diagnostics.sameOrigin404s.push(redactMapDiagnosticUrl(response.url()));
+      } else {
+        diagnostics.external404s.push(redactMapDiagnosticUrl(response.url()));
+      }
     }
   });
   context.on("page", (page) => {
-    page.on("pageerror", (error) => diagnostics.pageErrors.push(`${page.url()} :: ${error.message}`));
+    page.on("pageerror", (error) => {
+      const diagnostic = classifyPageError(error);
+      const pageUrl = redactMapDiagnosticUrl(page.url());
+      diagnostics.mapDiagnostics.push({ ...diagnostic, page_url: pageUrl, source: "pageerror" });
+      diagnostics.pageErrors.push(`${pageUrl} :: ${diagnostic.message}`);
+      recordDirectEvidence(page, pageAcceptanceGenerations.get(page), "pageErrors");
+    });
     page.on("console", (message) => {
       if (["error", "warning"].includes(message.type())) {
         const text = message.text();
         if (/GL Driver Message.*GPU stall due to ReadPixels/.test(text)) return;
-        const location = message.location().url;
-        diagnostics.consoleMessages.push(`${page.url()} :: ${message.type()}: ${text}${location ? ` [${location}]` : ""}`);
+        const diagnostic = classifyArcGISConsoleFailure(
+          { locationUrl: message.location().url, text },
+          { appOrigin: origin },
+        );
+        if (diagnostic.classification === "optional_public_basemap_candidate") {
+          observeOptionalMapDiagnostic(diagnostic, {
+            lifecycle: currentAcceptanceLifecycle(page),
+            page,
+            source: "console",
+          });
+        } else {
+          recordMapDiagnostic(diagnostic, { page, source: "console" });
+        }
       }
     });
   });
 }
 
+function requestPage(request) {
+  try {
+    return request.frame().page();
+  } catch {
+    return null;
+  }
+}
+
+function acceptanceRouteKey(value) {
+  const url = new URL(value);
+  const route = new URLSearchParams();
+  for (const key of ["app", "investmentPage"]) {
+    const selected = url.searchParams.get(key);
+    if (selected) route.set(key, selected);
+  }
+  return `${url.pathname}${route.size ? `?${route}` : ""}`;
+}
+
+function beginAcceptanceLifecycle(page, kind) {
+  assert.equal(
+    activeAcceptanceLifecycleByPage.has(page),
+    false,
+    `Cannot begin ${kind}; a prior acceptance lifecycle is still unproven.`,
+  );
+  const lifecycle = {
+    from_route: page.url() === "about:blank" ? "about:blank" : acceptanceRouteKey(page.url()),
+    generation: ++acceptanceLifecycleGeneration,
+    kind,
+    proven: false,
+    to_route: null,
+  };
+  activeAcceptanceLifecycleByPage.set(page, lifecycle);
+  pageAcceptanceGenerations.set(page, lifecycle.generation);
+  return lifecycle;
+}
+
+function proveAcceptanceLifecycle(page, lifecycle) {
+  assert.equal(
+    activeAcceptanceLifecycleByPage.get(page),
+    lifecycle,
+    `Acceptance lifecycle ${lifecycle.generation} was superseded before proof.`,
+  );
+  lifecycle.proven = true;
+  lifecycle.to_route = page.isClosed() ? lifecycle.from_route : acceptanceRouteKey(page.url());
+  if (lifecycle.kind === "route") {
+    assert.notEqual(
+      lifecycle.to_route,
+      lifecycle.from_route,
+      `Acceptance route lifecycle ${lifecycle.generation} did not change routes.`,
+    );
+  }
+  activeAcceptanceLifecycleByPage.delete(page);
+}
+
+function currentAcceptanceLifecycle(page) {
+  return page ? activeAcceptanceLifecycleByPage.get(page) ?? null : null;
+}
+
+function markAcceptanceTeardown(page) {
+  if (!page || page.isClosed()) return;
+  const lifecycle = beginAcceptanceLifecycle(page, "teardown");
+  lifecycle.proven = true;
+  lifecycle.to_route = lifecycle.from_route;
+}
+
+async function closeAcceptancePage(page) {
+  if (page.isClosed()) return;
+  markAcceptanceTeardown(page);
+  await page.close();
+}
+
+async function closeAcceptanceContext(context) {
+  context.pages().forEach(markAcceptanceTeardown);
+  await context.close();
+}
+
+async function acceptedNavigation(page, kind, navigate, prove) {
+  const lifecycle = beginAcceptanceLifecycle(page, kind);
+  await navigate();
+  await prove();
+  proveAcceptanceLifecycle(page, lifecycle);
+}
+
+async function openInvestmentRoute(page, name, investmentPage) {
+  await acceptedNavigation(
+    page,
+    "route",
+    () => page.getByRole("button", { name, exact: true }).click(),
+    async () => {
+      await page.waitForFunction(
+        (expected) => new URLSearchParams(location.search).get("investmentPage") === expected,
+        investmentPage,
+      );
+      await page.locator(`main[data-investment-page="${investmentPage}"]`).waitFor();
+      await assertHealthyText(page);
+    },
+  );
+}
+
+function recordMapDiagnostic(diagnostic, { generation = null, page = null, source }) {
+  const resolved = diagnostic.fatal === null
+    ? resolveMapDiagnostic(diagnostic, { health: {}, lifecycle: "current" })
+    : diagnostic;
+  const record = {
+    ...resolved,
+    page_url: page ? redactMapDiagnosticUrl(page.url()) : null,
+    source,
+  };
+  diagnostics.mapDiagnostics.push(record);
+  if (!record.fatal) return record;
+  const acceptanceGeneration = generation ?? pageAcceptanceGenerations.get(page);
+  recordDirectEvidence(page, acceptanceGeneration, "requiredRequestFailures");
+  if (source === "console") {
+    recordDirectEvidence(page, acceptanceGeneration, "consoleErrors");
+  }
+  diagnostics.primaryMapFailures.push(record);
+  const message = `${record.page_url ?? "no-page"} :: ${record.reason}${record.message ? `: ${record.message}` : ""}`;
+  (source === "console" ? diagnostics.consoleMessages : diagnostics.requestFailures).push(message);
+  return record;
+}
+
+function observeOptionalMapDiagnostic(diagnostic, { lifecycle = null, page = null, source }) {
+  const record = {
+    ...diagnostic,
+    page_url: page ? redactMapDiagnosticUrl(page.url()) : null,
+    source,
+  };
+  diagnostics.mapDiagnostics.push(record);
+  if (!page) {
+    const result = resolveMapDiagnostic(record, { health: {}, lifecycle: "unknown" });
+    Object.assign(record, result);
+    if (result.classification === "optional_public_basemap_failure") {
+      diagnostics.dependentOptionalFailures.push(record);
+    } else {
+      diagnostics.primaryMapFailures.push(record);
+      diagnostics.requestFailures.push(
+        `no-page :: Required cancellation lacked authoritative Demo lifecycle proof: ${record.reason}`,
+      );
+    }
+    return;
+  }
+  pendingMapDiagnostics.push({ lifecycle, page, record, resolved: false });
+}
+
+async function resolveMapDiagnosticsForPage(page, knownHealth = null) {
+  const pending = pendingMapDiagnostics.filter((entry) => !entry.resolved && entry.page === page);
+  if (!pending.length) return;
+  const primaryEvidence = immutablePrimaryEvidence(
+    page,
+    knownHealth ?? lastMapHealthByPage.get(page) ?? {},
+  );
+  const required = pending.filter(
+    (entry) => entry.record.classification === "required_request_cancellation_candidate",
+  );
+  const optional = pending.filter(
+    (entry) => entry.record.classification !== "required_request_cancellation_candidate",
+  );
+  const requiredResults = required.map((entry) => [
+    entry,
+    resolvePendingMapDiagnostic(entry, primaryEvidence),
+  ]);
+  for (const [entry, result] of [
+    ...requiredResults,
+    ...optional.map((entry) => [entry, resolvePendingMapDiagnostic(entry, primaryEvidence)]),
+  ]) {
+    Object.assign(entry.record, result);
+    entry.resolved = true;
+    if (result.fatal) {
+      if (entry.record.classification === "optional_public_basemap_failure") {
+        diagnostics.dependentOptionalFailures.push(entry.record);
+      } else {
+        diagnostics.primaryMapFailures.push(entry.record);
+        const target = entry.record.source === "console"
+          ? diagnostics.consoleMessages
+          : diagnostics.requestFailures;
+        target.push(`${entry.record.page_url ?? "no-page"} :: ${result.reason}`);
+      }
+    } else if (result.classification === "browser_request_cancellation") {
+      diagnostics.browserRequestCancellations.push(entry.record);
+    } else {
+      const target = entry.record.source === "console"
+        ? diagnostics.optionalPublicBasemapConsole
+        : diagnostics.optionalPublicBasemapFailures;
+      target.push(entry.record);
+    }
+  }
+}
+
+function immutablePrimaryEvidence(page, health) {
+  return Object.freeze({ ...health, ...directEvidenceForPage(page) });
+}
+
+function resolvePendingMapDiagnostic(entry, health) {
+  const acceptedLifecycle = entry.lifecycle?.proven === true;
+  const candidate = {
+    ...entry.record,
+    acceptance_lifecycle_generation: entry.lifecycle?.generation ?? null,
+    acceptance_teardown_succeeded:
+      acceptedLifecycle && entry.lifecycle.kind === "teardown",
+    acceptance_transition_succeeded:
+      acceptedLifecycle && entry.lifecycle.kind !== "teardown",
+    from_route: entry.lifecycle?.from_route ?? null,
+    to_route: entry.lifecycle?.to_route ?? null,
+  };
+  // The shared resolver's accepted-transition proof is the generic acceptance-owned
+  // lifecycle gate; retain the narrower teardown field in the persisted diagnostic.
+  if (candidate.acceptance_teardown_succeeded) {
+    candidate.acceptance_transition_succeeded = true;
+  }
+  const result = resolveMapDiagnostic(candidate, {
+    health,
+    lifecycle: candidate.acceptance_teardown_succeeded
+      ? "destroyed"
+      : candidate.acceptance_transition_succeeded
+        ? "stale"
+        : "current",
+  });
+  if (
+    candidate.classification === "required_request_cancellation_candidate" &&
+    candidate.acceptance_teardown_succeeded &&
+    result.fatal === false
+  ) {
+    result.reason =
+      "A required idempotent request was cancelled by an explicitly marked acceptance-owned teardown after required fallback health was proven.";
+  }
+  return result;
+}
+
+async function resolveAllMapDiagnostics() {
+  for (const page of new Set(
+    pendingMapDiagnostics.filter((entry) => !entry.resolved).map((entry) => entry.page),
+  )) {
+    await resolveMapDiagnosticsForPage(page);
+  }
+}
+
+async function readRequiredMapHealth(page, origin) {
+  const state = await page.evaluate(({ requiredBasemapId, requiredIds, requiredLabelId }) => {
+    const map = document.querySelector('[data-testid="cfs-arcgis-map"]');
+    const debug = window.__cfsGetMapDebugState?.();
+    return {
+      activeMapInteractive:
+        map?.getAttribute("data-map-renderer") === "interactive" &&
+        map.getAttribute("data-map-renderer-state") === "interactive_ready" &&
+        map.getAttribute("data-map-view-ready-state") === "ready" &&
+        debug?.ready === true &&
+        debug?.readyState === "ready",
+      currentMapAuthoritative:
+        document.querySelectorAll('[data-testid="cfs-arcgis-map"]').length === 1 &&
+        document.querySelectorAll(".esri-view-root").length === 1,
+      requiredLayersReady:
+        requiredIds.every((id) => {
+          const layer = debug?.layers?.find((candidate) => candidate.id === id);
+          return layer?.visible === true && Number(layer.graphicsCount) > 0;
+        }) &&
+        (map?.getAttribute("data-reference-basemap-state") !== "failed" ||
+          (() => {
+            const labels = debug?.layers?.find((candidate) => candidate.id === requiredLabelId);
+            return labels?.visible === true && Number(labels.graphicsCount) > 0;
+          })()),
+      sameOriginBasemapReady: debug?.basemapId === requiredBasemapId,
+      sameOriginContextReady:
+        map?.getAttribute("data-context-ready") === "true" &&
+        map.getAttribute("data-static-context-ready") === "true",
+      parcelInteractionReady:
+        document.querySelector('input[aria-label="Search parcels"]:not(:disabled)') !== null,
+    };
+  }, {
+    requiredBasemapId: REQUIRED_CFS_BASEMAP_ID,
+    requiredIds: REQUIRED_CFS_CONTEXT_LAYER_IDS,
+    requiredLabelId: REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
+  });
+  const health = {
+    ...state,
+    ...directEvidenceForPage(page),
+    appOrigin: origin,
+    parcelInteractionRequired: true,
+  };
+  if (health.activeMapInteractive && health.currentMapAuthoritative) {
+    lastMapHealthByPage.set(page, health);
+  }
+  return health;
+}
+
 async function goto(page, baseUrl, query) {
-  await page.goto(`${baseUrl}/${query}`, { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.body.textContent?.includes("Portfolio Demo"), null, { timeout: 30_000 });
-  await delay(750);
-  await assertHealthyText(page);
+  await acceptedNavigation(
+    page,
+    "goto",
+    () => page.goto(`${baseUrl}/${query}`, { waitUntil: "domcontentloaded" }),
+    async () => {
+      await page.waitForFunction(
+        () => document.body.textContent?.includes("Portfolio Demo"),
+        null,
+        { timeout: 30_000 },
+      );
+      await delay(750);
+      await assertHealthyText(page);
+    },
+  );
 }
 
 async function assertHealthyText(page) {
@@ -263,11 +721,22 @@ async function waitForMapReady(page) {
   assert.equal(debug?.assetsPath, `/arcgis-assets/${sdkVersion}`);
   assert(Number(debug?.layerCount) >= 5, "ArcGIS basemap layers are missing.");
   assert(Number(debug?.layerViewCount) >= 5, "ArcGIS basemap layerViews are missing.");
+  if (pendingMapDiagnostics.some((entry) => !entry.resolved && entry.page === page)) {
+    await page.waitForFunction(() =>
+      ["failed", "ready"].includes(
+        document
+          .querySelector('[data-testid="cfs-arcgis-map"]')
+          ?.getAttribute("data-reference-basemap-state") ?? "",
+      ),
+    );
+  }
   const countyPath = await page
     .getByTestId("cfs-local-context-map")
     .locator('[data-layer-id="county-boundary"]')
     .getAttribute("d");
   assert(countyPath?.trim() && !/NaN|Infinity/.test(countyPath), "County SVG path is invalid.");
+  const health = await readRequiredMapHealth(page, new URL(page.url()).origin);
+  await resolveMapDiagnosticsForPage(page, health);
   return map;
 }
 
@@ -659,16 +1128,28 @@ async function planningChecks(page, baseUrl) {
       await snapshotLibrary
         .locator('[data-testid="planning-persistence-status"][data-state="saved"]')
         .waitFor();
-      await page.reload({ waitUntil: "load" });
-      await page
-        .locator('button[aria-label^="Workspace:"][aria-pressed="true"]')
-        .waitFor();
-      await snapshotMode.click();
-      await page
-        .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
-        .waitFor();
-      await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
-      assert.equal(await page.getByRole("checkbox", { name: /^(?:Map|Dashboard) Snapshot$/ }).isChecked(), !before);
+      await acceptedNavigation(
+        page,
+        "reload",
+        () => page.reload({ waitUntil: "load" }),
+        async () => {
+          await page
+            .locator('button[aria-label^="Workspace:"][aria-pressed="true"]')
+            .waitFor();
+          await snapshotMode.click();
+          await page
+            .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
+            .waitFor();
+          await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
+          assert.equal(
+            await page
+              .getByRole("checkbox", { name: /^(?:Map|Dashboard) Snapshot$/ })
+              .isChecked(),
+            !before,
+          );
+          await assertHealthyText(page);
+        },
+      );
     }
     await page.evaluate(() => {
       window.print = () => sessionStorage.setItem("cfs-print-invoked", "true");
@@ -757,12 +1238,12 @@ async function investmentsChecks(page, baseUrl) {
   await goto(page, baseUrl, "?app=consulting&investmentPage=overview");
   await check("Investments", "Home and Projects load populated CASE-1 state", ["Home", "Projects", "continue project"], async () => {
     await page.getByText("CFS Large Development-Land Acquisition Case Study", { exact: false }).first().waitFor({ timeout: 30_000 });
-    await page.getByRole("button", { name: "Projects", exact: true }).click();
+    await openInvestmentRoute(page, "Projects", "engagements");
     await page.getByText("Active projects and case studies", { exact: false }).waitFor();
   });
 
   await check("Investments", "Find Sites filters and saved-search persistence", ["screen", "minimum acres", "environmental filter", "save search", "refresh"], async () => {
-    await page.getByRole("button", { name: "Find Sites", exact: true }).click();
+    await openInvestmentRoute(page, "Find Sites", "area-radar");
     await page.getByRole("button", { name: "Run Screening", exact: true }).click();
     await page.getByText(/3 candidates/i).first().waitFor();
     const filters = page.locator('main[data-investment-page="area-radar"] input[type="number"], main[data-investment-page="area-radar"] select');
@@ -770,12 +1251,30 @@ async function investmentsChecks(page, baseUrl) {
     await page.getByRole("button", { name: "Save Search", exact: true }).click();
     const saved = page.getByLabel("Saved searches");
     await saved.getByText("Find Sites: Large Development Land", { exact: true }).waitFor();
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await saved.getByText("Find Sites: Large Development Land", { exact: true }).waitFor();
+    await acceptedNavigation(
+      page,
+      "reload",
+      () => page.reload({ waitUntil: "domcontentloaded" }),
+      async () => {
+        await saved.getByText("Find Sites: Large Development Land", { exact: true }).waitFor();
+        await assertHealthyText(page);
+      },
+    );
   });
 
   await check("Investments", "external opportunity saves without false analysis", ["add external", "save", "refresh"], async () => {
-    await page.getByRole("button", { name: /Add External Opportunity/i }).click();
+    await acceptedNavigation(
+      page,
+      "route",
+      () => page.getByRole("button", { name: /Add External Opportunity/i }).click(),
+      async () => {
+        await page.waitForFunction(
+          () => new URLSearchParams(location.search).get("investmentPage") === "intake",
+        );
+        await page.locator('main[data-investment-page="intake"]').waitFor();
+        await assertHealthyText(page);
+      },
+    );
     const form = page.locator('main[data-investment-page="intake"]');
     const unique = `EXT-BROWSER-${Date.now()}`;
     await form.getByRole("textbox", { name: "Candidate label" }).fill("Browser acceptance opportunity");
@@ -783,12 +1282,19 @@ async function investmentsChecks(page, baseUrl) {
     await form.getByRole("button", { name: "Add Candidate", exact: true }).click();
     await form.getByText(unique, { exact: false }).first().waitFor();
     assert.equal(new URL(page.url()).searchParams.get("investmentPage"), "intake");
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await form.getByText(unique, { exact: false }).first().waitFor();
+    await acceptedNavigation(
+      page,
+      "reload",
+      () => page.reload({ waitUntil: "domcontentloaded" }),
+      async () => {
+        await form.getByText(unique, { exact: false }).first().waitFor();
+        await assertHealthyText(page);
+      },
+    );
   });
 
   await check("Investments", "all three candidates expose seven distinct research tabs", ["3 candidates", "7 research tabs"], async () => {
-    await page.getByRole("button", { name: "Find Sites", exact: true }).click();
+    await openInvestmentRoute(page, "Find Sites", "area-radar");
     await page.getByRole("button", { name: "Run Screening", exact: true }).click();
     const candidates = ["CFS-PARCEL-0149758869", "CFS-PARCEL-0149760035", "CFS-PARCEL-0149777275"];
     const tabs = ["Summary", "Property", "Market", "Constraints", "Financial", "Due Diligence", "Sources"];
@@ -798,7 +1304,18 @@ async function investmentsChecks(page, baseUrl) {
         await page.getByRole("button", { name: "Run Screening", exact: true }).click();
         card = page.getByText(candidate, { exact: false }).first().locator("xpath=ancestor::*[self::article or self::div][.//button[contains(.,'Open Property Review')]][1]");
       }
-      await card.getByRole("button", { name: "Open Property Review" }).click();
+      await acceptedNavigation(
+        page,
+        "route",
+        () => card.getByRole("button", { name: "Open Property Review" }).click(),
+        async () => {
+          await page.waitForFunction(
+            () => new URLSearchParams(location.search).get("investmentPage") === "research",
+          );
+          await page.locator('main[data-investment-page="research"]').waitFor();
+          await assertHealthyText(page);
+        },
+      );
       const research = page.getByRole("tablist", { name: "Property Research tabs" }).locator("xpath=ancestor::section[1]");
       const tabContents = new Set();
       for (const tab of tabs) {
@@ -808,25 +1325,32 @@ async function investmentsChecks(page, baseUrl) {
         tabContents.add(await research.innerText());
       }
       assert.equal(tabContents.size, tabs.length, `${candidate} did not render distinct tab content`);
-      await page.getByRole("button", { name: "Find Sites", exact: true }).click();
+      await openInvestmentRoute(page, "Find Sites", "area-radar");
     }
   });
 
   await check("Investments", "Reports bucket persists and can be emptied", ["generate report", "add bucket", "refresh", "remove"], async () => {
-    await page.getByRole("button", { name: "Reports", exact: true }).click();
+    await openInvestmentRoute(page, "Reports", "report-studio");
     const generate = page.getByRole("button", { name: /Generate/i }).first();
     await generate.click();
     const add = page.getByRole("button", { name: "Add report to Report Bucket", exact: true });
     await add.click();
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: "Reports", exact: true }).click();
-    await page.getByText(/Report Bucket/i).first().waitFor();
+    await acceptedNavigation(
+      page,
+      "reload",
+      () => page.reload({ waitUntil: "domcontentloaded" }),
+      async () => {
+        await page.getByRole("button", { name: "Reports", exact: true }).click();
+        await page.getByText(/Report Bucket/i).first().waitFor();
+        await assertHealthyText(page);
+      },
+    );
     const remove = page.getByRole("button", { name: /Remove/i }).first();
     if (await remove.count()) await remove.click();
   });
 
   await check("Investments", "Data & Methods exposes static dataset status and source links", ["dataset rows", "source links", "static refresh status"], async () => {
-    await page.getByRole("button", { name: "Data & Methods", exact: true }).click();
+    await openInvestmentRoute(page, "Data & Methods", "methodology");
     const status = page.getByLabel("Demo dataset status");
     assert.equal(await status.getByRole("link", { name: "Open demo asset" }).count(), 5);
     assert.equal(await status.getByRole("button", { name: "Static in portfolio demo" }).count(), 5);
@@ -835,7 +1359,7 @@ async function investmentsChecks(page, baseUrl) {
   });
 
   await check("Investments", "CASE-1 workflow reaches all nine artifacts", ["underwrite", "decide", "deliver", "9 artifacts"], async () => {
-    await page.getByRole("button", { name: "Projects", exact: true }).click();
+    await openInvestmentRoute(page, "Projects", "engagements");
     const library = page.getByLabel("Case Studies library");
     if (await library.count()) {
       await library.getByRole("button", { name: "Continue", exact: true }).first().click();
@@ -882,7 +1406,7 @@ async function investmentsChecks(page, baseUrl) {
       } else {
         await opened.waitForLoadState("domcontentloaded");
         assert.equal(new URL(opened.url()).origin, new URL(baseUrl).origin);
-        await opened.close();
+        await closeAcceptancePage(opened);
       }
       await panel.getByRole("button", { name: "Return to Deliver" }).click();
     }
@@ -941,7 +1465,7 @@ async function mobileChecks(browser, baseUrl) {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert(overflow <= 2, `${product} has ${overflow}px horizontal mobile overflow.`);
     await assertHealthyText(page);
-    await context.close();
+    await closeAcceptanceContext(context);
     record(product, "mobile viewport workflow", ["mobile layout"]);
     console.log(`PASS ${product}: mobile viewport workflow`);
   }
@@ -951,18 +1475,38 @@ async function offlineMapChecks(browser, baseUrl) {
   const origin = new URL(baseUrl).origin;
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const arcgisRequests = [];
+  const optionalFailures = [];
   const sameOriginPaths = new Set();
   await context.route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname.startsWith("/arcgis-assets/") || /(?:arcgis|esri)/i.test(url.hostname)) {
-      arcgisRequests.push(url.href);
+      arcgisRequests.push(redactMapDiagnosticUrl(url));
     }
     if (url.origin !== origin) {
-      await route.abort("blockedbyclient");
+      await route.abort(
+        isApprovedPublicArcgisRequest(url, undefined, route.request().headers())
+          ? "failed"
+          : "blockedbyclient",
+      );
       return;
     }
     sameOriginPaths.add(url.pathname);
     await route.continue();
+  });
+  context.on("requestfailed", (request) => {
+    const url = new URL(request.url());
+    if (!isApprovedPublicArcgisRequest(url, undefined, request.headers())) return;
+    optionalFailures.push(
+      classifyArcGISRequestFailure(
+        {
+          error: request.failure()?.errorText ?? "failed",
+          headers: request.headers(),
+          method: request.method(),
+          url: url.href,
+        },
+        { appOrigin: origin },
+      ),
+    );
   });
   const page = await context.newPage();
   try {
@@ -987,10 +1531,20 @@ async function offlineMapChecks(browser, baseUrl) {
     assert(
       arcgisRequests.every((url) => {
         const parsed = new URL(url);
-        return parsed.origin === origin && parsed.pathname.startsWith(localAssetPrefix);
+        return (
+          (parsed.origin === origin && parsed.pathname.startsWith(localAssetPrefix)) ||
+          isApprovedPublicArcgisRequest(parsed)
+        );
       }),
-      `ArcGIS attempted an external or unversioned request: ${arcgisRequests.join(" | ")}`,
+      `ArcGIS attempted an unapproved external or unversioned request: ${arcgisRequests.map(redactMapDiagnosticUrl).join(" | ")}`,
     );
+    const health = await readRequiredMapHealth(page, origin);
+    for (const failure of optionalFailures) {
+      const resolved = resolveMapDiagnostic(failure, { health, lifecycle: "current" });
+      diagnostics.mapDiagnostics.push(resolved);
+      assert.equal(resolved.fatal, false, resolved.reason);
+      diagnostics.optionalPublicBasemapFailures.push(resolved);
+    }
     await assertContextMapLayers(page);
     await assertPaintedImage(await captureMapSurface(page), "Externally isolated ArcGIS map");
     record("Planning", "external network isolation", [
@@ -1000,7 +1554,7 @@ async function offlineMapChecks(browser, baseUrl) {
     ]);
     console.log("PASS Planning: external network isolation");
   } finally {
-    await context.close();
+    await closeAcceptanceContext(context);
   }
 }
 
@@ -1026,16 +1580,17 @@ async function main() {
     attachDiagnostics(context, origin);
     const planning = await context.newPage();
     await planningChecks(planning, baseUrl);
-    await planning.close();
+    await closeAcceptancePage(planning);
     const economics = await context.newPage();
     await economicsChecks(economics, baseUrl);
-    await economics.close();
+    await closeAcceptancePage(economics);
     const investments = await context.newPage();
     await investmentsChecks(investments, baseUrl);
-    await investments.close();
+    await closeAcceptancePage(investments);
     await mobileChecks(browser, baseUrl);
     await offlineMapChecks(browser, baseUrl);
-    await context.close();
+    await closeAcceptanceContext(context);
+    await resolveAllMapDiagnostics();
 
     assert.deepEqual(diagnostics.pageErrors, [], `Page errors:\n${diagnostics.pageErrors.join("\n")}`);
     assert.deepEqual(diagnostics.sameOrigin404s, [], `Same-origin 404s:\n${diagnostics.sameOrigin404s.join("\n")}`);
@@ -1044,6 +1599,16 @@ async function main() {
     assert.deepEqual(diagnostics.requestLoops, [], `Probable request loops:\n${diagnostics.requestLoops.join("\n")}`);
     assert.deepEqual(diagnostics.blockedRequests, [], `Forbidden backend requests:\n${diagnostics.blockedRequests.join("\n")}`);
     assert.deepEqual(diagnostics.consoleMessages, [], `Console warnings/errors:\n${diagnostics.consoleMessages.join("\n")}`);
+    assert.deepEqual(
+      diagnostics.dependentOptionalFailures,
+      [],
+      `Optional map failures lacked a healthy required fallback:\n${diagnostics.dependentOptionalFailures.map((failure) => failure.reason).join("\n")}`,
+    );
+    assert.deepEqual(
+      diagnostics.primaryMapFailures,
+      [],
+      `Required map failures:\n${diagnostics.primaryMapFailures.map((failure) => failure.reason).join("\n")}`,
+    );
 
     const summary = {
       baseUrl,
