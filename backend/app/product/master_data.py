@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import csv
 import io
-from dataclasses import dataclass
+import json
+from dataclasses import dataclass, replace
 from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
@@ -20,23 +21,30 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.models import (
+    AccelaPlanReviewClean,
+    FemaFloodZoneClean,
     ParcelEnriched,
     ParcelZoningOverlayV2,
     PermitIntelligenceSegment,
     RealPropertyPermitClean,
     RealPropertyPermitParcelRelationship,
+    SchoolReference,
+    SchoolZone,
+    ZoningJurisdictionalClean,
 )
 from app.product.service import ProductNotFound, ProductValidationError
 
-DatasetId = Literal["parcels", "permits"]
+DatasetId = Literal["parcels", "permits", "addresses", "zoning", "flood", "schools"]
 FilterOperator = Literal["eq", "contains", "gte", "lte"]
 SortDirection = Literal["asc", "desc"]
-ExportFormat = Literal["csv", "xlsx"]
+ExportFormat = Literal["csv", "xlsx", "geojson"]
 FilterValue = StrictStr | StrictInt | StrictFloat
+RelationshipId = Literal["permits_to_parcels"]
 
 EXPORT_ROW_CAP = 150_000
+GEOJSON_EXPORT_ROW_CAP = 10_000
 MAX_FILTERS = 20
-MAX_SELECTED_FIELDS = 15
+MAX_SELECTED_FIELDS = 20
 
 
 class _StrictRequest(BaseModel):
@@ -49,6 +57,11 @@ class MasterDataFilter(_StrictRequest):
     value: FilterValue
 
 
+class MasterDataJoinRequest(_StrictRequest):
+    relationship_id: RelationshipId
+    attach_geometry: bool = False
+
+
 class MasterDataQueryRequest(_StrictRequest):
     fields: list[str] = Field(default_factory=list, max_length=MAX_SELECTED_FIELDS)
     filters: list[MasterDataFilter] = Field(default_factory=list, max_length=MAX_FILTERS)
@@ -57,6 +70,7 @@ class MasterDataQueryRequest(_StrictRequest):
         pattern=r"^[a-z][a-z0-9_]{0,63}$",
     )
     sort_direction: SortDirection = "asc"
+    join: MasterDataJoinRequest | None = None
 
     @field_validator("fields")
     @classmethod
@@ -93,9 +107,10 @@ class MasterDataFieldSpec:
     filter_operators: tuple[FilterOperator, ...]
     default: bool = False
     values_mode: Literal["none", "options", "search"] = "none"
+    relationship_id: RelationshipId | None = None
 
     def contract(self) -> dict[str, Any]:
-        return {
+        contract = {
             "id": self.id,
             "label": self.label,
             "description": self.description,
@@ -104,6 +119,39 @@ class MasterDataFieldSpec:
             "selectable": True,
             "default": self.default,
             "values_mode": self.values_mode,
+        }
+        if self.relationship_id:
+            contract["relationship_id"] = self.relationship_id
+        return contract
+
+
+@dataclass(frozen=True)
+class MasterDataRelationshipSpec:
+    id: RelationshipId
+    name: str
+    target_dataset_id: DatasetId
+    description: str
+    cardinality: Literal["many-to-many"]
+    supports_geometry: bool
+    geometry_type: str | None
+    crs: str | None
+    from_clause: Any
+    fields: tuple[MasterDataFieldSpec, ...]
+    field_overrides: dict[str, Any]
+    stable_expressions: tuple[Any, ...]
+    geometry_expression: Any
+
+    def contract(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "target_dataset_id": self.target_dataset_id,
+            "description": self.description,
+            "cardinality": self.cardinality,
+            "supports_geometry": self.supports_geometry,
+            "geometry_type": self.geometry_type,
+            "crs": self.crs,
+            "output_fields": [field.contract() for field in self.fields],
         }
 
 
@@ -117,14 +165,18 @@ class MasterDataDatasetSpec:
     owner: str
     spatial: bool
     geometry_type: str | None
+    crs: str | None
+    geometry_expression: Any | None
     from_clause: Any
     count_from: Any
     stable_id: str
     last_updated_expression: Any
     fields: tuple[MasterDataFieldSpec, ...]
     restricted_field_count: int
+    governance: dict[str, Any]
     data_quality: dict[str, Any]
     base_predicates: tuple[Any, ...] = ()
+    relationships: tuple[MasterDataRelationshipSpec, ...] = ()
 
     @property
     def field_map(self) -> dict[str, MasterDataFieldSpec]:
@@ -143,6 +195,13 @@ class MasterDataPage:
     page: int
     page_size: int
     total: int
+    spatial: bool
+    geometry_type: str | None
+    crs: str | None
+    feature_collection: dict[str, Any] | None
+    spatial_preview_limited: bool
+    join_statistics: dict[str, Any] | None
+    lineage: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -155,6 +214,30 @@ class MasterDataExportResult:
     content_type: str
     content: bytes
     record_count: int
+    lineage: dict[str, Any]
+    join_statistics: dict[str, Any] | None
+
+
+@dataclass(frozen=True)
+class MasterDataQueryPlan:
+    spec: MasterDataDatasetSpec
+    fields: tuple[MasterDataFieldSpec, ...]
+    from_clause: Any
+    base_predicates: tuple[Any, ...]
+    stable_expressions: tuple[Any, ...]
+    spatial: bool
+    geometry_type: str | None
+    crs: str | None
+    geometry_expression: Any | None
+    relationship: MasterDataRelationshipSpec | None
+
+    @property
+    def field_map(self) -> dict[str, MasterDataFieldSpec]:
+        return {field.id: field for field in self.fields}
+
+    @property
+    def default_fields(self) -> list[str]:
+        return [field.id for field in self.fields if field.default]
 
 
 def _field(
@@ -167,6 +250,7 @@ def _field(
     default: bool = False,
     filter_operators: tuple[FilterOperator, ...] | None = None,
     values_mode: Literal["none", "options", "search"] = "none",
+    relationship_id: RelationshipId | None = None,
 ) -> MasterDataFieldSpec:
     if data_type == "text":
         operators: tuple[FilterOperator, ...] = ("eq", "contains")
@@ -183,6 +267,7 @@ def _field(
         filter_operators=operators if filter_operators is None else filter_operators,
         default=default,
         values_mode=values_mode,
+        relationship_id=relationship_id,
     )
 
 
@@ -217,6 +302,92 @@ _PERMIT_LAST_UPDATED = func.coalesce(
     RealPropertyPermitClean.source_last_modified_at,
     RealPropertyPermitClean.transformed_at,
 )
+_PERMIT_JOIN_FROM = (
+    RealPropertyPermitClean.__table__
+    .outerjoin(
+        PermitIntelligenceSegment.__table__,
+        PermitIntelligenceSegment.permit_id == RealPropertyPermitClean.permit_id,
+    )
+    .outerjoin(
+        RealPropertyPermitParcelRelationship.__table__,
+        RealPropertyPermitParcelRelationship.permit_id
+        == RealPropertyPermitClean.permit_id,
+    )
+    .outerjoin(
+        ParcelEnriched.__table__,
+        ParcelEnriched.official_parcel_id
+        == RealPropertyPermitParcelRelationship.official_parcel_id,
+    )
+    .outerjoin(
+        ParcelZoningOverlayV2.__table__,
+        ParcelZoningOverlayV2.official_parcel_id == ParcelEnriched.official_parcel_id,
+    )
+)
+_SCHOOL_FROM = SchoolZone.__table__.outerjoin(
+    SchoolReference.__table__,
+    SchoolReference.school_reference_id == SchoolZone.matched_school_reference_id,
+)
+
+_PERMIT_TO_PARCELS = MasterDataRelationshipSpec(
+    id="permits_to_parcels",
+    name="Permits to parcels",
+    target_dataset_id="parcels",
+    description=(
+        "Preserves every governed permit-to-parcel relationship; unmatched permits "
+        "remain in the result and permits with multiple parcel matches remain multiple rows."
+    ),
+    cardinality="many-to-many",
+    supports_geometry=True,
+    geometry_type="MultiPolygon",
+    crs="EPSG:4326",
+    from_clause=_PERMIT_JOIN_FROM,
+    fields=(
+        _field(
+            "parcel_pin14",
+            "Parcel PIN14",
+            "County parcel business identifier from the matched parcel.",
+            "text",
+            ParcelEnriched.pin14,
+            filter_operators=(),
+            relationship_id="permits_to_parcels",
+        ),
+        _field(
+            "parcel_acreage",
+            "Parcel acreage",
+            "Calculated acreage from the matched parcel.",
+            "number",
+            ParcelEnriched.parcel_area_acres_calc,
+            filter_operators=(),
+            relationship_id="permits_to_parcels",
+        ),
+        _field(
+            "parcel_market_value",
+            "Parcel market value",
+            "Curated market value from the matched parcel.",
+            "number",
+            ParcelEnriched.marketvalue_numeric,
+            filter_operators=(),
+            relationship_id="permits_to_parcels",
+        ),
+        _field(
+            "parcel_zoning_code",
+            "Parcel zoning code",
+            "Dominant zoning code from the matched parcel.",
+            "category",
+            ParcelZoningOverlayV2.dominant_zoning_code_raw,
+            filter_operators=(),
+            relationship_id="permits_to_parcels",
+        ),
+    ),
+    field_overrides={
+        "official_parcel_id": RealPropertyPermitParcelRelationship.official_parcel_id,
+    },
+    stable_expressions=(
+        RealPropertyPermitClean.permit_id,
+        RealPropertyPermitParcelRelationship.official_parcel_id,
+    ),
+    geometry_expression=ParcelEnriched.geometry,
+)
 
 
 DATASET_REGISTRY: dict[DatasetId, MasterDataDatasetSpec] = {
@@ -229,11 +400,19 @@ DATASET_REGISTRY: dict[DatasetId, MasterDataDatasetSpec] = {
         owner="Cabarrus County",
         spatial=True,
         geometry_type="MultiPolygon",
+        crs="EPSG:4326",
+        geometry_expression=ParcelEnriched.geometry,
         from_clause=_PARCEL_FROM,
         count_from=ParcelEnriched.__table__,
         stable_id="official_parcel_id",
         last_updated_expression=ParcelEnriched.enriched_at,
         restricted_field_count=45,
+        governance={
+            "access_mode": "read_only",
+            "derived_outputs_only": True,
+            "sensitivity": "public_planner_safe",
+            "authority_status": "curated_authoritative_source",
+        },
         data_quality={
             "status": "review",
             "summary": "Curated parcel records retain non-unique business PINs and source quality caveats.",
@@ -268,11 +447,19 @@ DATASET_REGISTRY: dict[DatasetId, MasterDataDatasetSpec] = {
         owner="Cabarrus County",
         spatial=False,
         geometry_type=None,
+        crs=None,
+        geometry_expression=None,
         from_clause=_PERMIT_FROM,
         count_from=RealPropertyPermitClean.__table__,
         stable_id="permit_id",
         last_updated_expression=_PERMIT_LAST_UPDATED,
         restricted_field_count=30,
+        governance={
+            "access_mode": "read_only",
+            "derived_outputs_only": True,
+            "sensitivity": "public_planner_safe",
+            "authority_status": "authoritative_candidate",
+        },
         data_quality={
             "status": "review",
             "summary": "Authoritative-candidate permit records include optional dates, numbers, and governed parcel matches.",
@@ -299,6 +486,178 @@ DATASET_REGISTRY: dict[DatasetId, MasterDataDatasetSpec] = {
             _field("value_class", "Value class", "Descriptive permit value class.", "category", PermitIntelligenceSegment.permit_value_class, values_mode="options"),
             _field("status_stage", "Status stage", "Normalized permit status stage.", "category", PermitIntelligenceSegment.permit_status_stage, values_mode="options"),
             _field("last_updated", "Last updated", "Source last-modified timestamp, falling back to CFS transform time.", "date", _PERMIT_LAST_UPDATED, default=True, filter_operators=()),
+        ),
+        relationships=(_PERMIT_TO_PARCELS,),
+    ),
+    "addresses": MasterDataDatasetSpec(
+        id="addresses",
+        name="Addresses",
+        description=(
+            "Planning-case site addresses with governed parcel identifiers and source point geometry."
+        ),
+        source="Cabarrus Accela Plan Reviews",
+        technical_source="public.accela_plan_reviews_clean",
+        owner="Cabarrus County",
+        spatial=True,
+        geometry_type="Point",
+        crs="EPSG:4326",
+        geometry_expression=AccelaPlanReviewClean.geometry,
+        from_clause=AccelaPlanReviewClean.__table__,
+        count_from=AccelaPlanReviewClean.__table__,
+        stable_id="address_id",
+        last_updated_expression=AccelaPlanReviewClean.cleaned_at,
+        restricted_field_count=13,
+        governance={
+            "access_mode": "read_only",
+            "derived_outputs_only": True,
+            "sensitivity": "public_planner_safe",
+            "authority_status": "current_context_substitute",
+        },
+        data_quality={
+            "status": "review",
+            "summary": "Site addresses come from current-context Planning cases, not a county address-point authority.",
+            "known_issues": [
+                "The tax-parcel enrichment source contains no populated situs addresses, so Planning cases are the verified substitute.",
+                "Owner names, raw attributes, source URLs, and internal pipeline flags are restricted.",
+            ],
+        },
+        base_predicates=(
+            AccelaPlanReviewClean.current_context_only.is_(True),
+            AccelaPlanReviewClean.address.is_not(None),
+        ),
+        fields=(
+            _field("address_id", "Address record ID", "Stable CFS Planning-case address record identifier.", "number", AccelaPlanReviewClean.accela_plan_review_id, default=True),
+            _field("official_parcel_id", "CFS Parcel ID", "Matched CFS parcel identifier when available.", "text", AccelaPlanReviewClean.official_parcel_id, default=True, values_mode="search"),
+            _field("pin14", "PIN14", "County parcel business identifier when available.", "text", AccelaPlanReviewClean.pin14, values_mode="search"),
+            _field("site_address", "Site address", "Site address supplied by the Planning case.", "text", AccelaPlanReviewClean.address, default=True, values_mode="search"),
+            _field("review_type", "Review type", "Planning review type.", "category", AccelaPlanReviewClean.review_type, default=True, values_mode="options"),
+            _field("review_status", "Review status", "Planning review status.", "category", AccelaPlanReviewClean.review_status, default=True, values_mode="options"),
+            _field("file_date", "File date", "Planning case file date.", "date", AccelaPlanReviewClean.file_date, default=True),
+            _field("last_updated", "Last updated", "CFS source-cleaning timestamp.", "date", AccelaPlanReviewClean.cleaned_at, default=True, filter_operators=()),
+        ),
+    ),
+    "zoning": MasterDataDatasetSpec(
+        id="zoning",
+        name="Zoning",
+        description="Governed county and municipal zoning districts normalized by CFS.",
+        source="Cabarrus County and Municipal Zoning Services",
+        technical_source="public.zoning_jurisdictional_clean",
+        owner="Cabarrus County and participating municipalities",
+        spatial=True,
+        geometry_type="MultiPolygon",
+        crs="EPSG:4326",
+        geometry_expression=ZoningJurisdictionalClean.geometry,
+        from_clause=ZoningJurisdictionalClean.__table__,
+        count_from=ZoningJurisdictionalClean.__table__,
+        stable_id="zoning_id",
+        last_updated_expression=ZoningJurisdictionalClean.transformed_at,
+        restricted_field_count=9,
+        governance={
+            "access_mode": "read_only",
+            "derived_outputs_only": True,
+            "sensitivity": "public_planner_safe",
+            "authority_status": "curated_authoritative_source",
+        },
+        data_quality={
+            "status": "ready",
+            "summary": "Jurisdictional zoning features retain their source codes and CFS normalization.",
+            "known_issues": [
+                "Zoning boundaries and labels remain subject to source-jurisdiction updates.",
+                "Source URLs, raw geometry metrics, and raw source identifiers are restricted.",
+            ],
+        },
+        fields=(
+            _field("zoning_id", "Zoning record ID", "Stable CFS zoning feature identifier.", "text", ZoningJurisdictionalClean.zoning_jurisdictional_id, default=True, values_mode="search"),
+            _field("jurisdiction", "Jurisdiction", "Source zoning jurisdiction.", "category", ZoningJurisdictionalClean.jurisdiction_name, default=True, values_mode="options"),
+            _field("zoning_code", "Zoning code", "Source zoning code.", "category", ZoningJurisdictionalClean.zoning_code_raw, default=True, values_mode="options"),
+            _field("zoning_category", "Zoning category", "Normalized general zoning category.", "category", ZoningJurisdictionalClean.zoning_general_normalized, default=True, values_mode="options"),
+            _field("zoning_type", "Zoning type", "Source zoning type when supplied.", "category", ZoningJurisdictionalClean.zoning_type_raw, values_mode="options"),
+            _field("base_district", "Base district", "Source base zoning district when supplied.", "category", ZoningJurisdictionalClean.base_district_raw, values_mode="options"),
+            _field("conditional", "Conditional zoning", "Source conditional-zoning label when supplied.", "category", ZoningJurisdictionalClean.conditional_raw, values_mode="options"),
+            _field("last_updated", "Last updated", "CFS transform timestamp.", "date", ZoningJurisdictionalClean.transformed_at, default=True, filter_operators=()),
+        ),
+    ),
+    "flood": MasterDataDatasetSpec(
+        id="flood",
+        name="Flood",
+        description="Clean FEMA National Flood Hazard Layer features used by CFS Planning constraints.",
+        source="FEMA National Flood Hazard Layer",
+        technical_source="public.fema_nfhl_flood_zones_clean",
+        owner="Federal Emergency Management Agency",
+        spatial=True,
+        geometry_type="MultiPolygon",
+        crs="EPSG:4326",
+        geometry_expression=FemaFloodZoneClean.geometry,
+        from_clause=FemaFloodZoneClean.__table__,
+        count_from=FemaFloodZoneClean.__table__,
+        stable_id="flood_zone_id",
+        last_updated_expression=FemaFloodZoneClean.transformed_at,
+        restricted_field_count=10,
+        governance={
+            "access_mode": "read_only",
+            "derived_outputs_only": True,
+            "sensitivity": "public_planner_safe",
+            "authority_status": "authoritative_source",
+        },
+        data_quality={
+            "status": "ready",
+            "summary": "FEMA flood features use the governed CFS constraint classification.",
+            "known_issues": [
+                "Flood data supports planning screening and does not replace a site-specific flood determination.",
+                "Raw source metadata, URLs, datum/depth fields, and internal geometry fields are restricted.",
+            ],
+        },
+        fields=(
+            _field("flood_zone_id", "Flood zone ID", "Stable CFS flood feature identifier.", "number", FemaFloodZoneClean.flood_zone_internal_id, default=True),
+            _field("flood_area_id", "FEMA flood area ID", "FEMA flood area identifier when supplied.", "text", FemaFloodZoneClean.fld_ar_id, values_mode="search"),
+            _field("flood_zone_code", "Flood zone code", "FEMA flood zone code.", "category", FemaFloodZoneClean.flood_zone_code, default=True, values_mode="options"),
+            _field("flood_constraint_type", "Constraint type", "Governed CFS flood constraint type.", "category", FemaFloodZoneClean.flood_constraint_type, default=True, values_mode="options"),
+            _field("flood_severity", "Flood severity", "Governed CFS flood severity class.", "category", FemaFloodZoneClean.flood_severity_class, default=True, values_mode="options"),
+            _field("source_layer", "Source layer", "FEMA source layer.", "category", FemaFloodZoneClean.source_layer, values_mode="options"),
+            _field("last_updated", "Last updated", "CFS transform timestamp.", "date", FemaFloodZoneClean.transformed_at, default=True, filter_operators=()),
+        ),
+    ),
+    "schools": MasterDataDatasetSpec(
+        id="schools",
+        name="Schools",
+        description="Governed school assignment zones joined to the verified CFS school reference.",
+        source="Cabarrus County School Assignment Zones",
+        technical_source="public.school_zones + public.school_reference",
+        owner="Cabarrus County Schools and Kannapolis City Schools",
+        spatial=True,
+        geometry_type="MultiPolygon",
+        crs="EPSG:4326",
+        geometry_expression=SchoolZone.geometry,
+        from_clause=_SCHOOL_FROM,
+        count_from=SchoolZone.__table__,
+        stable_id="zone_id",
+        last_updated_expression=SchoolZone.transformed_at,
+        restricted_field_count=17,
+        governance={
+            "access_mode": "read_only",
+            "derived_outputs_only": True,
+            "sensitivity": "public_planner_safe",
+            "authority_status": "curated_authoritative_source",
+        },
+        data_quality={
+            "status": "review",
+            "summary": "Only school zones included in the governed CFS V1 assignment set are exposed.",
+            "known_issues": [
+                "Assignment zones can change and should be verified for individual enrollment decisions.",
+                "Excluded zones, raw source IDs, internal match details, and raw geometry are restricted.",
+            ],
+        },
+        base_predicates=(SchoolZone.include_in_cfs_v1.is_(True),),
+        fields=(
+            _field("zone_id", "School zone ID", "Stable CFS school assignment-zone identifier.", "text", SchoolZone.zone_id, default=True, values_mode="search"),
+            _field("school_name", "School name", "Assigned school name from the source zone.", "text", SchoolZone.school_name_raw, default=True, values_mode="search"),
+            _field("school_level", "School level", "Elementary, middle, or high school assignment level.", "category", SchoolZone.school_level, default=True, values_mode="options"),
+            _field("school_type", "School type", "School type from the governed reference record.", "category", SchoolReference.school_type, values_mode="options"),
+            _field("school_system", "School system", "School system responsible for the assignment zone.", "category", SchoolZone.school_system, default=True, values_mode="options"),
+            _field("school_address", "School address", "Public school address from the governed reference record.", "text", SchoolReference.address, values_mode="search"),
+            _field("match_confidence", "Match confidence", "Governed zone-to-school reference match confidence.", "category", SchoolZone.match_confidence, values_mode="options"),
+            _field("source_layer", "Source layer", "Source assignment-zone layer.", "category", SchoolZone.source_layer, values_mode="options"),
+            _field("last_updated", "Last updated", "CFS transform timestamp.", "date", SchoolZone.transformed_at, default=True, filter_operators=()),
         ),
     ),
 }
@@ -357,27 +716,49 @@ def preview_master_data(
     request: MasterDataPreviewRequest,
 ) -> MasterDataPage:
     spec = _dataset(dataset_id)
-    fields = _selected_fields(spec, request.fields)
-    predicates = _query_predicates(spec, request.filters)
-    total_count = _count(db, spec, predicates)
+    plan = _query_plan(spec, request.join)
+    fields = _selected_fields(plan, request.fields)
+    predicates = _query_predicates(plan, request.filters)
+    total_count = _count(db, plan, predicates)
     statement = (
         _select_statement(
-            spec,
+            plan,
             fields,
             predicates,
             request.sort_field,
             request.sort_direction,
+            include_geometry=plan.spatial,
         )
         .limit(request.page_size)
         .offset((request.page - 1) * request.page_size)
     )
+    result_rows = [dict(row) for row in db.execute(statement).mappings()]
+    join_statistics = _join_statistics(db, plan, predicates, total_count)
     return MasterDataPage(
         dataset_id=spec.id,
         field_ids=[field.id for field in fields],
-        rows=[dict(row) for row in db.execute(statement).mappings()],
+        rows=[{field.id: row[field.id] for field in fields} for row in result_rows],
         page=request.page,
         page_size=request.page_size,
         total=total_count,
+        spatial=plan.spatial,
+        geometry_type=plan.geometry_type,
+        crs=plan.crs,
+        feature_collection=(
+            _feature_collection(result_rows, fields, plan) if plan.spatial else None
+        ),
+        spatial_preview_limited=plan.spatial and (
+            request.page > 1 or total_count > len(result_rows)
+        ),
+        join_statistics=join_statistics,
+        lineage=_lineage(
+            plan,
+            fields,
+            request.filters,
+            total_count,
+            join_statistics,
+            export_format=None,
+        ),
     )
 
 
@@ -387,28 +768,46 @@ def export_master_data(
     request: MasterDataExportRequest,
 ) -> MasterDataExportResult:
     spec = _dataset(dataset_id)
-    fields = _selected_fields(spec, request.fields)
-    predicates = _query_predicates(spec, request.filters)
-    total_count = _count(db, spec, predicates)
-    if total_count > EXPORT_ROW_CAP:
+    plan = _query_plan(spec, request.join)
+    fields = _selected_fields(plan, request.fields)
+    predicates = _query_predicates(plan, request.filters)
+    if request.format == "geojson" and not plan.spatial:
         raise MasterDataValidationError(
-            f"Export matches {total_count} records; refine filters to {EXPORT_ROW_CAP} or fewer.",
+            "GeoJSON export requires native geometry or a join with attach_geometry=true.",
         )
-    rows = db.execute(
-        _select_statement(
-            spec,
-            fields,
-            predicates,
-            request.sort_field,
-            request.sort_direction,
-        ),
-    ).mappings()
+    total_count = _count(db, plan, predicates)
+    cap = GEOJSON_EXPORT_ROW_CAP if request.format == "geojson" else EXPORT_ROW_CAP
+    if total_count > cap:
+        raise MasterDataValidationError(
+            f"Export matches {total_count} records; refine filters to {cap} or fewer.",
+        )
+    statement = _select_statement(
+        plan,
+        fields,
+        predicates,
+        request.sort_field,
+        request.sort_direction,
+        include_geometry=request.format == "geojson",
+    )
+    rows = db.execute(statement).mappings()
     if request.format == "csv":
         content = _csv_content(fields, rows)
         content_type = "text/csv; charset=utf-8"
-    else:
+    elif request.format == "xlsx":
         content = _xlsx_content(spec.name, fields, rows)
         content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    else:
+        content = _geojson_content([dict(row) for row in rows], fields, plan)
+        content_type = "application/geo+json"
+    join_statistics = _join_statistics(db, plan, predicates, total_count)
+    lineage = _lineage(
+        plan,
+        fields,
+        request.filters,
+        total_count,
+        join_statistics,
+        export_format=request.format,
+    )
     return MasterDataExportResult(
         dataset_id=spec.id,
         field_ids=[field.id for field in fields],
@@ -421,6 +820,8 @@ def export_master_data(
         content_type=content_type,
         content=content,
         record_count=total_count,
+        lineage=lineage,
+        join_statistics=join_statistics,
     )
 
 
@@ -441,12 +842,18 @@ def _dataset_contract(db: Session, spec: MasterDataDatasetSpec) -> dict[str, Any
         "owner": spec.owner,
         "spatial": spec.spatial,
         "geometry_type": spec.geometry_type,
+        "crs": spec.crs,
+        "status": "ready",
         "record_count": metrics["record_count"] or 0,
         "last_updated": _isoformat(metrics["last_updated"]),
         "fields": [field.contract() for field in spec.fields],
         "default_fields": spec.default_fields,
         "restricted_field_count": spec.restricted_field_count,
-        "supported_export_formats": ["csv", "xlsx"],
+        "governance": spec.governance,
+        "supported_export_formats": (
+            ["csv", "xlsx", "geojson"] if spec.spatial else ["csv", "xlsx"]
+        ),
+        "relationships": [item.contract() for item in spec.relationships],
         "data_quality": spec.data_quality,
     }
 
@@ -458,30 +865,83 @@ def _dataset(dataset_id: str) -> MasterDataDatasetSpec:
         raise MasterDataNotFoundError(f"Unknown master-data dataset '{dataset_id}'.") from exc
 
 
-def _selectable_field(spec: MasterDataDatasetSpec, field_id: str) -> MasterDataFieldSpec:
-    field = spec.field_map.get(field_id)
+def _query_plan(
+    spec: MasterDataDatasetSpec,
+    requested_join: MasterDataJoinRequest | None,
+) -> MasterDataQueryPlan:
+    if requested_join is None:
+        return MasterDataQueryPlan(
+            spec=spec,
+            fields=spec.fields,
+            from_clause=spec.from_clause,
+            base_predicates=spec.base_predicates,
+            stable_expressions=(_selectable_field(spec, spec.stable_id).expression,),
+            spatial=spec.spatial,
+            geometry_type=spec.geometry_type,
+            crs=spec.crs,
+            geometry_expression=spec.geometry_expression,
+            relationship=None,
+        )
+    relationship = next(
+        (
+            item
+            for item in spec.relationships
+            if item.id == requested_join.relationship_id
+        ),
+        None,
+    )
+    if relationship is None:
+        raise MasterDataValidationError(
+            f"Relationship '{requested_join.relationship_id}' is not allowed for dataset '{spec.id}'.",
+        )
+    fields = tuple(
+        replace(field, expression=relationship.field_overrides[field.id])
+        if field.id in relationship.field_overrides
+        else field
+        for field in spec.fields
+    ) + relationship.fields
+    attach_geometry = requested_join.attach_geometry and relationship.supports_geometry
+    return MasterDataQueryPlan(
+        spec=spec,
+        fields=fields,
+        from_clause=relationship.from_clause,
+        base_predicates=spec.base_predicates,
+        stable_expressions=relationship.stable_expressions,
+        spatial=attach_geometry,
+        geometry_type=relationship.geometry_type if attach_geometry else None,
+        crs=relationship.crs if attach_geometry else None,
+        geometry_expression=(relationship.geometry_expression if attach_geometry else None),
+        relationship=relationship,
+    )
+
+
+def _selectable_field(
+    source: MasterDataDatasetSpec | MasterDataQueryPlan,
+    field_id: str,
+) -> MasterDataFieldSpec:
+    field = source.field_map.get(field_id)
     if field is None:
         raise MasterDataValidationError(
-            f"Field '{field_id}' is not selectable for dataset '{spec.id}'.",
+            f"Field '{field_id}' is not selectable for dataset '{source.spec.id if isinstance(source, MasterDataQueryPlan) else source.id}'.",
         )
     return field
 
 
 def _selected_fields(
-    spec: MasterDataDatasetSpec,
+    source: MasterDataDatasetSpec | MasterDataQueryPlan,
     requested_fields: list[str],
 ) -> list[MasterDataFieldSpec]:
-    field_ids = requested_fields or spec.default_fields
-    return [_selectable_field(spec, field_id) for field_id in field_ids]
+    field_ids = requested_fields or source.default_fields
+    return [_selectable_field(source, field_id) for field_id in field_ids]
 
 
 def _query_predicates(
-    spec: MasterDataDatasetSpec,
+    source: MasterDataDatasetSpec | MasterDataQueryPlan,
     filters: list[MasterDataFilter],
 ) -> list[Any]:
-    predicates = list(spec.base_predicates)
+    predicates = list(source.base_predicates)
     for item in filters:
-        field = _selectable_field(spec, item.field)
+        field = _selectable_field(source, item.field)
         if item.operator not in field.filter_operators:
             raise MasterDataValidationError(
                 f"Operator '{item.operator}' is not allowed for field '{field.id}'.",
@@ -536,38 +996,181 @@ def _filter_value(
         ) from exc
 
 
-def _count(db: Session, spec: MasterDataDatasetSpec, predicates: list[Any]) -> int:
-    statement = select(func.count()).select_from(spec.from_clause)
+def _count(db: Session, plan: MasterDataQueryPlan, predicates: list[Any]) -> int:
+    statement = select(func.count()).select_from(plan.from_clause)
     if predicates:
         statement = statement.where(and_(*predicates))
     return db.execute(statement).scalar_one() or 0
 
 
 def _select_statement(
-    spec: MasterDataDatasetSpec,
+    plan: MasterDataQueryPlan,
     fields: list[MasterDataFieldSpec],
     predicates: list[Any],
     sort_field: str | None,
     sort_direction: SortDirection,
+    *,
+    include_geometry: bool = False,
 ):
-    statement = select(
-        *(field.expression.label(field.id) for field in fields),
-    ).select_from(spec.from_clause)
+    selected = [field.expression.label(field.id) for field in fields]
+    selected.extend(
+        expression.label(f"__stable_{index}")
+        for index, expression in enumerate(plan.stable_expressions)
+    )
+    if include_geometry and plan.geometry_expression is not None:
+        selected.append(
+            func.ST_AsGeoJSON(plan.geometry_expression, 6).label("__geometry"),
+        )
+    statement = select(*selected).select_from(plan.from_clause)
     if predicates:
         statement = statement.where(and_(*predicates))
 
     order_by = []
     if sort_field:
-        field = _selectable_field(spec, sort_field)
+        field = _selectable_field(plan, sort_field)
         ordering = (
             field.expression.asc()
             if sort_direction == "asc"
             else field.expression.desc()
         )
         order_by.append(ordering.nulls_last())
-    if sort_field != spec.stable_id:
-        order_by.append(_selectable_field(spec, spec.stable_id).expression.asc())
+    for expression in plan.stable_expressions:
+        order_by.append(expression.asc().nulls_last())
     return statement.order_by(*order_by)
+
+
+def _join_statistics(
+    db: Session,
+    plan: MasterDataQueryPlan,
+    predicates: list[Any],
+    output_records: int,
+) -> dict[str, Any] | None:
+    if plan.relationship is None:
+        return None
+    source_id = RealPropertyPermitClean.permit_id
+    parcel_id = RealPropertyPermitParcelRelationship.official_parcel_id
+    source_statement = select(func.count(func.distinct(source_id))).select_from(
+        plan.from_clause,
+    )
+    matched_statement = select(func.count(func.distinct(source_id))).select_from(
+        plan.from_clause,
+    )
+    if predicates:
+        source_statement = source_statement.where(and_(*predicates))
+        matched_statement = matched_statement.where(and_(*predicates))
+    source_records = int(db.execute(source_statement).scalar_one() or 0)
+    matched_records = int(
+        db.execute(matched_statement.where(parcel_id.is_not(None))).scalar_one() or 0,
+    )
+    unmatched_records = source_records - matched_records
+    return {
+        "relationship_id": plan.relationship.id,
+        "source_records": source_records,
+        "matched_records": matched_records,
+        "unmatched_records": unmatched_records,
+        "match_percentage": round(
+            matched_records * 100 / source_records if source_records else 0,
+            2,
+        ),
+        "output_records": output_records,
+    }
+
+
+def _feature_collection(
+    rows: list[dict[str, Any]],
+    fields: list[MasterDataFieldSpec],
+    plan: MasterDataQueryPlan,
+) -> dict[str, Any]:
+    features = []
+    for row in rows:
+        geometry = _geojson_geometry(row.get("__geometry"))
+        feature_id = ":".join(
+            str(row.get(f"__stable_{index}") or "unmatched")
+            for index in range(len(plan.stable_expressions))
+        )
+        features.append(
+            {
+                "type": "Feature",
+                "id": feature_id,
+                "geometry": geometry,
+                "properties": {
+                    field.id: _json_value(row.get(field.id)) for field in fields
+                },
+            },
+        )
+    return {"type": "FeatureCollection", "features": features}
+
+
+def _lineage(
+    plan: MasterDataQueryPlan,
+    fields: list[MasterDataFieldSpec],
+    filters: list[MasterDataFilter],
+    output_records: int,
+    join_statistics: dict[str, Any] | None,
+    *,
+    export_format: ExportFormat | None,
+) -> dict[str, Any]:
+    relationship = plan.relationship
+    return {
+        "source_datasets": [
+            plan.spec.id,
+            *([relationship.target_dataset_id] if relationship else []),
+        ],
+        "query_timestamp": datetime.now(UTC).isoformat(),
+        "selected_fields": [field.id for field in fields],
+        "filters": [
+            {"field": item.field, "operator": item.operator} for item in filters
+        ],
+        "join_relationship": relationship.id if relationship else None,
+        "input_record_count": (
+            join_statistics["source_records"] if join_statistics else output_records
+        ),
+        "matched_count": (
+            join_statistics["matched_records"] if join_statistics else None
+        ),
+        "unmatched_count": (
+            join_statistics["unmatched_records"] if join_statistics else None
+        ),
+        "geometry_source": (
+            relationship.target_dataset_id
+            if relationship and plan.spatial
+            else plan.spec.id if plan.spatial else None
+        ),
+        "output_record_count": output_records,
+        "export_format": export_format,
+    }
+
+
+def _geojson_content(
+    rows: list[dict[str, Any]],
+    fields: list[MasterDataFieldSpec],
+    plan: MasterDataQueryPlan,
+) -> bytes:
+    return json.dumps(
+        _feature_collection(rows, fields, plan),
+        ensure_ascii=False,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _geojson_geometry(value: Any) -> dict[str, Any] | None:
+    if isinstance(value, dict):
+        return value
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def _json_value(value: Any) -> Any:
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return float(value)
+    return value
 
 
 def _csv_content(fields: list[MasterDataFieldSpec], rows: Any) -> bytes:

@@ -25,6 +25,8 @@
     "check:local-apis": "node scripts/check-local-apis.mjs",
     "check:local-interactions": "node scripts/check-local-interactions.mjs",
     "check:local-presentation": "node scripts/check-local-presentation.mjs",
+    "check:master-data-v1b": "node scripts/check-master-data-v1b.mjs",
+    "check:master-data-v1b-local": "node scripts/check-master-data-v1b.mjs --local",
     "check:enterprise-readiness": "python scripts/check_enterprise_readiness.py",
     "check:frontend-persistence": "node scripts/check-frontend-persistence.mjs",
     "check:interactive-map": "node scripts/check-interactive-map.mjs",
@@ -51,6 +53,7 @@
   "dependencies": {
     "@arcgis/core": "5.0.19",
     "@azure/msal-browser": "^4.30.0",
+    "@zip.js/zip.js": "~2.8.16",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
     "react": "19.2.4",

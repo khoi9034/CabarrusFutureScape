@@ -5,6 +5,13 @@ from app.models.development import (
     RealPropertyPermitClean,
     RealPropertyPermitParcelRelationship,
 )
+from app.models.master_data import (
+    AccelaPlanReviewClean,
+    FemaFloodZoneClean,
+    SchoolReference,
+    SchoolZone,
+    ZoningJurisdictionalClean,
+)
 from app.models.parcel import (
     Base,
     ParcelEnriched,
@@ -14,7 +21,9 @@ from app.models.parcel import (
 
 __all__ = [
     "Base",
+    "AccelaPlanReviewClean",
     "DevelopmentActivityParcelSummary",
+    "FemaFloodZoneClean",
     "ParcelPermitSegmentSummary",
     "ParcelEnriched",
     "ParcelZoningIntelligenceQA",
@@ -22,4 +31,7 @@ __all__ = [
     "PermitIntelligenceSegment",
     "RealPropertyPermitClean",
     "RealPropertyPermitParcelRelationship",
+    "SchoolReference",
+    "SchoolZone",
+    "ZoningJurisdictionalClean",
 ]

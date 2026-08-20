@@ -5,6 +5,7 @@
   "record_counts": {
     "demo_map_context_features": 212,
     "demo_map_layers": 11,
+    "master_data_v1b_rows": 60,
     "sample_parcels": 300,
     "economics_signals": 120,
     "school_capacity_rows": 37,
@@ -16,6 +17,7 @@
     { "path": "public/demo-data/economics_intelligence.json", "feature": "CFS Economics dashboard", "schema": "economics_intelligence.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/economics_powerbi_export.json", "feature": "Economics exports", "schema": "economics_powerbi_export.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/indicator_intelligence.json", "feature": "Planning Indicator Center", "schema": "indicator_intelligence.v1", "record_count": 1, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/master_data_v1b.json", "feature": "Master Data V1B catalog, preview, join, map, and exports", "schema": "master_data_v1b.v1", "record_count": 60, "source_classification": "deterministic sanitized demonstration records", "sanitized": true, "required": true },
     { "path": "public/demo-data/map_layers/demo_layer_manifest.json", "feature": "Planning map layers", "schema": "demo_layer_manifest.v2", "record_count": 11, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized cached GeoJSON manifest", "sanitized": true, "required": true },
     { "path": "public/demo-data/map_layers/demo_county_boundary.geojson", "feature": "Cabarrus County map frame", "schema": "geojson.feature_collection.v1", "record_count": 1, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified U.S. Census Bureau TIGERweb boundary", "sanitized": true, "required": true },
     { "path": "public/demo-data/map_layers/demo_municipal_boundaries.geojson", "feature": "Municipal map context", "schema": "geojson.feature_collection.v1", "record_count": 6, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified U.S. Census Bureau TIGERweb incorporated places", "sanitized": true, "required": true },

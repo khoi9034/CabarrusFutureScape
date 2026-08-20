@@ -2,10 +2,14 @@
 .env.*
 !.env.example
 .vercel
+.codex
+.agents
 .next
 out
 build
 node_modules
+local-data
+backend.env
 logs
 *.log
 outputs

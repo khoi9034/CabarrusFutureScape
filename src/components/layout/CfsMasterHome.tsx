@@ -44,7 +44,7 @@ const productCards: ProductCard[] = [
     action: "Open Master Data",
     accent: "cyan",
     description:
-      "Build governed Parcel and Permit extracts with controlled fields, filters, previews, and exports.",
+      "Build governed extracts across six planning datasets with controlled fields, filters, joins, previews, and exports.",
     href: "/?app=master-data",
     icon: Database,
     mode: "master-data",

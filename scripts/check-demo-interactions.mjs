@@ -21,6 +21,7 @@ import {
   REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
   resolveMapDiagnostic,
 } from "./map-acceptance-classification.mjs";
+import { validateGeoJson, validateXlsxBytes } from "./check-master-data-v1b.mjs";
 
 const root = process.cwd();
 const OPTIONAL_PUBLIC_RESOURCES = optionalPublicMapResources();
@@ -618,6 +619,35 @@ async function goto(page, baseUrl, query) {
       await assertHealthyText(page);
     },
   );
+}
+
+async function demoAliasChecks(page, baseUrl) {
+  await check("Home", "/demo redirects to the active four-product Demo Home", ["/demo", "product cards"], async () => {
+    await acceptedNavigation(
+      page,
+      "goto",
+      () => page.goto(`${baseUrl}/demo`, { waitUntil: "domcontentloaded" }),
+      async () => {
+        await page.waitForURL((url) => url.pathname === "/" && url.search === "", { timeout: 30_000 });
+        const home = page.getByTestId("cfs-master-home");
+        await home.waitFor();
+        const expected = [
+          ["planning", "CFS Planning", "Open Planning", "/?app=planning"],
+          ["economics", "CFS Economics", "Open Economics", "/?app=economics"],
+          ["master-data", "CFS Master Data", "Open Master Data", "/?app=master-data"],
+          ["ask-cfs", "Ask CFS", "Open Ask CFS", "/?app=ask-cfs"],
+        ];
+        assert.equal(await home.locator('[data-testid^="cfs-home-card-"]').count(), expected.length);
+        for (const [mode, title, action, href] of expected) {
+          const card = home.getByTestId(`cfs-home-card-${mode}`);
+          assert.equal(await card.getAttribute("href"), href, `${title} Home route drifted.`);
+          await card.getByText(title, { exact: true }).waitFor();
+          await card.getByText(action, { exact: true }).waitFor();
+        }
+        await assertHealthyText(page);
+      },
+    );
+  });
 }
 
 async function assertHealthyText(page) {
@@ -1232,46 +1262,170 @@ async function economicsChecks(page, baseUrl) {
 async function masterDataChecks(page, baseUrl) {
   const blockedBefore = diagnostics.blockedRequests.length;
   await goto(page, baseUrl, "?app=master-data");
-  await check("Master Data", "sanitized catalog, filtered preview, and CSV export", ["catalog", "filter", "preview", "CSV download"], async () => {
+  await check("Master Data", "six-dataset catalog, query, join, spatial preview, and governed exports", ["catalog", "filter", "fields", "pagination", "join", "map", "CSV", "XLSX", "GeoJSON"], async () => {
     const catalog = page.getByTestId("master-data-catalog");
     await catalog.waitFor();
     await page.getByText(/Portfolio Demo uses bundled sanitized samples/i).waitFor();
-    await catalog.getByRole("heading", { name: "Parcels", exact: true }).waitFor();
-    await catalog.getByRole("heading", { name: "Permits", exact: true }).waitFor();
-    await catalog.getByText("Sanitized Cabarrus County parcel sample", { exact: true }).waitFor();
+    for (const datasetId of ["parcels", "permits", "addresses", "zoning", "flood", "schools"]) {
+      await page.getByTestId(`master-data-dataset-${datasetId}`).waitFor();
+    }
+    const datasetSearch = page.getByRole("searchbox", { name: "Search datasets" });
+    await datasetSearch.fill("flood");
+    assert.equal(await catalog.locator('[data-testid^="master-data-dataset-"]').count(), 1, "Master Data catalog search did not filter metadata.");
+    await datasetSearch.fill("");
+
     await page.getByTestId("master-data-dataset-parcels").click();
-
     const preview = page.getByTestId("master-data-preview");
-    await page.getByRole("button", { name: "Preview", exact: true }).click();
+    await page.getByTestId("master-data-preview-run").click();
     await preview.locator("tbody tr").first().waitFor();
-    const unfilteredRows = await preview.locator("tbody tr").count();
-    const unfilteredSummary = await preview.getByText(/matching records/i).innerText();
-    assert.equal(unfilteredRows, 50, "Master Data default preview did not use 50 rows.");
+    assert.equal(await preview.locator("tbody tr").count(), 6, "Parcel preview did not expose the six-row sanitized sample.");
+    await assertMasterDataMapReady(page, 6);
+    await page.getByTestId("master-data-lineage").waitFor();
 
-    await page.getByRole("button", { name: "Add filter", exact: true }).click();
-    await page.getByRole("combobox", { name: "Filter 1 field" }).selectOption("official_parcel_id");
-    await page.getByLabel("Filter 1 value").fill("CFS-PARCEL-0149780354");
-    await page.getByRole("button", { name: "Preview", exact: true }).click();
-    await preview.getByText("1 matching records", { exact: true }).waitFor();
-    assert.equal(await preview.locator("tbody tr").count(), 1, "Master Data filter did not reduce the preview to one record.");
-    assert.notEqual(await preview.getByText(/matching records/i).innerText(), unfilteredSummary);
-    await preview.getByText("CFS-PARCEL-0149780354", { exact: true }).waitFor();
+    const parcelGeoJsonPromise = page.waitForEvent("download");
+    await page.getByTestId("master-data-export-geojson").click();
+    const parcelGeoJsonDownload = await parcelGeoJsonPromise;
+    assert.match(parcelGeoJsonDownload.suggestedFilename(), /^cfs-parcels-\d{4}-\d{2}-\d{2}\.geojson$/);
+    const parcelGeoJsonPath = await parcelGeoJsonDownload.path();
+    assert(parcelGeoJsonPath && statSync(parcelGeoJsonPath).size > 100, "Parcel GeoJSON download was empty.");
+    validateGeoJson(JSON.parse(readFileSync(parcelGeoJsonPath, "utf8")), { expectedFeatures: 6 });
 
-    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Dataset catalog", exact: true }).click();
+    await page.getByTestId("master-data-dataset-permits").click();
+    await page.getByRole("combobox", { name: "Preview page size" }).selectOption("25");
+    const permitNumber = page.getByTestId("master-data-field-permit_number");
+    await permitNumber.uncheck();
+    await permitNumber.check();
+    await page.getByTestId("master-data-preview-run").click();
+    await preview.getByText("30 matching records", { exact: true }).waitFor();
+    assert.equal(await preview.locator("tbody tr").count(), 25, "Permit preview page 1 did not use 25 rows.");
+    await page.getByTestId("master-data-page-next").click();
+    await preview.getByText("Page 2 of 2", { exact: true }).waitFor();
+    assert.equal(await preview.locator("tbody tr").count(), 5, "Permit preview page 2 did not retain the final five rows.");
+
+    await page.getByTestId("master-data-filter-add").click();
+    await page.getByTestId("master-data-filter-0-field").selectOption("permit_type");
+    await page.getByLabel("Filter 1 value").fill("Residential");
+    await page.getByTestId("master-data-preview-run").click();
+    await preview.getByText("15 matching records", { exact: true }).waitFor();
+    assert.equal(await preview.locator("tbody tr").count(), 15, "Permit type filter did not reduce the preview deterministically.");
+    await page.getByRole("button", { name: "Remove filter 1" }).click();
+
+    await page.getByTestId("master-data-join").check();
+    await page.getByTestId("master-data-join-attach-geometry").check();
+    await page.getByTestId("master-data-field-parcel_pin14").check();
+    await page.getByTestId("master-data-preview-run").click();
+    await preview.getByText("31 matching records", { exact: true }).waitFor();
+    const joinStats = page.getByTestId("master-data-join-stats");
+    await joinStats.waitFor();
+    for (const value of ["30", "24", "6", "80%", "31"]) {
+      assert((await joinStats.innerText()).includes(value), `Permit join statistics are missing ${value}.`);
+    }
+    await assertMasterDataMapReady(page, 25);
+    await page.getByTestId("master-data-lineage").getByText("permits_to_parcels", { exact: true }).waitFor();
+
+    const csvPromise = page.waitForEvent("download");
     await page.getByTestId("master-data-export-csv").click();
-    const download = await downloadPromise;
-    assert.match(download.suggestedFilename(), /^cfs-parcels-\d{4}-\d{2}-\d{2}\.csv$/);
-    const path = await download.path();
-    assert(path && statSync(path).size > 20, "Master Data CSV download was empty.");
-    const csv = readFileSync(path, "utf8");
-    assert(csv.includes('"Parcel ID"'), "Master Data CSV is missing its friendly header.");
-    assert(csv.includes("CFS-PARCEL-0149780354"), "Master Data CSV is missing the filtered parcel.");
+    const csvDownload = await csvPromise;
+    assert.match(csvDownload.suggestedFilename(), /^cfs-permits-\d{4}-\d{2}-\d{2}\.csv$/);
+    const csvPath = await csvDownload.path();
+    assert(csvPath && statSync(csvPath).size > 100, "Master Data CSV download was empty.");
+    const csv = readFileSync(csvPath, "utf8");
+    assert(csv.includes('"Permit ID"'), "Master Data CSV is missing its friendly header.");
+    assert(csv.includes("'=SANITIZED-DEMO-00030"), "Master Data CSV did not harden the formula-like fixture.");
+
+    const xlsxPromise = page.waitForEvent("download");
+    await page.getByTestId("master-data-export-xlsx").click();
+    const xlsxDownload = await xlsxPromise;
+    assert.match(xlsxDownload.suggestedFilename(), /^cfs-permits-\d{4}-\d{2}-\d{2}\.xlsx$/);
+    const xlsxPath = await xlsxDownload.path();
+    assert(xlsxPath && statSync(xlsxPath).size > 500, "Master Data XLSX download was empty.");
+    await validateXlsxBytes(readFileSync(xlsxPath), {
+      expectedText: "Permit ID",
+      formulaLikeValue: "=SANITIZED-DEMO-00030",
+    });
+
+    const joinedGeoJsonPromise = page.waitForEvent("download");
+    await page.getByTestId("master-data-export-geojson").click();
+    const joinedGeoJsonDownload = await joinedGeoJsonPromise;
+    assert.match(joinedGeoJsonDownload.suggestedFilename(), /^cfs-permits-\d{4}-\d{2}-\d{2}\.geojson$/);
+    const joinedGeoJsonPath = await joinedGeoJsonDownload.path();
+    assert(joinedGeoJsonPath && statSync(joinedGeoJsonPath).size > 100, "Joined GeoJSON download was empty.");
+    const joinedGeoJson = JSON.parse(readFileSync(joinedGeoJsonPath, "utf8"));
+    validateGeoJson(joinedGeoJson, { allowNullGeometry: true, expectedFeatures: 31 });
+    assert.equal(joinedGeoJson.features.filter((feature) => feature.geometry === null).length, 6, "Joined GeoJSON did not retain six unmatched permits.");
+    await acceptMasterDataOptionalBasemapFailures(page);
     assert.equal(
       diagnostics.blockedRequests.length,
       blockedBefore,
       "Master Data Demo attempted a forbidden backend/API request.",
     );
   });
+}
+
+async function acceptMasterDataOptionalBasemapFailures(page) {
+  const entries = pendingMapDiagnostics.filter(
+    (entry) => !entry.resolved && entry.page === page,
+  );
+  if (!entries.length) return;
+  assert.equal(
+    entries.some(
+      (entry) => entry.record.classification === "required_request_cancellation_candidate",
+    ),
+    false,
+    "Master Data cannot accept an optional basemap failure beside pending required work.",
+  );
+  assert.deepEqual(
+    directEvidenceForPage(page),
+    emptyDirectEvidence(),
+    "Master Data cannot accept an optional basemap failure beside a direct failure.",
+  );
+  const fallbackReady = await page.evaluate(() => {
+    const preview = document.querySelector('[data-testid="master-data-map-preview"]');
+    return Boolean(
+      preview?.getAttribute("data-map-state") === "ready" &&
+      Number(preview.getAttribute("data-mapped-feature-count")) > 0 &&
+      preview.querySelector(".esri-view-root"),
+    );
+  });
+  assert.equal(
+    fallbackReady,
+    true,
+    "Master Data optional basemap failure lacked a healthy required result-layer fallback.",
+  );
+  for (const entry of entries) {
+    Object.assign(entry.record, {
+      classification: "optional_public_basemap_failure",
+      fallback_healthy: true,
+      fatal: false,
+      lifecycle: "current",
+      reason:
+        "Approved optional public basemap failed while the required Master Data result MapView remained healthy.",
+    });
+    entry.resolved = true;
+    const target = entry.record.source === "console"
+      ? diagnostics.optionalPublicBasemapConsole
+      : diagnostics.optionalPublicBasemapFailures;
+    target.push(entry.record);
+  }
+}
+
+async function assertMasterDataMapReady(page, expectedMappedFeatures) {
+  const mapPreview = page.getByTestId("master-data-map-preview");
+  await mapPreview.getByText(new RegExp(`^${expectedMappedFeatures} mapped features?`)).waitFor({ timeout: 45_000 });
+  await mapPreview.getByText("Loading spatial preview…", { exact: true }).waitFor({ state: "detached", timeout: 45_000 });
+  assert.equal(
+    await mapPreview.getByText("Spatial preview unavailable", { exact: true }).count(),
+    0,
+    "Master Data spatial preview entered its error state.",
+  );
+  const view = mapPreview.getByLabel("Master Data ArcGIS MapView");
+  await view.locator(".esri-view-root").waitFor({ timeout: 45_000 });
+  await assertPaintedImage(await view.screenshot(), "Master Data spatial preview");
+  const pageErrorsBefore = diagnostics.pageErrors.length;
+  await view.click({ position: { x: 320, y: 190 } });
+  await delay(250);
+  assert.equal(diagnostics.pageErrors.length, pageErrorsBefore, "Master Data map selection interaction raised a page error.");
 }
 
 async function askCfsChecks(page, baseUrl) {
@@ -1452,6 +1606,9 @@ async function main() {
       viewport: { width: 1440, height: 1000 },
     });
     attachDiagnostics(context, origin);
+    const home = await context.newPage();
+    await demoAliasChecks(home, baseUrl);
+    await closeAcceptancePage(home);
     const planning = await context.newPage();
     await planningChecks(planning, baseUrl);
     await closeAcceptancePage(planning);
@@ -1491,7 +1648,7 @@ async function main() {
       baseUrl,
       assets,
       cases: Object.fromEntries(
-        ["Planning", "Economics", "Master Data", "Ask CFS"].map((product) => [
+        ["Home", "Planning", "Economics", "Master Data", "Ask CFS"].map((product) => [
           product,
           results.filter((result) => result.product === product).length,
         ]),

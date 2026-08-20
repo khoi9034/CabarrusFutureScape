@@ -35,7 +35,9 @@
 2. **Planning, 2 minutes:** Search `CFS-PARCEL-0149726579`, select it, and toggle Development Hotspots, Floodplain Review, and School Utilization + Permit Pressure.
 3. **Indicator Center and Ask CFS, 1 minute:** Open Indicator Center and ask what to inspect first. Point out evidence and caveats.
 4. **Economics, 1 minute:** Show database-backed KPIs, select a parcel, change a scenario control, and show the updated screening output.
-5. **Master Data, 1 minute:** Preview a governed dataset, apply a safe filter, and export selected fields.
+5. **Master Data, 1 minute:** Show the six-dataset catalog, preview a governed
+   dataset, then enable Permit → Parcel, review matched/unmatched lineage and
+   the spatial preview, and export selected fields.
 6. **Ask CFS, 1 minute:** Open the standalone route, ask a grounded follow-up, and point out evidence and caveats.
 
 ## Recovery
@@ -44,6 +46,9 @@
 - **Backend is not ready:** Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-cfs-presentation.ps1 -BackendOnly`.
 - **Database is unavailable:** Restore the existing local PostgreSQL listener on port `5433`, confirm database `cfs_dev`, then rerun `npm run present:cfs`.
 - **Ask CFS does not respond:** Run `npm run check:local-apis`. Deterministic Ask CFS requires FastAPI and `cfs_dev`, not OpenAI.
+- **Master Data V1B check:** With the presentation stack already running, run
+  `npm.cmd run check:master-data-v1b-local`. The check is loopback-only and does
+  not modify source tables or persist exports.
 - **Online basemap is unavailable:** Continue with the same-origin Cabarrus context map. County, municipality, water, road, place-label, overlay, parcel-focus, zoom, and reset rendering remain available without internet access.
 - **Port 3000 or 8000 is occupied:** The launcher refuses to stop an unrelated process. Identify and close that application yourself, then rerun the launcher.
 - **Validate services without restarting:** Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-cfs-presentation.ps1 -NoRestart`.

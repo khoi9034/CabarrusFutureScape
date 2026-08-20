@@ -4,11 +4,17 @@ import type Extent from "@arcgis/core/geometry/Extent";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type MapView from "@arcgis/core/views/MapView";
 import type { ArcGISRuntime } from "@/lib/gis/arcgisRuntime";
+import { createCfsVisualBasemapLayer } from "@/lib/gis/basemapProvider";
 import { cabarrusSceneConfig } from "@/lib/gis/gisConfig";
 
 export interface CabarrusSceneView {
   map: ArcGISMap;
   view: MapView;
+}
+
+export interface CfsResultSceneView extends CabarrusSceneView {
+  resultLayer: GraphicsLayer;
+  visualBasemapLayer: ReturnType<typeof createCfsVisualBasemapLayer>;
 }
 
 export interface CabarrusContextBasemapLayers {
@@ -70,6 +76,29 @@ export function createCabarrusSceneView(
   });
 
   return { map, view };
+}
+
+export function createCfsResultSceneView(
+  runtime: ArcGISRuntime,
+  container: HTMLDivElement,
+  resultLayer: GraphicsLayer,
+): CfsResultSceneView {
+  const visualBasemapLayer = createCfsVisualBasemapLayer(runtime);
+  const basemap = new runtime.Basemap({
+    baseLayers: [],
+    id: "cfs-master-data-osm-basemap",
+    title: "OpenStreetMap visual basemap",
+  });
+  const scene = createCabarrusSceneView(runtime, container, basemap);
+  scene.map.add(resultLayer);
+  return { ...scene, resultLayer, visualBasemapLayer };
+}
+
+export function destroyCfsResultSceneView(scene: CfsResultSceneView | null) {
+  if (!scene) return;
+  if (!scene.view.destroyed) scene.view.destroy();
+  if (!scene.resultLayer.destroyed) scene.resultLayer.destroy();
+  if (!scene.visualBasemapLayer.destroyed) scene.visualBasemapLayer.destroy();
 }
 
 export function createCabarrusStudyExtent(runtime: ArcGISRuntime) {

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Float, Numeric, String
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -36,6 +36,7 @@ class ParcelEnriched(Base):
     valuation_band: Mapped[str | None] = mapped_column(String)
     transformed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     enriched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    geometry: Mapped[str | None] = mapped_column(Text)
 
 
 class ParcelZoningOverlayV2(Base):

@@ -1,7 +1,11 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 
+import { validateStaticContract as validateMasterDataV1B } from "./check-master-data-v1b.mjs";
+
 const root = process.cwd();
+
+await validateMasterDataV1B();
 
 function read(path) {
   return readFileSync(join(root, path), "utf8");
@@ -158,6 +162,8 @@ const home = read("src/components/layout/CfsMasterHome.tsx");
 for (const route of ["app=planning", "app=economics", "app=master-data", "app=ask-cfs"]) {
   assertIncludes("src/components/layout/CfsMasterHome.tsx", home, route);
 }
+const demoRoute = read("src/app/demo/page.tsx");
+assertIncludes("src/app/demo/page.tsx", demoRoute, 'redirect("/")');
 
 const scene = read("src/components/gis/SceneViewContainer.tsx");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await getDemoMapContext(false)");

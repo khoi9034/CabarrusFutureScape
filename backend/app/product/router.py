@@ -203,10 +203,18 @@ def post_master_data_preview(
     return _envelope(
         request,
         {
+            "field_ids": page.field_ids,
             "page": page.page,
             "page_size": page.page_size,
             "rows": page.rows,
             "total": page.total,
+            "spatial": page.spatial,
+            "geometry_type": page.geometry_type,
+            "crs": page.crs,
+            "feature_collection": page.feature_collection,
+            "spatial_preview_limited": page.spatial_preview_limited,
+            "join_statistics": page.join_statistics,
+            "lineage": page.lineage,
         },
         settings,
     )
@@ -237,6 +245,8 @@ def post_master_data_export(
             "filters": result.filter_summary,
             "record_count": result.record_count,
             "format": result.format,
+            "join_statistics": result.join_statistics,
+            "lineage": result.lineage,
             "runtime_mode": settings.cfs_runtime_mode,
             "request_id": request_id,
         },
