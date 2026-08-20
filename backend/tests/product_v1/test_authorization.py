@@ -22,10 +22,19 @@ from app.product.service import ProductConflict, ProductNotFound, ProductService
 def test_role_permission_matrix_is_explicit() -> None:
     assert Permission.PLANNING_WRITE in ROLE_PERMISSIONS[Role.PLANNER]
     assert Permission.ECONOMICS_WRITE in ROLE_PERMISSIONS[Role.ANALYST]
+    assert Permission.MASTER_DATA_VIEW in ROLE_PERMISSIONS[Role.PLANNER]
+    assert Permission.MASTER_DATA_EXPORT in ROLE_PERMISSIONS[Role.PLANNER]
+    assert Permission.MASTER_DATA_VIEW in ROLE_PERMISSIONS[Role.ANALYST]
+    assert Permission.MASTER_DATA_EXPORT in ROLE_PERMISSIONS[Role.ANALYST]
     assert Permission.REPORT_WRITE in ROLE_PERMISSIONS[Role.REPORT_AUTHOR]
     assert Permission.INGESTION_APPLY in ROLE_PERMISSIONS[Role.DATA_STEWARD]
     assert Permission.ADMINISTER in ROLE_PERMISSIONS[Role.ADMINISTRATOR]
+    assert Permission.MASTER_DATA_VIEW in ROLE_PERMISSIONS[Role.ADMINISTRATOR]
+    assert Permission.MASTER_DATA_EXPORT in ROLE_PERMISSIONS[Role.ADMINISTRATOR]
     assert Permission.PROJECT_WRITE not in ROLE_PERMISSIONS[Role.VIEWER]
+    for role in (Role.VIEWER, Role.REPORT_AUTHOR, Role.DATA_STEWARD):
+        assert Permission.MASTER_DATA_VIEW not in ROLE_PERMISSIONS[role]
+        assert Permission.MASTER_DATA_EXPORT not in ROLE_PERMISSIONS[role]
 
 
 @pytest.mark.parametrize(

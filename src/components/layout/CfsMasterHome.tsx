@@ -1,14 +1,21 @@
 "use client";
 
-import { ArrowRight, BarChart3, BriefcaseBusiness, MapPinned } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  BriefcaseBusiness,
+  Database,
+  MapPinned,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { CfsAppMode } from "@/types";
 type ProductCard = {
   action: string;
   accent: "cyan" | "emerald" | "gold";
   description: string;
   href: string;
   icon: typeof MapPinned;
-  mode: "consulting" | "economics" | "planning";
+  mode: CfsAppMode;
   title: string;
 };
 
@@ -42,6 +49,16 @@ const productCards: ProductCard[] = [
     icon: BriefcaseBusiness,
     mode: "consulting",
     title: "CFS Investments",
+  },
+  {
+    action: "Open Master Data",
+    accent: "cyan",
+    description:
+      "Build governed Parcel and Permit extracts with controlled fields, filters, previews, and exports.",
+    href: "/?app=master-data",
+    icon: Database,
+    mode: "master-data",
+    title: "CFS Master Data",
   },
 ];
 
@@ -77,14 +94,14 @@ export function CfsMasterHome() {
             Cabarrus FutureScape
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            One county intelligence platform for planning, economics, and investment decisions.
+            One county intelligence platform for planning, economics, investments, and governed data extracts.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             Portfolio demonstration using sanitized, cached public demo data where applicable; screening outputs are preliminary.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3 lg:gap-5" aria-label="CFS products">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-5" aria-label="CFS products">
           {productCards.map((card) => {
             const Icon = card.icon;
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Numeric, String
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, Numeric, String
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -27,10 +27,15 @@ class ParcelEnriched(Base):
     mailzipcode: Mapped[str | None] = mapped_column(String)
     marketvalue_numeric: Mapped[float | None] = mapped_column(Numeric)
     assessedvalue_numeric: Mapped[float | None] = mapped_column(Numeric)
+    landvalue_numeric: Mapped[float | None] = mapped_column(Numeric)
+    buildingvalue_numeric: Mapped[float | None] = mapped_column(Numeric)
+    parcel_area_acres_calc: Mapped[float | None] = mapped_column(Float)
+    value_per_acre: Mapped[float | None] = mapped_column(Float)
     parcel_quality_status: Mapped[str | None] = mapped_column(String)
     parcel_size_category: Mapped[str | None] = mapped_column(String)
     valuation_band: Mapped[str | None] = mapped_column(String)
     transformed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    enriched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class ParcelZoningOverlayV2(Base):

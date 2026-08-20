@@ -20,6 +20,8 @@ import type {
   CfsAiSearchResponse,
 } from "@/types/api";
 
+type AskCfsAppMode = Exclude<CfsAppMode, "master-data">;
+
 export interface AskCfsExternalRequest {
   request: CfsAiSearchRequest;
   requestId: number;
@@ -29,7 +31,7 @@ const EMPTY_CONVERSATION: CfsAiConversationTurn[] = [];
 const askCfsConversationRepository = getAskCfsConversationRepository();
 
 interface PendingAskPersistence {
-  appMode: CfsAppMode;
+  appMode: AskCfsAppMode;
   domains: string[];
   filterContext: JsonObject;
   focusedDomain: string | null;
@@ -52,7 +54,7 @@ export function AskCfsPanel({
   suggestedPromptsOverride,
   visiblePromptCount,
 }: {
-  appMode?: CfsAppMode;
+  appMode?: AskCfsAppMode;
   externalRequest?: AskCfsExternalRequest | null;
   filterContext?: CfsAiSearchRequest["filter_context"];
   onResponse?: (response: CfsAiSearchResponse) => void;

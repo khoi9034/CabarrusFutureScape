@@ -43,6 +43,8 @@ export type ProductPermission =
   | "ingestion:apply"
   | "ingestion:dry_run"
   | "investments:write"
+  | "master_data:export"
+  | "master_data:view"
   | "planning:write"
   | "projects:write"
   | "reports:read"

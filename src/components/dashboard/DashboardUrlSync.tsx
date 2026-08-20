@@ -48,10 +48,19 @@ export function DashboardUrlSync() {
       // throwing or reaching for production county services.
       const nextState = deserializeDashboardUrlState(currentSearch);
       const appMode = new URLSearchParams(currentSearch).get("app");
-      if (appMode === "planning" || appMode === "economics" || appMode === "consulting") {
+      if (
+        appMode === "planning" ||
+        appMode === "economics" ||
+        appMode === "consulting" ||
+        appMode === "master-data"
+      ) {
         setCfsAppMode(appMode);
       } else {
         setCfsAppMode(null);
+        return;
+      }
+
+      if (appMode === "master-data") {
         return;
       }
 
@@ -136,7 +145,7 @@ export function DashboardUrlSync() {
       return;
     }
 
-    if (!cfsAppMode) {
+    if (!cfsAppMode || cfsAppMode === "master-data") {
       return;
     }
 

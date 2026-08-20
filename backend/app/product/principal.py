@@ -38,6 +38,8 @@ class Permission(StrEnum):
     ARTIFACT_DOWNLOAD = "artifacts:download"
     AUDIT_READ = "audit:read"
     ADMINISTER = "administration:write"
+    MASTER_DATA_VIEW = "master_data:view"
+    MASTER_DATA_EXPORT = "master_data:export"
 
 
 _VIEWER = {
@@ -49,13 +51,22 @@ _VIEWER = {
 ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
     Role.VIEWER: frozenset(_VIEWER),
     Role.PLANNER: frozenset(
-        _VIEWER | {Permission.PROJECT_WRITE, Permission.PLANNING_WRITE, Permission.REPORT_WRITE}
+        _VIEWER
+        | {
+            Permission.MASTER_DATA_EXPORT,
+            Permission.MASTER_DATA_VIEW,
+            Permission.PROJECT_WRITE,
+            Permission.PLANNING_WRITE,
+            Permission.REPORT_WRITE,
+        }
     ),
     Role.ANALYST: frozenset(
         _VIEWER
         | {
             Permission.ECONOMICS_WRITE,
             Permission.INVESTMENTS_WRITE,
+            Permission.MASTER_DATA_EXPORT,
+            Permission.MASTER_DATA_VIEW,
             Permission.PROJECT_WRITE,
             Permission.REPORT_WRITE,
         }

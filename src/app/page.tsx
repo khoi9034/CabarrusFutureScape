@@ -11,7 +11,10 @@ export default async function Home({ searchParams }: { searchParams: HomeSearchP
   const params = await searchParams;
   const appMode = firstSearchParam(params.app);
   const initialAppMode: CfsAppMode | undefined =
-    appMode === "planning" || appMode === "economics" || appMode === "consulting"
+    appMode === "planning" ||
+    appMode === "economics" ||
+    appMode === "consulting" ||
+    appMode === "master-data"
       ? appMode
       : undefined;
   const investmentPage = firstSearchParam(params.investmentPage);

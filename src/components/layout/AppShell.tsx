@@ -43,6 +43,7 @@ import { ConsultingShell } from "@/components/consulting/ConsultingShell";
 import { EconomicsShell } from "@/components/economics/EconomicsShell";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { CfsMasterHome } from "@/components/layout/CfsMasterHome";
+import { MasterDataWorkspace } from "@/components/master-data/MasterDataWorkspace";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
@@ -199,6 +200,13 @@ function ProductShell({
           resetKey="economics"
         >
           <EconomicsShell />
+        </EnterpriseErrorBoundary>
+      ) : cfsAppMode === "master-data" ? (
+        <EnterpriseErrorBoundary
+          moduleName="CFS Master Data"
+          resetKey="master-data"
+        >
+          <MasterDataWorkspace />
         </EnterpriseErrorBoundary>
       ) : parcelReviewMode ? (
         <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">

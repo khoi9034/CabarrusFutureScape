@@ -273,6 +273,10 @@ def test_openapi_covers_v1_product_and_legacy_compatibility_paths() -> None:
         "/api/v1/ingestion/runs",
         "/api/v1/artifacts",
         "/api/v1/audit",
+        "/api/v1/master-data/datasets",
+        "/api/v1/master-data/datasets/{dataset_id}",
+        "/api/v1/master-data/datasets/{dataset_id}/preview",
+        "/api/v1/master-data/datasets/{dataset_id}/export",
     }
     assert required <= set(paths)
 

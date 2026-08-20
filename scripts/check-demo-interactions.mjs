@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:net";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -1234,6 +1234,51 @@ async function economicsChecks(page, baseUrl) {
   });
 }
 
+async function masterDataChecks(page, baseUrl) {
+  const blockedBefore = diagnostics.blockedRequests.length;
+  await goto(page, baseUrl, "?app=master-data");
+  await check("Master Data", "sanitized catalog, filtered preview, and CSV export", ["catalog", "filter", "preview", "CSV download"], async () => {
+    const catalog = page.getByTestId("master-data-catalog");
+    await catalog.waitFor();
+    await page.getByText(/Portfolio Demo uses bundled sanitized samples/i).waitFor();
+    await catalog.getByRole("heading", { name: "Parcels", exact: true }).waitFor();
+    await catalog.getByRole("heading", { name: "Permits", exact: true }).waitFor();
+    await catalog.getByText("Sanitized Cabarrus County parcel sample", { exact: true }).waitFor();
+    await page.getByTestId("master-data-dataset-parcels").click();
+
+    const preview = page.getByTestId("master-data-preview");
+    await page.getByRole("button", { name: "Preview", exact: true }).click();
+    await preview.locator("tbody tr").first().waitFor();
+    const unfilteredRows = await preview.locator("tbody tr").count();
+    const unfilteredSummary = await preview.getByText(/matching records/i).innerText();
+    assert.equal(unfilteredRows, 50, "Master Data default preview did not use 50 rows.");
+
+    await page.getByRole("button", { name: "Add filter", exact: true }).click();
+    await page.getByRole("combobox", { name: "Filter 1 field" }).selectOption("official_parcel_id");
+    await page.getByLabel("Filter 1 value").fill("CFS-PARCEL-0149780354");
+    await page.getByRole("button", { name: "Preview", exact: true }).click();
+    await preview.getByText("1 matching records", { exact: true }).waitFor();
+    assert.equal(await preview.locator("tbody tr").count(), 1, "Master Data filter did not reduce the preview to one record.");
+    assert.notEqual(await preview.getByText(/matching records/i).innerText(), unfilteredSummary);
+    await preview.getByText("CFS-PARCEL-0149780354", { exact: true }).waitFor();
+
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByTestId("master-data-export-csv").click();
+    const download = await downloadPromise;
+    assert.match(download.suggestedFilename(), /^cfs-parcels-\d{4}-\d{2}-\d{2}\.csv$/);
+    const path = await download.path();
+    assert(path && statSync(path).size > 20, "Master Data CSV download was empty.");
+    const csv = readFileSync(path, "utf8");
+    assert(csv.includes('"Parcel ID"'), "Master Data CSV is missing its friendly header.");
+    assert(csv.includes("CFS-PARCEL-0149780354"), "Master Data CSV is missing the filtered parcel.");
+    assert.equal(
+      diagnostics.blockedRequests.length,
+      blockedBefore,
+      "Master Data Demo attempted a forbidden backend/API request.",
+    );
+  });
+}
+
 async function investmentsChecks(page, baseUrl) {
   await goto(page, baseUrl, "?app=consulting&investmentPage=overview");
   await check("Investments", "Home and Projects load populated CASE-1 state", ["Home", "Projects", "continue project"], async () => {
@@ -1480,7 +1525,7 @@ async function offlineMapChecks(browser, baseUrl) {
   await context.route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname.startsWith("/arcgis-assets/") || /(?:arcgis|esri)/i.test(url.hostname)) {
-      arcgisRequests.push(redactMapDiagnosticUrl(url));
+      arcgisRequests.push(url.href);
     }
     if (url.origin !== origin) {
       await route.abort(
@@ -1587,6 +1632,9 @@ async function main() {
     const investments = await context.newPage();
     await investmentsChecks(investments, baseUrl);
     await closeAcceptancePage(investments);
+    const masterData = await context.newPage();
+    await masterDataChecks(masterData, baseUrl);
+    await closeAcceptancePage(masterData);
     await mobileChecks(browser, baseUrl);
     await offlineMapChecks(browser, baseUrl);
     await closeAcceptanceContext(context);
@@ -1615,7 +1663,7 @@ async function main() {
       assets,
       caseArtifacts,
       cases: Object.fromEntries(
-        ["Planning", "Economics", "Investments"].map((product) => [
+        ["Planning", "Economics", "Investments", "Master Data"].map((product) => [
           product,
           results.filter((result) => result.product === product).length,
         ]),

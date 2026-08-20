@@ -329,7 +329,12 @@ const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
 ];
 
 function isCfsAppMode(value: unknown): value is CfsAppMode {
-  return value === "planning" || value === "economics" || value === "consulting";
+  return (
+    value === "planning" ||
+    value === "economics" ||
+    value === "consulting" ||
+    value === "master-data"
+  );
 }
 
 function writeStoredCfsAppMode(mode: CfsAppMode) {

@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
 from app.dependencies.database import get_db as database_session
+from app.dependencies.database import get_read_only_db as get_master_data_source_db
 from app.product.admin import administration_summary, list_users, update_user_roles
 from app.product.artifacts import (
     FutureObjectStorageArtifactStore,
@@ -27,6 +28,15 @@ from app.product.artifacts import (
 from app.product.audit import append_event, list_events
 from app.product.ingestion import RowsAdapter, run_ingestion, stage
 from app.product.jobs import ExternalWorkerJobProvider, InlineJobProvider
+from app.product.master_data import (
+    MasterDataExportRequest,
+    MasterDataPreviewRequest,
+    export_master_data,
+    get_master_data_dataset,
+    get_master_data_values,
+    list_master_data_datasets,
+    preview_master_data,
+)
 from app.product.principal import (
     AuthorizationError,
     Permission,
@@ -125,6 +135,122 @@ def me(
             "authenticated": principal.authenticated,
         },
         settings,
+    )
+
+
+@router.get("/master-data/datasets")
+def get_master_data_datasets(
+    request: Request,
+    principal: ProductPrincipal = Depends(get_product_principal),
+    source_session: Session = Depends(get_master_data_source_db, scope="function"),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    authorize(principal, Permission.MASTER_DATA_VIEW)
+    return _envelope(request, list_master_data_datasets(source_session), settings)
+
+
+@router.get("/master-data/datasets/{dataset_id}")
+def get_master_data_dataset_definition(
+    dataset_id: str,
+    request: Request,
+    principal: ProductPrincipal = Depends(get_product_principal),
+    source_session: Session = Depends(get_master_data_source_db, scope="function"),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    authorize(principal, Permission.MASTER_DATA_VIEW)
+    return _envelope(
+        request,
+        get_master_data_dataset(source_session, dataset_id),
+        settings,
+    )
+
+
+@router.get("/master-data/datasets/{dataset_id}/values/{field_id}")
+def get_master_data_field_values(
+    dataset_id: str,
+    field_id: str,
+    request: Request,
+    q: str | None = Query(default=None, max_length=200),
+    limit: int = Query(default=50, ge=1, le=100),
+    principal: ProductPrincipal = Depends(get_product_principal),
+    source_session: Session = Depends(get_master_data_source_db, scope="function"),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    authorize(principal, Permission.MASTER_DATA_VIEW)
+    return _envelope(
+        request,
+        get_master_data_values(
+            source_session,
+            dataset_id=dataset_id,
+            field_id=field_id,
+            query=q,
+            limit=limit,
+        ),
+        settings,
+    )
+
+
+@router.post("/master-data/datasets/{dataset_id}/preview")
+def post_master_data_preview(
+    dataset_id: str,
+    payload: MasterDataPreviewRequest,
+    request: Request,
+    principal: ProductPrincipal = Depends(get_product_principal),
+    source_session: Session = Depends(get_master_data_source_db, scope="function"),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    authorize(principal, Permission.MASTER_DATA_VIEW)
+    page = preview_master_data(source_session, dataset_id, payload)
+    return _envelope(
+        request,
+        {
+            "page": page.page,
+            "page_size": page.page_size,
+            "rows": page.rows,
+            "total": page.total,
+        },
+        settings,
+    )
+
+
+@router.post("/master-data/datasets/{dataset_id}/export")
+def post_master_data_export(
+    dataset_id: str,
+    payload: MasterDataExportRequest,
+    request: Request,
+    principal: ProductPrincipal = Depends(get_product_principal),
+    audit_session: Session = Depends(get_db, scope="function"),
+    source_session: Session = Depends(get_master_data_source_db, scope="function"),
+    settings: Settings = Depends(get_settings),
+) -> Response:
+    authorize(principal, Permission.MASTER_DATA_EXPORT)
+    result = export_master_data(source_session, dataset_id, payload)
+    request_id = _request_id(request)
+    append_event(
+        audit_session,
+        principal=principal,
+        action="master_data_export",
+        object_type="master_data_dataset",
+        object_id=result.dataset_id,
+        details={
+            "field_ids": result.field_ids,
+            "field_count": len(result.field_ids),
+            "filters": result.filter_summary,
+            "record_count": result.record_count,
+            "format": result.format,
+            "runtime_mode": settings.cfs_runtime_mode,
+            "request_id": request_id,
+        },
+        request_id=request_id,
+    )
+    return Response(
+        result.content,
+        media_type=result.content_type,
+        headers={
+            "Cache-Control": "private, no-store",
+            "Content-Disposition": f"attachment; filename*=UTF-8''{quote(result.filename, safe='')}",
+            "X-Content-Type-Options": "nosniff",
+        },
     )
 
 

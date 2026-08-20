@@ -55,12 +55,12 @@ const FORCE_REQUIRED_HEALTH_FAILURE_PATH =
   process.env.CFS_FRONTEND_PERSISTENCE_TEST_REQUIRED_HEALTH_FAILURE_PATH?.trim() || null;
 const REQUIRED_HEALTH_PATHS = new Set(["/ai/status", "/health/database", "/health/ready"]);
 const PLANNER_PERMISSIONS = [
-  "ask_cfs:use", "data:read", "planning:write", "projects:write", "reports:read", "reports:write", "sources:read",
+  "ask_cfs:use", "data:read", "master_data:export", "master_data:view", "planning:write", "projects:write", "reports:read", "reports:write", "sources:read",
 ];
 const ADMINISTRATOR_PERMISSIONS = [
   "administration:write", "artifacts:download", "ask_cfs:use", "audit:read",
   "data:read", "economics:write", "ingestion:apply", "ingestion:dry_run",
-  "investments:write", "planning:write", "projects:write", "reports:read",
+  "investments:write", "master_data:export", "master_data:view", "planning:write", "projects:write", "reports:read",
   "reports:write", "sources:read", "sources:write",
 ];
 assert(
@@ -1839,7 +1839,7 @@ async function localAuthorizationMatrix() {
 
   await runRoleCase(
     "Analyst",
-    ["ask_cfs:use", "data:read", "economics:write", "investments:write", "projects:write", "reports:read", "reports:write", "sources:read"],
+    ["ask_cfs:use", "data:read", "economics:write", "investments:write", "master_data:export", "master_data:view", "projects:write", "reports:read", "reports:write", "sources:read"],
     async (page) => {
       await goto(page, LOCAL_URL, "?app=planning");
       await assertVisiblePlanningSavesDisabled(page);

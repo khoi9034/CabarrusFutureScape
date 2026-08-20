@@ -8,6 +8,24 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.parcel import Base
 
 
+class RealPropertyPermitClean(Base):
+    __tablename__ = "real_property_permit_clean"
+    __table_args__ = {"schema": "public"}
+
+    permit_id: Mapped[str] = mapped_column(String, primary_key=True)
+    permit_number: Mapped[str | None] = mapped_column(String)
+    parcel_number: Mapped[str | None] = mapped_column(String)
+    permit_date: Mapped[date | None] = mapped_column(Date)
+    permit_type_normalized: Mapped[str | None] = mapped_column(String)
+    work_type_normalized: Mapped[str | None] = mapped_column(String)
+    permit_status_normalized: Mapped[str | None] = mapped_column(String)
+    permit_amount: Mapped[Decimal | None] = mapped_column(Numeric)
+    source_last_modified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+    )
+    transformed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class RealPropertyPermitParcelRelationship(Base):
     __tablename__ = "real_property_permit_parcel_relationship"
     __table_args__ = {"schema": "public"}

@@ -6,6 +6,7 @@ import {
   BookOpen,
   ChevronDown,
   Command,
+  Database,
   FileSearch,
   Home,
   LayoutDashboard,
@@ -37,6 +38,7 @@ import { dashboardRoleRegistry } from "@/lib/dashboard/roleRegistry";
 import { workspaceLayoutPresets } from "@/lib/dashboard/workspacePresets";
 import {
   getApiErrorDisplayMessage,
+  IS_ENTERPRISE_MODE,
   recordTechnicalEvent,
   USE_BACKEND_API,
   USE_DEMO_DATA,
@@ -147,6 +149,12 @@ const appModeOptions = [
     label: "Investment Intelligence",
     shortLabel: "CFS Investments",
   },
+  {
+    description: "Governed Parcel and Permit previews, filters, fields, and derived exports.",
+    id: "master-data",
+    label: "Master Data",
+    shortLabel: "CFS Master Data",
+  },
 ] as const;
 
 type QuickSearchStatus =
@@ -211,11 +219,15 @@ export function TopNav() {
   const localRuntime = useLocalRuntimeStatus();
   const runtimeStatusLabel = USE_DEMO_DATA
     ? "Portfolio Demo"
-    : USE_BACKEND_API
+    : IS_ENTERPRISE_MODE
+      ? "Enterprise API"
+      : USE_BACKEND_API
       ? "Live Local Data"
       : "Static";
   const runtimeStatusTone = USE_BACKEND_API ? localRuntime.tone : "blue";
   const consultingMode = cfsAppMode === "consulting";
+  const masterDataMode = cfsAppMode === "master-data";
+  const quickSearchEnabled = !masterDataMode;
   const searchPlaceholder = USE_DEMO_DATA
     ? "Search demo parcel, PIN, zoning, subdivision"
     : cfsAppMode === "economics" || consultingMode
@@ -284,7 +296,7 @@ export function TopNav() {
   }, []);
 
   useEffect(() => {
-    if (!quickSearchReady) {
+    if (!quickSearchEnabled || !quickSearchReady) {
       return;
     }
 
@@ -372,10 +384,10 @@ export function TopNav() {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [quickSearchReady, trimmedQuickSearchQuery]);
+  }, [quickSearchEnabled, quickSearchReady, trimmedQuickSearchQuery]);
 
   const loadDemoQuickSearchSuggestions = useCallback(() => {
-    if (!USE_DEMO_DATA || quickSearchReady) {
+    if (!quickSearchEnabled || !USE_DEMO_DATA || quickSearchReady) {
       return;
     }
 
@@ -415,7 +427,13 @@ export function TopNav() {
         );
         setQuickSearchStatus("error");
       });
-  }, [quickSearchReady]);
+  }, [quickSearchEnabled, quickSearchReady]);
+
+  useEffect(() => {
+    if (quickSearchEnabled) return;
+    demoSuggestionRequestRef.current += 1;
+    setQuickSearchOpen(false);
+  }, [quickSearchEnabled]);
 
   const hydrateSelectedParcel = useCallback(
     (
@@ -551,6 +569,8 @@ export function TopNav() {
                 <BriefcaseBusiness className="h-4 w-4 text-[var(--consult-emerald)]" />
               ) : cfsAppMode === "economics" ? (
                 <BarChart3 className="h-4 w-4 text-[#f0cd79]" />
+              ) : masterDataMode ? (
+                <Database className="h-4 w-4 text-[#8fe7ff]" />
               ) : (
                 <Map className="h-4 w-4 text-[#f0cd79]" />
               )}
@@ -711,6 +731,7 @@ export function TopNav() {
           </nav>
         ) : null}
 
+        {!masterDataMode ? (
         <div className="order-4 flex w-full min-w-0 items-center gap-2 md:order-2 md:w-auto md:flex-1 lg:order-3">
           <div
             className="relative block min-w-0 flex-1 md:min-w-[12rem]"
@@ -901,9 +922,10 @@ export function TopNav() {
             />
           </div>
         </div>
+        ) : <div className="order-4 hidden min-w-0 flex-1 lg:block" />}
 
         <div className="relative order-2 flex shrink-0 items-center gap-2 lg:order-4">
-          <button
+          {!masterDataMode ? <button
             aria-label="Open command palette"
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white md:hidden xl:flex"
             onClick={() => setCommandPaletteOpen(true)}
@@ -911,7 +933,7 @@ export function TopNav() {
             type="button"
           >
             <Command className="h-4 w-4" />
-          </button>
+          </button> : null}
           <button
             aria-expanded={moreOpen}
             aria-label={
@@ -919,6 +941,8 @@ export function TopNav() {
                 ? "Open economics controls"
                 : consultingMode
                   ? "Open investment controls"
+                  : masterDataMode
+                    ? "Open Master Data controls"
                 : "Open dashboard controls"
             }
             className="flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:text-white"
@@ -928,6 +952,8 @@ export function TopNav() {
                 ? "Economics status and mode controls"
                 : consultingMode
                   ? "Investments status and mode controls"
+                  : masterDataMode
+                    ? "Master Data status and access"
                 : "Role, workspace, and scenario controls"
             }
             type="button"
@@ -990,6 +1016,22 @@ export function TopNav() {
                       tone={runtimeStatusTone}
                     />
                   </div>
+                </div>
+              ) : masterDataMode ? (
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-[#68d8ff]/20 bg-[#68d8ff]/10 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fe7ff]">
+                      CFS Master Data
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-slate-300">
+                      Governed Parcel and Permit previews and derived exports.
+                    </p>
+                  </div>
+                  <CompactStatusChip
+                    icon={Activity}
+                    label={runtimeStatusLabel}
+                    tone={runtimeStatusTone}
+                  />
                 </div>
               ) : (
                 <div className="grid gap-3">
