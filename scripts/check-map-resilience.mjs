@@ -146,11 +146,19 @@ async function run(
     if (url.pathname.startsWith("/arcgis-assets/")) {
       diagnostics.arcgisAssetRequests.add(redactMapDiagnosticUrl(url));
     }
-    if (url.origin !== origin && /(?:arcgis|esri)/i.test(url.hostname)) {
+    if (
+      url.origin !== origin &&
+      (/(?:arcgis|esri|openstreetmap)/i.test(url.hostname) ||
+        isApprovedPublicArcgisRequest(url, optionalPublicResources))
+    ) {
       diagnostics.externalArcgisRequests.push(`${name}: ${redactMapDiagnosticUrl(url)}`);
     }
     if (
-      isExternalArcgisRequest(url, { apiOrigin, appOrigin: origin }) &&
+      isExternalArcgisRequest(url, {
+        apiOrigin,
+        appOrigin: origin,
+        resources: optionalPublicResources,
+      }) &&
       !isApprovedPublicArcgisRequest(
         url,
         optionalPublicResources,
@@ -215,7 +223,11 @@ async function run(
     if (
       url.origin === origin ||
       url.origin === apiOrigin ||
-      isExternalArcgisRequest(url, { apiOrigin, appOrigin: origin })
+      isExternalArcgisRequest(url, {
+        apiOrigin,
+        appOrigin: origin,
+        resources: optionalPublicResources,
+      })
     ) {
       const message = `${name}: ${diagnostic.reason} ${redactMapDiagnosticUrl(url)}`;
       scenario.fatalRequests.push(message);
@@ -450,9 +462,9 @@ async function run(
       });
     }
     assert.deepEqual(scenario.pageErrors, [], `${name} page errors were observed.`);
-    assert.deepEqual(scenario.dependentFailures, [], `${name} dependent map failures were observed.`);
     assert.deepEqual(scenario.fatalConsole, [], `${name} fatal console errors were observed.`);
     assert.deepEqual(scenario.fatalRequests, [], `${name} fatal requests were observed.`);
+    assert.deepEqual(scenario.dependentFailures, [], `${name} dependent map failures were observed.`);
     assert.deepEqual(scenario.apiFailures, [], `${name} API response failures were observed.`);
     results.push(name);
     console.log(`PASS map resilience: ${name}`);
@@ -671,7 +683,7 @@ function resolveScenarioCandidates(scenario, lifecycleOverride = null) {
 }
 
 function recordPrimaryScenarioFailure(candidate, scenario) {
-  const fatalMessage = `${scenario.name}: ${candidate.reason}`;
+  const fatalMessage = `${scenario.name}: ${candidate.reason} ${candidate.url ?? candidate.request_key ?? "[request unavailable]"}`;
   diagnostics.requestFailures.push(fatalMessage);
   scenario.fatalRequests.push(fatalMessage);
 }
@@ -687,7 +699,7 @@ function recordDependentScenarioFailure(candidate, scenario, expected) {
     scenario.expectedOptionalFatal.push(candidate);
     return;
   }
-  const fatalMessage = `${scenario.name}: ${candidate.reason}`;
+  const fatalMessage = `${scenario.name}: ${candidate.reason} ${candidate.url ?? candidate.request_key ?? "[request unavailable]"}`;
   diagnostics.console.push(fatalMessage);
   scenario.dependentFailures.push(fatalMessage);
 }
@@ -753,22 +765,30 @@ try {
   }
   await run("normal clean context");
   await run(
-    "external ArcGIS blocked",
+    "external OSM blocked",
     async (context) => {
       await context.route("**/*", (route) => {
         const url = new URL(route.request().url());
-        return url.origin !== origin && /(?:arcgis|esri)/i.test(url.hostname)
+        return isApprovedPublicArcgisRequest(
+          url,
+          optionalPublicResources,
+          route.request().headers(),
+        )
           ? route.abort("failed")
           : route.continue();
       });
     },
-    async (_context, _page, scenario) => {
+    async (_context, page, scenario) => {
       assert(
         scenario.optionalCandidates.some(
           (candidate) => candidate.classification === "optional_public_basemap_candidate",
         ),
-        "External ArcGIS blocking produced no optional public map diagnostic.",
+        "External OSM blocking produced no optional public map diagnostic.",
       );
+      const map = page.getByTestId("cfs-arcgis-map");
+      assert.equal(await map.getAttribute("data-reference-basemap-state"), "failed");
+      assert.equal(await map.getAttribute("data-basemap-mode"), "same-origin");
+      await page.getByTestId("cfs-reference-basemap-warning").waitFor();
     },
   );
   await run(
@@ -939,7 +959,7 @@ try {
     diagnostics.optionalPublicBasemapFailures.every(
       (failure) => failure.fatal === false && failure.fallback_healthy === true,
     ),
-    "An optional public ArcGIS failure was accepted without a healthy required fallback.",
+    "An optional public basemap failure was accepted without a healthy required fallback.",
   );
   console.log(
     JSON.stringify(
@@ -1129,6 +1149,16 @@ async function assertInteractiveMap(page) {
   const sdkVersion = await map.getAttribute("data-arcgis-sdk-version");
   assert.match(sdkVersion ?? "", /^\d+\.\d+\.\d+$/);
   assert.equal(await map.getAttribute("data-arcgis-assets-path"), `/arcgis-assets/${sdkVersion}`);
+  const publicBasemap = optionalPublicResources[0];
+  assert.equal(await map.getAttribute("data-basemap-provider"), publicBasemap.provider);
+  assert.equal(
+    await map.getAttribute("data-basemap-url-template"),
+    publicBasemap.urlTemplate,
+  );
+  assert.equal(
+    await map.getAttribute("data-basemap-attribution"),
+    publicBasemap.attribution,
+  );
   assert.match(
     (await map.getAttribute("data-basemap-mode")) ?? "",
     /^same-origin(?:\+public)?$/,
@@ -1180,9 +1210,13 @@ async function assertInteractiveMap(page) {
       const state = element?.getAttribute("data-reference-basemap-state");
       const layers = window.__cfsGetMapDebugState?.().layers ?? [];
       if (state === "ready") {
-        return layers.some(
-          (layer) => layer.id === "cfs-public-reference-labels" && layer.visible,
+        const visual = layers.find(
+          (layer) => layer.id === "cfs-public-reference-basemap",
         );
+        const localLabels = layers.find(
+          (layer) => layer.id === "cfs-local-place-labels",
+        );
+        return visual?.visible === true && localLabels?.visible === false;
       }
       if (state === "failed") {
         return layers.some(
@@ -1197,6 +1231,14 @@ async function assertInteractiveMap(page) {
     null,
     { timeout: 30_000 },
   );
+  if ((await map.getAttribute("data-reference-basemap-state")) === "ready") {
+    const attribution = map.locator(".esri-attribution, arcgis-attribution").first();
+    await attribution.waitFor({ state: "visible", timeout: 10_000 });
+    assert(
+      (await attribution.textContent())?.includes(publicBasemap.attribution),
+      "Visible map attribution does not identify the configured tile provider.",
+    );
+  }
   await assertPaintedImage(await map.screenshot(), "interactive Cabarrus County map");
   assert.equal(
     await page.getByText("Interactive map could not start", { exact: true }).count(),

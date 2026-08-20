@@ -4,18 +4,20 @@
 
 ArcGIS MapView is the primary renderer in demo, local, and enterprise modes.
 It starts with a custom `Basemap` made from the existing same-origin Cabarrus
-county, municipality, hydrography, major-road, and place-label graphics. It
-then adds the public World Dark Gray Canvas base and reference-label cached
-services directly by URL, without a Portal item, API key, or ArcGIS sign-in.
-These direct services restore the original dark-gray street and place context
-while the same-origin layers remain the required interactive fallback.
+county outline, municipality, hydrography, major-road, and place-label
+graphics. It then loads the ArcGIS SDK `OpenStreetMapLayer` underneath that
+context without a Portal item, API key, or ArcGIS sign-in. Once OpenStreetMap
+is ready, its labels replace the local place labels while the same-origin
+layers remain the required interactive fallback.
 
-`NEXT_PUBLIC_CFS_REFERENCE_BASEMAP_URL` and
-`NEXT_PUBLIC_CFS_REFERENCE_LABELS_URL` may point Enterprise deployments to
-approved public or organization-hosted cached map services. They must not
-contain credentials. A failed reference service is removed without destroying MapView;
-the neutral same-origin context remains interactive and shows a small,
-nonblocking warning.
+`NEXT_PUBLIC_CFS_BASEMAP_URL_TEMPLATE` may point Enterprise deployments to one
+approved web-tile host using either `{z}/{x}/{y}` or
+`{level}/{col}/{row}` placeholders. The URL must use HTTPS and must not contain
+credentials, a query, a fragment, subdomain expansion, or any other template
+tokens. `NEXT_PUBLIC_CFS_BASEMAP_ATTRIBUTION` supplies the provider attribution;
+it defaults to `© OpenStreetMap contributors`. A failed visual basemap is
+removed without destroying MapView; the same-origin context and local labels
+remain interactive and a small nonblocking warning is shown.
 
 The SVG renderer mounts underneath MapView while the SDK loads. MapView becomes
 visible and receives pointer input only after it reports `ready`, has a valid
@@ -62,16 +64,6 @@ versioned tree may be cached immutably without keeping incompatible worker
 chunks after an SDK upgrade.
 
 `npm run check:interactive-map` proves primary rendering, local assets, paint,
-pan, zoom, hit testing, layers, snapshot capture, route restoration, mobile,
-slow-network, blocked external Esri services, and WebGL fallback/retry.
-
-## Optional hosted Esri basemap
-
-Set `NEXT_PUBLIC_CFS_ESRI_BASEMAP_ENABLED=true`, provide a browser-safe
-`NEXT_PUBLIC_CFS_ESRI_API_KEY`, and optionally set
-`NEXT_PUBLIC_CFS_ESRI_BASEMAP_STYLE`. MapView first becomes interactive with the
-same-origin basemap, then loads the hosted style underneath it. A timeout or
-hosted-service error leaves the local interactive map unchanged. All
-`NEXT_PUBLIC_` values are visible in the browser, so restrict the key to the
-deployed HTTPS origins and only the basemap services it needs; never use a
-server credential here.
+pan, zoom, hit testing, layers, attribution, snapshot capture, route
+restoration, mobile, slow-network, blocked external visual-basemap services,
+and WebGL fallback/retry.

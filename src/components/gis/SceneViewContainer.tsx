@@ -1,12 +1,11 @@
 "use client";
 
 import type Graphic from "@arcgis/core/Graphic";
-import type Basemap from "@arcgis/core/Basemap";
 import type Extent from "@arcgis/core/geometry/Extent";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type Layer from "@arcgis/core/layers/Layer";
-import type TileLayer from "@arcgis/core/layers/TileLayer";
+import type WebTileLayer from "@arcgis/core/layers/WebTileLayer";
 import type MapView from "@arcgis/core/views/MapView";
 import {
   useCallback,
@@ -53,8 +52,10 @@ import {
   type ArcGISRuntime,
 } from "@/lib/gis/arcgisRuntime";
 import {
-  updateSelectedParcelSymbols,
-} from "@/lib/gis/mockSceneLayers";
+  CFS_BASEMAP_PROVIDER_CONFIG,
+  createCfsVisualBasemapLayer,
+} from "@/lib/gis/basemapProvider";
+import { updateSelectedParcelSymbols } from "@/lib/gis/mockSceneLayers";
 import {
   applyOperationalLayerVisibility,
   createOperationalLayers,
@@ -81,13 +82,9 @@ import {
   resolveParcelMapFocus,
 } from "@/lib/map/parcelMapFocus";
 import {
-  CFS_ESRI_BASEMAP_STYLE,
-  CFS_REFERENCE_BASEMAP_URL,
-  CFS_REFERENCE_LABELS_URL,
   recordTechnicalEvent,
   USE_DEMO_DATA,
   USE_INTERACTIVE_MAP,
-  USE_ONLINE_BASEMAP,
 } from "@/lib/api/client";
 import {
   getDemoMapContext,
@@ -350,8 +347,6 @@ export function SceneViewContainer() {
     useState<ArcGisLoadState>(USE_INTERACTIVE_MAP ? "idle" : "disabled");
   const [arcGisViewState, setArcGisViewState] =
     useState<ArcGisLoadState>(USE_INTERACTIVE_MAP ? "idle" : "disabled");
-  const [hostedBasemapState, setHostedBasemapState] =
-    useState<ArcGisLoadState>(USE_ONLINE_BASEMAP ? "idle" : "disabled");
   const [referenceBasemapState, setReferenceBasemapState] =
     useState<ArcGisLoadState>("idle");
   const [mapZoom, setMapZoom] = useState<number | null>(null);
@@ -985,13 +980,12 @@ export function SceneViewContainer() {
     let extentWatchHandle: ArcGISHandle | null = null;
     let fatalWatchHandle: ArcGISHandle | null = null;
     let focusEventHandler: ((event: Event) => void) | null = null;
-    let hostedBasemap: Basemap | null = null;
-    let hostedBasemapLayers: Layer[] = [];
-    let referenceBasemapLayers: TileLayer[] = [];
     let hoverHandle: ArcGISHandle | null = null;
     let localView: SceneView | null = null;
     let readyWatchHandle: ArcGISHandle | null = null;
     let refocusEventHandler: (() => void) | null = null;
+    let visualBasemapAbortController: AbortController | null = null;
+    let visualBasemapLayer: WebTileLayer | null = null;
     let zoomWatchHandle: ArcGISHandle | null = null;
     const initializationAttemptId = ++initializationAttemptRef.current;
     const isCurrentAttempt = () =>
@@ -1251,7 +1245,6 @@ export function SceneViewContainer() {
       setMapViewReadyState("loading");
       setArcGisRuntimeState(USE_INTERACTIVE_MAP ? "idle" : "disabled");
       setArcGisViewState(USE_INTERACTIVE_MAP ? "idle" : "disabled");
-      setHostedBasemapState(USE_ONLINE_BASEMAP ? "idle" : "disabled");
       setReferenceBasemapState("idle");
 
       try {
@@ -1620,62 +1613,54 @@ export function SceneViewContainer() {
         setMapStatus("online");
 
         setReferenceBasemapState("loading");
-        referenceBasemapLayers = [
-          new runtime.TileLayer({
-            id: "cfs-public-reference-basemap",
-            listMode: "hide",
-            title: "Public dark-gray reference basemap",
-            url: CFS_REFERENCE_BASEMAP_URL,
-          }),
-          new runtime.TileLayer({
-            id: "cfs-public-reference-labels",
-            listMode: "hide",
-            title: "Public dark-gray reference labels",
-            url: CFS_REFERENCE_LABELS_URL,
-          }),
-        ];
+        visualBasemapLayer = createCfsVisualBasemapLayer(runtime);
+        visualBasemapAbortController = new AbortController();
+        const visualLayer = visualBasemapLayer;
+        const visualLayerAbortController = visualBasemapAbortController;
         void withTimeout(
-          Promise.all(referenceBasemapLayers.map((layer) => layer.load())),
+          visualLayer
+            .load()
+            .then(() =>
+              visualLayer.fetchTile(10, 404, 282, {
+                signal: visualLayerAbortController.signal,
+              }),
+            )
+            .then(async () => {
+              if (
+                !isCurrentAttempt() ||
+                view.destroyed ||
+                visualLayerAbortController.signal.aborted ||
+                visualBasemapLayer !== visualLayer
+              ) {
+                visualLayer.destroy();
+                return;
+              }
+              contextBasemap.baseLayers.add(visualLayer, 0);
+              const layerView = await view.whenLayerView(visualLayer as Layer);
+              await runtime.reactiveUtils.whenOnce(() => !layerView.updating);
+              if (
+                !isCurrentAttempt() ||
+                view.destroyed ||
+                visualLayerAbortController.signal.aborted ||
+                visualBasemapLayer !== visualLayer
+              ) {
+                return;
+              }
+              contextLayers.placeLabels.visible = false;
+              setReferenceBasemapState("ready");
+            }),
           10_000,
-          "Public reference basemap timed out.",
+          "OpenStreetMap visual basemap timed out.",
         )
-          .then(async ([baseLayer, labelsLayer]) => {
-            if (!isCurrentAttempt() || view.destroyed) {
-              baseLayer.destroy();
-              labelsLayer.destroy();
-              return;
-            }
-            contextBasemap.baseLayers.add(baseLayer, 0);
-            contextBasemap.referenceLayers.add(labelsLayer, 0);
-            await withTimeout(
-              Promise.all([
-                view.whenLayerView(baseLayer),
-                view.whenLayerView(labelsLayer),
-              ]),
-              10_000,
-              "Public reference basemap did not render.",
-            );
-            if (!isCurrentAttempt() || view.destroyed) {
-              return;
-            }
-            setCountyLandOpacity(
-              layers["county-boundary"] as GraphicsLayer,
-              0.04,
-            );
-            contextLayers.placeLabels.visible = false;
-            setReferenceBasemapState("ready");
-          })
           .catch((error) => {
-            for (const layer of referenceBasemapLayers) {
-              contextBasemap.baseLayers.remove(layer);
-              contextBasemap.referenceLayers.remove(layer);
-              layer.destroy();
+            visualLayerAbortController.abort();
+            contextBasemap.baseLayers.remove(visualLayer);
+            if (!visualLayer.destroyed) {
+              visualLayer.destroy();
             }
-            referenceBasemapLayers = [];
-            setCountyLandOpacity(
-              layers["county-boundary"] as GraphicsLayer,
-              0.94,
-            );
+            if (visualBasemapLayer === visualLayer) {
+              visualBasemapLayer = null;
+            }
             contextLayers.placeLabels.visible = true;
             if (!isCurrentAttempt()) {
               return;
@@ -1685,66 +1670,6 @@ export function SceneViewContainer() {
               reason: getSceneErrorMessage(error),
             });
           });
-
-        if (USE_ONLINE_BASEMAP) {
-          setHostedBasemapState("loading");
-          hostedBasemap = new runtime.Basemap({
-            style: { id: CFS_ESRI_BASEMAP_STYLE } as never,
-            title: "Optional Esri hosted basemap",
-          });
-          void withTimeout(
-            hostedBasemap.loadAll(),
-            10_000,
-            "Optional Esri hosted basemap timed out.",
-          )
-            .then(async () => {
-              const loadedBasemap = hostedBasemap;
-              hostedBasemap = null;
-              if (!loadedBasemap) {
-                return;
-              }
-              if (!isCurrentAttempt() || view.destroyed) {
-                loadedBasemap.destroy();
-                return;
-              }
-              hostedBasemapLayers = mergeHostedBasemap(
-                contextBasemap,
-                loadedBasemap,
-              );
-              await withTimeout(
-                Promise.all(
-                  hostedBasemapLayers.map((layer) => view.whenLayerView(layer)),
-                ),
-                10_000,
-                "Optional Esri hosted basemap did not render.",
-              );
-              if (!isCurrentAttempt() || view.destroyed) {
-                return;
-              }
-              setCountyLandOpacity(
-                layers["county-boundary"] as GraphicsLayer,
-                0.12,
-              );
-              setHostedBasemapState("ready");
-            })
-            .catch((error) => {
-              hostedBasemap?.destroy();
-              hostedBasemap = null;
-              removeHostedBasemapLayers(contextBasemap, hostedBasemapLayers);
-              hostedBasemapLayers = [];
-              setCountyLandOpacity(
-                layers["county-boundary"] as GraphicsLayer,
-                0.94,
-              );
-              if (!isCurrentAttempt()) {
-                return;
-              }
-              setHostedBasemapState("failed");
-              recordTechnicalEvent("optional_hosted_basemap_unavailable", {
-                reason: getSceneErrorMessage(error),
-              });
-            });
-        }
       } catch (error) {
         if (!isCurrentAttempt()) {
           return;
@@ -1873,20 +1798,17 @@ export function SceneViewContainer() {
       lastFocusedParcelIdRef.current = null;
       runtimeRef.current = null;
       viewRef.current = null;
-      hostedBasemap?.destroy();
-      hostedBasemap = null;
+      visualBasemapAbortController?.abort();
+      visualBasemapAbortController = null;
       if (localView?.map?.basemap) {
-        for (const layer of referenceBasemapLayers) {
-          localView.map.basemap.baseLayers.remove(layer);
-          localView.map.basemap.referenceLayers.remove(layer);
+        if (visualBasemapLayer) {
+          localView.map.basemap.baseLayers.remove(visualBasemapLayer);
         }
       }
-      referenceBasemapLayers.forEach((layer) => layer.destroy());
-      referenceBasemapLayers = [];
-      if (localView?.map?.basemap) {
-        removeHostedBasemapLayers(localView.map.basemap, hostedBasemapLayers);
+      if (visualBasemapLayer && !visualBasemapLayer.destroyed) {
+        visualBasemapLayer.destroy();
       }
-      hostedBasemapLayers = [];
+      visualBasemapLayer = null;
       if (window.__cfsCaptureMapSnapshot) {
         delete window.__cfsCaptureMapSnapshot;
       }
@@ -2442,12 +2364,13 @@ export function SceneViewContainer() {
         data-arcgis-runtime-state={arcGisRuntimeState}
         data-arcgis-view-state={arcGisViewState}
         data-basemap-mode={
-          hostedBasemapState === "ready"
-            ? "same-origin+hosted"
-            : referenceBasemapState === "ready"
-              ? "same-origin+public"
-              : "same-origin"
+          referenceBasemapState === "ready"
+            ? "same-origin+public"
+            : "same-origin"
         }
+        data-basemap-provider={CFS_BASEMAP_PROVIDER_CONFIG.kind}
+        data-basemap-url-template={CFS_BASEMAP_PROVIDER_CONFIG.urlTemplate}
+        data-basemap-attribution={CFS_BASEMAP_PROVIDER_CONFIG.attribution}
         data-context-county-features={
           mapContext?.countyBoundary.features.length ?? 0
         }
@@ -2478,10 +2401,7 @@ export function SceneViewContainer() {
               ].join(",")
             : ""
         }
-        data-hosted-basemap-state={hostedBasemapState}
         data-reference-basemap-state={referenceBasemapState}
-        data-reference-basemap-url={CFS_REFERENCE_BASEMAP_URL}
-        data-reference-labels-url={CFS_REFERENCE_LABELS_URL}
         data-map-zoom={interactiveReady ? (mapZoom ?? "") : fallbackZoom}
         data-static-context-ready={staticContextReady ? "true" : "false"}
         data-testid="cfs-arcgis-map"
@@ -2494,7 +2414,8 @@ export function SceneViewContainer() {
           data-testid="cfs-reference-basemap-warning"
           role="status"
         >
-          Reference basemap is temporarily unavailable. Parcel and planning layers remain available.
+          OpenStreetMap basemap is temporarily unavailable. Parcel and planning
+          layers remain available.
         </div>
       ) : null}
       <div
@@ -3317,26 +3238,6 @@ function getMapViewFailureMessage(readyState: SceneView["readyState"]) {
   }
 }
 
-function mergeHostedBasemap(
-  sameOriginBasemap: Basemap,
-  hostedBasemap: Basemap,
-) {
-  const baseLayers = hostedBasemap.baseLayers.removeAll();
-  const referenceLayers = hostedBasemap.referenceLayers.removeAll();
-  sameOriginBasemap.baseLayers.addMany(baseLayers, 0);
-  sameOriginBasemap.referenceLayers.addMany(referenceLayers, 0);
-  hostedBasemap.destroy();
-  return [...baseLayers, ...referenceLayers];
-}
-
-function removeHostedBasemapLayers(basemap: Basemap, layers: Layer[]) {
-  for (const layer of layers) {
-    basemap.baseLayers.remove(layer);
-    basemap.referenceLayers.remove(layer);
-    layer.destroy();
-  }
-}
-
 function isAbortError(error: unknown) {
   return (
     typeof error === "object" &&
@@ -3674,19 +3575,13 @@ function createDemoBoundaryGraphic(
       rings,
       spatialReference: { wkid: 4326 },
     }),
-    symbol: createDemoBoundarySymbol(0.94),
+    symbol: createDemoBoundarySymbol(),
   });
 }
 
-function setCountyLandOpacity(layer: GraphicsLayer, opacity: number) {
-  for (const graphic of layer.graphics) {
-    graphic.symbol = createDemoBoundarySymbol(opacity);
-  }
-}
-
-function createDemoBoundarySymbol(fillOpacity: number) {
+function createDemoBoundarySymbol() {
   return {
-    color: [24, 31, 38, fillOpacity],
+    color: [24, 31, 38, 0],
     outline: {
       color: [216, 184, 106, 0.96],
       width: 2.4,

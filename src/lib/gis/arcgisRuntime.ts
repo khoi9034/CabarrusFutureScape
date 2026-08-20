@@ -5,7 +5,9 @@ import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type Extent from "@arcgis/core/geometry/Extent";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type MapImageLayer from "@arcgis/core/layers/MapImageLayer";
+import type OpenStreetMapLayer from "@arcgis/core/layers/OpenStreetMapLayer";
 import type TileLayer from "@arcgis/core/layers/TileLayer";
+import type WebTileLayer from "@arcgis/core/layers/WebTileLayer";
 import type TileInfo from "@arcgis/core/layers/support/TileInfo";
 import type Point from "@arcgis/core/geometry/Point";
 import type Polygon from "@arcgis/core/geometry/Polygon";
@@ -26,7 +28,9 @@ export interface ArcGISRuntime {
   GraphicsLayer: typeof GraphicsLayer;
   Map: typeof ArcGISMap;
   MapImageLayer: typeof MapImageLayer;
+  OpenStreetMapLayer: typeof OpenStreetMapLayer;
   TileLayer: typeof TileLayer;
+  WebTileLayer: typeof WebTileLayer;
   Point: typeof Point;
   Polygon: typeof Polygon;
   Polyline: typeof Polyline;
@@ -39,12 +43,6 @@ export interface ArcGISRuntime {
 export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
   const { default: config } = await import("@arcgis/core/config.js");
   config.assetsPath = ARCGIS_ASSETS_PATH;
-  const publicBasemapKey =
-    process.env.NEXT_PUBLIC_CFS_ESRI_API_KEY?.trim() ||
-    process.env.NEXT_PUBLIC_ARCGIS_API_KEY?.trim();
-  if (publicBasemapKey) {
-    config.apiKey = publicBasemapKey;
-  }
   const [
     { default: Basemap },
     { default: Map },
@@ -52,7 +50,9 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     { default: FeatureLayer },
     { default: GraphicsLayer },
     { default: MapImageLayer },
+    { default: OpenStreetMapLayer },
     { default: TileLayer },
+    { default: WebTileLayer },
     { default: Graphic },
     { default: Point },
     { default: Polygon },
@@ -68,7 +68,9 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     import("@arcgis/core/layers/FeatureLayer.js"),
     import("@arcgis/core/layers/GraphicsLayer.js"),
     import("@arcgis/core/layers/MapImageLayer.js"),
+    import("@arcgis/core/layers/OpenStreetMapLayer.js"),
     import("@arcgis/core/layers/TileLayer.js"),
+    import("@arcgis/core/layers/WebTileLayer.js"),
     import("@arcgis/core/Graphic.js"),
     import("@arcgis/core/geometry/Point.js"),
     import("@arcgis/core/geometry/Polygon.js"),
@@ -87,7 +89,9 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     GraphicsLayer,
     Map,
     MapImageLayer,
+    OpenStreetMapLayer,
     TileLayer,
+    WebTileLayer,
     Point,
     Polygon,
     Polyline,

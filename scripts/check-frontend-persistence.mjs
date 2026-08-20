@@ -69,8 +69,7 @@ assert(
 );
 const OPTIONAL_PUBLIC_MAP_RESOURCES = optionalPublicMapResources();
 const OPTIONAL_BASEMAP_FAILURE_TEST_URLS = [
-  `${OPTIONAL_PUBLIC_MAP_RESOURCES[1].serviceUrl}/tile/10/405/280`,
-  `${OPTIONAL_PUBLIC_MAP_RESOURCES[0].serviceUrl}/tilemap/10/384/256/32/32?f=json`,
+  OPTIONAL_PUBLIC_MAP_RESOURCES[0].sampleUrl,
 ];
 assert(["authorization", "cleanup", "full", "health-drain", "map-fallback", "seed", "verify"].includes(PHASE), `Unsupported frontend persistence phase ${PHASE}.`);
 if (process.argv.includes("--check-optional-basemap-classifier")) {
@@ -275,7 +274,7 @@ function assertBrowserDiagnosticsHealthy() {
   assert.deepEqual(
     report.diagnostics.unexpected_external_arcgis_requests,
     [],
-    "Browser requested an unexpected external ArcGIS resource.",
+    "Browser requested an unexpected external map resource.",
   );
 }
 
@@ -3357,13 +3356,21 @@ async function assertOptionalPublicBasemapFallback(context) {
     const contextState = await page.evaluate(() => {
       const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
       return {
+        attribution: element?.getAttribute("data-basemap-attribution"),
+        basemapMode: element?.getAttribute("data-basemap-mode"),
         countyFeatures: Number(element?.getAttribute("data-context-county-features")),
         debug: window.__cfsGetMapDebugState?.(),
         labelFeatures: Number(element?.getAttribute("data-context-label-features")),
+        provider: element?.getAttribute("data-basemap-provider"),
         referenceBasemapState: element?.getAttribute("data-reference-basemap-state"),
         roadFeatures: Number(element?.getAttribute("data-context-road-features")),
+        urlTemplate: element?.getAttribute("data-basemap-url-template"),
       };
     });
+    const publicBasemap = OPTIONAL_PUBLIC_MAP_RESOURCES[0];
+    assert.equal(contextState.provider, publicBasemap.provider);
+    assert.equal(contextState.urlTemplate, publicBasemap.urlTemplate);
+    assert.equal(contextState.attribution, publicBasemap.attribution);
     assert.equal(contextState.debug?.ready, true, "MapView is not ready after the optional basemap failure.");
     assert.equal(contextState.debug?.readyState, "ready", "MapView readyState is not ready.");
     assert.equal(contextState.debug?.basemapId, "cfs-same-origin-basemap");
@@ -3380,6 +3387,7 @@ async function assertOptionalPublicBasemapFallback(context) {
       assert(layer?.visible && Number(layer.graphicsCount) > 0, `Required same-origin layer ${layerId} is unavailable.`);
     }
     if (contextState.referenceBasemapState === "failed") {
+      assert.equal(contextState.basemapMode, "same-origin");
       const labels = contextState.debug?.layers?.find((candidate) => candidate.id === "cfs-local-place-labels");
       assert(labels?.visible && Number(labels.graphicsCount) > 0, "Fallback local labels are unavailable.");
       await page.getByTestId("cfs-reference-basemap-warning").waitFor();

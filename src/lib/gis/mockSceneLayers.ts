@@ -34,7 +34,7 @@ export function createMockSceneLayers(runtime: ArcGISRuntime): MockSceneLayerMap
         type: "polygon",
       },
       symbol: {
-        color: [13, 22, 34, 0.1],
+        color: [13, 22, 34, 0],
         outline: {
           color: [216, 184, 106, 0.9],
           width: 2,

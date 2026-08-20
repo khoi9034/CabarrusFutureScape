@@ -42,8 +42,8 @@ import {
   recordTechnicalEvent,
   USE_BACKEND_API,
   USE_DEMO_DATA,
-  USE_ONLINE_BASEMAP,
 } from "@/lib/api/client";
+import { CFS_BASEMAP_PROVIDER_CONFIG } from "@/lib/gis/basemapProvider";
 import {
   getApiAiStatus,
   getApiDatabaseHealth,
@@ -1268,7 +1268,9 @@ function LocalRuntimeStatusPanel({ status }: { status: LocalRuntimeState }) {
         </dd>
         <dt className="text-slate-500">Map</dt>
         <dd className="text-right text-slate-200">
-          {USE_ONLINE_BASEMAP ? "Online basemap" : "Local neutral background"}
+          {CFS_BASEMAP_PROVIDER_CONFIG.kind === "openstreetmap"
+            ? "OpenStreetMap"
+            : "Configured tile basemap"}
         </dd>
       </dl>
       {status.recovery ? (

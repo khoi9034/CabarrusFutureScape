@@ -64,7 +64,7 @@ const REQUIRED_CASES = [
   "Ten consecutive refreshes",
   "Mobile touch/pointer behavior",
   "slow network",
-  "blocked external Esri services while local SDK assets remain available",
+  "blocked external OSM services while local SDK assets remain available",
   "WebGL failure triggers emergency fallback",
   "retry successfully restores ArcGIS when possible",
   "no infinite initialization loop",
@@ -178,25 +178,28 @@ try {
       async (page, _context, diagnostics) => {
         await openExploreCountywide(page);
         const { map } = await assertInteractiveMap(page);
-        const externalAvailable = await page.evaluate((serviceUrl) =>
-          fetch(`${serviceUrl}?f=json`)
+        const externalAvailable = await page.evaluate((sampleUrl) =>
+          fetch(sampleUrl)
             .then(() => true)
             .catch(() => false),
-          OPTIONAL_PUBLIC_RESOURCES[0].serviceUrl,
+          OPTIONAL_PUBLIC_RESOURCES[0].sampleUrl,
         );
-        assert.equal(externalAvailable, false, "External ArcGIS request was not blocked.");
+        assert.equal(externalAvailable, false, "External OSM request was not blocked.");
         assert(
-          diagnostics.blockedExternal.some((url) => /(?:arcgis|esri)/i.test(url)),
-          "No external ArcGIS request reached the block rule.",
+          diagnostics.blockedExternal.some((url) =>
+            isApprovedPublicArcgisRequest(url, OPTIONAL_PUBLIC_RESOURCES),
+          ),
+          "No external OSM request reached the block rule.",
         );
         assert.equal(await map.getAttribute("data-basemap-mode"), "same-origin");
+        await page.getByTestId("cfs-reference-basemap-warning").waitFor();
         const localManifest = await page.evaluate(() =>
           fetch("/arcgis-assets/manifest.json").then((response) => response.ok),
         );
         assert.equal(localManifest, true, "Same-origin ArcGIS manifest was unavailable.");
         if (index === 0) {
           pass("No external basemap required");
-          pass("blocked external Esri services while local SDK assets remain available");
+          pass("blocked external OSM services while local SDK assets remain available");
         }
       },
     );
@@ -226,7 +229,7 @@ try {
   assert.deepEqual(
     aggregate.unexpectedExternalArcgisRequests,
     [],
-    `Unexpected external ArcGIS requests: ${aggregate.unexpectedExternalArcgisRequests.join(" | ")}`,
+    `Unexpected external map requests: ${aggregate.unexpectedExternalArcgisRequests.join(" | ")}`,
   );
   pass("No ArcGIS asset 404");
   pass("no infinite initialization loop");
@@ -607,7 +610,11 @@ function attachDiagnostics(context, diagnostics) {
       );
     }
     if (
-      isExternalArcgisRequest(url, { apiOrigin: API_ORIGIN, appOrigin: ORIGIN }) &&
+      isExternalArcgisRequest(url, {
+        apiOrigin: API_ORIGIN,
+        appOrigin: ORIGIN,
+        resources: OPTIONAL_PUBLIC_RESOURCES,
+      }) &&
       !approvedPublicArcgis
     ) {
       const safeUrl = redactMapDiagnosticUrl(url);
@@ -618,7 +625,7 @@ function attachDiagnostics(context, diagnostics) {
           event_type: "request",
           fallback_healthy: false,
           fatal: true,
-          reason: "An external ArcGIS request did not match the configured public Base/Reference contract.",
+          reason: "An external map request did not match the configured OSM tile contract.",
           url: safeUrl,
         });
       }
@@ -1098,6 +1105,13 @@ async function assertInteractiveMap(page, { painted = false } = {}) {
       Number(fallback ? getComputedStyle(fallback).opacity : 1) <= 0.01
     );
   });
+  await page.waitForFunction(() =>
+    ["failed", "ready"].includes(
+      document
+        .querySelector('[data-testid="cfs-arcgis-map"]')
+        ?.getAttribute("data-reference-basemap-state") ?? "",
+    ),
+  );
   const state = await getDebugState(page);
   const box = await map.boundingBox();
   assert(box && box.width > 240 && box.height > 240, `Map dimensions are invalid: ${JSON.stringify(box)}`);
@@ -1113,12 +1127,31 @@ async function assertInteractiveMap(page, { painted = false } = {}) {
   assert(state.layerViewCount >= REQUIRED_CONTEXT_LAYERS.length);
   assert.equal(state.assetsPath, manifest.assetsPath);
   assert.equal(state.sdkVersion, manifest.sdkVersion);
+  const publicBasemap = OPTIONAL_PUBLIC_RESOURCES[0];
+  assert.equal(await map.getAttribute("data-basemap-provider"), publicBasemap.provider);
+  assert.equal(
+    await map.getAttribute("data-basemap-url-template"),
+    publicBasemap.urlTemplate,
+  );
+  assert.equal(
+    await map.getAttribute("data-basemap-attribution"),
+    publicBasemap.attribution,
+  );
+  const referenceBasemapState = await map.getAttribute("data-reference-basemap-state");
+  if (referenceBasemapState === "ready") {
+    const attribution = map.locator(".esri-attribution, arcgis-attribution").first();
+    await attribution.waitFor({ state: "visible", timeout: 10_000 });
+    assert(
+      (await attribution.textContent())?.includes(publicBasemap.attribution),
+      "Visible map attribution does not identify the configured tile provider.",
+    );
+  }
   for (const layerId of REQUIRED_CONTEXT_LAYERS) {
     const layer = state.layers.find((candidate) => candidate.id === layerId);
     assert(layer?.visible, `Required context layer is not visible: ${layerId}`);
     assert(Number(layer.graphicsCount) > 0, `Required context layer is empty: ${layerId}`);
   }
-  if ((await map.getAttribute("data-reference-basemap-state")) === "failed") {
+  if (referenceBasemapState === "failed") {
     const labels = state.layers.find(
       (candidate) => candidate.id === REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID,
     );

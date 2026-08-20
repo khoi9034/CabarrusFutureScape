@@ -129,7 +129,6 @@ export type CfsTechnicalEventName =
   | "map_interaction_failed"
   | "map_renderer_selected"
   | "map_retry"
-  | "optional_hosted_basemap_unavailable"
   | "powerbi_export"
   | "provider_fallback"
   | "reference_basemap_unavailable"
@@ -164,22 +163,6 @@ export const CFS_AI_PROVIDER = CFS_RUNTIME_CONFIG.aiProvider;
 export const CFS_AUTH_MODE = CFS_RUNTIME_CONFIG.authMode;
 export const CFS_ARTIFACT_PROVIDER = CFS_RUNTIME_CONFIG.artifactProvider;
 export const CFS_JOB_PROVIDER = CFS_RUNTIME_CONFIG.jobProvider;
-export const USE_ONLINE_BASEMAP =
-  (process.env.NEXT_PUBLIC_CFS_ESRI_BASEMAP_ENABLED === "true" ||
-    process.env.NEXT_PUBLIC_ARCGIS_BASEMAP_ENABLED === "true") &&
-  Boolean(
-    process.env.NEXT_PUBLIC_CFS_ESRI_API_KEY?.trim() ||
-      process.env.NEXT_PUBLIC_ARCGIS_API_KEY?.trim(),
-  );
-export const CFS_ESRI_BASEMAP_STYLE =
-  process.env.NEXT_PUBLIC_CFS_ESRI_BASEMAP_STYLE ??
-  "arcgis/navigation-night";
-export const CFS_REFERENCE_BASEMAP_URL =
-  process.env.NEXT_PUBLIC_CFS_REFERENCE_BASEMAP_URL?.trim() ||
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer";
-export const CFS_REFERENCE_LABELS_URL =
-  process.env.NEXT_PUBLIC_CFS_REFERENCE_LABELS_URL?.trim() ||
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer";
 
 export function buildApiUrl(path: string, params?: ApiQueryParams) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

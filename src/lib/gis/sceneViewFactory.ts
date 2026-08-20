@@ -25,13 +25,12 @@ export function createCabarrusContextBasemap(
 ) {
   return new runtime.Basemap({
     baseLayers: [
-      layers.county,
       layers.hydrography,
       layers.municipalities,
       layers.roads,
     ],
     id: "cfs-same-origin-basemap",
-    referenceLayers: [layers.labels],
+    referenceLayers: [layers.county, layers.labels],
     title: "Cabarrus County same-origin basemap",
   });
 }
@@ -47,6 +46,7 @@ export function createCabarrusSceneView(
   const spatialReference = { wkid: 3857 };
 
   const view = new runtime.MapView({
+    attributionVisible: true,
     background: { color: "#050911" },
     container,
     constraints: {

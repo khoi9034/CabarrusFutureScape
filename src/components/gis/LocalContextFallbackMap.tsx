@@ -111,7 +111,7 @@ export function LocalContextFallbackMap({
       <path
         d={drawing.county}
         data-layer-id="county-boundary"
-        fill="#102131"
+        fill="none"
         fillRule="evenodd"
         stroke="#d8b86a"
         strokeWidth="4"

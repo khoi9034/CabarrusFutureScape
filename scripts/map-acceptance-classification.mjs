@@ -2,10 +2,9 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const DEFAULT_BASE_URL =
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer";
-const DEFAULT_LABELS_URL =
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer";
+const DEFAULT_OSM_URL_TEMPLATE =
+  "https://{subDomain}.tile.openstreetmap.org/{level}/{col}/{row}.png";
+const DEFAULT_OSM_ATTRIBUTION = "© OpenStreetMap contributors";
 const OPTIONAL_NETWORK_ERRORS = new Set([
   "cors",
   "net::ERR_ABORTED",
@@ -23,21 +22,22 @@ export const REQUIRED_CFS_CONTEXT_LAYER_IDS = Object.freeze([
 export const REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID = "cfs-local-place-labels";
 
 export function optionalPublicMapResources({
-  baseUrl = process.env.NEXT_PUBLIC_CFS_REFERENCE_BASEMAP_URL?.trim() || DEFAULT_BASE_URL,
-  labelsUrl = process.env.NEXT_PUBLIC_CFS_REFERENCE_LABELS_URL?.trim() || DEFAULT_LABELS_URL,
+  attribution =
+    process.env.NEXT_PUBLIC_CFS_BASEMAP_ATTRIBUTION?.trim() || DEFAULT_OSM_ATTRIBUTION,
+  urlTemplate = process.env.NEXT_PUBLIC_CFS_BASEMAP_URL_TEMPLATE?.trim(),
 } = {}) {
+  const configuredTemplate = urlTemplate
+    ? normalizeTileUrlTemplate(urlTemplate)
+    : DEFAULT_OSM_URL_TEMPLATE;
   return [
     {
       id: "cfs-public-reference-basemap",
       kind: "base",
-      serviceUrl: normalizeServiceUrl(baseUrl),
-      title: "Public dark-gray reference basemap",
-    },
-    {
-      id: "cfs-public-reference-labels",
-      kind: "reference",
-      serviceUrl: normalizeServiceUrl(labelsUrl),
-      title: "Public dark-gray reference labels",
+      attribution,
+      provider: urlTemplate ? "web-tile" : "openstreetmap",
+      sampleUrl: new URL(expandTileUrlTemplate(configuredTemplate)).href,
+      title: "OpenStreetMap visual basemap",
+      urlTemplate: configuredTemplate,
     },
   ];
 }
@@ -50,7 +50,7 @@ export function isApprovedOptionalPublicMapResource(
   if (!url) return null;
   if (
     hasAuthenticationQuery(url) ||
-    !hasOnlyExpectedPublicQuery(url) ||
+    url.search ||
     url.hash ||
     url.username ||
     url.password
@@ -58,17 +58,7 @@ export function isApprovedOptionalPublicMapResource(
     return null;
   }
   for (const resource of resources) {
-    const service = new URL(resource.serviceUrl);
-    if (!approvedServiceOrigins(service).has(url.origin)) continue;
-    const suffix = url.pathname.slice(service.pathname.length);
-    if (
-      url.pathname.startsWith(service.pathname) &&
-      (/^\/?$/.test(suffix) ||
-        /^\/tile\/\d+\/\d+\/\d+\/?$/i.test(suffix) ||
-        /^\/tilemap\/\d+\/\d+\/\d+\/\d+\/\d+\/?$/i.test(suffix))
-    ) {
-      return resource;
-    }
+    if (matchesTileUrlTemplate(url, resource.urlTemplate)) return resource;
   }
   return null;
 }
@@ -83,31 +73,28 @@ export function isApprovedPublicArcgisRequest(
     !url ||
     hasArcgisCredentialHeaders(headers) ||
     hasAuthenticationQuery(url) ||
-    !hasOnlyExpectedPublicQuery(url) ||
+    url.search ||
     url.hash ||
     url.username ||
     url.password
   ) {
     return false;
   }
-  if (isApprovedOptionalPublicMapResource(url, resources)) return true;
-  if (url.hostname !== "static.arcgis.com") return false;
-  return resources.some((resource) => {
-    const serviceName = configuredServiceName(resource);
-    return (
-      serviceName &&
-      new RegExp(`^/attribution/${escapeRegExp(serviceName)}/?$`, "i").test(url.pathname)
-    );
-  });
+  return Boolean(isApprovedOptionalPublicMapResource(url, resources));
 }
 
-export function isExternalArcgisRequest(value, { apiOrigin, appOrigin } = {}) {
+export function isExternalArcgisRequest(
+  value,
+  { apiOrigin, appOrigin, resources = optionalPublicMapResources() } = {},
+) {
   const url = toUrl(value);
   return Boolean(
     url &&
       url.origin !== apiOrigin &&
       url.origin !== appOrigin &&
       (/(?:arcgis|esri)/i.test(url.hostname) ||
+        /(?:^|\.)tile\.openstreetmap\.org$/i.test(url.hostname) ||
+        resources.some((resource) => templateHostname(resource.urlTemplate) === url.hostname) ||
         /\/(?:sharing\/rest|rest\/services)(?:\/|$)|\/MapServer(?:\/|$)|\/oauth2\/|\/signin(?:\/|$)/i.test(
           url.pathname,
         )),
@@ -128,7 +115,7 @@ export function isMapDiagnosticRequest(
               url.pathname,
             ))) ||
         isApprovedPublicArcgisRequest(url, resources) ||
-        isExternalArcgisRequest(url, { apiOrigin, appOrigin })),
+        isExternalArcgisRequest(url, { apiOrigin, appOrigin, resources })),
   );
 }
 
@@ -177,9 +164,7 @@ export function mapDiagnosticRequestKey(
 ) {
   const url = toUrl(value);
   if (!url) return null;
-  const optional =
-    isApprovedOptionalPublicMapResource(url, resources) ??
-    approvedAttributionResource(url, resources);
+  const optional = isApprovedOptionalPublicMapResource(url, resources);
   const prefix = String(method).toUpperCase();
   if (optional) return `${prefix}:optional:${optional.id}`;
   if (url.searchParams.has("_rsc")) {
@@ -210,7 +195,6 @@ export function classifyArcGISRequestFailure(
   }
 
   const resource = isApprovedOptionalPublicMapResource(url, resources);
-  const attribution = approvedAttributionResource(url, resources);
   if (
     resource &&
     String(method).toUpperCase() === "GET" &&
@@ -221,21 +205,6 @@ export function classifyArcGISRequestFailure(
     return optionalCandidate("requestfailed", resource, {
       error,
       reason: `Exact configured optional ${resource.kind} service failed with ${error}; required fallback health is pending.`,
-      request_key: mapDiagnosticRequestKey(url, resources, method),
-      url: sanitizedUrl(url),
-    });
-  }
-
-  if (
-    attribution &&
-    String(method).toUpperCase() === "GET" &&
-    OPTIONAL_NETWORK_ERRORS.has(normalizeNetworkError(error)) &&
-    url.origin !== appOrigin &&
-    url.origin !== apiOrigin
-  ) {
-    return optionalCandidate("requestfailed", attribution, {
-      error,
-      reason: `Exact optional ${attribution.kind} attribution resource failed with ${error}; required fallback health is pending.`,
       request_key: mapDiagnosticRequestKey(url, resources, method),
       url: sanitizedUrl(url),
     });
@@ -283,7 +252,7 @@ export function classifyArcGISHttpFailure(
   }
   if (
     AUTHENTICATION_HTTP_STATUSES.has(numericStatus) &&
-    (isExternalArcgisRequest(url, { apiOrigin, appOrigin }) ||
+    (isExternalArcgisRequest(url, { apiOrigin, appOrigin, resources }) ||
       isApprovedPublicArcgisRequest(url, resources) ||
       hasArcgisCredentialHeaders(headers))
   ) {
@@ -293,9 +262,7 @@ export function classifyArcGISHttpFailure(
       { method, status: numericStatus, url: sanitizedUrl(url) },
     );
   }
-  const optional =
-    isApprovedOptionalPublicMapResource(url, resources) ??
-    approvedAttributionResource(url, resources);
+  const optional = isApprovedOptionalPublicMapResource(url, resources);
   if (
     optional &&
     ["GET", "HEAD"].includes(String(method).toUpperCase()) &&
@@ -408,10 +375,10 @@ export function classifyArcGISConsoleFailure(
     }
   }
 
-  if (/\b(?:TileLayer|Basemap)\b.*(?:#load|Failed)/i.test(text)) {
+  if (/\b(?:OpenStreetMapLayer|WebTileLayer|TileLayer|Basemap)\b.*(?:#load|Failed)/i.test(text)) {
     return fatal(
       "unexpected_arcgis_layer_failure",
-      "An ArcGIS TileLayer or Basemap failure did not match an exact approved optional identity.",
+      "An ArcGIS basemap-layer failure did not match an exact approved optional identity.",
       { event_type: "console", message: safeText },
     );
   }
@@ -557,8 +524,13 @@ export function resolveMapDiagnostic(candidate, { health, lifecycle = "current" 
 export function runClassificationSafetyMatrix() {
   const appOrigin = "http://127.0.0.1:3000";
   const apiOrigin = "http://127.0.0.1:8000";
-  const resources = optionalPublicMapResources();
-  const [base, reference] = resources;
+  const resources = optionalPublicMapResources({ urlTemplate: "" });
+  const [base] = resources;
+  const customResources = optionalPublicMapResources({
+    attribution: "© Organization tile contributors",
+    urlTemplate: "https://tiles.example.gov/osm/{z}/{x}/{y}.png",
+  });
+  const [custom] = customResources;
   const healthy = {
     activeMapInteractive: true,
     apiFailures: 0,
@@ -574,49 +546,92 @@ export function runClassificationSafetyMatrix() {
     sameOriginContextReady: true,
   };
   const context = { apiOrigin, appOrigin, resources };
+  const customContext = { apiOrigin, appOrigin, resources: customResources };
   assert.equal(
     isMapDiagnosticRequest(`${appOrigin}/?app=planning&_rsc=acceptance`, context),
     true,
     "Same-origin Next route-data requests must use the shared lifecycle classifier.",
   );
   assert.equal(
-    isApprovedPublicArcgisRequest(`${base.serviceUrl}?apiKey=do-not-log-me`, resources),
+    isApprovedPublicArcgisRequest(`${base.sampleUrl}?apiKey=do-not-log-me`, resources),
     false,
     "Credential-bearing optional requests must never be approved.",
   );
   assert.equal(
-    isApprovedPublicArcgisRequest(
-      "https://static.arcgis.com/attribution/Canvas/World_Dark_Gray_Base?f=json",
-      resources,
-    ),
+    isApprovedPublicArcgisRequest(base.sampleUrl, resources),
     true,
-    "The exact public Canvas attribution resource must be approved.",
+    "The exact public OSM tile must be approved.",
   );
-  const request = (resource, error) =>
-    classifyArcGISRequestFailure(
-      { error, method: "GET", url: `${resource.serviceUrl}/tile/10/405/280` },
-      context,
+  assert.equal(
+    isApprovedPublicArcgisRequest(base.sampleUrl.replace("a.", "c."), resources),
+    true,
+    "The SDK's exact a/b/c OSM subdomain contract must be approved.",
+  );
+  assert.equal(
+    isApprovedPublicArcgisRequest(base.sampleUrl.replace("a.", "d."), resources),
+    false,
+    "An OSM sibling subdomain outside a/b/c must fail closed.",
+  );
+  assert.equal(
+    isMapDiagnosticRequest(base.sampleUrl.replace("a.", "d."), context),
+    true,
+    "An unapproved OSM sibling request must still reach the fatal classifier.",
+  );
+  assert.equal(
+    isApprovedPublicArcgisRequest(custom.sampleUrl, customResources),
+    true,
+    "The exact configured OSM-compatible tile must be approved.",
+  );
+  assert.equal(
+    isApprovedPublicArcgisRequest(`${custom.sampleUrl}/extra`, customResources),
+    false,
+    "A configured-host path outside the exact tile template must fail closed.",
+  );
+  for (const urlTemplate of [
+    "http://tiles.example.gov/{z}/{x}/{y}.png",
+    "https://user:secret@tiles.example.gov/{z}/{x}/{y}.png",
+    "https://tiles.example.gov/{z}/{x}/{y}.png?token=secret",
+    "https://tiles.example.gov/{z}/{x}/{y}.png#fragment",
+    "https://{subDomain}.tiles.example.gov/{z}/{x}/{y}.png",
+    "https://{z}.tiles.example.gov/{z}/{x}/{y}.png",
+    "https://tiles.example.gov/{z}/{x}/{y}.png{",
+    "https://tiles.example.gov/{z}/{x}/{y}.png}",
+    "https://tiles.example.gov/{z}/{x}.png",
+    "https://tiles.example.gov/{z}/{x}/{y}/{level}/{col}/{row}.png",
+    "https://tiles.example.gov/{z}/{x}/{y}/{level}.png",
+    "https://tiles.example.gov/{level}/{col}/{row}/{z}.png",
+  ]) {
+    assert.throws(
+      () => optionalPublicMapResources({ urlTemplate }),
+      /Optional public basemap URL template/,
+      `Unsafe basemap template was accepted: ${urlTemplate}`,
     );
-  const layer = (resource, component = "TileLayer") =>
+  }
+  const request = (resource, error, requestContext = context, url = resource.sampleUrl) =>
+    classifyArcGISRequestFailure(
+      { error, method: "GET", url },
+      requestContext,
+    );
+  const layer = (resource, component = "OpenStreetMapLayer", layerContext = context) =>
     classifyArcGISConsoleFailure(
       {
         text: `[@arcgis/core/layers/${component}] #load() Failed to load layer (title: '${resource.title}', id: '${resource.id}') {error: s}`,
       },
-      context,
+      layerContext,
     );
   const nonfatal = [
-    ["public Base TileLayer ERR_FAILED", request(base, "ERR_FAILED"), "current"],
-    ["public Reference TileLayer ERR_FAILED", request(reference, "net::ERR_FAILED"), "current"],
-    ["public Base ERR_NETWORK_ACCESS_DENIED", request(base, "ERR_NETWORK_ACCESS_DENIED"), "current"],
-    ["public Reference ERR_NETWORK_ACCESS_DENIED", request(reference, "net::ERR_NETWORK_ACCESS_DENIED"), "current"],
-    ["exact Reference TileLayer without requestfailed", layer(reference), "current"],
-    ["exact Base TileLayer without requestfailed", layer(base), "current"],
-    ["exact Base Basemap without requestfailed", layer(base, "Basemap"), "current"],
+    ["public OSM a-tile ERR_FAILED", request(base, "ERR_FAILED"), "current"],
+    ["public OSM b-tile ERR_FAILED", request(base, "net::ERR_FAILED", context, base.sampleUrl.replace("a.", "b.")), "current"],
+    ["public OSM c-tile ERR_NETWORK_ACCESS_DENIED", request(base, "ERR_NETWORK_ACCESS_DENIED", context, base.sampleUrl.replace("a.", "c.")), "current"],
+    ["configured web tile ERR_NETWORK_ACCESS_DENIED", request(custom, "net::ERR_NETWORK_ACCESS_DENIED", customContext), "current"],
+    ["exact OpenStreetMapLayer without requestfailed", layer(base), "current"],
+    ["exact WebTileLayer without requestfailed", layer(custom, "WebTileLayer", customContext), "current"],
+    ["exact OSM Basemap without requestfailed", layer(base, "Basemap"), "current"],
     [
       "exact optional HTTP 503",
       classifyArcGISHttpFailure(
-        { method: "GET", status: 503, url: `${reference.serviceUrl}?f=json` },
-        context,
+        { method: "GET", status: 503, url: custom.sampleUrl },
+        customContext,
       ),
       "current",
     ],
@@ -624,10 +639,10 @@ export function runClassificationSafetyMatrix() {
       "exact optional HTTP 503 console",
       classifyArcGISConsoleFailure(
         {
-          locationUrl: `${reference.serviceUrl}?f=json`,
+          locationUrl: custom.sampleUrl,
           text: "Failed to load resource: the server responded with a status of 503",
         },
-        context,
+        customContext,
       ),
       "current",
     ],
@@ -812,29 +827,29 @@ export function runClassificationSafetyMatrix() {
     ["stale cancellation with unhealthy fallback", () => resolveMapDiagnostic(classifyArcGISRequestFailure({ error: "ERR_ABORTED", method: "GET", url: `${appOrigin}/demo-data/map_layers/demo_transportation_context.geojson` }, context), { health: { ...healthy, sameOriginContextReady: false }, lifecycle: "stale" })],
     ["unknown TileLayer", () => classifyArcGISConsoleFailure({ text: "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'World imagery', id: 'unexpected-imagery') {error: s}" }, context)],
     ["unknown Basemap", () => classifyArcGISConsoleFailure({ text: "[@arcgis/core/Basemap] #load() Failed to load basemap (title: 'Unknown basemap', id: 'unknown-basemap') {error: s}" }, context)],
-    ["exact optional ID with wrong title", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'Wrong title', id: '${base.id}') {error: s}` }, context)],
-    ["exact optional title with wrong ID", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: '${base.title}', id: 'wrong-id') {error: s}` }, context)],
-    ["unexpected Esri MapServer", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json" }, context)],
+    ["exact optional ID with wrong title", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/OpenStreetMapLayer] #load() Failed to load layer (title: 'Wrong title', id: '${base.id}') {error: s}` }, context)],
+    ["exact optional title with wrong ID", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/WebTileLayer] #load() Failed to load layer (title: '${base.title}', id: 'wrong-id') {error: s}` }, context)],
+    ["unapproved OSM sibling tile", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: base.sampleUrl.replace("a.", "d.") }, context)],
     ["private Portal item", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json" }, context)],
     ["OAuth/sign-in", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: "https://www.arcgis.com/sharing/rest/oauth2/authorize" }, context)],
-    ["public service with API key", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${base.serviceUrl}?apiKey=do-not-log-me` }, context)],
-    ["public service with authorization header", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", headers: { Authorization: "Bearer do-not-log-me" }, method: "GET", url: base.serviceUrl }, context)],
+    ["public service with API key", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${base.sampleUrl}?apiKey=do-not-log-me` }, context)],
+    ["public service with authorization header", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", headers: { Authorization: "Bearer do-not-log-me" }, method: "GET", url: base.sampleUrl }, context)],
     ["authorization console secret redaction", () => classifyArcGISConsoleFailure({ text: "Authorization: Bearer do-not-log-me" }, context)],
     ["basic authorization console secret redaction", () => classifyArcGISConsoleFailure({ text: "Authorization: Basic do-not-log-me" }, context)],
     ["quoted JSON console secret redaction", () => classifyArcGISConsoleFailure({ text: '{"token":"do-not-log-me","Authorization":"Bearer do-not-log-me"}' }, context)],
     ["request error secret redaction", () => classifyArcGISRequestFailure({ error: '{"token":"do-not-log-me"}', method: "GET", url: `${appOrigin}/required-resource.js` }, context)],
     ["quoted credential with apostrophe redaction", () => classifyArcGISConsoleFailure({ text: '{"credential":"abc\'do-not-log-me"}' }, context)],
     ["quoted credential with escaped delimiter redaction", () => classifyArcGISConsoleFailure({ text: String.raw`{"token":"abc\"do-not-log-me"}` }, context)],
-    ["attribution resource with credential", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: "https://user:do-not-log-me@static.arcgis.com/attribution/Canvas/World_Dark_Gray_Base?f=json" }, context)],
-    ["attribution resource with arbitrary query", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: "https://static.arcgis.com/attribution/Canvas/World_Dark_Gray_Base?callback=do-not-log-me" }, context)],
-    ["optional service fragment credential", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${base.serviceUrl}#access_token=do-not-log-me` }, context)],
-    ["optional ArcGIS HTTP 403", () => classifyArcGISHttpFailure({ method: "GET", status: 403, url: base.serviceUrl }, context)],
+    ["OSM tile resource with credential", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: base.sampleUrl.replace("https://", "https://user:do-not-log-me@") }, context)],
+    ["OSM tile resource with arbitrary query", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${base.sampleUrl}?callback=do-not-log-me` }, context)],
+    ["optional OSM tile fragment credential", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${base.sampleUrl}#access_token=do-not-log-me` }, context)],
+    ["optional OSM HTTP 403", () => classifyArcGISHttpFailure({ method: "GET", status: 403, url: base.sampleUrl }, context)],
     ["same-origin SDK HTTP 404", () => classifyArcGISHttpFailure({ method: "GET", status: 404, url: `${appOrigin}/arcgis-assets/5.0.19/missing.js` }, context)],
     ["same-origin Demo parcel index HTTP 404", () => classifyArcGISHttpFailure({ method: "GET", status: 404, url: `${appOrigin}/intelligence/parcel-search-index.json` }, context)],
-    ["custom-host ArcGIS MapServer", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: "https://gis.example.gov/rest/services/private/MapServer?f=json" }, context)],
-    ["exact optional identity with token-required error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: token required}` }, context)],
+    ["configured tile host with wrong path", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${custom.sampleUrl}/extra` }, customContext)],
+    ["exact optional identity with token-required error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/OpenStreetMapLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: token required}` }, context)],
     ["arbitrary JavaScript console error", () => classifyArcGISConsoleFailure({ text: "TypeError: cannot read properties of undefined" }, context)],
-    ["exact optional identity with authorization error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: 403 Forbidden}` }, context)],
+    ["exact optional identity with authorization error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/WebTileLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: 403 Forbidden}` }, context)],
     ["page exception", () => classifyPageError(new Error("page exploded"))],
     ["OAuth console secret redaction", () => classifyArcGISConsoleFailure({ text: "OAuth failed https://gis.example.gov/oauth2/authorize?client_id=do-not-log-me&code=do-not-log-me" }, context)],
     [
@@ -924,7 +939,7 @@ function optionalCandidate(eventType, resource, details) {
     layer_id: resource.id,
     layer_title: resource.title,
     resource_kind: resource.kind,
-    service_url: resource.serviceUrl,
+    service_url: resource.urlTemplate,
   };
 }
 
@@ -948,7 +963,7 @@ function sanitizeDiagnosticDetails(details) {
 }
 
 function parseLayerIdentity(text) {
-  const match = /\[@arcgis\/core\/(?:layers\/)?(TileLayer|Basemap)\]\s*#load\(\)\s*Failed[^\n]*?\(title:\s*['"]([^'"]+)['"],\s*id:\s*['"]([^'"]+)['"]\)/i.exec(
+  const match = /\[@arcgis\/core\/(?:layers\/)?(OpenStreetMapLayer|WebTileLayer|TileLayer|Basemap)\]\s*#load\(\)\s*Failed[^\n]*?\(title:\s*['"]([^'"]+)['"],\s*id:\s*['"]([^'"]+)['"]\)/i.exec(
     text,
   );
   if (!match) return null;
@@ -961,49 +976,13 @@ function parseLayerIdentity(text) {
 
 function extractApprovedUrl(value, resources) {
   const direct = toUrl(value);
-  if (
-    direct &&
-    (isApprovedOptionalPublicMapResource(direct, resources) ||
-      approvedAttributionResource(direct, resources))
-  ) {
+  if (direct && isApprovedOptionalPublicMapResource(direct, resources)) {
     return direct;
   }
   const extracted = extractFirstUrl(value);
-  return extracted &&
-    (isApprovedOptionalPublicMapResource(extracted, resources) ||
-      approvedAttributionResource(extracted, resources))
+  return extracted && isApprovedOptionalPublicMapResource(extracted, resources)
     ? extracted
     : null;
-}
-
-function approvedAttributionResource(value, resources) {
-  const url = toUrl(value);
-  if (
-    !url ||
-    url.hostname !== "static.arcgis.com" ||
-    url.hash ||
-    url.username ||
-    url.password ||
-    hasAuthenticationQuery(url) ||
-    !hasOnlyExpectedPublicQuery(url)
-  ) {
-    return null;
-  }
-  return (
-    resources.find((resource) => {
-      const serviceName = configuredServiceName(resource);
-      return (
-        serviceName &&
-        new RegExp(`^/attribution/${escapeRegExp(serviceName)}/?$`, "i").test(url.pathname)
-      );
-    }) ?? null
-  );
-}
-
-function configuredServiceName(resource) {
-  return new URL(resource.serviceUrl).pathname.match(
-    /\/services\/(.+)\/MapServer$/i,
-  )?.[1];
 }
 
 function extractFirstUrl(value) {
@@ -1027,41 +1006,84 @@ function normalizeNetworkError(value) {
   return String(value);
 }
 
-function normalizeServiceUrl(value) {
-  const url = new URL(value);
-  if (url.username || url.password || hasAuthenticationQuery(url)) {
-    throw new Error("Optional public ArcGIS service configuration must not contain credentials.");
+function normalizeTileUrlTemplate(value) {
+  const template = String(value).trim();
+  const xyzTokens = ["{z}", "{x}", "{y}"];
+  const arcgisTokens = ["{level}", "{col}", "{row}"];
+  const xyz = xyzTokens.every((token) => template.includes(token));
+  const arcgis = arcgisTokens.every((token) => template.includes(token));
+  if (
+    !(
+      (xyz && !arcgisTokens.some((token) => template.includes(token))) ||
+      (arcgis && !xyzTokens.some((token) => template.includes(token)))
+    )
+  ) {
+    throw new Error(
+      "Optional public basemap URL template must contain exactly one complete {z}/{x}/{y} or {level}/{col}/{row} token set.",
+    );
   }
-  if (url.search || url.hash) {
-    throw new Error("Optional public ArcGIS service configuration must be a query-free MapServer URL.");
+  const remainingTemplate = [...xyzTokens, ...arcgisTokens].reduce(
+    (result, token) => result.replaceAll(token, ""),
+    template,
+  );
+  if (/[{}]/.test(remainingTemplate)) {
+    throw new Error("Optional public basemap URL template contains an unsupported token.");
   }
-  url.hash = "";
-  url.search = "";
-  url.pathname = url.pathname.replace(/\/+$/, "");
-  return url.href.replace(/\/$/, "");
+  const parsed = new URL(expandTileUrlTemplate(template));
+  if (parsed.protocol !== "https:" || !/^https:\/\/[^/{}]+\//i.test(template)) {
+    throw new Error("Optional public basemap URL template must use HTTPS.");
+  }
+  if (parsed.username || parsed.password || hasAuthenticationQuery(parsed)) {
+    throw new Error("Optional public basemap URL template must not contain credentials.");
+  }
+  if (parsed.search || parsed.hash) {
+    throw new Error("Optional public basemap URL template must not contain a query or fragment.");
+  }
+  return template;
 }
 
-function approvedServiceOrigins(service) {
-  const origins = new Set([service.origin]);
-  if (["server.arcgisonline.com", "services.arcgisonline.com"].includes(service.hostname)) {
-    for (const hostname of ["server.arcgisonline.com", "services.arcgisonline.com"]) {
-      const alias = new URL(service.origin);
-      alias.hostname = hostname;
-      origins.add(alias.origin);
-    }
-  }
-  return origins;
+function normalizeTemplateUrl(template) {
+  const markers = new Map([
+    ["{subDomain}", "cfs-subdomain"],
+    ["{z}", "900000000001"],
+    ["{x}", "900000000002"],
+    ["{y}", "900000000003"],
+    ["{level}", "900000000004"],
+    ["{col}", "900000000005"],
+    ["{row}", "900000000006"],
+  ]);
+  let value = template;
+  for (const [token, marker] of markers) value = value.replaceAll(token, marker);
+  let normalized = new URL(value).href;
+  for (const [token, marker] of markers) normalized = normalized.replaceAll(marker, token);
+  return normalized;
+}
+
+function expandTileUrlTemplate(template, subDomain = "a") {
+  return template
+    .replaceAll("{subDomain}", subDomain)
+    .replaceAll("{level}", "10")
+    .replaceAll("{col}", "282")
+    .replaceAll("{row}", "405")
+    .replaceAll("{z}", "10")
+    .replaceAll("{x}", "282")
+    .replaceAll("{y}", "405");
+}
+
+function matchesTileUrlTemplate(url, template) {
+  const pattern = escapeRegExp(normalizeTemplateUrl(template))
+    .replaceAll("\\{subDomain\\}", "(?:a|b|c)")
+    .replace(/\\\{(?:z|x|y|level|col|row)\\\}/g, "\\d+");
+  return new RegExp(`^${pattern}$`, "i").test(url.href);
+}
+
+function templateHostname(template) {
+  return new URL(expandTileUrlTemplate(template)).hostname;
 }
 
 function hasAuthenticationQuery(url) {
   return [...url.searchParams.keys()].some((key) =>
     /^(?:api[-_]?key|access[-_]?token|token|auth|authorization)$/i.test(key),
-  );
-}
-
-function hasOnlyExpectedPublicQuery(url) {
-  return [...url.searchParams.entries()].every(
-    ([key, value]) => key.toLowerCase() === "f" && /^(?:json|pjson)$/i.test(value),
   );
 }
 

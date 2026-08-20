@@ -205,6 +205,7 @@ const scene = read("src/components/gis/SceneViewContainer.tsx");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await getDemoMapContext(false)");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "hydrateLocalContextLayers");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "createCabarrusContextBasemap");
+assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "createCfsVisualBasemapLayer");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await waitForUsableArcGisView");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "data-arcgis-assets-path={ARCGIS_ASSETS_PATH}");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, 'aria-label="Zoom in"');
@@ -218,10 +219,24 @@ assertIncludes("src/lib/api/client.ts", apiClient, "export const USE_INTERACTIVE
 const runtime = read("src/lib/gis/arcgisRuntime.ts");
 assertIncludes("src/lib/gis/arcgisRuntime.ts", runtime, "`/arcgis-assets/${ARCGIS_SDK_VERSION}`");
 assertIncludes("src/lib/gis/arcgisRuntime.ts", runtime, "config.assetsPath = ARCGIS_ASSETS_PATH");
+assertIncludes("src/lib/gis/arcgisRuntime.ts", runtime, "OpenStreetMapLayer");
+assertIncludes("src/lib/gis/arcgisRuntime.ts", runtime, "WebTileLayer");
+
+const basemapProvider = read("src/lib/gis/basemapProvider.ts");
+assertIncludes("src/lib/gis/basemapProvider.ts", basemapProvider, "NEXT_PUBLIC_CFS_BASEMAP_URL_TEMPLATE");
+assertIncludes("src/lib/gis/basemapProvider.ts", basemapProvider, "© OpenStreetMap contributors");
+assertIncludes("src/lib/gis/basemapProvider.ts", basemapProvider, "new runtime.OpenStreetMapLayer");
+assertIncludes("src/lib/gis/basemapProvider.ts", basemapProvider, "new runtime.WebTileLayer");
 
 const sceneFactory = read("src/lib/gis/sceneViewFactory.ts");
 assertIncludes("src/lib/gis/sceneViewFactory.ts", sceneFactory, "baseLayers:");
-assertIncludes("src/lib/gis/sceneViewFactory.ts", sceneFactory, "referenceLayers: [layers.labels]");
+assertIncludes("src/lib/gis/sceneViewFactory.ts", sceneFactory, "referenceLayers: [layers.county, layers.labels]");
 assertIncludes("src/lib/gis/sceneViewFactory.ts", sceneFactory, 'id: "cfs-same-origin-basemap"');
+
+const fallbackMap = read("src/components/gis/LocalContextFallbackMap.tsx");
+assertIncludes("src/components/gis/LocalContextFallbackMap.tsx", fallbackMap, 'fill="none"');
+const mockSceneLayers = read("src/lib/gis/mockSceneLayers.ts");
+assertIncludes("src/lib/gis/mockSceneLayers.ts", mockSceneLayers, "color: [13, 22, 34, 0]");
+assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "color: [24, 31, 38, 0]");
 
 console.log(`PASS demo functionality contracts (${contextAssets.length} required map context assets)`);

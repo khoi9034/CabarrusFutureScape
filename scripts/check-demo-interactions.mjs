@@ -13,6 +13,7 @@ import {
   isApprovedPublicArcgisRequest,
   isExternalArcgisRequest,
   isMapDiagnosticRequest,
+  optionalPublicMapResources,
   redactMapDiagnosticText,
   redactMapDiagnosticUrl,
   REQUIRED_CFS_BASEMAP_ID,
@@ -22,6 +23,7 @@ import {
 } from "./map-acceptance-classification.mjs";
 
 const root = process.cwd();
+const OPTIONAL_PUBLIC_RESOURCES = optionalPublicMapResources();
 const externalBaseUrl = process.env.CFS_DEMO_BASE_URL?.replace(/\/$/, "");
 const caseArtifacts = [];
 const results = [];
@@ -710,7 +712,16 @@ async function waitForMapReady(page) {
   });
   assert(visibility.interactive >= 0.99, "Interactive renderer is transparent.");
   assert(visibility.static <= 0.01, "Emergency SVG is visible over a ready MapView.");
-  assert.equal(await map.getAttribute("data-basemap-mode"), "same-origin");
+  const publicBasemap = OPTIONAL_PUBLIC_RESOURCES[0];
+  assert.equal(await map.getAttribute("data-basemap-provider"), publicBasemap.provider);
+  assert.equal(
+    await map.getAttribute("data-basemap-url-template"),
+    publicBasemap.urlTemplate,
+  );
+  assert.equal(
+    await map.getAttribute("data-basemap-attribution"),
+    publicBasemap.attribution,
+  );
   const sdkVersion = await map.getAttribute("data-arcgis-sdk-version");
   assert.match(sdkVersion ?? "", /^\d+\.\d+\.\d+$/);
   assert.equal(await map.getAttribute("data-arcgis-assets-path"), `/arcgis-assets/${sdkVersion}`);
@@ -721,15 +732,16 @@ async function waitForMapReady(page) {
   assert.equal(debug?.assetsPath, `/arcgis-assets/${sdkVersion}`);
   assert(Number(debug?.layerCount) >= 5, "ArcGIS basemap layers are missing.");
   assert(Number(debug?.layerViewCount) >= 5, "ArcGIS basemap layerViews are missing.");
-  if (pendingMapDiagnostics.some((entry) => !entry.resolved && entry.page === page)) {
-    await page.waitForFunction(() =>
-      ["failed", "ready"].includes(
-        document
-          .querySelector('[data-testid="cfs-arcgis-map"]')
-          ?.getAttribute("data-reference-basemap-state") ?? "",
-      ),
-    );
-  }
+  await page.waitForFunction(() =>
+    ["failed", "ready"].includes(
+      document
+        .querySelector('[data-testid="cfs-arcgis-map"]')
+        ?.getAttribute("data-reference-basemap-state") ?? "",
+    ),
+  );
+  assert.equal(await map.getAttribute("data-basemap-mode"), "same-origin");
+  assert.equal(await map.getAttribute("data-reference-basemap-state"), "failed");
+  await page.getByTestId("cfs-reference-basemap-warning").waitFor();
   const countyPath = await page
     .getByTestId("cfs-local-context-map")
     .locator('[data-layer-id="county-boundary"]')
@@ -1524,7 +1536,10 @@ async function offlineMapChecks(browser, baseUrl) {
   const sameOriginPaths = new Set();
   await context.route("**/*", async (route) => {
     const url = new URL(route.request().url());
-    if (url.pathname.startsWith("/arcgis-assets/") || /(?:arcgis|esri)/i.test(url.hostname)) {
+    if (
+      url.pathname.startsWith("/arcgis-assets/") ||
+      isExternalArcgisRequest(url, { appOrigin: origin })
+    ) {
       arcgisRequests.push(url.href);
     }
     if (url.origin !== origin) {
