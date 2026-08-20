@@ -9,8 +9,7 @@
     "economics_signals": 120,
     "school_capacity_rows": 37,
     "permit_segment_buckets": 9,
-    "development_annual_trends": 31,
-    "case_1_shortlist_candidates": 3
+    "development_annual_trends": 31
   },
   "required_assets": [
     { "path": "public/demo-data/sample_parcels.json", "feature": "Planning parcel search", "schema": "sample_parcels.v1", "record_count": 300, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
@@ -22,10 +21,7 @@
     { "path": "public/demo-data/map_layers/demo_municipal_boundaries.geojson", "feature": "Municipal map context", "schema": "geojson.feature_collection.v1", "record_count": 6, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified U.S. Census Bureau TIGERweb incorporated places", "sanitized": true, "required": true },
     { "path": "public/demo-data/map_layers/demo_hydrography.geojson", "feature": "Major water map context", "schema": "geojson.feature_collection.v1", "record_count": 124, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified U.S. Fish and Wildlife Service NWI extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/map_layers/demo_transportation_context.geojson", "feature": "Major road map context", "schema": "geojson.feature_collection.v1", "record_count": 75, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified local transportation centerline extract", "sanitized": true, "required": true },
-    { "path": "public/demo-data/map_layers/demo_place_labels.geojson", "feature": "Major place map labels", "schema": "geojson.feature_collection.v1", "record_count": 6, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized representative points derived from TIGERweb municipalities", "sanitized": true, "required": true },
-    { "path": "case-studies/large-development-land/screening_funnel.json", "feature": "CASE-1 screening funnel", "schema": "case_screening_funnel.v1", "record_count": 6, "source_classification": "sanitized case-study package", "sanitized": true, "required": true },
-    { "path": "case-studies/large-development-land/shortlisted_candidates.json", "feature": "Investments Find Sites and CASE-1 shortlist", "schema": "case_shortlist.v1", "record_count": 3, "source_classification": "sanitized case-study package", "sanitized": true, "required": true },
-    { "path": "case-studies/large-development-land/final_diagnostic_exhibits.json", "feature": "CASE-1 underwriting diagnostic exhibits", "schema": "case_final_diagnostics.v1", "record_count": 3, "source_classification": "sanitized case-study package", "sanitized": true, "required": true }
+    { "path": "public/demo-data/map_layers/demo_place_labels.geojson", "feature": "Major place map labels", "schema": "geojson.feature_collection.v1", "record_count": 6, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized representative points derived from TIGERweb municipalities", "sanitized": true, "required": true }
   ],
   "source_label": "Local CFS PostGIS cached extract"
 }

@@ -1,5 +1,7 @@
 # CFS Investment Executive Recommendation
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 **Acquisition question:** Which large Cabarrus County development-land candidate should advance from screening into acquisition pricing?
 
 **Screening result:** CFS reviewed 110,017 parcel records, narrowed the universe to 241 acreage-qualified and evidence-ready parcels, passed 62 through the initial screen, manually reviewed 10, and shortlisted 3.

@@ -3,9 +3,9 @@
 import {
   ArrowRight,
   BarChart3,
-  BriefcaseBusiness,
   Database,
   MapPinned,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CfsAppMode } from "@/types";
@@ -41,16 +41,6 @@ const productCards: ProductCard[] = [
     title: "CFS Economics",
   },
   {
-    action: "Open Investments",
-    accent: "emerald",
-    description:
-      "Screen acquisition opportunities, compare candidate properties, review underwriting, and prepare investment recommendations.",
-    href: "/?app=consulting&investmentPage=engagements",
-    icon: BriefcaseBusiness,
-    mode: "consulting",
-    title: "CFS Investments",
-  },
-  {
     action: "Open Master Data",
     accent: "cyan",
     description:
@@ -59,6 +49,16 @@ const productCards: ProductCard[] = [
     icon: Database,
     mode: "master-data",
     title: "CFS Master Data",
+  },
+  {
+    action: "Open Ask CFS",
+    accent: "emerald",
+    description:
+      "Ask questions in plain language and get evidence-grounded explanations of planning and economics context.",
+    href: "/?app=ask-cfs",
+    icon: Sparkles,
+    mode: "ask-cfs",
+    title: "Ask CFS",
   },
 ];
 
@@ -94,7 +94,7 @@ export function CfsMasterHome() {
             Cabarrus FutureScape
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            One county intelligence platform for planning, economics, investments, and governed data extracts.
+            A planning intelligence and self-service data platform combining parcel-centered Planning, Economics scenario analysis, governed Master Data workflows, and Ask CFS.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             Portfolio demonstration using sanitized, cached public demo data where applicable; screening outputs are preliminary.

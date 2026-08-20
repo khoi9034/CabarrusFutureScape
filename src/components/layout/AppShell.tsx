@@ -30,6 +30,7 @@ import {
   Waves,
   X,
 } from "lucide-react";
+import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
 import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { IndicatorCenterWorkspace } from "@/components/dashboard/IndicatorCenterWorkspace";
@@ -39,7 +40,6 @@ import {
 } from "@/components/dashboard/IntelligencePanel";
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
 import { OverviewCommandCenter } from "@/components/dashboard/OverviewCommandCenter";
-import { ConsultingShell } from "@/components/consulting/ConsultingShell";
 import { EconomicsShell } from "@/components/economics/EconomicsShell";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { CfsMasterHome } from "@/components/layout/CfsMasterHome";
@@ -48,8 +48,6 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
-import type { InitialCaseStudyUrlState } from "@/components/investment/InvestmentCaseStudies";
-import type { InvestmentPageId } from "@/components/investment/InvestmentShell";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { CfsAppMode, OverviewPanelWidthPreset } from "@/types";
@@ -79,31 +77,18 @@ function clampLeftPanelWidth(width: number) {
 
 export function AppShell({
   initialAppMode,
-  initialCaseStudyUrlState,
-  initialInvestmentPage,
 }: {
   initialAppMode?: CfsAppMode;
-  initialCaseStudyUrlState?: InitialCaseStudyUrlState;
-  initialInvestmentPage?: InvestmentPageId;
 }) {
   return (
     <DashboardProvider initialAppMode={initialAppMode}>
       <DashboardUrlSync />
-      <ProductShell
-        initialCaseStudyUrlState={initialCaseStudyUrlState}
-        initialInvestmentPage={initialInvestmentPage}
-      />
+      <ProductShell />
     </DashboardProvider>
   );
 }
 
-function ProductShell({
-  initialCaseStudyUrlState,
-  initialInvestmentPage,
-}: {
-  initialCaseStudyUrlState?: InitialCaseStudyUrlState;
-  initialInvestmentPage?: InvestmentPageId;
-}) {
+function ProductShell() {
   const {
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
@@ -168,14 +153,12 @@ function ProductShell({
     <div
       className={cn(
         "relative flex min-h-screen flex-col overflow-x-hidden text-slate-100 lg:h-screen lg:overflow-hidden",
-        cfsAppMode === "consulting"
-          ? "consult-app-backdrop"
-          : cfsAppMode === "economics"
+        cfsAppMode === "economics"
           ? "econ-app-backdrop"
           : "cfs-command-backdrop metric-grid",
       )}
     >
-      {cfsAppMode === "economics" || cfsAppMode === "consulting" ? null : (
+      {cfsAppMode === "economics" ? null : (
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,13,0.08),rgba(3,7,13,0.88))]" />
       )}
       <div className="pointer-events-none absolute left-0 right-0 top-[4.5rem] z-10 h-px gold-line opacity-70" />
@@ -184,17 +167,7 @@ function ProductShell({
         <TopNav />
       </div>
 
-      {cfsAppMode === "consulting" ? (
-        <EnterpriseErrorBoundary
-          moduleName="CFS Investments"
-          resetKey="consulting"
-        >
-          <ConsultingShell
-            initialCaseStudyUrlState={initialCaseStudyUrlState}
-            initialInvestmentPage={initialInvestmentPage}
-          />
-        </EnterpriseErrorBoundary>
-      ) : cfsAppMode === "economics" ? (
+      {cfsAppMode === "economics" ? (
         <EnterpriseErrorBoundary
           moduleName="CFS Economics"
           resetKey="economics"
@@ -208,6 +181,26 @@ function ProductShell({
         >
           <MasterDataWorkspace />
         </EnterpriseErrorBoundary>
+      ) : cfsAppMode === "ask-cfs" ? (
+        <main className="relative z-10 min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <EnterpriseErrorBoundary moduleName="Ask CFS" resetKey="ask-cfs">
+            <div className="mx-auto grid w-full max-w-5xl gap-4">
+              <section className="cfs-command-surface rounded-2xl p-5 sm:p-6">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+                  Explain the evidence
+                </p>
+                <h1 className="mt-2 text-3xl font-semibold text-white">Ask CFS</h1>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+                  Ask planning and economics questions in plain language. Answers stay grounded in available CFS evidence, caveats, and recommended follow-up.
+                </p>
+              </section>
+              <AskCfsPanel
+                appMode="planning"
+                filterContext={{ selected_parcel_id: selectedParcelId ?? undefined }}
+              />
+            </div>
+          </EnterpriseErrorBoundary>
+        </main>
       ) : parcelReviewMode ? (
         <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
           <EnterpriseErrorBoundary
@@ -757,7 +750,7 @@ function OverviewLandingPage({
               <ShieldAlert className="h-5 w-5 text-[#d8b86a]" />
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d8b86a]">
-                  Investment Decision Workflows
+                  Economic Decision Workflows
                 </p>
                 <h2 className="text-xl font-semibold text-white">
                   Growth value, public cost risk, and investment readiness

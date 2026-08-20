@@ -168,7 +168,7 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
         )
     context["indicator_summary"] = {}
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
-    if request and request.app_mode in {"consulting", "economics"}:
+    if request and request.app_mode == "economics":
         if _db is None:
             context["context_freshness"] = "fallback_partial"
             context["caveats"].append("Economics context is unavailable, so CFS used data-needed economics guidance.")

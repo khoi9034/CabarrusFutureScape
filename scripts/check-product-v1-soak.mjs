@@ -25,7 +25,6 @@ const protectedPaths = [
   "outputs/school_capacity_ingestion_last_run.json",
   "outputs/school_presentation_utilization_seed_last_run.json",
   "logs/production-map-e89e3e8.png",
-  ...trackedCasePaths(),
 ];
 const before = new Map(
   protectedPaths.filter(existsSync).map((path) => [path, sha256(path)]),
@@ -38,13 +37,8 @@ let round = 0;
 const live = {
   askConversationId: null,
   economicsScenarioId: null,
-  investmentEngagementId: null,
-  investmentIntakeId: null,
-  investmentSavedSearchId: null,
-  investmentUnderwritingId: null,
   planningSnapshotId: null,
   projectId: null,
-  propertyReviewId: null,
   reportBucketItemId: null,
   reportId: null,
   prefix: `CFS-PRODUCT-V1-SOAK-${Date.now()}`,
@@ -266,105 +260,13 @@ async function seedLiveProductRecords() {
     method: "POST",
   });
 
-  const savedSearch = await legacyApi("/investment/saved-searches", {
-    body: {
-      advanced_criteria: {},
-      essential_criteria: {},
-      goal: "Custom",
-      guided_or_advanced: "guided",
-      result_summary: {},
-      search_name: `${live.prefix} Search`,
-    },
-    method: "POST",
-  });
-  live.investmentSavedSearchId = savedSearch.id;
-
-  const converted = await legacyApi(
-    `/investment/saved-searches/${encodeURIComponent(savedSearch.id)}/engagement`,
-    { method: "POST" },
-  );
-  live.investmentEngagementId = converted.engagement.id;
-  await legacyApi(
-    `/investment/engagements/${encodeURIComponent(converted.engagement.id)}/criteria`,
-    {
-      body: {
-        criteria: [
-          {
-            criterion: "Verify all sources before further diligence",
-            type: "Needs Verification",
-          },
-        ],
-      },
-      method: "POST",
-    },
-  );
-
-  const intake = await legacyApi("/investment/intake", {
-    body: {
-      candidate_name: `${live.prefix} Opportunity`,
-      review_status: "Screening",
-      source_type: "Manual Research",
-      strategy: "development_land",
-      user_notes: "Disposable Product V1 soak opportunity",
-    },
-    method: "POST",
-  });
-  live.investmentIntakeId = intake.candidate.id;
-  await legacyApi(
-    `/investment/engagements/${encodeURIComponent(converted.engagement.id)}/shortlist`,
-    {
-      body: {
-        item_id: intake.candidate.id,
-        item_type: "intake_candidate",
-        notes: "Disposable Product V1 soak shortlist",
-        status: "Shortlist",
-      },
-      method: "POST",
-    },
-  );
-
-  const underwriting = await legacyApi("/investment/underwriting/scenarios", {
-    body: {
-      assumptions: {},
-      candidate_id: intake.candidate.id,
-      private_notes: "Disposable Product V1 soak underwriting draft",
-      scenario_name: `${live.prefix} Underwriting`,
-      scenario_status: "Draft",
-      scenario_type: "development_land",
-      strategy: "development_land",
-    },
-    method: "POST",
-  });
-  live.investmentUnderwritingId = underwriting.id;
-
-  const propertyReview = await api("/api/v1/investments/property-reviews", {
-    body: {
-      findings: {
-        engagement_id: live.investmentEngagementId,
-        saved_search_id: live.investmentSavedSearchId,
-        shortlist_status: "Shortlist",
-        underwriting_scenario_id: live.investmentUnderwritingId,
-      },
-      notes: `${live.prefix} disposable property review`,
-      opportunity_id: live.investmentIntakeId,
-      project_id: live.projectId,
-      review_status: "In Review",
-    },
-    method: "POST",
-  });
-  live.propertyReviewId = propertyReview.id;
-
   const report = await api("/api/v1/reports", {
     body: {
       payload: {
-        engagement_id: live.investmentEngagementId,
-        opportunity_id: live.investmentIntakeId,
-        property_review_id: live.propertyReviewId,
-        saved_search_id: live.investmentSavedSearchId,
-        underwriting_scenario_id: live.investmentUnderwritingId,
+        planning_snapshot_id: live.planningSnapshotId,
       },
       project_id: live.projectId,
-      report_type: "Investment lifecycle soak",
+      report_type: "Planning persistence soak",
       status: "Draft",
       title: `${live.prefix} Report`,
     },
@@ -375,8 +277,8 @@ async function seedLiveProductRecords() {
   const reportBucketItem = await api("/api/v1/reports/bucket", {
     body: {
       include_in_print: true,
-      object_id: live.propertyReviewId,
-      object_type: "property_review",
+      object_id: live.planningSnapshotId,
+      object_type: "planning_snapshot",
       payload: { source: "Product V1 soak" },
       position: 1,
       project_id: live.projectId,
@@ -389,41 +291,21 @@ async function seedLiveProductRecords() {
 
   await verifyLiveProductRecords();
   console.log(
-    "PASS seeded live Planning, Economics, Ask CFS, Investment, and report persistence records",
+    "PASS seeded live Planning, Economics, Ask CFS, and report persistence records",
   );
 }
 
 async function verifyLiveProductRecords() {
   if (!live.projectId) return;
-  const [
-    project,
-    snapshot,
-    scenario,
-    conversation,
-    savedSearches,
-    engagement,
-    intake,
-    underwriting,
-    propertyReview,
-    report,
-    reportBucketItem,
-  ] = await Promise.all([
-    api(`/api/v1/projects/${live.projectId}`),
-    api(`/api/v1/planning/snapshots/${live.planningSnapshotId}`),
-    api(`/api/v1/economics/scenarios/${live.economicsScenarioId}`),
-    api(`/api/v1/ask-cfs/conversations/${live.askConversationId}`),
-    legacyApi("/investment/saved-searches"),
-    legacyApi(
-      `/investment/engagements/${encodeURIComponent(live.investmentEngagementId)}`,
-    ),
-    legacyApi(`/investment/intake/${encodeURIComponent(live.investmentIntakeId)}`),
-    legacyApi(
-      `/investment/underwriting/scenarios/${encodeURIComponent(live.investmentUnderwritingId)}`,
-    ),
-    api(`/api/v1/investments/property-reviews/${live.propertyReviewId}`),
-    api(`/api/v1/reports/${live.reportId}`),
-    api(`/api/v1/reports/bucket/${live.reportBucketItemId}`),
-  ]);
+  const [project, snapshot, scenario, conversation, report, reportBucketItem] =
+    await Promise.all([
+      api(`/api/v1/projects/${live.projectId}`),
+      api(`/api/v1/planning/snapshots/${live.planningSnapshotId}`),
+      api(`/api/v1/economics/scenarios/${live.economicsScenarioId}`),
+      api(`/api/v1/ask-cfs/conversations/${live.askConversationId}`),
+      api(`/api/v1/reports/${live.reportId}`),
+      api(`/api/v1/reports/bucket/${live.reportBucketItemId}`),
+    ]);
   assert.equal(project.name, live.prefix);
   assert.equal(snapshot.project_id, live.projectId);
   assert.equal(snapshot.current_version, 2);
@@ -431,35 +313,11 @@ async function verifyLiveProductRecords() {
   assert.equal(scenario.project_id, live.projectId);
   assert.equal(scenario.current_version, 2);
   assert.equal(conversation.project_id, live.projectId);
-  assert.equal(
-    savedSearches.searches.find(
-      (search) => search.id === live.investmentSavedSearchId,
-    )?.search_name,
-    `${live.prefix} Search`,
-  );
-  assert.ok(engagement.engagement_name.includes(live.prefix));
-  assert.ok(
-    engagement.shortlist.some(
-      (item) =>
-        item.item_id === live.investmentIntakeId &&
-        item.item_type === "intake_candidate" &&
-        item.status === "Shortlist",
-    ),
-  );
-  assert.equal(intake.candidate_name, `${live.prefix} Opportunity`);
-  assert.equal(underwriting.candidate_id, live.investmentIntakeId);
-  assert.equal(underwriting.scenario_status, "Draft");
-  assert.equal(propertyReview.project_id, live.projectId);
-  assert.equal(propertyReview.opportunity_id, live.investmentIntakeId);
-  assert.equal(
-    propertyReview.findings?.underwriting_scenario_id,
-    live.investmentUnderwritingId,
-  );
   assert.equal(report.project_id, live.projectId);
-  assert.equal(report.payload?.property_review_id, live.propertyReviewId);
+  assert.equal(report.payload?.planning_snapshot_id, live.planningSnapshotId);
   assert.equal(reportBucketItem.project_id, live.projectId);
   assert.equal(reportBucketItem.report_id, live.reportId);
-  assert.equal(reportBucketItem.object_id, live.propertyReviewId);
+  assert.equal(reportBucketItem.object_id, live.planningSnapshotId);
 }
 
 async function verifyLiveAudit() {
@@ -468,7 +326,6 @@ async function verifyLiveAudit() {
     live.planningSnapshotId,
     live.economicsScenarioId,
     live.askConversationId,
-    live.propertyReviewId,
     live.reportId,
     live.reportBucketItemId,
   ]) {
@@ -479,17 +336,16 @@ async function verifyLiveAudit() {
 
 async function archiveLiveProductRecords() {
   if (!live.projectId) return;
-  for (const [path, id] of [
+  for (const [resourcePath, id] of [
     ["/api/v1/reports/bucket", live.reportBucketItemId],
     ["/api/v1/reports", live.reportId],
-    ["/api/v1/investments/property-reviews", live.propertyReviewId],
     ["/api/v1/planning/snapshots", live.planningSnapshotId],
     ["/api/v1/economics/scenarios", live.economicsScenarioId],
     ["/api/v1/ask-cfs/conversations", live.askConversationId],
     ["/api/v1/projects", live.projectId],
   ]) {
     if (id) {
-      await api(`${path}/${id}/archive`, {
+      await api(`${resourcePath}/${id}/archive`, {
         allowNotFound: true,
         method: "POST",
         retry: true,
@@ -497,62 +353,18 @@ async function archiveLiveProductRecords() {
     }
   }
 
-  for (const [path, id] of [
-    ["/investment/underwriting/scenarios", live.investmentUnderwritingId],
-    ["/investment/engagements", live.investmentEngagementId],
-    ["/investment/intake", live.investmentIntakeId],
-    ["/investment/saved-searches", live.investmentSavedSearchId],
-  ]) {
-    if (!id) continue;
-    const result = await legacyApi(`${path}/${encodeURIComponent(id)}`, {
-      allowNotFound: true,
-      method: "DELETE",
-      retry: true,
-    });
-    if (result) assert.equal(result.deleted, true);
-  }
-
-  for (const path of [
+  for (const resourcePath of [
     "/api/v1/reports/bucket",
     "/api/v1/reports",
-    "/api/v1/investments/property-reviews",
     "/api/v1/planning/snapshots",
     "/api/v1/economics/scenarios",
     "/api/v1/ask-cfs/conversations",
     "/api/v1/projects",
   ]) {
-    const rows = await api(`${path}?page_size=100`);
+    const rows = await api(`${resourcePath}?page_size=100`);
     assert.ok(!rows.some((row) => JSON.stringify(row).includes(live.prefix)));
   }
-  const [savedSearches, engagements, intake, underwriting] = await Promise.all([
-    legacyApi("/investment/saved-searches"),
-    legacyApi("/investment/engagements"),
-    legacyApi("/investment/intake"),
-    legacyApi("/investment/underwriting/scenarios"),
-  ]);
-  assert.ok(
-    !savedSearches.searches.some(
-      (record) => record.id === live.investmentSavedSearchId,
-    ),
-  );
-  assert.ok(
-    !engagements.engagements.some(
-      (record) => record.id === live.investmentEngagementId,
-    ),
-  );
-  assert.ok(
-    !intake.candidates.some((record) => record.id === live.investmentIntakeId),
-  );
-  assert.ok(
-    !underwriting.scenarios.some(
-      (record) => record.id === live.investmentUnderwritingId,
-    ),
-  );
-  console.log("PASS archived/deleted disposable live Product V1 records");
-}
-
-async function legacyApi(path, options = {}) {
-  return api(path, { ...options, raw: true });
+  console.log("PASS archived disposable live Product V1 records");
 }
 
 async function api(
@@ -561,7 +373,6 @@ async function api(
     allowNotFound = false,
     body,
     method = "GET",
-    raw = false,
     retry = false,
   } = {},
 ) {
@@ -596,7 +407,7 @@ async function api(
     );
   }
   assert.ok(response.headers.get("x-request-id"), `${method} ${path} omitted X-Request-ID`);
-  return raw ? payload : payload.data;
+  return payload.data;
 }
 
 function runAcceptanceRound() {
@@ -698,16 +509,6 @@ function assertProtectedArtifacts() {
 
 function sha256(path) {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
-}
-
-function trackedCasePaths() {
-  const result = spawnSync(
-    "git",
-    ["ls-files", "--", "case-studies/large-development-land", "docs/case-studies", "src/app/case-studies/large-development-land"],
-    { encoding: "utf8" },
-  );
-  if (result.status !== 0) throw new Error("Unable to inventory protected CASE artifacts.");
-  return result.stdout.split(/\r?\n/).filter(Boolean);
 }
 
 function readCanonicalRelationCounts() {

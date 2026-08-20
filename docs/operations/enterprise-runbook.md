@@ -114,7 +114,7 @@ until a restore into an isolated target is timed and validated.
 ## Frontend persistence acceptance
 
 `check:frontend-persistence` is defined to drive the actual Planning, Economics,
-Investments Report Bucket, and Ask CFS interfaces. A successful run must observe
+Report Bucket, Master Data, and Ask CFS interfaces. A successful run must observe
 the resulting Product API requests, refresh and reopen disposable records, check
 audit history, archive them through supported routes, and verify cleanup. Direct
 API persistence tests are lower-level coverage and do not substitute for this
@@ -130,7 +130,7 @@ do not diagnose them by enabling a browser-storage fallback.
 
 The release soak runs at least 45 minutes against disposable Product V1 records,
 includes the browser persistence command as an acceptance round, exercises
-Planning/Economics/Investments/Ask CFS/Power BI/map/roles/audit/dry-run/artifact
+Planning/Economics/Master Data/Ask CFS/Power BI/map/roles/audit/dry-run/artifact
 downloads, restarts owned services, cleans up, and compares canonical hashes
 before and after. Short diagnostic runs do not satisfy release soak.
 

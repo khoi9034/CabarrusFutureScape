@@ -114,13 +114,13 @@ def test_cloud_table_guard_checks_existing_tables_only_for_managed_identity(monk
     fake_db = FakeDb()
     monkeypatch.setenv("CFS_DATABASE_AUTH_MODE", "managed_identity")
     app.config.get_settings.cache_clear()
-    assert cloud_tables_exist(fake_db, ["investment_candidate_intake", "investment_saved_item"])
-    assert fake_db.names == ["investment_candidate_intake", "investment_saved_item"]
+    assert cloud_tables_exist(fake_db, ["parcels_enriched", "development_activity_parcel_summary"])
+    assert fake_db.names == ["parcels_enriched", "development_activity_parcel_summary"]
 
     fake_db = FakeDb()
     monkeypatch.setenv("CFS_DATABASE_AUTH_MODE", "password")
     app.config.get_settings.cache_clear()
-    assert not cloud_tables_exist(fake_db, ["investment_candidate_intake"])
+    assert not cloud_tables_exist(fake_db, ["parcels_enriched"])
     assert fake_db.names == []
 
 

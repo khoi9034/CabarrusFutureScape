@@ -182,7 +182,7 @@ This phase is a practice/export workflow, not Power BI Embedded.
 7. Build the exported relationships, especially
    `scenario_output_fact.scenario_id -> scenario_dim.scenario_id` and
    `parcel_economic_signal_fact.geography_label -> geography_dim.geography_label`.
-8. Create report pages for the executive dashboard, parcel investment screen,
+8. Create report pages for the executive dashboard, parcel economic screen,
    scenario planning model, and data confidence register.
 
 Future path: these tables can become a Power BI semantic model, then a Power BI
@@ -204,7 +204,7 @@ turning the export into a Desktop report:
   `parcel_economic_signal_fact.geography_label -> geography_dim.geography_label`.
 - Keep remaining tables disconnected until a visual needs them; some tables are
   summary-level and should not be forced into incorrect relationships.
-- Build four pages: Executive Economic Dashboard, Parcel Investment Screen,
+- Build four pages: Executive Economic Dashboard, Parcel Economic Screen,
   Scenario Planning Model, and Data Confidence Register.
 - Beginner path: use the CSV files first because they import as normal flat
   BI source tables. Use the JSON pack later for app-to-app integration.

@@ -60,7 +60,7 @@ const PLANNER_PERMISSIONS = [
 const ADMINISTRATOR_PERMISSIONS = [
   "administration:write", "artifacts:download", "ask_cfs:use", "audit:read",
   "data:read", "economics:write", "ingestion:apply", "ingestion:dry_run",
-  "investments:write", "master_data:export", "master_data:view", "planning:write", "projects:write", "reports:read",
+  "master_data:export", "master_data:view", "planning:write", "projects:write", "reports:read",
   "reports:write", "sources:read", "sources:write",
 ];
 assert(
@@ -83,7 +83,6 @@ const protectedPaths = [
   "outputs/school_capacity_ingestion_last_run.json",
   "outputs/school_presentation_utilization_seed_last_run.json",
   "logs/production-map-e89e3e8.png",
-  ...trackedCasePaths(),
 ];
 const protectedBefore = new Map(
   protectedPaths.filter(existsSync).map((file) => [file, sha256(file)]),
@@ -316,7 +315,6 @@ try {
       } else if (!["health-drain", "map-fallback"].includes(PHASE)) {
         await localPlanning(localContext);
         await localEconomicsAndBucket(localContext);
-        await localInvestmentsBucket(localContext);
         const askConversationId = await localAskCfs(localContext);
         await localMalformedProductRecords(localContext);
         await localPermissionDenial(localContext, askConversationId);
@@ -1282,58 +1280,6 @@ async function localEconomicsAndBucket(context) {
   }
 }
 
-async function localInvestmentsBucket(context) {
-  const page = await context.newPage();
-  try {
-    await runCase("Investments", "UI Report Bucket add, refresh, remove", async () => {
-      await goto(page, LOCAL_URL, "?app=consulting&investmentPage=overview");
-      await page.locator("button.investment-ghost-button").filter({ hasText: "Find Sites" }).click();
-      const screening = page.waitForResponse((response) =>
-        new URL(response.url()).pathname === "/investment/radar/search" &&
-        response.request().method() === "POST",
-      { timeout: 60_000 });
-      await page.getByRole("button", { name: "Run Screening", exact: true }).click();
-      assert.equal((await screening).status(), 200);
-      const review = page.getByRole("button", { name: "Open Property Review" }).first();
-      await review.waitFor({ timeout: 60_000 });
-      await review.click();
-      await page.getByRole("tablist", { name: "Property Research tabs" }).waitFor({ timeout: 45_000 });
-      await page.getByRole("button", { name: "Reports", exact: true }).click();
-      const generate = page.getByRole("button", { name: /Generate/i }).first();
-      await generate.waitFor({ timeout: 45_000 });
-      await poll(async () => !(await generate.isDisabled()), 45_000);
-      const generated = page.waitForResponse((response) =>
-        new URL(response.url()).pathname === "/investment/reports/generate" &&
-        response.request().method() === "POST",
-      { timeout: 60_000 });
-      await generate.click();
-      assert.equal((await generated).status(), 200);
-      const addReport = page.getByRole("button", { name: "Add report to Report Bucket", exact: true });
-      await poll(async () => !(await addReport.isDisabled()), 60_000);
-      const added = await productWrite(page, "POST", /^\/api\/v1\/reports\/bucket$/, () =>
-        addReport.click(),
-      );
-      const id = productId(added, "Investments Report Bucket add");
-      remember("investments_report_bucket", "/api/v1/reports/bucket", id);
-      expectPersistedFields(id, { object_id: added.data.object_id, object_type: added.data.object_type });
-      await reloadPage(page);
-      await page.getByRole("button", { name: "Return to CFS Home" }).waitFor({ timeout: 60_000 });
-      const row = reportBucketRow(page, id, added.data.object_id);
-      await row.waitFor({ timeout: 45_000 });
-      const removed = await productWrite(
-        page,
-        "POST",
-        new RegExp(`^/api/v1/reports/bucket/${id}/archive$`),
-        () => row.getByRole("button", { name: "Remove", exact: true }).click(),
-      );
-      assert(removed.data.archived_at);
-      markClean(id, "ui_archive");
-    });
-  } finally {
-    await closeAcceptedPage(page);
-  }
-}
-
 async function localAskCfs(context) {
   const page = await context.newPage();
   let ownedConversationId = null;
@@ -1838,7 +1784,7 @@ async function localAuthorizationMatrix() {
 
   await runRoleCase(
     "Analyst",
-    ["ask_cfs:use", "data:read", "economics:write", "investments:write", "master_data:export", "master_data:view", "projects:write", "reports:read", "reports:write", "sources:read"],
+    ["ask_cfs:use", "data:read", "economics:write", "master_data:export", "master_data:view", "projects:write", "reports:read", "reports:write", "sources:read"],
     async (page) => {
       await goto(page, LOCAL_URL, "?app=planning");
       await assertVisiblePlanningSavesDisabled(page);
@@ -1994,7 +1940,7 @@ async function runRoleCase(role, permissions, run, caseName = `${role} UI permis
 }
 
 async function assertCurrentPrincipalRole(page, role) {
-  const controls = page.getByRole("button", { name: /Open (?:dashboard|economics|investment) controls/i });
+  const controls = page.getByRole("button", { name: /Open (?:dashboard|economics) controls/i });
   await controls.click();
   const principalStatus = page.getByTestId("product-principal-status");
   try {
@@ -2006,7 +1952,7 @@ async function assertCurrentPrincipalRole(page, role) {
 }
 
 async function assertLocalRuntimeHealth(page, expectedFailurePath = null) {
-  const controls = page.getByRole("button", { name: /Open (?:dashboard|economics|investment) controls/i });
+  const controls = page.getByRole("button", { name: /Open (?:dashboard|economics) controls/i });
   await controls.click();
   const runtime = page.getByTestId("local-runtime-status");
   try {
@@ -3727,7 +3673,6 @@ tables = {
     "planning_report": ("reports", None, None, "created_by"),
     "economics": ("economic_scenarios", "economic_scenario_versions", "scenario_id", "created_by"),
     "economics_report_bucket": ("report_bucket_items", None, None, "created_by"),
-    "investments_report_bucket": ("report_bucket_items", None, None, "created_by"),
     "ask_cfs": ("ask_cfs_conversations", "ask_cfs_messages", "conversation_id", "user_id"),
 }
 
@@ -3953,16 +3898,6 @@ function assertProtectedArtifacts() {
 
 function sha256(file) {
   return createHash("sha256").update(readFileSync(file)).digest("hex");
-}
-
-function trackedCasePaths() {
-  const result = spawnSync(
-    "git",
-    ["ls-files", "--", "case-studies/large-development-land", "docs/case-studies", "src/app/case-studies/large-development-land"],
-    { encoding: "utf8" },
-  );
-  assert.equal(result.status, 0, "Unable to inventory protected CASE artifacts.");
-  return result.stdout.split(/\r?\n/).filter(Boolean);
 }
 
 function git(...args) {

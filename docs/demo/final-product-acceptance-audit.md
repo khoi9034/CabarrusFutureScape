@@ -1,5 +1,7 @@
 # Final Product Acceptance Audit
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 Date: 2026-07-27
 Production audited: https://cabarrus-future-scape.vercel.app
 Production commit audited before fixes: 2574fdc55027c9ca49923c6fc1be4842e62745f2

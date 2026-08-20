@@ -54,7 +54,7 @@ def test_restore_runner_uses_entra_token_process_only_and_metrics() -> None:
     assert "WindowStyle Hidden" in script
 
 
-def test_azure_validator_compares_counts_geometry_sensitive_columns_and_writes() -> None:
+def test_azure_validator_compares_counts_geometry_and_sensitive_columns_without_writes() -> None:
     script = _text(AZURE_VALIDATOR)
     assert "row_count_mismatches" in script
     assert "geometry" in script
@@ -63,7 +63,8 @@ def test_azure_validator_compares_counts_geometry_sensitive_columns_and_writes()
     assert "spatial_index_present" in script
     assert "sensitive_column_checks" in script
     assert "forbidden_objects" in script
-    assert "writable_rollback" in script
+    assert "writable_rollback" not in script
+    assert "INSERT INTO investment_" not in script
     assert "sslmode=\"disable\"" in script
     assert "sslmode=os.getenv(\"PGSSLMODE\", \"require\")" in script
 
@@ -77,8 +78,9 @@ def test_role_grants_keep_readonly_readonly_and_app_writes_narrow() -> None:
     assert "GRANT SELECT ON TABLE %I.%I TO cfs_readonly, cfs_app" in sql
     assert "REVOKE INSERT, UPDATE, DELETE" in sql
     assert "TO cfs_app" in sql
-    assert "public.investment_candidate_intake" in sql
-    assert "public.investment_underwriting_scenario" in sql
+    assert "GRANT INSERT, UPDATE, DELETE ON TABLE" not in sql
+    assert "public.investment_candidate_intake" not in sql
+    assert "public.investment_underwriting_scenario" not in sql
     assert "ALTER ROLE" not in sql
     assert not re.search(r"(?i)\b(WITH\s+)?PASSWORD\b", sql)
 

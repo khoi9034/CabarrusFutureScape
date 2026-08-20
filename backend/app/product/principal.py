@@ -27,7 +27,6 @@ class Permission(StrEnum):
     ASK_CFS = "ask_cfs:use"
     PLANNING_WRITE = "planning:write"
     ECONOMICS_WRITE = "economics:write"
-    INVESTMENTS_WRITE = "investments:write"
     PROJECT_WRITE = "projects:write"
     REPORT_READ = "reports:read"
     REPORT_WRITE = "reports:write"
@@ -64,7 +63,6 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
         _VIEWER
         | {
             Permission.ECONOMICS_WRITE,
-            Permission.INVESTMENTS_WRITE,
             Permission.MASTER_DATA_EXPORT,
             Permission.MASTER_DATA_VIEW,
             Permission.PROJECT_WRITE,

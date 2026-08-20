@@ -25,7 +25,6 @@ import {
 const root = process.cwd();
 const OPTIONAL_PUBLIC_RESOURCES = optionalPublicMapResources();
 const externalBaseUrl = process.env.CFS_DEMO_BASE_URL?.replace(/\/$/, "");
-const caseArtifacts = [];
 const results = [];
 const controls = new Map();
 const diagnostics = {
@@ -347,7 +346,7 @@ function requestPage(request) {
 function acceptanceRouteKey(value) {
   const url = new URL(value);
   const route = new URLSearchParams();
-  for (const key of ["app", "investmentPage"]) {
+  for (const key of ["app"]) {
     const selected = url.searchParams.get(key);
     if (selected) route.set(key, selected);
   }
@@ -417,22 +416,6 @@ async function acceptedNavigation(page, kind, navigate, prove) {
   await navigate();
   await prove();
   proveAcceptanceLifecycle(page, lifecycle);
-}
-
-async function openInvestmentRoute(page, name, investmentPage) {
-  await acceptedNavigation(
-    page,
-    "route",
-    () => page.getByRole("button", { name, exact: true }).click(),
-    async () => {
-      await page.waitForFunction(
-        (expected) => new URLSearchParams(location.search).get("investmentPage") === expected,
-        investmentPage,
-      );
-      await page.locator(`main[data-investment-page="${investmentPage}"]`).waitFor();
-      await assertHealthyText(page);
-    },
-  );
 }
 
 function recordMapDiagnostic(diagnostic, { generation = null, page = null, source }) {
@@ -1291,182 +1274,14 @@ async function masterDataChecks(page, baseUrl) {
   });
 }
 
-async function investmentsChecks(page, baseUrl) {
-  await goto(page, baseUrl, "?app=consulting&investmentPage=overview");
-  await check("Investments", "Home and Projects load populated CASE-1 state", ["Home", "Projects", "continue project"], async () => {
-    await page.getByText("CFS Large Development-Land Acquisition Case Study", { exact: false }).first().waitFor({ timeout: 30_000 });
-    await openInvestmentRoute(page, "Projects", "engagements");
-    await page.getByText("Active projects and case studies", { exact: false }).waitFor();
-  });
-
-  await check("Investments", "Find Sites filters and saved-search persistence", ["screen", "minimum acres", "environmental filter", "save search", "refresh"], async () => {
-    await openInvestmentRoute(page, "Find Sites", "area-radar");
-    await page.getByRole("button", { name: "Run Screening", exact: true }).click();
-    await page.getByText(/3 candidates/i).first().waitFor();
-    const filters = page.locator('main[data-investment-page="area-radar"] input[type="number"], main[data-investment-page="area-radar"] select');
-    assert((await filters.count()) >= 2, "Find Sites filter controls are missing.");
-    await page.getByRole("button", { name: "Save Search", exact: true }).click();
-    const saved = page.getByLabel("Saved searches");
-    await saved.getByText("Find Sites: Large Development Land", { exact: true }).waitFor();
-    await acceptedNavigation(
-      page,
-      "reload",
-      () => page.reload({ waitUntil: "domcontentloaded" }),
-      async () => {
-        await saved.getByText("Find Sites: Large Development Land", { exact: true }).waitFor();
-        await assertHealthyText(page);
-      },
-    );
-  });
-
-  await check("Investments", "external opportunity saves without false analysis", ["add external", "save", "refresh"], async () => {
-    await acceptedNavigation(
-      page,
-      "route",
-      () => page.getByRole("button", { name: /Add External Opportunity/i }).click(),
-      async () => {
-        await page.waitForFunction(
-          () => new URLSearchParams(location.search).get("investmentPage") === "intake",
-        );
-        await page.locator('main[data-investment-page="intake"]').waitFor();
-        await assertHealthyText(page);
-      },
-    );
-    const form = page.locator('main[data-investment-page="intake"]');
-    const unique = `EXT-BROWSER-${Date.now()}`;
-    await form.getByRole("textbox", { name: "Candidate label" }).fill("Browser acceptance opportunity");
-    await form.getByRole("textbox", { name: "Parcel ID" }).fill(unique);
-    await form.getByRole("button", { name: "Add Candidate", exact: true }).click();
-    await form.getByText(unique, { exact: false }).first().waitFor();
-    assert.equal(new URL(page.url()).searchParams.get("investmentPage"), "intake");
-    await acceptedNavigation(
-      page,
-      "reload",
-      () => page.reload({ waitUntil: "domcontentloaded" }),
-      async () => {
-        await form.getByText(unique, { exact: false }).first().waitFor();
-        await assertHealthyText(page);
-      },
-    );
-  });
-
-  await check("Investments", "all three candidates expose seven distinct research tabs", ["3 candidates", "7 research tabs"], async () => {
-    await openInvestmentRoute(page, "Find Sites", "area-radar");
-    await page.getByRole("button", { name: "Run Screening", exact: true }).click();
-    const candidates = ["CFS-PARCEL-0149758869", "CFS-PARCEL-0149760035", "CFS-PARCEL-0149777275"];
-    const tabs = ["Summary", "Property", "Market", "Constraints", "Financial", "Due Diligence", "Sources"];
-    for (const candidate of candidates) {
-      let card = page.getByText(candidate, { exact: false }).first().locator("xpath=ancestor::*[self::article or self::div][.//button[contains(.,'Open Property Review')]][1]");
-      if (!(await card.count())) {
-        await page.getByRole("button", { name: "Run Screening", exact: true }).click();
-        card = page.getByText(candidate, { exact: false }).first().locator("xpath=ancestor::*[self::article or self::div][.//button[contains(.,'Open Property Review')]][1]");
-      }
-      await acceptedNavigation(
-        page,
-        "route",
-        () => card.getByRole("button", { name: "Open Property Review" }).click(),
-        async () => {
-          await page.waitForFunction(
-            () => new URLSearchParams(location.search).get("investmentPage") === "research",
-          );
-          await page.locator('main[data-investment-page="research"]').waitFor();
-          await assertHealthyText(page);
-        },
-      );
-      const research = page.getByRole("tablist", { name: "Property Research tabs" }).locator("xpath=ancestor::section[1]");
-      const tabContents = new Set();
-      for (const tab of tabs) {
-        const button = page.getByRole("tab", { name: tab });
-        await button.click();
-        assert.equal(await button.getAttribute("aria-selected"), "true");
-        tabContents.add(await research.innerText());
-      }
-      assert.equal(tabContents.size, tabs.length, `${candidate} did not render distinct tab content`);
-      await openInvestmentRoute(page, "Find Sites", "area-radar");
-    }
-  });
-
-  await check("Investments", "Reports bucket persists and can be emptied", ["generate report", "add bucket", "refresh", "remove"], async () => {
-    await openInvestmentRoute(page, "Reports", "report-studio");
-    const generate = page.getByRole("button", { name: /Generate/i }).first();
-    await generate.click();
-    const add = page.getByRole("button", { name: "Add report to Report Bucket", exact: true });
-    await add.click();
-    await acceptedNavigation(
-      page,
-      "reload",
-      () => page.reload({ waitUntil: "domcontentloaded" }),
-      async () => {
-        await page.getByRole("button", { name: "Reports", exact: true }).click();
-        await page.getByText(/Report Bucket/i).first().waitFor();
-        await assertHealthyText(page);
-      },
-    );
-    const remove = page.getByRole("button", { name: /Remove/i }).first();
-    if (await remove.count()) await remove.click();
-  });
-
-  await check("Investments", "Data & Methods exposes static dataset status and source links", ["dataset rows", "source links", "static refresh status"], async () => {
-    await openInvestmentRoute(page, "Data & Methods", "methodology");
-    const status = page.getByLabel("Demo dataset status");
-    assert.equal(await status.getByRole("link", { name: "Open demo asset" }).count(), 5);
-    assert.equal(await status.getByRole("button", { name: "Static in portfolio demo" }).count(), 5);
-    const href = await status.getByRole("link", { name: "Open demo asset" }).first().getAttribute("href");
-    assert(href?.startsWith("/demo-data/"));
-  });
-
-  await check("Investments", "CASE-1 workflow reaches all nine artifacts", ["underwrite", "decide", "deliver", "9 artifacts"], async () => {
-    await openInvestmentRoute(page, "Projects", "engagements");
-    const library = page.getByLabel("Case Studies library");
-    if (await library.count()) {
-      await library.getByRole("button", { name: "Continue", exact: true }).first().click();
-    }
-    const workspace = page.getByLabel("Case study workspace");
-    await workspace.waitFor();
-    const workflow = workspace.getByLabel("Case-study workflow");
-    await workflow.getByRole("button", { name: /^Underwrite/ }).click();
-    await workspace.getByText(/No scenario supports a positive land basis/i).waitFor();
-    await workspace.getByRole("button", { name: "Review Assumptions", exact: true }).click();
-    const assumptions = workspace.getByLabel("Underwriting assumption review");
-    await assumptions.waitFor();
-    for (const residual of ["-$110.20M", "-$64.34M", "-$14.25M"]) {
-      await assumptions.getByText(residual, { exact: false }).waitFor();
-    }
-    await assumptions.getByRole("button", { name: "Return to Underwrite" }).click();
-    await workflow.getByRole("button", { name: /^Decide/ }).click();
-    await workspace.getByText("Targeted diligence only.", { exact: true }).waitFor();
-    await workflow.getByRole("button", { name: /^Deliver/ }).click();
-    const deliverables = workspace.getByRole("heading", { name: "Deliverable checklist" }).locator("xpath=ancestor::section[1]");
-    const rows = deliverables.locator("tbody tr");
-    assert.equal(await rows.count(), 9, "CASE-1 did not expose nine deliverables.");
-    const names = await rows.locator("td:first-child").allInnerTexts();
-    assert.equal(new Set(names).size, 9, "CASE-1 deliverable titles were not unique.");
-    caseArtifacts.push(...names);
-    for (let index = 0; index < names.length; index += 1) {
-      await deliverables.locator("tbody tr").nth(index).getByRole("button").click();
-      const panel = workspace.getByLabel(names[index]);
-      const link = panel.getByRole("link", { name: "Open artifact" });
-      if (!(await link.count())) {
-        await panel.getByText(/No downloadable artifact is registered/i).waitFor();
-        await panel.getByRole("button", { name: "Return to Deliver" }).click();
-        continue;
-      }
-      const href = await link.getAttribute("href");
-      assert(href?.startsWith("/case-studies/large-development-land"));
-      const isDownload = /\.(?:pptx|xlsx)$/i.test(href);
-      const openedPromise = isDownload ? page.waitForEvent("download") : page.waitForEvent("popup");
-      await link.click();
-      const opened = await openedPromise;
-      if (isDownload) {
-        const path = await opened.path();
-        assert(path && statSync(path).size > 100, `${names[index]} download was empty`);
-      } else {
-        await opened.waitForLoadState("domcontentloaded");
-        assert.equal(new URL(opened.url()).origin, new URL(baseUrl).origin);
-        await closeAcceptancePage(opened);
-      }
-      await panel.getByRole("button", { name: "Return to Deliver" }).click();
-    }
+async function askCfsChecks(page, baseUrl) {
+  await goto(page, baseUrl, "?app=ask-cfs");
+  await check("Ask CFS", "standalone route answers a grounded question", ["route", "answer"], async () => {
+    await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor();
+    const ask = page.getByRole("textbox", { name: "Ask CFS question" });
+    await ask.fill("What data should I inspect first?");
+    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByRole("button", { name: "Reset conversation" }).waitFor({ timeout: 20_000 });
   });
 }
 
@@ -1474,7 +1289,8 @@ async function mobileChecks(browser, baseUrl) {
   for (const [product, query] of [
     ["Planning", "?app=planning"],
     ["Economics", "?app=economics"],
-    ["Investments", "?app=consulting&investmentPage=overview"],
+    ["Master Data", "?app=master-data"],
+    ["Ask CFS", "?app=ask-cfs"],
   ]) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     attachDiagnostics(context, new URL(baseUrl).origin);
@@ -1513,11 +1329,9 @@ async function mobileChecks(browser, baseUrl) {
       await page.locator("#top-parcel-search-results").getByRole("option").first().click();
       await page.getByTestId("parcel-economic-context").getByText("CFS-PARCEL-0149726304", { exact: false }).waitFor();
     }
-    if (product === "Investments") {
-      await page.getByRole("region", { name: "CFS Investments", exact: true }).waitFor();
-      await page.getByRole("button", { name: "Find Sites", exact: true }).first().click();
-      await page.getByRole("button", { name: "Run Screening", exact: true }).click();
-      await page.getByText(/3 candidates/i).first().waitFor();
+    if (product === "Master Data") await page.getByTestId("master-data-catalog").waitFor();
+    if (product === "Ask CFS") {
+      await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor();
     }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert(overflow <= 2, `${product} has ${overflow}px horizontal mobile overflow.`);
@@ -1644,12 +1458,12 @@ async function main() {
     const economics = await context.newPage();
     await economicsChecks(economics, baseUrl);
     await closeAcceptancePage(economics);
-    const investments = await context.newPage();
-    await investmentsChecks(investments, baseUrl);
-    await closeAcceptancePage(investments);
     const masterData = await context.newPage();
     await masterDataChecks(masterData, baseUrl);
     await closeAcceptancePage(masterData);
+    const askCfs = await context.newPage();
+    await askCfsChecks(askCfs, baseUrl);
+    await closeAcceptancePage(askCfs);
     await mobileChecks(browser, baseUrl);
     await offlineMapChecks(browser, baseUrl);
     await closeAcceptanceContext(context);
@@ -1676,9 +1490,8 @@ async function main() {
     const summary = {
       baseUrl,
       assets,
-      caseArtifacts,
       cases: Object.fromEntries(
-        ["Planning", "Economics", "Investments", "Master Data"].map((product) => [
+        ["Planning", "Economics", "Master Data", "Ask CFS"].map((product) => [
           product,
           results.filter((result) => result.product === product).length,
         ]),

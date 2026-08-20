@@ -579,10 +579,9 @@
       "object_name": "investment_acs_market_context",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "104.0 KB",
@@ -590,7 +589,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "geoid",
         "geography_type",
@@ -621,10 +620,9 @@
       "object_name": "investment_acs_tract_geometry",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": true,
       "approximate_size": "376.0 KB",
@@ -632,7 +630,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "geoid",
         "acs_year",
@@ -650,19 +648,17 @@
       "object_name": "investment_assumption_template",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference",
-        "writable_saved_workflow"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
-      "read_or_write": "read_write",
+      "cloud_required": false,
+      "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "16.0 KB",
       "sensitive_columns": [],
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Writable workflow table preserved for local staging validation.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "id",
         "template_name",
@@ -679,19 +675,17 @@
       "object_name": "investment_candidate_intake",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference",
-        "writable_saved_workflow"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
-      "read_or_write": "read_write",
+      "cloud_required": false,
+      "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "48.0 KB",
       "sensitive_columns": [],
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Writable workflow table preserved for local staging validation.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "id",
         "parcel_id",
@@ -727,19 +721,17 @@
       "object_name": "investment_engagement",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference",
-        "writable_saved_workflow"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
-      "read_or_write": "read_write",
+      "cloud_required": false,
+      "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "32.0 KB",
       "sensitive_columns": [],
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Writable workflow table preserved for local staging validation.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "id",
         "engagement_name",
@@ -757,10 +749,9 @@
       "object_name": "investment_environmental_facilities",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": true,
       "approximate_size": "1.3 MB",
@@ -768,7 +759,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "source_id",
         "facility_name",
@@ -790,10 +781,9 @@
       "object_name": "investment_nwi_wetlands",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": true,
       "approximate_size": "20.7 MB",
@@ -801,7 +791,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "source_id",
         "wetland_type",
@@ -816,10 +806,9 @@
       "object_name": "investment_parcel_acs_geography",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "16.2 MB",
@@ -827,7 +816,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "parcel_id",
         "tract_geoid",
@@ -841,10 +830,9 @@
       "object_name": "investment_parcel_environmental_context",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "3.1 GB",
@@ -852,7 +840,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "parcel_id",
         "flood_context_band",
@@ -900,19 +888,17 @@
       "object_name": "investment_recent_work",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference",
-        "writable_saved_workflow"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
-      "read_or_write": "read_write",
+      "cloud_required": false,
+      "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "48.0 KB",
       "sensitive_columns": [],
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Writable workflow table preserved for local staging validation.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "id",
         "activity_type",
@@ -932,19 +918,17 @@
       "object_name": "investment_saved_item",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference",
-        "writable_saved_workflow"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
-      "read_or_write": "read_write",
+      "cloud_required": false,
+      "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "48.0 KB",
       "sensitive_columns": [],
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Writable workflow table preserved for local staging validation.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "id",
         "item_type",
@@ -971,19 +955,17 @@
       "object_name": "investment_saved_search",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference",
-        "writable_saved_workflow"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
-      "read_or_write": "read_write",
+      "cloud_required": false,
+      "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "32.0 KB",
       "sensitive_columns": [],
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Writable workflow table preserved for local staging validation.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "id",
         "search_name",
@@ -1004,10 +986,9 @@
       "object_name": "investment_soil_units",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": true,
       "approximate_size": "32.5 MB",
@@ -1015,7 +996,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "source_id",
         "map_unit",
@@ -1033,10 +1014,9 @@
       "object_name": "investment_terrain_context",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
+      "cloud_required": false,
       "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "72.8 MB",
@@ -1044,7 +1024,7 @@
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Included for active CFS runtime compatibility.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "parcel_id",
         "minimum_elevation",
@@ -1067,19 +1047,17 @@
       "object_name": "investment_underwriting_scenario",
       "object_type": "Table",
       "required_by": [
-        "CFS Investment",
-        "active_backend_reference",
-        "writable_saved_workflow"
+        "Legacy Investments (retired)"
       ],
-      "cloud_required": true,
-      "read_or_write": "read_write",
+      "cloud_required": false,
+      "read_or_write": "read_only",
       "contains_geometry": false,
       "approximate_size": "80.0 KB",
       "sensitive_columns": [],
       "restriction_status": "Cloud safe",
       "migration_action": "Include Entire Object",
       "rebuildable": false,
-      "dependency_notes": "Writable workflow table preserved for local staging validation.",
+      "dependency_notes": "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime.",
       "included_columns": [
         "id",
         "scenario_name",

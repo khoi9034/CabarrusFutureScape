@@ -1,5 +1,7 @@
 # CFS Investment Large Development-Land Acquisition Case Study
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 ## 1. Executive Summary
 
 CFS identified CFS-PARCEL-0149758869 as the strongest physical/planning screening candidate in the large development-land case study. It has 489.43 gross acres, a 392.11-acre preliminary developable-area screening estimate, a CASE-1 screening score of 89, adjacent sewer-proximity proxy evidence, and a moderate mapped environmental constraint profile.

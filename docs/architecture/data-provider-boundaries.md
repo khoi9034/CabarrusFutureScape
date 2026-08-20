@@ -20,8 +20,8 @@ existing boundaries instead.
 | --- | --- | --- | --- |
 | Parcel and Planning | Sanitized JSON/GeoJSON | FastAPI to local PostGIS | Same typed API contract |
 | Economics and scenarios | Sanitized JSON | FastAPI economics service | Hosted economics API |
-| Investments | Session demo service | FastAPI investment routes | Hosted investment API |
 | Ask CFS | Deterministic demo context | FastAPI local context | Hosted context/provider service |
+| Master Data | Sanitized bundled samples | Read-only FastAPI catalog | Governed read/export API |
 | Power BI | Sanitized static package | API-generated local package | Governed export endpoint |
 | Reports | Sanitized/session artifacts | Backend report routes | Authenticated report service |
 

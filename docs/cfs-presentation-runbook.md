@@ -183,5 +183,5 @@ Avoid:
 - Guaranteed return
 - Will develop
 - Confirmed utility capacity
-- Investment advice
+- Transaction, acquisition, or financial advice
 - Project approval recommendation

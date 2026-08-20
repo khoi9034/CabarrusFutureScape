@@ -23,9 +23,8 @@
 - [Home](http://127.0.0.1:3000)
 - [Planning](http://127.0.0.1:3000/?app=planning)
 - [Economics](http://127.0.0.1:3000/?app=economics)
-- [Investments Projects](http://127.0.0.1:3000/?app=consulting&investmentPage=engagements)
-- [CASE-1 Underwrite](http://127.0.0.1:3000/?app=consulting&investmentPage=engagements&consultingPage=case-studies&caseStudy=large-development-land&caseStep=underwrite)
-- [CASE-1 Deliver](http://127.0.0.1:3000/?app=consulting&investmentPage=engagements&consultingPage=case-studies&caseStudy=large-development-land&caseStep=deliver)
+- [Master Data](http://127.0.0.1:3000/?app=master-data)
+- [Ask CFS](http://127.0.0.1:3000/?app=ask-cfs)
 - [FastAPI Docs](http://127.0.0.1:8000/docs)
 - [API Readiness](http://127.0.0.1:8000/health/ready)
 - [Database Health](http://127.0.0.1:8000/health/database)
@@ -36,9 +35,8 @@
 2. **Planning, 2 minutes:** Search `CFS-PARCEL-0149726579`, select it, and toggle Development Hotspots, Floodplain Review, and School Utilization + Permit Pressure.
 3. **Indicator Center and Ask CFS, 1 minute:** Open Indicator Center and ask what to inspect first. Point out evidence and caveats.
 4. **Economics, 1 minute:** Show database-backed KPIs, select a parcel, change a scenario control, and show the updated screening output.
-5. **Investments, 1 minute:** Open Projects, continue CASE-1, then show Find Sites and Property Review.
-6. **Underwrite and Decide, 1 minute:** Review assumptions and explain why the recommendation stops before acquisition pricing.
-7. **Deliver, 1 minute:** Open the deliverable artifacts and close on the preserved evidence trail.
+5. **Master Data, 1 minute:** Preview a governed dataset, apply a safe filter, and export selected fields.
+6. **Ask CFS, 1 minute:** Open the standalone route, ask a grounded follow-up, and point out evidence and caveats.
 
 ## Recovery
 

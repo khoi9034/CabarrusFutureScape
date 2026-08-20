@@ -253,7 +253,7 @@ def test_v1_request_ids_errors_pagination_and_legacy_compatibility(
     assert admin_body["provenance"]["api_version"] == "v1"
 
 
-def test_openapi_covers_v1_product_and_legacy_compatibility_paths() -> None:
+def test_openapi_covers_active_v1_product_and_legacy_compatibility_paths() -> None:
     paths = app.openapi()["paths"]
     required = {
         "/api/v1/health",
@@ -261,7 +261,6 @@ def test_openapi_covers_v1_product_and_legacy_compatibility_paths() -> None:
         "/api/v1/planning/snapshots",
         "/api/v1/economics/intelligence",
         "/api/v1/economics/scenarios",
-        "/api/v1/investment/saved-searches",
         "/api/v1/projects",
         "/api/v1/reports",
         "/api/v1/ask-cfs/conversations",
@@ -279,6 +278,8 @@ def test_openapi_covers_v1_product_and_legacy_compatibility_paths() -> None:
         "/api/v1/master-data/datasets/{dataset_id}/export",
     }
     assert required <= set(paths)
+    assert not any(path.startswith("/investment") for path in paths)
+    assert not any(path.startswith("/api/v1/investment") for path in paths)
 
 
 def test_readiness_requires_current_product_migration(monkeypatch, product_engine) -> None:
@@ -294,7 +295,7 @@ def test_readiness_requires_current_product_migration(monkeypatch, product_engin
     assert health_ready()["migration"] == "0001_product_v1"
 
 
-def test_demo_has_no_persistent_writes_and_versioned_legacy_investment_is_read_only(
+def test_demo_has_no_persistent_writes_and_retired_investment_routes_are_absent(
     monkeypatch,
 ) -> None:
     demo = Settings(
@@ -313,52 +314,16 @@ def test_demo_has_no_persistent_writes_and_versioned_legacy_investment_is_read_o
             "/api/v1/ask-cfs/conversations",
             json={"title": "Must stay in sessionStorage"},
         )
-        legacy_write = client.post("/api/v1/investment/saved-searches", json={})
-        unversioned_write = client.post("/investment/saved-searches", json={})
-        unversioned_read = client.get("/investment/strategies")
+        retired_requests = (
+            client.get("/investment/strategies"),
+            client.post("/investment/saved-searches", json={}),
+            client.get("/api/v1/investment/strategies"),
+            client.post("/api/v1/investment/saved-searches", json={}),
+            client.get("/api/v1/investments/property-reviews"),
+            client.post("/api/v1/investments/property-reviews", json={}),
+        )
 
     assert ask_write.status_code == 405
     assert ask_write.json()["error"]["code"] == "demo_write_disabled"
     assert ask_write.json()["request_id"]
-    assert legacy_write.status_code == 405
-    assert legacy_write.json()["error"]["code"] == "read_only_compatibility"
-    assert unversioned_write.status_code == 405
-    assert unversioned_read.status_code == 200
-    assert "post" in app.openapi()["paths"]["/investment/saved-searches"]
-
-
-def test_enterprise_blocks_unversioned_investment_mutations_but_local_does_not(
-    monkeypatch,
-) -> None:
-    enterprise = Settings(
-        CFS_RUNTIME_MODE="enterprise",
-        CFS_DATA_PROVIDER="enterprise_api",
-        CFS_AUTH_MODE="oidc",
-        CFS_ARTIFACT_PROVIDER="object_storage",
-        CFS_JOB_PROVIDER="external_worker",
-        CFS_ENTRA_TENANT_ID="tenant-id",
-        CFS_ENTRA_API_AUDIENCE="api://cfs-api",
-        CFS_ORGANIZATION_ID="organization-id",
-        CFS_CORS_ORIGINS="https://cfs.example.gov",
-        _env_file=None,
-    )
-    monkeypatch.setattr("app.main.settings", enterprise)
-    with TestClient(app, raise_server_exceptions=False) as client:
-        enterprise_write = client.post("/investment/saved-searches", json={})
-        versioned_write = client.post("/api/v1/investment/saved-searches", json={})
-
-    local = Settings(
-        CFS_RUNTIME_MODE="local",
-        CFS_DATA_PROVIDER="local_api",
-        CFS_AUTH_MODE="off",
-        CFS_ARTIFACT_PROVIDER="local_file",
-        CFS_JOB_PROVIDER="inline",
-        _env_file=None,
-    )
-    monkeypatch.setattr("app.main.settings", local)
-    with TestClient(app, raise_server_exceptions=False) as client:
-        local_write = client.post("/investment/saved-searches", json={})
-
-    assert enterprise_write.status_code == 405
-    assert versioned_write.status_code == 405
-    assert local_write.status_code != 405
+    assert all(response.status_code == 404 for response in retired_requests)

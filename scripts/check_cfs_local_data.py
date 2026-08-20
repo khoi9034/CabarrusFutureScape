@@ -55,7 +55,6 @@ DOMAIN_RELATIONS = {
 
 LIMITED_RELATIONS = {
     "school_capacity": "No official capacity rows; presentation uses preliminary utilization context.",
-    "investment_case_study": "CASE-1 is repository-backed; the local database table is optional.",
 }
 
 GEOMETRY_RELATIONS = {
@@ -209,22 +208,6 @@ def main() -> int:
             if school_capacity["exists"] and school_capacity["rows"]:
                 report["domains"]["Schools"]["status"] = "Available"
                 report["domains"]["Schools"]["limitations"].clear()
-
-            case_manifest = ROOT / "case-studies" / "large-development-land" / "case-study.json"
-            investment_table = report["relations"]["investment_case_study"]
-            investment_available = case_manifest.is_file()
-            report["domains"]["Investments"] = {
-                "status": "Available with limitation" if investment_available else "Missing",
-                "relations": ["investment_case_study"],
-                "repository_case_manifest": investment_available,
-                "limitations": (
-                    [LIMITED_RELATIONS["investment_case_study"]]
-                    if investment_available and not investment_table["rows"]
-                    else []
-                ),
-            }
-            if not investment_available:
-                failures.append("CASE-1 repository manifest is missing")
 
             report["domains"]["WSACC"]["status"] = "Available with limitation"
             report["domains"]["WSACC"]["limitations"].append(

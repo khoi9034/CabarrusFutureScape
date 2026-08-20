@@ -13,14 +13,13 @@ import { toProductApiError } from "@/lib/product/apiClient";
 import { toJsonObject } from "@/lib/product/json";
 import { getAskCfsConversationRepository } from "@/lib/product/runtimeRepository";
 import type { AskCfsMessageRecord, JsonObject, JsonValue } from "@/lib/product/types";
-import type { CfsAppMode } from "@/types";
 import type {
   CfsAiConversationTurn,
   CfsAiSearchRequest,
   CfsAiSearchResponse,
 } from "@/types/api";
 
-type AskCfsAppMode = Exclude<CfsAppMode, "master-data">;
+type AskCfsAppMode = "economics" | "planning";
 
 export interface AskCfsExternalRequest {
   request: CfsAiSearchRequest;
@@ -95,18 +94,12 @@ export function AskCfsPanel({
     (appMode === "economics"
       ? askCfsEconomicsSuggestedPrompts
       : askCfsSuggestedPrompts);
-  const helperText =
-    appMode === "consulting"
-      ? "Search across case studies, active candidates, comparisons, underwriting, evidence gaps, and deliverables."
-      : appMode === "economics"
-        ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
-        : "Search across indicators, layers, methodology, and cached planning signals.";
-  const inputPlaceholder =
-    appMode === "consulting"
-      ? "Ask about the active case study, candidate tradeoffs, underwriting assumptions, or next diligence..."
-      : appMode === "economics"
-        ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
-        : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness...";
+  const helperText = appMode === "economics"
+    ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
+    : "Search across indicators, layers, methodology, and cached planning signals.";
+  const inputPlaceholder = appMode === "economics"
+    ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
+    : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness...";
   const visiblePrompts = visiblePromptCount
     ? suggestedPrompts.slice(0, visiblePromptCount)
     : suggestedPrompts;

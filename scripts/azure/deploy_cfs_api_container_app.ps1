@@ -146,10 +146,6 @@ if (-not $ExistingStagingSecret) {
 if ($env:OPENAI_API_KEY) {
   Set-KeyVaultSecretValue -Name openai-api-key -Value $env:OPENAI_API_KEY
 }
-if ($env:CENSUS_API_KEY) {
-  Set-KeyVaultSecretValue -Name census-api-key -Value $env:CENSUS_API_KEY
-}
-
 $Workspace = Get-AzJsonOrNull @("monitor", "log-analytics", "workspace", "show", "-g", $ResourceGroup, "-n", $WorkspaceName, "-o", "json")
 if (-not $Workspace) {
   $Workspace = az monitor log-analytics workspace create -g $ResourceGroup -n $WorkspaceName -l $Location -o json | ConvertFrom-Json
@@ -232,8 +228,6 @@ $SecretArgs = @(
 )
 $OpenAiSecret = Get-AzTsvOrNull @("keyvault", "secret", "show", "--vault-name", $KeyVaultName, "--name", "openai-api-key", "--query", "id", "-o", "tsv")
 if ($OpenAiSecret) { $SecretArgs += "openai-key=keyvaultref:$($VaultUri)secrets/openai-api-key,identityref:$IdentityId" }
-$CensusSecret = Get-AzTsvOrNull @("keyvault", "secret", "show", "--vault-name", $KeyVaultName, "--name", "census-api-key", "--query", "id", "-o", "tsv")
-if ($CensusSecret) { $SecretArgs += "census-key=keyvaultref:$($VaultUri)secrets/census-api-key,identityref:$IdentityId" }
 $SecretSetArgs = @("containerapp", "secret", "set", "-g", $ResourceGroup, "-n", $ContainerAppName, "--secrets") + $SecretArgs + @("-o", "none")
 Invoke-Az $SecretSetArgs
 
@@ -267,7 +261,6 @@ if ($EntraAllowedObjectIds) { $EnvVars += "CFS_ENTRA_ALLOWED_OBJECT_IDS=$EntraAl
 if ($EntraWriteRole) { $EnvVars += "CFS_ENTRA_WRITE_ROLE=$EntraWriteRole" }
 if ($EntraAdminRole) { $EnvVars += "CFS_ENTRA_ADMIN_ROLE=$EntraAdminRole" }
 if ($OpenAiSecret) { $EnvVars += "OPENAI_API_KEY=secretref:openai-key" }
-if ($CensusSecret) { $EnvVars += "CENSUS_API_KEY=secretref:census-key" }
 $EnvVarArgs = @("containerapp", "update", "-g", $ResourceGroup, "-n", $ContainerAppName, "--set-env-vars") + $EnvVars + @("-o", "none")
 Invoke-Az $EnvVarArgs
 

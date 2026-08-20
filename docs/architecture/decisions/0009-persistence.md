@@ -1,5 +1,7 @@
 # ADR 0009: Mode-aware product persistence
 
+> Scope update (2026-08-20): Investments and CASE-1 examples below are retained as decision history only; those surfaces are retired.
+
 - Status: Accepted
 - Date: 2026-08-02
 

@@ -1,5 +1,7 @@
 # CFS Cloud Stage Safety Report
 
+> `investment_*` objects in this historical stage report are retained legacy inventory only; they are not active product routes, workflows, or app-role write grants.
+
 Generated: 2026-07-16T17:12:46.404504+00:00
 
 ## Summary

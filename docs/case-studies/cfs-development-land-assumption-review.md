@@ -1,5 +1,7 @@
 # CFS Development-Land Assumption Review
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 CASE-3A prepares the large-development-land case study for later underwriting. It separates CFS evidence from assumptions, keeps the CASE-1 shortlist unchanged, and stops before financial calculations, workbook generation, or final recommendation work.
 
 ## Evidence Boundary
@@ -43,4 +45,3 @@ The most sensitive variables before underwriting are developable acreage, densit
 ## Required Professional Review
 
 Professional estimates are still needed for civil/site engineering, utility service and capacity, water availability, sewer extension feasibility, access and off-site transportation work, title/easements/survey, entitlement path, wetland and floodplain review, geotechnical/soils review, and market/value assumptions.
-

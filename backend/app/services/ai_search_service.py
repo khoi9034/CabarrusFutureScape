@@ -221,7 +221,7 @@ class CfsAiSearchService:
         total_start = time.perf_counter()
         domains = (
             ["economics"]
-            if request.app_mode in {"consulting", "economics"} and not request.filters.domains
+            if request.app_mode == "economics" and not request.filters.domains
             else request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
         )
         deterministic_start = time.perf_counter()
@@ -767,8 +767,6 @@ def _economics_answer(
         return _economics_environmental_context_answer(request, context)
     if _is_economics_market_context_query(request.query):
         return _economics_market_context_answer(request, context)
-    if _is_investment_research_context(request):
-        return _investment_research_answer(request, context)
     if _is_economics_walkthrough_query(request.query):
         return _economics_walkthrough_answer(request, context)
     if _is_economics_workspace_query(request.query):
@@ -860,7 +858,7 @@ def _economics_answer(
             ),
         ),
         (
-            "Consulting takeaway",
+            "Decision-support takeaway",
             "Traditional GIS can show where things are. CFS Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
         ),
         (
@@ -943,125 +941,12 @@ def _is_economics_environmental_context_query(query: str) -> bool:
     return any(term in normalized for term in ("environment", "physical constraint", "wetland", "slope", "terrain", "soil", "regulated facility", "epa", "usable-area", "usable area", "phase i", "geotechnical"))
 
 
-def _is_investment_research_context(request: CfsAiSearchRequest) -> bool:
-    filters = request.filter_context or {}
-    normalized = request.query.lower()
-    return (
-        request.app_mode == "consulting"
-        or filters.get("mode") in {"investment_panel", "cfs_investment"}
-        or "cfs investment" in normalized
-        or "cfs consulting" in normalized
-        or "investment research" in normalized
-    )
-
-
-def _investment_intent(query: str) -> str:
-    normalized = query.lower()
-    checks = [
-        ("Underwriting", ("underwriting", "feasibility", "break-even", "break even", "sensitivity", "sources and uses", "cash flow", "dscr", "cap rate", "irr", "modeled return", "scenario", "land-banking")),
-        ("Saved Workspace", ("my shortlist", "saved candidate", "saved candidates", "saved search", "recent search", "recent work", "recent industrial search", "continue my", "current project")),
-        ("Consulting Engagement", ("engagement", "client", "site selection", "shortlist", "criteria", "portfolio", "consulting", "market entry")),
-        ("Opportunity Feed", ("opportunity feed", "available opportunity", "available opportunities", "listing", "broker", "external search", "source platform")),
-        ("Area Opportunity Radar", ("area", "radar", "search area", "priority search area", "geography", "corridor")),
-        ("Report Generation", ("report", "memorandum", "brief", "guide")),
-        ("Candidate Comparison", ("compare", "versus", "tradeoff")),
-        ("Acquisition Basis", ("asking", "basis", "comparable", "sale")),
-        ("Environmental and Physical", ("environment", "wetland", "slope", "terrain", "soil", "epa", "usable")),
-        ("Market Area", ("market", "acs", "census", "demographic", "housing", "household")),
-        ("Utility and Infrastructure", ("utility", "sewer", "capacity", "infrastructure")),
-        ("Planning and Entitlement", ("planning", "zoning", "entitlement", "permit")),
-        ("Due Diligence", ("verify", "verification", "diligence", "checklist", "ask staff")),
-        ("Development Readiness", ("readiness", "development", "momentum", "access")),
-        ("Opportunity Screening", ("screen", "candidate", "surface", "priority")),
-    ]
-    for label, terms in checks:
-        if any(term in normalized for term in terms):
-            return label
-    return "Parcel Review"
-
-
-def _investment_research_answer(
-    request: CfsAiSearchRequest,
-    context: CfsAiContext,
-) -> CfsAiSearchResponse:
-    filters = request.filter_context or {}
-    intent = _investment_intent(request.query)
-    candidate = filters.get("active_intake_candidate") or filters.get("selected_candidate") or "the active candidate"
-    strategy = filters.get("active_strategy") or "selected strategy"
-    underwriting = filters.get("active_underwriting_summary") or filters.get("active_underwriting_result")
-    product_label = "CFS Investments" if request.app_mode == "consulting" else "CFS Investment"
-    saved_workspace_lines = [
-        f"Shortlist count: {filters.get('persisted_shortlist_count') or 0}",
-        f"Shortlist preview: {filters.get('persisted_shortlist_preview') or 'No saved shortlist items were provided in context.'}",
-        f"Recent work: {filters.get('recent_work_preview') or 'No recent work was provided in context.'}",
-        f"Saved searches: {filters.get('saved_search_preview') or 'No saved searches were provided in context.'}",
-    ]
-    underwriting_lines = []
-    if isinstance(underwriting, dict):
-        underwriting_lines = [
-            f"Scenario type: {underwriting.get('scenario_type_label') or underwriting.get('scenario_type') or 'not selected'}",
-            f"Total cost/basis: {underwriting.get('total_project_cost') or underwriting.get('total_basis_at_exit') or underwriting.get('total_basis_after_entitlement') or 'not available'}",
-            f"Return context: {underwriting.get('scenario_irr') or underwriting.get('scenario_return') or underwriting.get('unlevered_return_context') or 'not available'}",
-            f"Missing inputs: {', '.join(underwriting.get('missing_inputs') or []) if isinstance(underwriting.get('missing_inputs'), list) else 'not available'}",
-        ]
-    elif isinstance(underwriting, str) and underwriting:
-        underwriting_lines = [underwriting]
-    answer = _briefing(
-        ("Intent", f"{intent} for {candidate} under {strategy}."),
-        (
-            f"Use in {product_label}",
-            _bullets(
-                [
-                    f"Use {product_label} as screening-level research for candidate status, data readiness, and verification needs.",
-                    "Use Opportunity Engine for ranked parcel candidates and strategy filters.",
-                    "Use Opportunity Feed for governed opportunity references, source links, parcel matching, and intake handoff.",
-                    "Use Area Opportunity Radar to identify Priority Search Areas before reviewing individual parcels or opportunity references.",
-                    "Use Engagements to manage client criteria, shortlists, portfolio screening, and deliverables.",
-                    "Use Property Research for unified parcel, planning, economics, market-area, basis, utility, and environmental context.",
-                    "Use Underwriting Lab for deterministic scenario calculations, sensitivities, and exports based on user-entered assumptions.",
-                    "Use Report Studio for structured reports with sources, limitations, and due-diligence requirements.",
-                ]
-            ),
-        ),
-        (
-            "Underwriting context" if underwriting_lines else "Underwriting context",
-            _bullets(underwriting_lines or ["No active underwriting scenario was provided. Open Underwriting Lab, calculate a scenario, then ask again."]),
-        ),
-        (
-            "Saved workspace",
-            _bullets(saved_workspace_lines if intent == "Saved Workspace" else ["Use Home to continue Recent Work, rerun Saved Searches, or open My Shortlist."]),
-        ),
-        (
-            "Evidence boundaries",
-            _bullets(
-                [
-                    "Distinguish public-source evidence from CFS-derived proxies and user-entered information.",
-                    "Treat missing evidence as a data gap, not as a positive or negative parcel signal.",
-                    "Do not treat ACS, comparable context, utility proxies, or environmental layers as proof of demand, value, service, capacity, or feasibility.",
-                ]
-            ),
-        ),
-        (
-            "Next action",
-            f"Generate the relevant {product_label} report or add the candidate evidence to the Report Bucket before Print.",
-        ),
-    )
-    return _response(
-        answer,
-        context,
-        ["economics"],
-        request.mode,
-        [_evidence(f"{product_label} research context", f"Intent group: {intent}; candidate: {candidate}; strategy: {strategy}.", "investment_research_context")],
-        [f"Open {product_label} Report Studio.", "Review missing evidence and verification requirements.", "Compare candidates as tradeoffs only."],
-    )
-
-
 def _economics_environmental_context_answer(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
 ) -> CfsAiSearchResponse:
     filters = request.filter_context or {}
-    candidate = filters.get("active_intake_candidate") or "the active candidate"
+    candidate = filters.get("selected_parcel_id") or filters.get("active_parcel_id") or "the selected parcel"
     wetland = filters.get("active_wetland_context") or "not loaded"
     terrain = filters.get("active_terrain_context") or "not loaded"
     soil = filters.get("active_soil_context") or "not loaded"
@@ -1085,7 +970,7 @@ def _economics_environmental_context_answer(
     answer = _briefing(
         (
             "Direct answer",
-            f"Use Environmental & Physical Context in Candidate Intake for {candidate}. Current screening shows mapped wetland context: {wetland}; terrain context: {terrain}; soil context: {soil}; regulated-facility proximity: {facility}; usable-area screening proxy: {usable}; confidence: {confidence}.",
+            f"Use the Land Due Diligence Screener for {candidate}. Current screening shows mapped wetland context: {wetland}; terrain context: {terrain}; soil context: {soil}; regulated-facility proximity: {facility}; usable-area screening proxy: {usable}; confidence: {confidence}.",
         ),
         ("Interpretation", _bullets(interpretation)),
         (
@@ -1114,12 +999,12 @@ def _economics_environmental_context_answer(
             _evidence(
                 "Environmental & Physical Context",
                 f"Wetland: {wetland}; terrain: {terrain}; soil: {soil}; facility proximity: {facility}; usable-area proxy: {usable}.",
-                "investment_parcel_environmental_context",
+                "economics_environmental_context",
                 "available" if confidence not in {"Data Needed", "not loaded"} else "limited",
             )
         ],
         [
-            "Open Candidate Intake analysis and review Environmental & Physical Context.",
+            "Open the selected parcel in the Land Due Diligence Screener and review Environmental & Physical Context.",
             "Compare environmental context against utility, market-area, basis, and development-readiness evidence.",
             "Document professional verification needs before any site-specific conclusion.",
         ],
@@ -1135,11 +1020,11 @@ def _economics_market_context_answer(
     geoid = filters.get("active_market_geography") or "unresolved"
     acs_year = filters.get("active_market_year") or "not loaded"
     geography_type = filters.get("active_market_geography_type") or "tract"
-    candidate = filters.get("active_intake_candidate") or "the active candidate"
+    candidate = filters.get("selected_parcel_id") or filters.get("active_parcel_id") or "the selected parcel"
     answer = _briefing(
         (
             "Direct answer",
-            f"Use the Market Area Context section in Candidate Intake for {candidate}. Current ACS {acs_year} {geography_type} context is {market_band}; Census GEOID is {geoid}. Treat this as aggregate market-area context, not proof of demand or investment performance.",
+            f"Use Market Area Context in the Land Due Diligence Screener for {candidate}. Current ACS {acs_year} {geography_type} context is {market_band}; Census GEOID is {geoid}. Treat this as aggregate market-area context, not proof of demand or investment performance.",
         ),
         (
             "How to use it",
@@ -1147,7 +1032,7 @@ def _economics_market_context_answer(
                 [
                     "Compare population, household, income, occupancy, tenure, and growth context against development-readiness and basis context.",
                     "Use it as one evidence dimension for screening; do not let ACS context override utility, zoning, access, flood, school, or comparable-sale due diligence.",
-                    "If geography is unavailable, refresh ACS data and verify the candidate has a parcel geometry match.",
+                    "If geography is unavailable, verify the governed ACS source and the parcel-to-tract geometry match.",
                 ]
             ),
         ),
@@ -1164,13 +1049,13 @@ def _economics_market_context_answer(
         [
             _evidence(
                 "ACS Market Area Context",
-                "Candidate Intake can attach aggregate ACS tract context when a parcel-to-tract geography is available.",
-                "investment_acs_market_context",
+                "Economics can attach aggregate ACS tract context when a parcel-to-tract geography is available.",
+                "economics_market_context",
                 "available" if geoid != "unresolved" else "limited",
             )
         ],
         [
-            "Open Candidate Intake analysis and review Market Area Context.",
+            "Open the selected parcel in the Land Due Diligence Screener and review Market Area Context.",
             "Compare ACS context with development-readiness, basis context, and due diligence flags.",
             "Use the comparison table to see candidate tradeoffs without declaring a winner.",
         ],
@@ -1842,7 +1727,7 @@ def _economics_powerbi_answer(
         answer = _briefing(
             (
                 "Direct answer",
-                "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In CFS Investment, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
+                "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. Open the selected parcel in Economics, then generate a Review Guide when you want a live summary.",
             ),
             (
                 "What CFS will include",
@@ -1972,7 +1857,7 @@ def _economics_powerbi_answer(
             _bullets(
                 [
                     "Executive Economic Dashboard: KPI cards, opportunity class bar chart, underbuilt watchlist, geography and scenario slicers.",
-                    "Parcel Investment Screen: parcel table, value per acre band, improvement-to-land ratio band, constraint burden, recommended follow-up.",
+                    "Parcel Economic Screen: parcel table, value per acre band, improvement-to-land ratio band, constraint burden, recommended follow-up.",
                     "Scenario Planning Model: scenario comparison matrix, fiscal attractiveness by scenario, service burden vs tax-base lift.",
                     "Data Confidence Register: domain readiness matrix, missing data table, next data need list.",
                 ]
@@ -1983,7 +1868,7 @@ def _economics_powerbi_answer(
             _bullets(
                 [
                     "Executive dashboard: economics_kpi_fact and parcel_economic_signal_fact.",
-                    "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
+                    "Parcel economic screen: parcel_economic_signal_fact and geography_dim.",
                     "Scenario Model page: scenario_output_fact and scenario_dim.",
                     "Data confidence register: domain_readiness_dim.",
                 ]
@@ -2235,8 +2120,8 @@ def _powerbi_actions_for_query(query: str) -> dict[str, Any]:
         selected_filters = {"opportunity_class": "Underbuilt Redevelopment Candidate"}
         canvas_items = [
             visual("Executive Economic Dashboard", "Underbuilt candidate count", "bar", "parcel_economic_signal_fact", "opportunity_class", "signal_id", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
-            visual("Parcel Investment Screen", "Underbuilt candidates by segment", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
-            visual("Parcel Investment Screen", "Top underbuilt rows", "matrix", "parcel_economic_signal_fact", "geography_label", "recommended_followup", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
+            visual("Parcel Economic Screen", "Underbuilt candidates by segment", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
+            visual("Parcel Economic Screen", "Top underbuilt rows", "matrix", "parcel_economic_signal_fact", "geography_label", "recommended_followup", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
         ]
     elif "scenario" in normalized:
         title = "Scenario Comparison Dashboard"

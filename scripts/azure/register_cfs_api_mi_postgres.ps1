@@ -35,7 +35,6 @@ try {
   $PrincipalSqlLiteral = $IdentityName.Replace("'", "''")
   $CheckSql = @'
 SELECT jsonb_build_object(
-  'can_insert_candidate', has_table_privilege('__PRINCIPAL__','public.investment_candidate_intake','INSERT'),
   'can_insert_analytical', has_table_privilege('__PRINCIPAL__','public.development_activity_parcel_summary','INSERT'),
   'can_select_analytical', has_table_privilege('__PRINCIPAL__','public.development_activity_parcel_summary','SELECT'),
   'can_create_public', has_schema_privilege('__PRINCIPAL__','public','CREATE')

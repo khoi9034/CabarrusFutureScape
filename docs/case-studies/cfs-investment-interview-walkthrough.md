@@ -1,5 +1,7 @@
 # CFS Investment Case-Study Interview Walkthrough
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 ## 30-second description
 
 I used CFS Investment to answer a real-estate screening question: which large Cabarrus County parcels should advance into formal acquisition diligence for future residential or mixed-use development. I built a repeatable countywide funnel, scored candidates with a transparent 100-point analyst model, compared three properties, estimated preliminary developable acreage without double-counting overlapping flood and wetland constraints, and prepared draft underwriting scenarios and a due-diligence plan.

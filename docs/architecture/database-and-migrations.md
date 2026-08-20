@@ -4,7 +4,7 @@
 
 Product V1 migrations manage product-work tables only. They do not drop, rebuild,
 truncate, or copy authoritative parcel, planning, permit, flood, school,
-economics, WSACC, investment evidence, model, or CASE datasets.
+economics, WSACC, model, or retained legacy Investments/CASE datasets.
 
 ## Migration properties
 
@@ -60,8 +60,8 @@ The CI service contains sanitized fixtures only and is discarded after the job.
 ## Product tables
 
 The Product V1 model covers organizations/users/preferences, projects/members/
-workflow state, Planning and Economics versioned work, Investments workflow,
-reports/buckets, Ask CFS conversations, source/ingestion/quality, artifacts,
+workflow state, Planning and Economics versioned work, reports/buckets, Ask CFS
+conversations, source/ingestion/quality, artifacts,
 audit events, and background jobs. The model documentation and migrations are
 the authoritative names; raw analytical datasets remain separate.
 

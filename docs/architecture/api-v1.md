@@ -3,8 +3,8 @@
 ## Compatibility
 
 Existing unversioned routes remain available. Product V1 adds `/api/v1`
-compatibility for health, parcels, planning, economics, investments, projects,
-snapshots, scenarios, reports, Ask CFS, data sources, ingestion, artifacts, and
+compatibility for health, parcels, planning, economics, projects, snapshots,
+scenarios, reports, Ask CFS, Master Data, data sources, ingestion, artifacts, and
 audit. Versioned routers call existing domain services rather than duplicate them.
 
 ## Common response behavior

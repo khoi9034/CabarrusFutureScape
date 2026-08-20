@@ -45,8 +45,8 @@ authorize a cloud or production deployment.
 ## Product acceptance
 
 - [ ] Full Product V1 and legacy regression commands pass on the release commit.
-- [ ] Planning, Economics, Investments, Ask CFS, Power BI, maps, reports, CASE
-      artifacts, and administration are accepted by responsible reviewers.
+- [ ] Planning, Economics, Master Data, Ask CFS, Power BI, maps, reports, exports,
+      and administration are accepted by responsible reviewers.
 - [ ] A full 45-minute soak passes with canonical hashes unchanged.
 - [ ] Migration upgrade/rollback/re-upgrade passes in an isolated environment.
 - [ ] Hosted staging smoke uses sanitized/disposable records and cleans up.

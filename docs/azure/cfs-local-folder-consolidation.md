@@ -27,6 +27,7 @@ Audit run: 2026-07-27. Archive target used per request: `C:\CFS_Archive\2026-07-
 
 ## Preserved Local Artifacts
 
-- CASE-1 local source JSON remains under `local-data\azure-migration\case1`.
+- Retired CASE-1 source JSON remains only as historical migration inventory under
+  `local-data\azure-migration\case1`; it is not an active product or deployment input.
 - AZ-1B/AZ-2 migration manifests, smoke reports, restore logs, and dumps remain under `local-data\azure-migration`.
 - Microclimate GeoTIFFs remain under `local-data\CFS_Data\Microclimate`.

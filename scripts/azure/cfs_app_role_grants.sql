@@ -60,15 +60,4 @@ BEGIN
   END LOOP;
 END $$;
 
-GRANT INSERT, UPDATE, DELETE ON TABLE
-  public.investment_candidate_intake,
-  public.investment_saved_item,
-  public.investment_recent_work,
-  public.investment_saved_search,
-  public.investment_engagement,
-  public.investment_underwriting_scenario
-TO cfs_app;
-
--- Reports and due-diligence packet workflows currently use generated payloads
--- plus saved-item/report-bucket records. Add tables here only when a new
--- persistent report table is introduced and validated.
+-- Add table-specific write grants only for validated active workflows.

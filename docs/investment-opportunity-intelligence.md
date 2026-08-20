@@ -1,5 +1,7 @@
 # CFS Investment Opportunity Intelligence
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 CFS Investment opportunity intelligence is a screening-level consulting workflow for finding search areas, organizing opportunity references, matching those references to CFS parcels, and preparing client or internal diligence work.
 
 It is not financial guidance, an appraisal, a complete listing feed, a purchase recommendation, or a guarantee of future value.

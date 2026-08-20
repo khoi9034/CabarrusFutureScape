@@ -1,5 +1,7 @@
 # CFS Local Database Inventory
 
+> `investment_*` objects in this inventory are retained legacy database records only; they are not active product routes, workflows, or app-role write grants.
+
 Generated: 2026-07-16T16:58:37.066791+00:00
 
 ## Source Environment
@@ -42,21 +44,21 @@ Generated: 2026-07-16T16:58:37.066791+00:00
 | `public.development_prediction_ranking_classes` | Include Entire Object | Model Lab, active_backend_reference | read_only |
 | `public.development_prediction_ranking_explanations` | Include Entire Object | Model Lab, active_backend_reference | read_only |
 | `public.fema_nfhl_flood_zones_clean` | Include Entire Object | CFS Planning Environmental, active_backend_reference | read_only |
-| `public.investment_acs_market_context` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_acs_tract_geometry` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_assumption_template` | Include Entire Object | CFS Investment, active_backend_reference, writable_saved_workflow | read_write |
-| `public.investment_candidate_intake` | Include Entire Object | CFS Investment, active_backend_reference, writable_saved_workflow | read_write |
-| `public.investment_engagement` | Include Entire Object | CFS Investment, active_backend_reference, writable_saved_workflow | read_write |
-| `public.investment_environmental_facilities` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_nwi_wetlands` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_parcel_acs_geography` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_parcel_environmental_context` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_recent_work` | Include Entire Object | CFS Investment, active_backend_reference, writable_saved_workflow | read_write |
-| `public.investment_saved_item` | Include Entire Object | CFS Investment, active_backend_reference, writable_saved_workflow | read_write |
-| `public.investment_saved_search` | Include Entire Object | CFS Investment, active_backend_reference, writable_saved_workflow | read_write |
-| `public.investment_soil_units` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_terrain_context` | Include Entire Object | CFS Investment, active_backend_reference | read_only |
-| `public.investment_underwriting_scenario` | Include Entire Object | CFS Investment, active_backend_reference, writable_saved_workflow | read_write |
+| `public.investment_acs_market_context` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_acs_tract_geometry` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_assumption_template` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_candidate_intake` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_engagement` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_environmental_facilities` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_nwi_wetlands` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_parcel_acs_geography` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_parcel_environmental_context` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_recent_work` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_saved_item` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_saved_search` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_soil_units` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_terrain_context` | Include Entire Object | Legacy Investments (retired) | read_only |
+| `public.investment_underwriting_scenario` | Include Entire Object | Legacy Investments (retired) | read_only |
 | `public.new_construction_permit_parcel_relationship` | Include Entire Object | active_backend_reference | read_only |
 | `public.new_construction_permits_clean` | Include Entire Object | active_backend_reference | read_only |
 | `public.parcel_development_model_features` | Include Entire Object | Model Lab, active_backend_reference | read_only |

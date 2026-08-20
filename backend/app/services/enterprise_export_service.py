@@ -531,7 +531,7 @@ def _powerbi_report_guide_markdown() -> str:
     return """# Recommended Report Pages
 
 1. Executive Economic Dashboard: KPI cards, opportunity classes, and data confidence.
-2. Parcel Investment Screen: segment, geography, opportunity, and special-asset slicers.
+2. Parcel Economic Screen: segment, geography, opportunity, and special-asset slicers.
 3. Scenario Planning Model: scenario matrix with the disconnected scenario model.
 4. Data Confidence Register: readiness status and next-data-need table.
 
@@ -936,7 +936,7 @@ def _powerbi_suggested_visuals() -> list[dict[str, Any]]:
             ],
         },
         {
-            "page": "Parcel Investment Screen",
+            "page": "Parcel Economic Screen",
             "visuals": [
                 "Parcel table",
                 "Value per acre band",
@@ -1059,7 +1059,7 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
                 ],
             },
             {
-                "page": "Parcel Investment Screen",
+                "page": "Parcel Economic Screen",
                 "purpose": "Parcel/site screening.",
                 "visuals": [
                     {
@@ -1206,11 +1206,11 @@ def _segment_order(value: Any) -> int:
 
 def _signal_report_page(row: dict[str, Any]) -> str:
     if row.get("special_asset_flag"):
-        return "Parcel Investment Screen"
+        return "Parcel Economic Screen"
     if str(row.get("economic_data_confidence") or "").lower() in {"data needed", "data_needed", "low"}:
         return "Data Confidence Register"
     if str(row.get("opportunity_class") or "").lower().startswith("underbuilt"):
-        return "Parcel Investment Screen"
+        return "Parcel Economic Screen"
     return "Executive Economic Dashboard"
 
 

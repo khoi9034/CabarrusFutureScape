@@ -20,6 +20,7 @@ from app.product.service import ProductConflict, ProductNotFound, ProductService
 
 
 def test_role_permission_matrix_is_explicit() -> None:
+    assert "investments:write" not in {permission.value for permission in Permission}
     assert Permission.PLANNING_WRITE in ROLE_PERMISSIONS[Role.PLANNER]
     assert Permission.ECONOMICS_WRITE in ROLE_PERMISSIONS[Role.ANALYST]
     assert Permission.MASTER_DATA_VIEW in ROLE_PERMISSIONS[Role.PLANNER]

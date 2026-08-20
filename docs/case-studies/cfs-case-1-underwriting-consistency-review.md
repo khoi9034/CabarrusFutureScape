@@ -1,5 +1,7 @@
 # CASE-1 Underwriting Consistency Review
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 CASE-3A.2 is a diagnostic review only. It does not create a workbook, final residual land value, valuation, appraisal, investment advice, asking price, or acquisition recommendation.
 
 ## Executive Finding

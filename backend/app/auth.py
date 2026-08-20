@@ -12,15 +12,6 @@ RoutePolicy = Literal["public", "read", "write", "admin"]
 
 PUBLIC_PATHS = {"/health", "/health/ready", "/health/database"}
 ADMIN_PATHS = {"/economics/export-diagnostics"}
-WRITE_PREFIXES = (
-    "/investment/engagements",
-    "/investment/intake",
-    "/investment/recent-work",
-    "/investment/reports",
-    "/investment/saved-items",
-    "/investment/saved-searches",
-    "/investment/underwriting",
-)
 
 
 @dataclass(frozen=True)
@@ -46,8 +37,6 @@ def classify_route(path: str, method: str) -> RoutePolicy:
         return "public"
     if normalized in ADMIN_PATHS or normalized.startswith("/ops/"):
         return "admin"
-    if method in {"DELETE", "PATCH", "POST"} and normalized.startswith(WRITE_PREFIXES):
-        return "write"
     return "read"
 
 

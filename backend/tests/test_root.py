@@ -23,7 +23,6 @@ def test_root_endpoint_returns_api_status() -> None:
         "development": "/development",
         "economics": "/economics",
         "indicators": "/indicators",
-        "investment": "/investment",
         "parcels": "/parcels",
         "wsacc": "/wsacc",
     }

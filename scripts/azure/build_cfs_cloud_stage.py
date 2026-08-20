@@ -167,15 +167,7 @@ EXCLUDE_TABLE_PATTERNS = (
     "us_rules",
 )
 
-WRITABLE_TABLES = {
-    "investment_assumption_template",
-    "investment_candidate_intake",
-    "investment_engagement",
-    "investment_recent_work",
-    "investment_saved_item",
-    "investment_saved_search",
-    "investment_underwriting_scenario",
-}
+WRITABLE_TABLES: set[str] = set()
 
 
 def main() -> int:
@@ -376,7 +368,10 @@ def build_manifest(conn, inventory: list[dict[str, Any]], code_refs: set[str]) -
             for col in item["columns"]
             if classify_column(col["column_name"]) not in {"Safe Derived Field", "Public Operational Field"}
         ]
-        cloud_required = qualified in FORCE_INCLUDE or qualified in code_refs
+        cloud_required = (
+            not item["object_name"].startswith("investment_")
+            and (qualified in FORCE_INCLUDE or qualified in code_refs)
+        )
         action = migration_action(qualified, item, sensitive, cloud_required)
         required_by = required_features(qualified, code_refs)
         objects.append(
@@ -432,6 +427,8 @@ def classify_column(name: str) -> str:
 
 def migration_action(qualified: str, item: dict[str, Any], sensitive: list[dict[str, str]], cloud_required: bool) -> str:
     lowered = qualified.lower()
+    if lowered.startswith("public.investment_"):
+        return "Include Entire Object"
     if any(lowered.startswith(prefix) for prefix in EXCLUDE_PREFIXES):
         return "Exclude"
     if any(pattern in lowered for pattern in EXCLUDE_TABLE_PATTERNS):
@@ -445,11 +442,11 @@ def migration_action(qualified: str, item: dict[str, Any], sensitive: list[dict[
 
 def required_features(qualified: str, code_refs: set[str]) -> list[str]:
     name = qualified.split(".", 1)[1]
+    if name.startswith("investment_"):
+        return ["Legacy Investments (retired)"]
     features = []
     if qualified in code_refs:
         features.append("active_backend_reference")
-    if name.startswith("investment_"):
-        features.append("CFS Investment")
     if name.startswith("parcel_school") or name.startswith("school_"):
         features.append("CFS Planning Schools")
     if "transportation" in name:
@@ -475,6 +472,8 @@ def restriction_status(qualified: str, sensitive: list[dict[str, str]]) -> str:
 
 
 def dependency_notes(qualified: str, action: str, required_by: list[str]) -> str:
+    if qualified.lower().startswith("public.investment_"):
+        return "Retained as dormant legacy Investments inventory; not exposed by the active cloud runtime."
     if action == "Exclude":
         return "Excluded from cloud stage; not required by active runtime or restricted/raw/extension managed."
     if action == "Rebuild from Included Sources":

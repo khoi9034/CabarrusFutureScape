@@ -60,15 +60,15 @@ reported inline; a rejected write never changes the record's saved status.
 
 Analyst saves assumptions and outputs, creates scenario versions, compares a
 bounded set, and asks a Report Author to generate governed output.
-Economics and Investments share the same Report Bucket repository. A Report
-Author can manage bucket items; a Viewer may read an item only when its parent
+Economics uses the shared Report Bucket repository. A Report Author can manage
+bucket items; a Viewer may read an item only when its parent
 report is Approved and cannot create, update print selection, or archive items.
 
-### Investments
+### Master Data
 
-Analyst creates a disposable project, saved search, opportunity, shortlist,
-property review, underwriting draft, and report bucket. Cleanup archives product
-records and leaves audit history; CASE records are never used as disposable data.
+Planner or Analyst previews approved datasets, filters only allowed fields, and
+exports selected columns. Restricted source fields are never exposed, and each
+export writes a privacy-safe audit event without recording filter values.
 
 ### Ask CFS
 

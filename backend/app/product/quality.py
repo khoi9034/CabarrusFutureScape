@@ -19,7 +19,6 @@ DOMAIN_RULES = {
     "schools": QualityRule("schools.required_source", ("school_name", "source_confidence")),
     "economics": QualityRule("economics.required_provenance", ("provenance",)),
     "wsacc": QualityRule("wsacc.required_limitations", ("source", "limitations")),
-    "investments": QualityRule("investments.required_source", ("source_name", "status")),
 }
 
 

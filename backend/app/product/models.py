@@ -188,8 +188,7 @@ property_reviews = Table(
     Column("id", String(36), primary_key=True, default=new_id),
     Column("organization_id", ForeignKey("organizations.id"), nullable=True),
     Column("project_id", ForeignKey("projects.id"), nullable=False),
-    # References the authoritative investment_candidate_intake record without
-    # creating a second opportunity table in the Product V1 schema.
+    # Legacy reference retained for schema and record compatibility.
     Column("opportunity_id", String(120), nullable=True),
     Column("parcel_id", String(120)),
     Column("review_status", String(40), nullable=False, default="Not Reviewed"),
@@ -427,8 +426,8 @@ PRODUCT_TABLES = {
     )
 }
 
-# These existing investment tables and domain services remain authoritative.
-# Product V1 intentionally creates no parallel table and performs no silent sync.
+# Legacy Investment mappings are retained for migration and schema compatibility.
+# They are dormant and are not exposed as active Product V1 resources.
 LEGACY_INVESTMENT_EQUIVALENTS = {
     "investment_projects": "investment_engagement",
     "saved_searches": "investment_saved_search",

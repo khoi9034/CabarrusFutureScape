@@ -108,7 +108,6 @@ const PRODUCT_PERMISSIONS = new Set<ProductPermission>([
   "economics:write",
   "ingestion:apply",
   "ingestion:dry_run",
-  "investments:write",
   "master_data:export",
   "master_data:view",
   "planning:write",

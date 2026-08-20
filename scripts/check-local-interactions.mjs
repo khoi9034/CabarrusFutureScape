@@ -882,29 +882,6 @@ async function navigateToHome(page) {
   throw new Error(`Home navigation did not change route and module state: ${JSON.stringify(transition)}`);
 }
 
-async function navigateInvestmentPage(page, name, pageId) {
-  const button = page
-    .getByLabel("CFS Investments navigation")
-    .getByRole("button", { name, exact: true });
-  await page.waitForFunction(
-    (label) => {
-      const element = document.querySelector(`[aria-label="CFS Investments navigation"] button[aria-label="${label}"]`);
-      return element && Object.keys(element).some((key) => key.startsWith("__reactProps$"));
-    },
-    name,
-    { timeout: 30_000 },
-  );
-  await button.click();
-  await page.waitForFunction(
-    (expectedPage) => new URLSearchParams(location.search).get("investmentPage") === expectedPage,
-    pageId,
-    { timeout: 30_000 },
-  );
-  const destination = page.locator(`main[data-investment-page="${pageId}"]`);
-  await destination.waitFor({ state: "visible", timeout: 30_000 });
-  return destination;
-}
-
 async function assertHealthyPage(page) {
   const text = await page.locator("body").innerText();
   assert(!text.includes("Portfolio Demo"), "Live page displayed Portfolio Demo.");
@@ -946,7 +923,7 @@ async function assertLiveStatus(page) {
     .getByTestId("local-runtime-ask")
     .getByText("Grounded local answers", { exact: true })
     .waitFor();
-  await panel.getByText("Local neutral background", { exact: true }).waitFor();
+  await panel.getByText(/^(?:OpenStreetMap|Configured tile basemap)$/).waitFor();
   await controls.click();
 }
 
@@ -1334,21 +1311,6 @@ async function economicsWorkflow(page) {
   await navigateToHome(page);
 }
 
-async function cleanupIntake(candidateId) {
-  const response = await fetch(`${API_URL}/investment/intake/${encodeURIComponent(candidateId)}`, {
-    method: "DELETE",
-  });
-  assert.equal(response.status, 200, "Disposable browser intake cleanup failed.");
-  const verify = await fetch(`${API_URL}/investment/intake/${encodeURIComponent(candidateId)}`);
-  assert.equal(verify.status, 404, "Disposable browser intake still exists.");
-  report.disposable_cleanup = {
-    ...report.disposable_cleanup,
-    candidate_id: candidateId,
-    deleted: true,
-    verified: true,
-  };
-}
-
 async function archivePlanningSnapshot(snapshotId) {
   const response = await fetch(
     `${API_URL}/api/v1/planning/snapshots/${encodeURIComponent(snapshotId)}/archive`,
@@ -1392,170 +1354,6 @@ async function verifyPlanningSnapshotArchived(snapshotId, method) {
   };
 }
 
-async function cleanupRecentWork() {
-  const response = await fetch(`${API_URL}/investment/recent-work`);
-  assert.equal(response.status, 200, "Recent-work cleanup scan failed.");
-  const items = (await response.json()).items ?? [];
-  const disposable = items.filter((item) => JSON.stringify(item).includes(TEMP_PREFIX));
-  for (const item of disposable) {
-    const deleted = await fetch(
-      `${API_URL}/investment/recent-work/${encodeURIComponent(item.id)}`,
-      { method: "DELETE" },
-    );
-    assert.equal(deleted.status, 200, "Disposable recent-work cleanup failed.");
-  }
-  const verify = await fetch(`${API_URL}/investment/recent-work`);
-  assert.equal(verify.status, 200, "Recent-work cleanup verification failed.");
-  assert(
-    !JSON.stringify(await verify.json()).includes(TEMP_PREFIX),
-    "Disposable recent-work item still exists.",
-  );
-  report.disposable_cleanup = {
-    ...report.disposable_cleanup,
-    recent_work_deleted: disposable.length,
-    recent_work_verified: true,
-  };
-}
-
-async function investmentsWorkflow(page) {
-  await goto(page, "?app=consulting&investmentPage=overview");
-  await runCase("Investments", "Projects and CASE-1 continue", async () => {
-    await page
-      .getByText("CFS Large Development-Land Acquisition Case Study", { exact: false })
-      .first()
-      .waitFor({ timeout: 45_000 });
-    await navigateInvestmentPage(page, "Projects", "engagements");
-    const library = page.getByLabel("Case Studies library");
-    if (await library.count()) {
-      await library.getByRole("button", { name: "Continue", exact: true }).first().click();
-      await page.getByLabel("Case study workspace").waitFor();
-    }
-  });
-
-  await runCase("Investments", "Find Sites and Property Review", async () => {
-    const findSites = await navigateInvestmentPage(page, "Find Sites", "area-radar");
-    const responsePromise = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname === "/investment/radar/search" &&
-        response.request().method() === "POST",
-      { timeout: 60_000 },
-    );
-    await findSites.getByRole("button", { name: "Run Screening", exact: true }).click();
-    assert.equal((await responsePromise).status(), 200);
-    const review = page.getByRole("button", { name: "Open Property Review" }).first();
-    await review.waitFor({ timeout: 30_000 });
-    await review.click();
-    await page.getByRole("tablist", { name: "Property Research tabs" }).waitFor();
-  });
-
-  await runCase("Investments", "safe disposable backend mutation", async () => {
-    const findSites = await navigateInvestmentPage(page, "Find Sites", "area-radar");
-    await findSites.getByRole("button", { name: /Add External Opportunity/i }).click();
-    const form = page.locator('main[data-investment-page="intake"]');
-    await form.getByRole("textbox", { name: "Candidate label" }).fill(TEMP_PREFIX);
-    await form.getByRole("textbox", { name: "Parcel ID" }).fill(PARCEL);
-    const responsePromise = page.waitForResponse(
-      (response) =>
-        response.url() === `${API_URL}/investment/intake` &&
-        response.request().method() === "POST",
-      { timeout: 60_000 },
-    );
-    await form.getByRole("button", { name: "Add Candidate", exact: true }).click();
-    const response = await responsePromise;
-    assert.equal(response.status(), 200);
-    const body = await response.json();
-    const candidateId = body?.candidate?.id;
-    assert(candidateId, "Disposable candidate response omitted its id.");
-    try {
-      const detail = await fetch(
-        `${API_URL}/investment/intake/${encodeURIComponent(candidateId)}`,
-      );
-      assert.equal(detail.status, 200);
-      assert.equal((await detail.json()).candidate_name, TEMP_PREFIX);
-    } finally {
-      await cleanupIntake(candidateId);
-    }
-    await goto(page, "?app=consulting&investmentPage=report-studio");
-  });
-
-  await runCase("Investments", "Reports and three grounded questions", async () => {
-    const findSites = await navigateInvestmentPage(page, "Find Sites", "area-radar");
-    await findSites.getByRole("button", { name: "Run Screening", exact: true }).click();
-    const review = page.getByRole("button", { name: "Open Property Review" }).first();
-    await review.waitFor({ timeout: 60_000 });
-    await review.click();
-    await page.getByRole("tablist", { name: "Property Research tabs" }).waitFor();
-    await navigateInvestmentPage(page, "Reports", "report-studio");
-    const reportResponse = page.waitForResponse(
-      (response) =>
-        response.url() === `${API_URL}/investment/reports/generate` &&
-        response.request().method() === "POST",
-      { timeout: 60_000 },
-    );
-    const generate = page.getByRole("button", { name: /Generate/i }).first();
-    await generate.click();
-    assert.equal((await reportResponse).status(), 200);
-    await page.getByRole("button", { name: /Ask CFS/i }).first().click();
-    await page.getByRole("dialog", { name: "Ask CFS Investments" }).waitFor();
-    await askQuestions(page, [
-      "Why is the priority parcel the strongest screening candidate?",
-      "What are the major diligence risks?",
-      "Which assumptions drive the underwriting result?",
-    ]);
-    await page
-      .getByRole("dialog", { name: "Ask CFS Investments" })
-      .getByRole("button", { name: "Close", exact: true })
-      .click();
-  });
-
-  await runCase("Investments", "Underwrite, Decide, Deliver, and all artifacts", async () => {
-    await navigateInvestmentPage(page, "Projects", "engagements");
-    const library = page.getByLabel("Case Studies library");
-    if (await library.count()) {
-      await library.getByRole("button", { name: "Continue", exact: true }).first().click();
-    }
-    const workspace = page.getByLabel("Case study workspace");
-    await workspace.waitFor();
-    const workflow = workspace.getByLabel("Case-study workflow");
-    await workflow.getByRole("button", { name: /^Underwrite/ }).click();
-    await workspace.getByRole("button", { name: "Review Assumptions", exact: true }).click();
-    await workspace.getByLabel("Underwriting assumption review").waitFor();
-    await workspace.getByRole("button", { name: "Return to Underwrite" }).click();
-    await workflow.getByRole("button", { name: /^Decide/ }).click();
-    await workflow.getByRole("button", { name: /^Deliver/ }).click();
-    const deliverables = workspace
-      .getByRole("heading", { name: "Deliverable checklist" })
-      .locator("xpath=ancestor::section[1]");
-    const rows = deliverables.locator("tbody tr");
-    assert.equal(await rows.count(), 9, "CASE-1 did not expose nine deliverables.");
-    for (let index = 0; index < 9; index += 1) {
-      const name = await rows.nth(index).locator("td:first-child").innerText();
-      await rows.nth(index).getByRole("button").click();
-      const panel = workspace.getByLabel(name);
-      const link = panel.getByRole("link", { name: "Open artifact" });
-      if (await link.count()) {
-        const href = await link.getAttribute("href");
-        const isDownload = /\.(?:pptx|xlsx)$/i.test(href ?? "");
-        const openedPromise = isDownload
-          ? page.waitForEvent("download")
-          : page.waitForEvent("popup");
-        await link.click();
-        const opened = await openedPromise;
-        if (isDownload) {
-          const artifactPath = await opened.path();
-          assert(artifactPath && statSync(artifactPath).size > 100);
-        } else {
-          await opened.waitForLoadState("domcontentloaded");
-          await opened.close();
-        }
-      }
-      await panel.getByRole("button", { name: "Return to Deliver" }).click();
-    }
-  });
-
-  await navigateToHome(page);
-}
-
 async function navigationChecks(page) {
   await runCase("Navigation", "deep links, refresh, Back, Forward, and clean Home", async () => {
     await page.evaluate(() => localStorage.clear());
@@ -1564,10 +1362,7 @@ async function navigationChecks(page) {
     await waitForRequiredApiDrain(page, "Planning to Economics transition");
     const economicsGeneration = beginAcceptanceTransition(page);
     await page.locator('button[aria-haspopup="menu"]').click();
-    await page
-      .getByRole("menuitemradio")
-      .filter({ hasText: "Economics" })
-      .click();
+    await page.getByRole("menuitemradio", { name: /^Economic Intelligence\b/ }).click();
     await page.waitForFunction(() => new URLSearchParams(location.search).get("app") === "economics");
     await assertHealthyPage(page);
     completeAcceptanceTransition(page, economicsGeneration);
@@ -1595,6 +1390,15 @@ async function navigationChecks(page) {
     await assertHealthyPage(page);
     completeAcceptanceTransition(page, homeGeneration);
     await resolveMapDiagnosticsForPage(page);
+  });
+}
+
+async function activeProductRouteChecks(page) {
+  await runCase("Navigation", "Master Data and Ask CFS routes load", async () => {
+    await goto(page, "?app=master-data");
+    await page.getByTestId("master-data-catalog").waitFor({ timeout: 45_000 });
+    await goto(page, "?app=ask-cfs");
+    await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor({ timeout: 45_000 });
   });
 }
 
@@ -1634,12 +1438,13 @@ async function offlineChecks(browser) {
       timeout: 45_000,
     });
   }, true);
-  await runCase("Investments", "CASE-1 renders offline", async () => {
-    await goto(page, "?app=consulting&investmentPage=engagements");
-    await page
-      .getByText("CFS Large Development-Land Acquisition Case Study", { exact: false })
-      .first()
-      .waitFor({ timeout: 45_000 });
+  await runCase("Master Data", "catalog renders with external network blocked", async () => {
+    await goto(page, "?app=master-data");
+    await page.getByTestId("master-data-catalog").waitFor({ timeout: 45_000 });
+  }, true);
+  await runCase("Ask CFS", "standalone route renders with external network blocked", async () => {
+    await goto(page, "?app=ask-cfs");
+    await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor({ timeout: 45_000 });
   }, true);
 
   await page.waitForLoadState("networkidle", { timeout: 30_000 });
@@ -1754,7 +1559,7 @@ async function runWorkflows() {
     const page = await context.newPage();
     await planningWorkflow(page);
     await economicsWorkflow(page);
-    await investmentsWorkflow(page);
+    await activeProductRouteChecks(page);
     await navigationChecks(page);
     await page.waitForLoadState("networkidle", { timeout: 30_000 });
     await closeAcceptedContext(context);
@@ -1762,11 +1567,7 @@ async function runWorkflows() {
     await degradedDataChecks(browser);
     await resolveAllMapDiagnostics();
   } finally {
-    try {
-      await cleanupRecentWork();
-    } finally {
-      await browser.close();
-    }
+    await browser.close();
   }
 }
 
@@ -1829,7 +1630,7 @@ async function runRequiredMapFailureProbe() {
 
 function collectFinalInvariants() {
   recordFinalInvariant("local_api_route_count", ">=20", Object.keys(report.api_paths).length, Object.keys(report.api_paths).length >= 20);
-  recordFinalInvariant("ask_cfs_ui_request_count", ">=10", report.api_paths["POST /ai/search"] ?? 0, (report.api_paths["POST /ai/search"] ?? 0) >= 10);
+  recordFinalInvariant("ask_cfs_ui_request_count", ">=7", report.api_paths["POST /ai/search"] ?? 0, (report.api_paths["POST /ai/search"] ?? 0) >= 7);
   recordFinalInvariant(
     "same_origin_map_context_assets",
     LIVE_MAP_CONTEXT_PATHS.size,
@@ -1879,8 +1680,6 @@ function collectFinalInvariants() {
   );
   recordFinalInvariant("planning_snapshot_archived", true, Boolean(report.disposable_cleanup?.planning_snapshot_verified));
   recordFinalInvariant("planning_snapshot_archive_audit", true, Boolean(report.disposable_cleanup?.planning_snapshot_audit_verified));
-  recordFinalInvariant("investment_mutation_cleaned", true, Boolean(report.disposable_cleanup?.verified));
-  recordFinalInvariant("recent_work_cleaned", true, Boolean(report.disposable_cleanup?.recent_work_verified));
 }
 
 function recordFinalInvariant(name, expected, actual, passed = JSON.stringify(actual) === JSON.stringify(expected)) {

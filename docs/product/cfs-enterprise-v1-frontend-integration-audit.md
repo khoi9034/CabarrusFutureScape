@@ -1,5 +1,7 @@
 # Enterprise Product V1 frontend persistence audit
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 The initial audit was performed on 2026-08-02 on
 `product/cfs-enterprise-v1` at
 `897a809eaea0c6bb833a1d615424022bbfae5d04`. The implementation state below

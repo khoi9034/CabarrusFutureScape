@@ -48,7 +48,7 @@ def test_preexisting_managed_table_is_not_adopted_or_versioned() -> None:
     assert {column["name"] for column in inspect(engine).get_columns("projects")} == {"id"}
 
 
-def test_migration_does_not_duplicate_authoritative_investment_tables(product_engine) -> None:
+def test_migration_preserves_legacy_investment_equivalents_without_duplicates(product_engine) -> None:
     physical_tables = set(inspect(product_engine).get_table_names())
     assert {"saved_searches", "opportunities", "shortlist_items", "underwriting_scenarios"}.isdisjoint(
         physical_tables

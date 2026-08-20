@@ -39,7 +39,6 @@ def test_all_source_statuses_and_quality_domains_are_registered() -> None:
         "schools",
         "economics",
         "wsacc",
-        "investments",
     }
     assert all(
         evaluate_domain_rows(domain, [])[0]["status"] != "not_configured"

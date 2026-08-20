@@ -1,5 +1,7 @@
 # CFS Investment Acquisition-Review Presentation
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 ## Slide 1: Investment Question and Strategy
 
 Main message: Identify whether a large Cabarrus County development-land candidate should advance from screening into acquisition pricing.

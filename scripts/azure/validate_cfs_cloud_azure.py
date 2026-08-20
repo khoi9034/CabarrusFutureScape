@@ -196,30 +196,6 @@ def view_checks(conn: psycopg.Connection) -> list[dict[str, Any]]:
     return results
 
 
-def writable_rollback(conn: psycopg.Connection) -> list[str]:
-    statements = [
-        "INSERT INTO investment_candidate_intake (id, candidate_name, source_type, strategy, created_at, updated_at) VALUES ('az1b-validation-candidate', 'AZ1B Validation', 'Manual Research', 'development_land', now(), now())",
-        "INSERT INTO investment_saved_item (id, item_type, item_reference_id, label, status, created_at, updated_at) VALUES ('az1b-validation-item', 'parcel', 'AZ1B', 'AZ1B Validation', 'Shortlisted', now(), now())",
-        "INSERT INTO investment_recent_work (id, activity_type, reference_type, label, page, last_opened_at) VALUES ('az1b-validation-recent', 'opened', 'parcel', 'AZ1B Validation', 'research', now())",
-        "INSERT INTO investment_saved_search (id, search_name, goal, location_type, guided_or_advanced, created_at, updated_at) VALUES ('az1b-validation-search', 'AZ1B Validation', 'Custom', 'All Cabarrus County', 'guided', now(), now())",
-        "INSERT INTO investment_engagement (id, engagement_name, selected_strategy, engagement_status, created_at, updated_at) VALUES ('az1b-validation-engagement', 'AZ1B Validation', 'development_land', 'Draft', now(), now())",
-        "INSERT INTO investment_underwriting_scenario (id, scenario_name, scenario_type, strategy, assumptions_json, results_json, scenario_status, created_at, updated_at) VALUES ('az1b-validation-scenario', 'AZ1B Validation', 'development_land', 'development_land', '{}', '{}', 'Draft', now(), now())",
-    ]
-    with conn.cursor() as cur:
-        cur.execute("BEGIN")
-        for statement in statements:
-            cur.execute(statement)
-        cur.execute("ROLLBACK")
-    return [
-        "investment_candidate_intake",
-        "investment_saved_item",
-        "investment_recent_work",
-        "investment_saved_search",
-        "investment_engagement",
-        "investment_underwriting_scenario",
-    ]
-
-
 def geometry_mismatches(stage_geometry: list[dict[str, Any]], azure_geometry: list[dict[str, Any]]) -> list[dict[str, Any]]:
     keys = (
         "f_table_schema",
@@ -281,7 +257,6 @@ def main() -> None:
                     """,
                 )
             ),
-            "writable_rollback_tables": writable_rollback(azure),
         }
 
     report["ok"] = not report["row_count_mismatches"] and not report["geometry"]["mismatches"] and not [

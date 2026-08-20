@@ -197,7 +197,7 @@ export function EconomicMissionControl() {
       ) : null}
 
       <section className="mt-4 grid gap-3 lg:grid-cols-4">
-        {consultingPanels.map((panel) => (
+        {economicsPanels.map((panel) => (
           <article
             className="cfs-command-card rounded-xl border-[#d8b86a]/18 p-4"
             key={panel.title}
@@ -218,7 +218,7 @@ export function EconomicMissionControl() {
       <section className="mt-4 cfs-command-surface rounded-xl border-[#a8f3c4]/18 p-4">
         <SectionHeader
           icon={<FileSearch className="h-4 w-4" />}
-          kicker="Enterprise Investment Toolkit"
+          kicker="Enterprise Economics Toolkit"
           title="Planning model, BI dashboard, location intelligence, and decision pack"
         />
         <div className="mt-4 grid gap-3 lg:grid-cols-4">
@@ -333,7 +333,7 @@ export function EconomicMissionControl() {
           <SectionHeader
             icon={<FileSearch className="h-4 w-4" />}
             kicker="Underbuilt Redevelopment Watchlist"
-            title="Site Readiness / Investment Candidates"
+            title="Site Readiness / Review Candidates"
           />
           <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
             <div className="grid grid-cols-[minmax(8rem,1fr)_8rem_8rem] gap-2 border-b border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -397,7 +397,7 @@ export function EconomicMissionControl() {
           <SectionHeader
             icon={<PlayCircle className="h-4 w-4" />}
             kicker="Scenario Comparison"
-            title="Growth, Investment, and Redevelopment Scenarios"
+            title="Growth, Infrastructure, and Redevelopment Scenarios"
           />
           <div className="mt-3 grid gap-2">
             {(intelligence?.scenario_templates ?? []).slice(0, 5).map((scenario) => (
@@ -453,7 +453,7 @@ const constraintRows = [
   },
 ];
 
-const consultingPanels = [
+const economicsPanels = [
   {
     kicker: "Panel 1",
     title: "Economic Snapshot",
@@ -513,9 +513,9 @@ const enterpriseToolkit = [
       "Evidence pack and assumptions",
       "Risk flags, caveats, and next diligence",
     ],
-    kicker: "Investment deliverable",
-    text: "Decision-pack pattern for turning indicators into a presentation-ready consulting artifact.",
-    title: "Investment Decision Pack",
+    kicker: "Economic deliverable",
+    text: "Decision-pack pattern for turning indicators into a presentation-ready economic artifact.",
+    title: "Economic Decision Pack",
   },
 ];
 

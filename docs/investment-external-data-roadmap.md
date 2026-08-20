@@ -1,5 +1,7 @@
 # CFS Investment External Data Roadmap
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 Phase IP-2C: External Property, Market, and Location Data Research
 
 This roadmap is for internal CFS Investment only. CFS remains a screening-level land and property research tool. External data can improve due-diligence triage, but it must not be described as investment advice, an appraisal, a guaranteed return, a confirmed market value, a confirmed development outcome, or confirmed utility service/capacity.

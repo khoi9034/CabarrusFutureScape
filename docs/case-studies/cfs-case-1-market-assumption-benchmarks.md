@@ -1,5 +1,7 @@
 # CASE-1 Market Assumption Benchmarks
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 CASE-3A.1 proposes underwriting assumptions for user review. These values are not approved, not an appraisal, not investment advice, and not a final acquisition recommendation.
 
 ## Recommended Program

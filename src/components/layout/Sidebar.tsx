@@ -230,7 +230,7 @@ function EconomicsLayerControlsPanel({
     },
     {
       caveat: "Scenario candidates require assumptions before fiscal interpretation.",
-      label: "Site Readiness / Investment Candidate",
+      label: "Site Readiness / Review Candidate",
       status: "Scenario",
     },
   ];

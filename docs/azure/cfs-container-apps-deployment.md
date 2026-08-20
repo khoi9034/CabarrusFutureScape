@@ -207,11 +207,6 @@ Warm smoke timings, one sample per route:
 | Power BI export | 1,402 ms |
 | Ask CFS Planning | 1,157 ms |
 | Ask CFS Economics | 1,227 ms |
-| Investment screening | 1,808 ms |
-| Research context | 1,800 ms |
-| ACS context | 1,239 ms |
-| Environmental context | 1,319 ms |
-| Writable workflow operations | 1,213-1,824 ms |
 
 Scale-to-zero test:
 

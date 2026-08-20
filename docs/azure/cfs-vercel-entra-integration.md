@@ -50,8 +50,8 @@ FastAPI rejects missing, expired, wrong-audience, wrong-tenant, invalid-signatur
 | Class | Routes |
 | --- | --- |
 | Public minimal health | `/health`, `/health/ready`, `/health/database` |
-| Authenticated read | parcels, planning, economics, Model Lab, Power BI export, Ask CFS, indicators, WSACC, investment reads |
-| Authenticated write | candidate intake, saved items, recent work, saved searches, engagements, underwriting, reports |
+| Authenticated read | parcels, planning, economics, Model Lab, Power BI export, Ask CFS, Master Data, indicators, WSACC, reports |
+| Authenticated write | projects, Planning snapshots, Economics scenarios, reports/Report Bucket, Ask CFS conversations, governed sources/ingestion |
 | Admin | `/economics/export-diagnostics`, future `/ops/*` routes |
 
 The staging token is still accepted first. This is temporary and should be removed after Entra preview QA passes end to end.
@@ -116,7 +116,7 @@ Manual Preview QA verified:
 - the CFS Microsoft Entra login appeared
 - authorized account sign-in succeeded
 - signed-out access was rejected
-- Planning, Economics, Investment, Ask CFS, Model Lab, Power BI & Tools, reports, and saved-work flows loaded
+- Planning, Economics, Master Data, Ask CFS, Model Lab, Power BI & Tools, reports, and saved-work flows loaded
 - a temporary writable saved-work action succeeded and the temporary QA record was removed
 - sign-out succeeded and protected CFS content required authentication afterward
 
@@ -173,7 +173,7 @@ Frontend rollback:
 - unauthorized access fails
 - Planning passes
 - Economics passes
-- Investment passes
+- Master Data passes
 - Ask CFS passes
 - Model Lab warm latency is acceptable
 - reports and writable records pass

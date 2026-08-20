@@ -8,7 +8,6 @@ const protectedPaths = [
   "outputs/school_capacity_ingestion_last_run.json",
   "outputs/school_presentation_utilization_seed_last_run.json",
   "logs/production-map-e89e3e8.png",
-  ...trackedCasePaths(),
 ];
 const before = new Map(
   protectedPaths
@@ -73,14 +72,4 @@ function assertFrontendPersistenceContract() {
 
 function sha256(path) {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
-}
-
-function trackedCasePaths() {
-  const result = spawnSync(
-    "git",
-    ["ls-files", "--", "case-studies/large-development-land", "docs/case-studies", "src/app/case-studies/large-development-land"],
-    { encoding: "utf8" },
-  );
-  if (result.status !== 0) throw new Error("Unable to inventory protected CASE artifacts.");
-  return result.stdout.split(/\r?\n/).filter(Boolean);
 }

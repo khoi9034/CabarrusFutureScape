@@ -19,7 +19,6 @@ from app.product.models import (
     planning_snapshots,
     project_members,
     projects,
-    property_reviews,
     report_bucket_items,
     reports,
     utc_now,
@@ -67,7 +66,6 @@ RESOURCES = {
         economic_scenario_versions,
         "scenario_id",
     ),
-    "property_reviews": ResourceDefinition(property_reviews, Permission.INVESTMENTS_WRITE),
     "reports": ResourceDefinition(reports, Permission.REPORT_WRITE),
     "report_bucket_items": ResourceDefinition(report_bucket_items, Permission.REPORT_WRITE),
     "ask_cfs_conversations": ResourceDefinition(

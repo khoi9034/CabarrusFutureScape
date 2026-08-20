@@ -33,7 +33,7 @@ topological validity, type coercion, or canonical apply reconciliation.
 | Schools | School name and source confidence present |
 | Economics | Provenance present |
 | WSACC | Source and limitations present |
-| Investments | Source name and status present |
+| Master Data | Dataset metadata, field restrictions, and source lineage present |
 
 ## Result model
 

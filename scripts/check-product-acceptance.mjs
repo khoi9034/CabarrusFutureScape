@@ -30,37 +30,12 @@ function walk(dir) {
 const home = read("src/components/layout/CfsMasterHome.tsx");
 assertIncludes("Master Home", home, "Portfolio demonstration using sanitized, cached public demo data");
 
-const investmentShell = read("src/components/investment/InvestmentShell.tsx");
-assertIncludes("Investments shell", investmentShell, "CFS Investments");
-assertIncludes("Investments shell", investmentShell, "portfolio demonstration using sanitized or cached public demo data");
-
-const caseStudy = read("src/components/investment/InvestmentCaseStudies.tsx");
-assertIncludes("CASE Decide", caseStudy, "Targeted diligence only.");
-assertIncludes("CASE Decide", caseStudy, "Do not advance to acquisition pricing yet.");
-assertIncludes("CASE Decide", caseStudy, "No current scenario supports a positive land basis");
+for (const route of ["app=planning", "app=economics", "app=master-data", "app=ask-cfs"]) {
+  assertIncludes("Master Home", home, route);
+}
 
 for (const path of walk("src").filter((file) => /\.(ts|tsx)$/.test(file))) {
   assertNotIncludes(path, read(path), "CFS Consulting");
-}
-
-const diagnostic = JSON.parse(
-  read("case-studies/large-development-land/final_diagnostic_exhibits.json"),
-);
-const residuals = Object.fromEntries(
-  diagnostic.scenario_comparison.map((row) => [
-    row.scenario,
-    Math.round((row.residual_after_selling_carry / 1_000_000) * 100) / 100,
-  ]),
-);
-
-for (const [scenario, expected] of [
-  ["Downside", -110.2],
-  ["Base", -64.34],
-  ["Upside", -14.25],
-]) {
-  if (residuals[scenario] !== expected) {
-    throw new Error(`${scenario} residual changed: expected ${expected}, got ${residuals[scenario]}`);
-  }
 }
 
 console.log("PASS product acceptance contracts");

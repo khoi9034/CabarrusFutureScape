@@ -813,7 +813,7 @@ def test_ai_search_economics_mode_returns_economic_answer() -> None:
     assert response.domains == ["economics"]
     assert response.dashboard_actions.focus_domain == "economics"
     assert "CFS Economics reviewed 12 parcels" in response.answer
-    assert "Consulting takeaway" in response.answer
+    assert "Decision-support takeaway" in response.answer
     assert "Enterprise tool alignment" in response.answer
     assert "Underbuilt / redevelopment logic" in response.answer
     assert "improvement-to-land ratio" in response.answer
@@ -1204,55 +1204,9 @@ def test_ai_search_economics_due_diligence_packet_prompt_is_safe() -> None:
     assert "buy this" not in response.answer.lower()
 
 
-def test_ai_search_economics_investment_panel_prompt_is_safe() -> None:
-    response = CfsAiSearchService(_settings()).search(
-        CfsAiSearchRequest(
-            app_mode="economics",
-            filter_context={"mode": "investment_panel"},
-            query="Which candidates should I review first?",
-        ),
-        _context(),
-    )
-
-    answer = response.answer.lower()
-    assert "cfs investment" in answer
-    assert "report studio" in answer
-    assert "screening-level" in answer
-    assert "buy this" not in answer
-    assert "guaranteed" not in answer
-
-
-def test_ai_search_investment_research_intent_routes_reports() -> None:
-    response = CfsAiSearchService(_settings()).search(
-        CfsAiSearchRequest(
-            app_mode="economics",
-            filter_context={"mode": "cfs_investment", "active_strategy": "Development Land"},
-            query="Generate a development-site review report.",
-        ),
-        _context(),
-    )
-
-    assert "Report Generation" in response.answer
-    assert "CFS Investment" in response.answer
-    assert response.evidence[0].source == "investment_research_context"
-
-
-def test_ai_search_consulting_mode_uses_investments_label() -> None:
-    response = CfsAiSearchService(_settings()).search(
-        CfsAiSearchRequest(
-            app_mode="consulting",
-            filter_context={
-                "active_case_study": "CFS Large Development-Land Acquisition Case Study",
-                "active_strategy": "Development Land",
-            },
-            query="What should I work on next?",
-        ),
-        _context(),
-    )
-
-    assert "CFS Investments" in response.answer
-    assert "CFS Consulting" not in response.answer
-    assert response.evidence[0].source == "investment_research_context"
+def test_ai_search_rejects_retired_consulting_mode() -> None:
+    with pytest.raises(ValueError):
+        CfsAiSearchRequest(app_mode="consulting", query="What should I work on next?")
 
 
 def test_ai_search_environmental_prompt_rejects_contamination_conclusion() -> None:
@@ -1261,7 +1215,7 @@ def test_ai_search_environmental_prompt_rejects_contamination_conclusion() -> No
             app_mode="economics",
             query="Does EPA facility proximity mean this parcel is contaminated?",
             filter_context={
-                "active_intake_candidate": "Demo candidate",
+                "selected_parcel_id": "Demo parcel",
                 "active_facility_context": "Facility Within 0.25 Mile",
                 "active_environmental_confidence": "High",
             },

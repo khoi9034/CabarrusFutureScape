@@ -1,5 +1,7 @@
 # CFS Investment
 
+> **Retired historical reference:** The Investments product and CASE-1 workflow are retired and are not part of the active Demo, Local, Enterprise, acceptance, or deployment surface. This document is retained only as historical design or evidence and must not be used as an operating runbook.
+
 CFS Investment is the private/internal CFS product for land, property, and real-estate opportunity screening. It uses evidence from CFS Planning and CFS Economics, including development-readiness signals, acquisition-basis context, comparable-sale context, 2024 ACS market-area context, WSACC sewer-proximity proxies, and environmental screening context.
 
 The product remains behind the local convenience access gate until real authentication is implemented. The gate is not production authentication.

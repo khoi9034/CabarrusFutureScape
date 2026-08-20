@@ -25,7 +25,6 @@ from app.routers import (
     development_router,
     economics_router,
     indicators_router,
-    investment_router,
     parcel_router,
     school_constraints_router,
     temporal_router,
@@ -74,16 +73,6 @@ async def enforce_staging_or_entra_access(request: Request, call_next):
             status.HTTP_413_CONTENT_TOO_LARGE,
             "request_too_large",
             f"Product V1 requests are limited to {PRODUCT_V1_MAX_REQUEST_BYTES} bytes.",
-        )
-    if _is_v1_legacy_investment_mutation(request) or (
-        settings.cfs_runtime_mode == "enterprise"
-        and _is_unversioned_legacy_investment_mutation(request)
-    ):
-        return _error_response(
-            request,
-            status.HTTP_405_METHOD_NOT_ALLOWED,
-            "read_only_compatibility",
-            "Legacy Investment compatibility is read-only until a governed persistence adapter is available.",
         )
     if settings.cfs_runtime_mode == "demo" and _is_product_persistence_mutation(request):
         return _error_response(
@@ -194,36 +183,14 @@ def _is_oversized_product_request(request: Request) -> bool:
     return content_length.isdigit() and int(content_length) > PRODUCT_V1_MAX_REQUEST_BYTES
 
 
-def _is_v1_legacy_investment_mutation(request: Request) -> bool:
-    return (
-        request.method in {"DELETE", "PATCH", "POST", "PUT"}
-        and (
-            request.url.path == "/api/v1/investment"
-            or request.url.path.startswith("/api/v1/investment/")
-        )
-    )
-
-
-def _is_unversioned_legacy_investment_mutation(request: Request) -> bool:
-    return (
-        request.method in {"DELETE", "PATCH", "POST", "PUT"}
-        and (
-            request.url.path == "/investment"
-            or request.url.path.startswith("/investment/")
-        )
-    )
-
-
 def _is_product_persistence_mutation(request: Request) -> bool:
     if request.method not in {"DELETE", "PATCH", "POST", "PUT"}:
         return False
     return request.url.path.startswith(
         (
-            "/investment/",
             "/api/v1/projects",
             "/api/v1/planning/snapshots",
             "/api/v1/economics/scenarios",
-            "/api/v1/investments/property-reviews",
             "/api/v1/reports",
             "/api/v1/ask-cfs/conversations",
             "/api/v1/data-sources",
@@ -270,7 +237,6 @@ def root() -> dict[str, object]:
             "constraints": "/constraints",
             "ai_search": "/ai/search",
             "indicators": "/indicators",
-            "investment": "/investment",
             "wsacc": "/wsacc",
         },
     }
@@ -355,7 +321,6 @@ legacy_routers = (
     indicators_router.router,
     ai_search_router.router,
     wsacc_router.router,
-    investment_router.router,
 )
 for legacy_router in legacy_routers:
     app.include_router(legacy_router)

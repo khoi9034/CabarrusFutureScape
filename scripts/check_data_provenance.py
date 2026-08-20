@@ -13,7 +13,6 @@ def main() -> int:
     failures: list[str] = []
     checks = 0
     client = read("src/lib/api/client.ts")
-    investment = read("src/lib/investmentIntelligenceService.ts")
     top_nav = read("src/components/layout/TopNav.tsx")
     parcel_search = read("src/components/dashboard/ParcelSearchPanel.tsx")
     command_palette = read("src/components/dashboard/CommandPalette.tsx")
@@ -38,11 +37,6 @@ def main() -> int:
     checks += require(
         "USE_DEMO_DATA || !USE_BACKEND_API" not in frontend_sources,
         "A live path still treats a missing backend as demo mode.",
-        failures,
-    )
-    checks += require(
-        "return USE_DEMO_DATA;" in investment,
-        "Investment demo-mode guard is not strict.",
         failures,
     )
     checks += require(

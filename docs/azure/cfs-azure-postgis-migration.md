@@ -1,5 +1,7 @@
 # CFS Azure PostGIS Migration
 
+> `investment_*` objects in this migration record are retained legacy inventory only; they are not active product routes, workflows, or app-role write grants.
+
 ## Architecture
 
 - Local source: `cfs_dev` on PostgreSQL 18.4 / PostGIS 3.6.2.

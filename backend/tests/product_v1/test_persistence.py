@@ -184,18 +184,7 @@ def test_economics_and_ask_cfs_persist_with_safe_fields(
             "title": "Primary scenario",
         },
     )
-    review = economic_service.create(
-        "property_reviews",
-        {
-            "project_id": project["id"],
-            "opportunity_id": "legacy-candidate-1",
-            "parcel_id": "p-1",
-            "review_status": "Reviewed",
-            "findings": {"source": "authoritative investment candidate reference"},
-        },
-    )
     assert economic_service.archive("report_bucket_items", bucket["id"])["archived_at"]
-    assert economic_service.archive("property_reviews", review["id"])["archived_at"]
 
     viewer = principal_factory(Role.VIEWER, project_ids=frozenset({project["id"]}))
     ask = ProductService(product_session, viewer)
@@ -298,4 +287,4 @@ def test_economics_and_ask_cfs_persist_with_safe_fields(
             select(func.count()).select_from(audit_events).where(
                 audit_events.c.request_id == "economics-1"
             )
-        ) >= 6
+        ) >= 5

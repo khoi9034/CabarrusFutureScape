@@ -13,7 +13,7 @@ Recommended hosting order:
 2. Planning intelligence and map overlays
 3. Economics intelligence and governed exports
 4. Ask CFS context/search
-5. Reports and persistent investment workflows
+5. Reports and Master Data exports
 
 ## Database sequence
 

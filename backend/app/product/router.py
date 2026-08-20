@@ -68,7 +68,6 @@ RESOURCE_ROUTES = (
     ("/projects", "projects"),
     ("/planning/snapshots", "planning_snapshots"),
     ("/economics/scenarios", "economic_scenarios"),
-    ("/investments/property-reviews", "property_reviews"),
     ("/reports", "reports"),
     ("/ask-cfs/conversations", "ask_cfs_conversations"),
 )

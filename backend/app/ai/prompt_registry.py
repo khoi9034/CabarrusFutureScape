@@ -24,10 +24,6 @@ PRODUCT_RULES = {
         "benefit. Underbuilt is a screening classification. Scenario outputs are "
         "modeled or illustrative and must disclose unrepresented public costs."
     ),
-    "consulting": (
-        "Use the Economics rules and keep recommendations as screening and "
-        "diligence guidance, never guaranteed outcomes."
-    ),
 }
 
 SafetyQueryKind = Literal["prompt_injection", "sensitive_data"]

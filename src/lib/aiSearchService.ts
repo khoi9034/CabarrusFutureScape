@@ -182,7 +182,7 @@ async function searchDemoCfsAi(
     return sanitizeDemoResponse(demoSafetyAnswer(request.query));
   }
 
-  if (request.app_mode === "consulting" || request.app_mode === "economics") {
+  if (request.app_mode === "economics") {
     return sanitizeDemoResponse(await demoEconomicsAnswer(request));
   }
 
@@ -316,7 +316,7 @@ async function demoEconomicsAnswer(
       ],
       [
         "Fiscal / service interpretation",
-        "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as an investment-ready candidate.",
+        "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as a development-ready candidate.",
       ],
       [
         "Inspect next",
@@ -339,7 +339,7 @@ async function demoEconomicsAnswer(
         ]),
       ],
       [
-        "Consulting takeaway",
+      "Decision takeaway",
         "Traditional GIS can show where things are. CFS Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
       ],
       [
@@ -957,7 +957,7 @@ function demoEconomicsDueDiligencePacketAnswer(
     answer: briefing(
       [
         "Direct answer",
-        "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In CFS Investment, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
+        "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. Generate a due diligence packet when you want a saved summary.",
       ],
       [
         "What CFS will include",
@@ -1197,7 +1197,7 @@ function demoEconomicsPowerBiAnswer(
         "Which table powers what",
         bullets([
           "Executive dashboard: economics_kpi_fact and parcel_economic_signal_fact.",
-          "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
+          "Parcel economic screen: parcel_economic_signal_fact and geography_dim.",
           "Scenario Model page: scenario_output_fact and scenario_dim.",
           "Data confidence register: domain_readiness_dim.",
         ]),
@@ -1413,8 +1413,8 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
     selectedFilters = { opportunity_class: "Underbuilt Redevelopment Candidate" };
     reportCanvasItems = [
       visual("Executive Economic Dashboard", "Underbuilt candidate count", "bar", "parcel_economic_signal_fact", "opportunity_class", "signal_id", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
-      visual("Parcel Investment Screen", "Underbuilt candidates by segment", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
-      visual("Parcel Investment Screen", "Top underbuilt rows", "matrix", "parcel_economic_signal_fact", "geography_label", "recommended_followup", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
+      visual("Parcel Economic Screen", "Underbuilt candidates by segment", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
+      visual("Parcel Economic Screen", "Top underbuilt rows", "matrix", "parcel_economic_signal_fact", "geography_label", "recommended_followup", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
     ];
   } else if (normalized.includes("scenario")) {
     reportTitle = "Scenario Comparison Dashboard";

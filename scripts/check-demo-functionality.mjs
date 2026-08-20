@@ -151,55 +151,13 @@ contextAssets.forEach((asset) => {
   assert(layer.schema && layer.feature && layer.generated_at && layer.source_classification, `${asset.path} layer metadata is incomplete`);
 });
 
-const funnel = json("case-studies/large-development-land/screening_funnel.json").counts;
-const expectedFunnel = {
-  countywide_parcels_reviewed: 110017,
-  parcels_meeting_minimum_100_acres: 241,
-  parcels_with_usable_planning_and_investment_evidence: 241,
-  parcels_passing_initial_screens: 62,
-  parcels_receiving_preliminary_manual_review: 10,
-  final_shortlist_count: 3,
-};
-for (const [key, expected] of Object.entries(expectedFunnel)) {
-  assert(funnel[key] === expected, `CASE-1 funnel ${key} drifted: ${funnel[key]} !== ${expected}`);
-}
-
-const shortlist = json("case-studies/large-development-land/shortlisted_candidates.json").candidates;
-const candidates = Object.fromEntries(shortlist.map((candidate) => [candidate.parcel_id, candidate]));
-for (const [parcelId, score, acres, developable] of [
-  ["CFS-PARCEL-0149758869", 89, 489.43, 392.11],
-  ["CFS-PARCEL-0149760035", 77, 670.27, 554.36],
-  ["CFS-PARCEL-0149777275", 36, 233.26, 112.85],
-]) {
-  const candidate = candidates[parcelId];
-  assert(candidate, `missing CASE-1 candidate ${parcelId}`);
-  assert(candidate.screening_score === score, `${parcelId} score drifted`);
-  assert(candidate.gross_acres === acres, `${parcelId} gross acres drifted`);
-  assert(candidate.preliminary_developable_acres === developable, `${parcelId} developable acres drifted`);
-}
-
-const diagnostics = json("case-studies/large-development-land/final_diagnostic_exhibits.json");
-const residuals = Object.fromEntries(diagnostics.scenario_comparison.map((row) => [
-  row.scenario,
-  Math.round((row.residual_after_selling_carry / 1_000_000) * 100) / 100,
-]));
-for (const [scenario, expected] of [["Downside", -110.2], ["Base", -64.34], ["Upside", -14.25]]) {
-  assert(residuals[scenario] === expected, `${scenario} residual drifted: ${residuals[scenario]} !== ${expected}`);
-}
-
-const service = read("src/lib/investmentIntelligenceService.ts");
-assertIncludes("src/lib/investmentIntelligenceService.ts", service, "getDemoInvestmentScreen(strategy)");
-assertIncludes("src/lib/investmentIntelligenceService.ts", service, "createDemoInvestmentSavedSearch(payload)");
-assertIncludes("src/lib/investmentIntelligenceService.ts", service, "createDemoInvestmentIntakeCandidate(payload)");
-assert(!service.includes("Investment screening uses local FastAPI in live mode."), "demo screening still throws live-mode error");
-
 const shell = read("src/components/economics/EconomicsShell.tsx");
-assertIncludes("src/components/economics/EconomicsShell.tsx", shell, "Run Screening");
-assertIncludes("src/components/economics/EconomicsShell.tsx", shell, "Large Development Land");
-assertIncludes("src/components/economics/EconomicsShell.tsx", shell, "Open Property Review");
-assertIncludes("src/components/economics/EconomicsShell.tsx", shell, "No search results yet. Run Screening");
-assert(!shell.includes('defaultValue="industrial_site"'), "Find Sites still defaults to industrial_site");
-assert(!shell.includes("Find Sites: Industrial Site"), "Find Sites saved search still uses Industrial Site");
+assertIncludes("src/components/economics/EconomicsShell.tsx", shell, "Land Due Diligence Screener");
+
+const home = read("src/components/layout/CfsMasterHome.tsx");
+for (const route of ["app=planning", "app=economics", "app=master-data", "app=ask-cfs"]) {
+  assertIncludes("src/components/layout/CfsMasterHome.tsx", home, route);
+}
 
 const scene = read("src/components/gis/SceneViewContainer.tsx");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await getDemoMapContext(false)");

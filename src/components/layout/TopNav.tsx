@@ -16,8 +16,8 @@ import {
   RadioTower,
   Search,
   BarChart3,
-  BriefcaseBusiness,
   Calculator,
+  Sparkles,
   UserRound,
   XCircle,
 } from "lucide-react";
@@ -144,16 +144,16 @@ const appModeOptions = [
     shortLabel: "CFS Economics",
   },
   {
-    description: "Site selection, acquisition screening, due diligence, underwriting, and case studies.",
-    id: "consulting",
-    label: "Investment Intelligence",
-    shortLabel: "CFS Investments",
-  },
-  {
     description: "Governed Parcel and Permit previews, filters, fields, and derived exports.",
     id: "master-data",
     label: "Master Data",
     shortLabel: "CFS Master Data",
+  },
+  {
+    description: "Evidence-grounded answers across planning and economics context.",
+    id: "ask-cfs",
+    label: "Ask CFS",
+    shortLabel: "Ask CFS",
   },
 ] as const;
 
@@ -225,17 +225,16 @@ export function TopNav() {
       ? "Live Local Data"
       : "Static";
   const runtimeStatusTone = USE_BACKEND_API ? localRuntime.tone : "blue";
-  const consultingMode = cfsAppMode === "consulting";
   const masterDataMode = cfsAppMode === "master-data";
   const quickSearchEnabled = !masterDataMode;
   const searchPlaceholder = USE_DEMO_DATA
     ? "Search demo parcel, PIN, zoning, subdivision"
-    : cfsAppMode === "economics" || consultingMode
+    : cfsAppMode === "economics"
       ? "Search parcel, PIN, zoning, subdivision"
       : "Search parcel, PIN, owner, address, subdivision";
   const searchTitle = USE_DEMO_DATA
     ? "Search demo parcels, PINs, zoning, subdivisions, or neighborhoods"
-    : cfsAppMode === "economics" || consultingMode
+    : cfsAppMode === "economics"
       ? "Search parcels, PINs, zoning, subdivisions, or neighborhoods"
       : "Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods";
   const currentAppMode =
@@ -246,9 +245,7 @@ export function TopNav() {
       window.history.pushState(
         null,
         "",
-        mode === "consulting"
-          ? "/?app=consulting&investmentPage=engagements"
-          : `/?app=${mode}`,
+        `/?app=${mode}`,
       );
     }
     setCfsAppMode(mode);
@@ -540,9 +537,7 @@ export function TopNav() {
       <header
         className={cn(
           "relative z-30 flex min-h-[var(--cfs-top-nav-height)] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4",
-          consultingMode
-            ? "consult-command-bar"
-            : cfsAppMode === "economics"
+          cfsAppMode === "economics"
             ? "econ-command-bar"
             : "cfs-command-bar border-b border-[#68d8ff]/14 bg-[#03070d]/94",
         )}
@@ -565,12 +560,12 @@ export function TopNav() {
             type="button"
           >
             <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#68d8ff]/28 bg-[#68d8ff]/[0.1]">
-              {consultingMode ? (
-                <BriefcaseBusiness className="h-4 w-4 text-[var(--consult-emerald)]" />
-              ) : cfsAppMode === "economics" ? (
+              {cfsAppMode === "economics" ? (
                 <BarChart3 className="h-4 w-4 text-[#f0cd79]" />
               ) : masterDataMode ? (
                 <Database className="h-4 w-4 text-[#8fe7ff]" />
+              ) : cfsAppMode === "ask-cfs" ? (
+                <Sparkles className="h-4 w-4 text-[#8fe7ff]" />
               ) : (
                 <Map className="h-4 w-4 text-[#f0cd79]" />
               )}
@@ -879,7 +874,7 @@ export function TopNav() {
                           </span>
                         </div>
                         <p className="mt-1 truncate text-[11px] text-slate-500">
-                          {(cfsAppMode === "economics" || consultingMode
+                          {(cfsAppMode === "economics"
                             ? [record.neighborhood, record.subdivision]
                             : [
                                 record.mailingAddress,
@@ -939,9 +934,7 @@ export function TopNav() {
             aria-label={
               cfsAppMode === "economics"
                 ? "Open economics controls"
-                : consultingMode
-                  ? "Open investment controls"
-                  : masterDataMode
+                : masterDataMode
                     ? "Open Master Data controls"
                 : "Open dashboard controls"
             }
@@ -950,9 +943,7 @@ export function TopNav() {
             title={
               cfsAppMode === "economics"
                 ? "Economics status and mode controls"
-                : consultingMode
-                  ? "Investments status and mode controls"
-                  : masterDataMode
+                : masterDataMode
                     ? "Master Data status and access"
                 : "Role, workspace, and scenario controls"
             }
@@ -970,30 +961,7 @@ export function TopNav() {
 
           {moreOpen ? (
             <div className="absolute right-0 top-11 z-50 w-[min(24rem,calc(100vw-1.5rem))] rounded-lg border border-white/10 bg-[#08111d]/98 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-              {consultingMode ? (
-                <div className="grid gap-3">
-                  <div className="rounded-lg border border-[var(--consult-border)] bg-[rgba(53,201,141,0.08)] p-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--consult-emerald)]">
-                      CFS Investments
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-300">
-                      Site selection, due diligence, underwriting, reports, and case studies.
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <CompactStatusChip
-                      icon={RadioTower}
-                      label={dashboardStatusLabels[mapStatus]}
-                      tone={mapStatus === "online" ? "green" : mapStatus === "degraded" ? "red" : "gold"}
-                    />
-                    <CompactStatusChip
-                      icon={Activity}
-                      label={runtimeStatusLabel}
-                      tone={runtimeStatusTone}
-                    />
-                  </div>
-                </div>
-              ) : cfsAppMode === "economics" ? (
+              {cfsAppMode === "economics" ? (
                 <div className="grid gap-3">
                   <div className="rounded-lg border border-[#d8b86a]/20 bg-[#d8b86a]/10 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
