@@ -24,21 +24,24 @@
 - [Planning](http://127.0.0.1:3000/?app=planning)
 - [Economics](http://127.0.0.1:3000/?app=economics)
 - [Master Data](http://127.0.0.1:3000/?app=master-data)
-- [Ask CFS](http://127.0.0.1:3000/?app=ask-cfs)
 - [FastAPI Docs](http://127.0.0.1:8000/docs)
 - [API Readiness](http://127.0.0.1:8000/health/ready)
 - [Database Health](http://127.0.0.1:8000/health/database)
 
+Ask CFS is available from the shared control inside Planning, Economics, and
+Master Data. The retired `?app=ask-cfs` destination redirects safely to Home.
+
 ## Suggested Presentation Flow
 
 1. **Home, 30 seconds:** Establish the three connected products and show the Live Local Data status.
-2. **Planning, 2 minutes:** Search `CFS-PARCEL-0149726579`, select it, and toggle Development Hotspots, Floodplain Review, and School Utilization + Permit Pressure.
-3. **Indicator Center and Ask CFS, 1 minute:** Open Indicator Center and ask what to inspect first. Point out evidence and caveats.
-4. **Economics, 1 minute:** Show database-backed KPIs, select a parcel, change a scenario control, and show the updated screening output.
-5. **Master Data, 1 minute:** Show the six-dataset catalog, preview a governed
+2. **Planning, 2 minutes:** Search `CFS-PARCEL-0149726579`, select it, toggle Development Hotspots, Floodplain Review, and School Utilization + Permit Pressure, then open Ask CFS and ask what to inspect first.
+3. **Economics, 1 minute:** Show database-backed KPIs, select a parcel, change a scenario control, and use Ask CFS to explain the screening output.
+4. **Master Data, 1 minute:** Show the six-dataset catalog, preview a governed
    dataset, then enable Permit → Parcel, review matched/unmatched lineage and
-   the spatial preview, and export selected fields.
-6. **Ask CFS, 1 minute:** Open the standalone route, ask a grounded follow-up, and point out evidence and caveats.
+   the spatial preview, and ask Ask CFS to explain the match percentage before
+   exporting selected fields.
+5. **Shared assistant, 30 seconds:** Close Ask CFS in each workspace and confirm
+   the active workspace and analysis remain in place.
 
 ## Recovery
 

@@ -30,7 +30,7 @@ import {
   CFS_PLANNING_SNAPSHOT_SAVED_EVENT,
   CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
 } from "@/components/dashboard/OverviewCommandCenter";
-import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
+import { SharedAskCfsSource } from "@/components/dashboard/SharedAskCfsDrawer";
 import { EconomicMissionControl } from "@/components/dashboard/EconomicMissionControl";
 import {
   buildIndicatorCenterReviewThemes,
@@ -915,7 +915,7 @@ function PlanningIndicatorCenterWorkspace() {
       />
 
       <div className="mt-4">
-        <AskCfsPanel
+        <SharedAskCfsSource
           appMode="planning"
           externalRequest={askCfsExternalRequest}
           filterContext={askCfsFilterContext}

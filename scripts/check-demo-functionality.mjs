@@ -159,9 +159,29 @@ const shell = read("src/components/economics/EconomicsShell.tsx");
 assertIncludes("src/components/economics/EconomicsShell.tsx", shell, "Land Due Diligence Screener");
 
 const home = read("src/components/layout/CfsMasterHome.tsx");
-for (const route of ["app=planning", "app=economics", "app=master-data", "app=ask-cfs"]) {
-  assertIncludes("src/components/layout/CfsMasterHome.tsx", home, route);
-}
+const homeWorkspaceRoutes = [...home.matchAll(/href: "\/\?app=([^\"]+)"/g)].map((match) => match[1]);
+assert(
+  homeWorkspaceRoutes.join(",") === "planning,economics,master-data",
+  "Demo Home must expose exactly three primary workspace cards",
+);
+assertIncludes("src/components/layout/CfsMasterHome.tsx", home, 'data-testid="cfs-home-shared-ask-cfs"');
+assertIncludes("src/components/layout/CfsMasterHome.tsx", home, "lg:grid-cols-3");
+assert(!home.includes("cfs-home-card-ask-cfs"), "Demo Home still exposes Ask CFS as a primary card");
+assert(!home.includes("xl:grid-cols-4"), "Demo Home still reserves a fourth card column");
+
+const topNav = read("src/components/layout/TopNav.tsx");
+assertIncludes("src/components/layout/TopNav.tsx", topNav, 'data-testid="shared-ask-cfs-toggle"');
+const appShell = read("src/components/layout/AppShell.tsx");
+assertIncludes("src/components/layout/AppShell.tsx", appShell, "<SharedAskCfsDrawer");
+const sharedAsk = read("src/components/dashboard/SharedAskCfsDrawer.tsx");
+assertIncludes("src/components/dashboard/SharedAskCfsDrawer.tsx", sharedAsk, "<AskCfsPanel");
+assertIncludes("src/components/dashboard/SharedAskCfsDrawer.tsx", sharedAsk, "appMode={appMode}");
+
+const homeRoute = read("src/app/page.tsx");
+assert(
+  /appMode === "ask-cfs"[\s\S]*?redirect\("\/"\);/.test(homeRoute),
+  "Legacy Ask CFS URL does not redirect safely to Home",
+);
 const demoRoute = read("src/app/demo/page.tsx");
 assertIncludes("src/app/demo/page.tsx", demoRoute, 'redirect("/")');
 

@@ -18,7 +18,11 @@ from app.dependencies.database import get_optional_read_only_db
 from app.routers.economics_router import get_cached_economics_intelligence
 from app.routers.indicators_router import get_cached_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
-from app.services.ai_search_service import CfsAiSearchService, get_ai_provider_status
+from app.services.ai_search_service import (
+    CfsAiSearchService,
+    get_ai_provider_status,
+    safe_filter_context,
+)
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
 LOGGER = logging.getLogger(__name__)
@@ -191,24 +195,7 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
 def _with_request_context(context: CfsAiContext, request: CfsAiSearchRequest | None) -> CfsAiContext:
     if not request or not request.filter_context:
         return context
-    clean_filters = {
-        str(key): value
-        for key, value in request.filter_context.items()
-        if value not in (None, "", "All")
-        and not any(
-            blocked in str(key).lower()
-            for blocked in (
-                "address",
-                "email",
-                "mail",
-                "owner",
-                "password",
-                "phone",
-                "secret",
-                "token",
-            )
-        )
-    }
+    clean_filters = safe_filter_context(request.filter_context)
     if clean_filters:
         context["filter_context"] = clean_filters
         context["filtered_context_summary"] = "; ".join(

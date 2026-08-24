@@ -28,11 +28,16 @@ import type {
   MasterDataPreviewRequest,
   MasterDataValue,
 } from "@/lib/master-data/types";
+import type { CfsAiSearchRequest } from "@/types/api";
 
 const PAGE_SIZE = 50;
 const repository = getMasterDataRepository();
 
-export function MasterDataWorkspace() {
+export function MasterDataWorkspace({
+  onAskContextChange,
+}: {
+  onAskContextChange?: (context: CfsAiSearchRequest["filter_context"]) => void;
+}) {
   const { can, error: principalError, status: principalStatus } = useProductPrincipal();
   const [attempt, setAttempt] = useState(0);
   const [datasets, setDatasets] = useState<MasterDataDatasetDefinition[]>([]);
@@ -117,6 +122,28 @@ export function MasterDataWorkspace() {
         )
       : selectableFields;
   }, [fieldSearch, selectableFields]);
+  const askCfsContext = useMemo<CfsAiSearchRequest["filter_context"]>(() => ({
+    mode: "master_data",
+    master_data_dataset_id: selectedDataset?.id ?? null,
+    master_data_dataset_name: selectedDataset?.name ?? null,
+    master_data_selected_fields: selectedFields.join(", ") || null,
+    master_data_filters: filters
+      .filter((filter) => filter.value.trim())
+      .map((filter) => `${filter.field} ${filter.operator}`)
+      .join("; ") || null,
+    master_data_join: activeRelationship?.id ?? null,
+    master_data_result_count: preview?.total ?? null,
+    master_data_match_percentage:
+      preview?.join_statistics?.match_percentage ?? null,
+    master_data_lineage:
+      preview?.lineage.source_datasets.join(" → ") ?? null,
+  }), [
+    activeRelationship,
+    filters,
+    preview,
+    selectedDataset,
+    selectedFields,
+  ]);
   const activeValueLookups = useMemo(
     () =>
       filters.flatMap((filter) => {
@@ -130,6 +157,10 @@ export function MasterDataWorkspace() {
       }),
     [availableFields, filters],
   );
+
+  useEffect(() => {
+    onAskContextChange?.(askCfsContext);
+  }, [askCfsContext, onAskContextChange]);
 
   useEffect(() => {
     if (!selectedDataset || !activeValueLookups.length) {

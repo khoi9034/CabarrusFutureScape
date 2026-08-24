@@ -6,8 +6,9 @@ import {
   Network,
   PanelLeft,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import type { AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
+import { SharedAskCfsSource } from "@/components/dashboard/SharedAskCfsDrawer";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import { useProductPrincipal } from "@/hooks/useProductPrincipal";
 import {
@@ -916,7 +917,7 @@ function PowerBiToolsPage({
       ),
     [dataReadiness, outputs, powerBiPayload, signals],
   );
-  const handleAskCfsResponse = (response: CfsAiSearchResponse) => {
+  const handleAskCfsResponse = useCallback((response: CfsAiSearchResponse) => {
     setLastAskResponse(response);
     const actions = response.powerbi_actions;
     if (!actions || actions.action_type === "none") return;
@@ -927,7 +928,7 @@ function PowerBiToolsPage({
         .querySelector('[data-econ-tour="generated-report-preview"], [data-econ-tour="powerbi-practice-pack"]')
         ?.scrollIntoView({ behavior: "smooth", block: "start" }),
     );
-  };
+  }, []);
   return (
     <>
       <PageHeader
@@ -948,7 +949,7 @@ function PowerBiToolsPage({
         <p className="mb-3 text-sm leading-6 text-[var(--econ-muted)]">
           Ask what to build, which rows to select, or how to turn CFS Economics into a Power BI report.
         </p>
-        <AskCfsPanel
+        <SharedAskCfsSource
           appMode="economics"
           onResponse={handleAskCfsResponse}
           suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
@@ -1293,15 +1294,26 @@ function EconomicDashboardPage({
     setSelectedOpportunityClass("All");
     setSelectedDataConfidence("All");
   };
-  const askCfsFilterContext = {
-    economic_segment: selectedSegment,
-    geography: selectedGeography,
-    opportunity_class: selectedOpportunityClass,
-    data_confidence: selectedDataConfidence,
-    filtered_signal_count: filteredSignals.length,
-    filtered_watchlist_rows: filteredWatchlist.length,
-    selected_parcel_id: selectedParcelId,
-  };
+  const askCfsFilterContext = useMemo(
+    () => ({
+      economic_segment: selectedSegment,
+      geography: selectedGeography,
+      opportunity_class: selectedOpportunityClass,
+      data_confidence: selectedDataConfidence,
+      filtered_signal_count: filteredSignals.length,
+      filtered_watchlist_rows: filteredWatchlist.length,
+      selected_parcel_id: selectedParcelId,
+    }),
+    [
+      filteredSignals.length,
+      filteredWatchlist.length,
+      selectedDataConfidence,
+      selectedGeography,
+      selectedOpportunityClass,
+      selectedParcelId,
+      selectedSegment,
+    ],
+  );
 
   return (
     <>
@@ -1339,7 +1351,7 @@ function EconomicDashboardPage({
         signal={selectedParcelSignal}
       />
       <EconPanel title="Ask CFS Economics" kicker="Ask first" tourId="ask-cfs">
-        <AskCfsPanel
+        <SharedAskCfsSource
           appMode="economics"
           filterContext={askCfsFilterContext}
           visiblePromptCount={6}
@@ -1693,7 +1705,7 @@ function EconomicsWorkspacePage({
       {embedded ? null : (
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
           <EconPanel title="Ask CFS Economics" kicker="Analyst prompts">
-            <AskCfsPanel
+            <SharedAskCfsSource
               appMode="economics"
               suggestedPromptsOverride={askCfsEconomicsWorkspacePrompts}
               visiblePromptCount={6}
@@ -1832,7 +1844,7 @@ function EnterpriseWorkspacePage({
         </div>
         {embedded ? null : (
           <EconPanel title="Ask CFS Economics" kicker="Assistant">
-            <AskCfsPanel
+            <SharedAskCfsSource
               appMode="economics"
               suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
               visiblePromptCount={6}
@@ -2256,7 +2268,7 @@ function EconomicsPrintPage({
       </article>
       <section className="no-print">
         <EconPanel title="Ask CFS Economics" kicker="Snapshot support">
-          <AskCfsPanel
+          <SharedAskCfsSource
             appMode="economics"
             suggestedPromptsOverride={askCfsEconomicsPrintPrompts}
             visiblePromptCount={6}

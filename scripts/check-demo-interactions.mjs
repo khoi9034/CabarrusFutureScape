@@ -622,7 +622,7 @@ async function goto(page, baseUrl, query) {
 }
 
 async function demoAliasChecks(page, baseUrl) {
-  await check("Home", "/demo redirects to the active four-product Demo Home", ["/demo", "product cards"], async () => {
+  await check("Home", "/demo redirects to the active three-workspace Demo Home", ["/demo", "workspace cards", "shared Ask CFS"], async () => {
     await acceptedNavigation(
       page,
       "goto",
@@ -635,7 +635,6 @@ async function demoAliasChecks(page, baseUrl) {
           ["planning", "CFS Planning", "Open Planning", "/?app=planning"],
           ["economics", "CFS Economics", "Open Economics", "/?app=economics"],
           ["master-data", "CFS Master Data", "Open Master Data", "/?app=master-data"],
-          ["ask-cfs", "Ask CFS", "Open Ask CFS", "/?app=ask-cfs"],
         ];
         assert.equal(await home.locator('[data-testid^="cfs-home-card-"]').count(), expected.length);
         for (const [mode, title, action, href] of expected) {
@@ -644,6 +643,21 @@ async function demoAliasChecks(page, baseUrl) {
           await card.getByText(title, { exact: true }).waitFor();
           await card.getByText(action, { exact: true }).waitFor();
         }
+        await home.getByTestId("cfs-home-shared-ask-cfs").getByText("Ask CFS", { exact: true }).waitFor();
+        await assertHealthyText(page);
+      },
+    );
+  });
+
+  await check("Home", "legacy standalone Ask CFS route redirects to Home", ["legacy redirect", "clean Home"], async () => {
+    await acceptedNavigation(
+      page,
+      "goto",
+      () => page.goto(`${baseUrl}/?app=ask-cfs`, { waitUntil: "domcontentloaded" }),
+      async () => {
+        await page.waitForURL((url) => url.pathname === "/" && url.search === "", { timeout: 30_000 });
+        await page.getByTestId("cfs-master-home").waitFor();
+        assert.equal(await page.getByTestId("cfs-home-card-ask-cfs").count(), 0);
         await assertHealthyText(page);
       },
     );
@@ -1053,10 +1067,11 @@ async function planningChecks(page, baseUrl) {
       await button.click();
       assert.equal(await button.getAttribute("aria-pressed"), "true");
     }
-    const ask = page.getByRole("textbox", { name: "Ask CFS question" });
-    await ask.fill("Where is growth pressure highest?");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
-    await page.getByRole("button", { name: "Reset conversation" }).waitFor({ timeout: 20_000 });
+    await assertSharedAskCfsDrawer(page, {
+      appMode: "planning",
+      label: "CFS Planning",
+      question: "Where is growth pressure highest?",
+    });
   });
 
   await check("Planning", "Model Lab modes and methodology return state", ["Model Lab on/off", "points", "heatmap", "clusters", "methodology return"], async () => {
@@ -1428,15 +1443,59 @@ async function assertMasterDataMapReady(page, expectedMappedFeatures) {
   assert.equal(diagnostics.pageErrors.length, pageErrorsBefore, "Master Data map selection interaction raised a page error.");
 }
 
-async function askCfsChecks(page, baseUrl) {
-  await goto(page, baseUrl, "?app=ask-cfs");
-  await check("Ask CFS", "standalone route answers a grounded question", ["route", "answer"], async () => {
-    await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor();
-    const ask = page.getByRole("textbox", { name: "Ask CFS question" });
-    await ask.fill("What data should I inspect first?");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
-    await page.getByRole("button", { name: "Reset conversation" }).waitFor({ timeout: 20_000 });
-  });
+async function assertSharedAskCfsDrawer(page, { appMode, label, question = null }) {
+  const blockedBefore = diagnostics.blockedRequests.length;
+  const toggle = page.getByTestId("shared-ask-cfs-toggle");
+  assert.equal(new URL(page.url()).searchParams.get("app"), appMode);
+  await toggle.click();
+  const drawer = page.getByTestId("shared-ask-cfs-drawer");
+  await drawer.waitFor();
+  await drawer.getByRole("heading", { name: `Ask CFS · ${label}`, exact: true }).waitFor();
+  assert.equal(new URL(page.url()).searchParams.get("app"), appMode, "Opening Ask CFS changed workspace.");
+  if (question) {
+    await drawer.getByRole("textbox", { name: "Ask CFS question" }).fill(question);
+    await drawer.getByRole("button", { name: "Ask", exact: true }).click();
+    await drawer.getByRole("button", { name: "Reset conversation" }).waitFor({ timeout: 20_000 });
+  }
+  assert.equal(
+    diagnostics.blockedRequests.length,
+    blockedBefore,
+    `${label} shared Ask CFS attempted a forbidden backend/API request.`,
+  );
+  await drawer.getByTestId("shared-ask-cfs-close").click();
+  await drawer.waitFor({ state: "hidden" });
+  assert.equal(new URL(page.url()).searchParams.get("app"), appMode, "Closing Ask CFS changed workspace.");
+}
+
+async function sharedAskCfsChecks(page, baseUrl) {
+  for (const workspace of [
+    {
+      appMode: "planning",
+      label: "CFS Planning",
+      product: "Planning",
+      question: "What planning data should I inspect first?",
+    },
+    {
+      appMode: "economics",
+      label: "CFS Economics",
+      product: "Economics",
+      question: "What economic evidence should I inspect first?",
+    },
+    {
+      appMode: "master-data",
+      label: "CFS Master Data",
+      product: "Master Data",
+      question: "What does this governed dataset contain?",
+    },
+  ]) {
+    await goto(page, baseUrl, `?app=${workspace.appMode}`);
+    await check(
+      workspace.product,
+      "shared Ask CFS opens, answers without a backend, closes, and stays in workspace",
+      ["shared Ask CFS", "drawer", "answer", "close", "workspace preserved", "zero backend"],
+      () => assertSharedAskCfsDrawer(page, workspace),
+    );
+  }
 }
 
 async function mobileChecks(browser, baseUrl) {
@@ -1444,7 +1503,6 @@ async function mobileChecks(browser, baseUrl) {
     ["Planning", "?app=planning"],
     ["Economics", "?app=economics"],
     ["Master Data", "?app=master-data"],
-    ["Ask CFS", "?app=ask-cfs"],
   ]) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     attachDiagnostics(context, new URL(baseUrl).origin);
@@ -1484,9 +1542,10 @@ async function mobileChecks(browser, baseUrl) {
       await page.getByTestId("parcel-economic-context").getByText("CFS-PARCEL-0149726304", { exact: false }).waitFor();
     }
     if (product === "Master Data") await page.getByTestId("master-data-catalog").waitFor();
-    if (product === "Ask CFS") {
-      await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor();
-    }
+    await assertSharedAskCfsDrawer(page, {
+      appMode: product === "Planning" ? "planning" : product === "Economics" ? "economics" : "master-data",
+      label: `CFS ${product}`,
+    });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert(overflow <= 2, `${product} has ${overflow}px horizontal mobile overflow.`);
     await assertHealthyText(page);
@@ -1618,9 +1677,9 @@ async function main() {
     const masterData = await context.newPage();
     await masterDataChecks(masterData, baseUrl);
     await closeAcceptancePage(masterData);
-    const askCfs = await context.newPage();
-    await askCfsChecks(askCfs, baseUrl);
-    await closeAcceptancePage(askCfs);
+    const sharedAskCfs = await context.newPage();
+    await sharedAskCfsChecks(sharedAskCfs, baseUrl);
+    await closeAcceptancePage(sharedAskCfs);
     await mobileChecks(browser, baseUrl);
     await offlineMapChecks(browser, baseUrl);
     await closeAcceptanceContext(context);
@@ -1648,7 +1707,7 @@ async function main() {
       baseUrl,
       assets,
       cases: Object.fromEntries(
-        ["Home", "Planning", "Economics", "Master Data", "Ask CFS"].map((product) => [
+        ["Home", "Planning", "Economics", "Master Data"].map((product) => [
           product,
           results.filter((result) => result.product === product).length,
         ]),

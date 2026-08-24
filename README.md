@@ -37,7 +37,19 @@ Phase 15B registers environmental source priorities in
 legacy `opendata/MapServer` hydrology/flood layers as fallback/reference, and
 keep FEMA NFHL as the authoritative regulatory flood source.
 
-Current product modes:
+Current product structure has three core workspaces:
+
+- `CFS Planning`: parcel-centered planning, development, constraints, schools,
+  transportation, and planning intelligence.
+- `CFS Economics`: economic indicators, development conditions, fiscal
+  insights, and scenario analysis.
+- `CFS Master Data`: governed dataset discovery, filtering, preview, joins,
+  spatialization, and export.
+
+`Ask CFS` is a shared intelligence layer available inside all three workspaces,
+not a fourth application.
+
+Within CFS Planning, the current product modes are:
 
 - `Overview`: landing and safe-use introduction for Cabarrus FutureScape. It
   explains what CFS is, what it can do today, what remains internal research,
@@ -116,11 +128,12 @@ parcel search. It uses cached demo extracts and clearly labels the public site
 as a Portfolio Demo. The full local version remains the source of truth for
 PostGIS-backed countywide data.
 
-### Ask CFS Indicator Search
+### Shared Ask CFS Intelligence
 
-Indicator Center includes `Ask CFS`, a grounded search panel for CFS indicators,
-layers, methodology, school pressure, floodplain review, Model Lab context, and
-data readiness.
+Planning, Economics, and Master Data each expose the same grounded `Ask CFS`
+assistant without leaving the active workspace. It explains only approved CFS
+evidence and preserves source caveats; Master Data context remains limited to
+governed dataset metadata, filters, joins, counts, and lineage.
 
 Local deterministic mode works without paid AI keys:
 

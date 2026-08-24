@@ -332,7 +332,6 @@ function isCfsAppMode(value: unknown): value is CfsAppMode {
   return (
     value === "planning" ||
     value === "economics" ||
-    value === "ask-cfs" ||
     value === "master-data"
   );
 }

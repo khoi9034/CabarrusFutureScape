@@ -11,6 +11,7 @@ export default async function Home({ searchParams }: { searchParams: HomeSearchP
 
   if (
     appMode === "consulting" ||
+    appMode === "ask-cfs" ||
     [
       "investmentPage",
       "consultingPage",
@@ -26,7 +27,6 @@ export default async function Home({ searchParams }: { searchParams: HomeSearchP
   const initialAppMode: CfsAppMode | undefined =
     appMode === "planning" ||
     appMode === "economics" ||
-    appMode === "ask-cfs" ||
     appMode === "master-data"
       ? appMode
       : undefined;

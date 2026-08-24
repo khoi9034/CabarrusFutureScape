@@ -24,6 +24,12 @@ PRODUCT_RULES = {
         "benefit. Underbuilt is a screening classification. Scenario outputs are "
         "modeled or illustrative and must disclose unrepresented public costs."
     ),
+    "master-data": (
+        "Use only the supplied governed Master Data metadata and aggregate result "
+        "context. Never infer row values, restricted fields, SQL, source credentials, "
+        "or authority to mutate source data. Counts supplied by the UI are session "
+        "context and must not be presented as independently verified facts."
+    ),
 }
 
 SafetyQueryKind = Literal["prompt_injection", "sensitive_data"]

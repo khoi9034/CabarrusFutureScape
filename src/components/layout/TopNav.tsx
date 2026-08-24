@@ -149,12 +149,6 @@ const appModeOptions = [
     label: "Master Data",
     shortLabel: "CFS Master Data",
   },
-  {
-    description: "Evidence-grounded answers across planning and economics context.",
-    id: "ask-cfs",
-    label: "Ask CFS",
-    shortLabel: "Ask CFS",
-  },
 ] as const;
 
 type QuickSearchStatus =
@@ -165,7 +159,13 @@ type QuickSearchStatus =
   | "loading"
   | "ready";
 
-export function TopNav() {
+export function TopNav({
+  askCfsOpen,
+  onAskCfsOpenChange,
+}: {
+  askCfsOpen: boolean;
+  onAskCfsOpenChange: (open: boolean) => void;
+}) {
   const {
     activeRole,
     activeWorkspacePreset,
@@ -529,14 +529,16 @@ export function TopNav() {
 
   return (
     <>
-      <CommandPalette
-        onOpenChange={setCommandPaletteOpen}
-        open={commandPaletteOpen}
-      />
+      {askCfsOpen ? null : (
+        <CommandPalette
+          onOpenChange={setCommandPaletteOpen}
+          open={commandPaletteOpen}
+        />
+      )}
 
       <header
         className={cn(
-          "relative z-30 flex min-h-[var(--cfs-top-nav-height)] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4",
+          "relative z-30 flex min-h-[var(--cfs-top-nav-height)] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:gap-3 lg:px-4 2xl:flex-nowrap",
           cfsAppMode === "economics"
             ? "econ-command-bar"
             : "cfs-command-bar border-b border-[#68d8ff]/14 bg-[#03070d]/94",
@@ -564,8 +566,6 @@ export function TopNav() {
                 <BarChart3 className="h-4 w-4 text-[#f0cd79]" />
               ) : masterDataMode ? (
                 <Database className="h-4 w-4 text-[#8fe7ff]" />
-              ) : cfsAppMode === "ask-cfs" ? (
-                <Sparkles className="h-4 w-4 text-[#8fe7ff]" />
               ) : (
                 <Map className="h-4 w-4 text-[#f0cd79]" />
               )}
@@ -727,7 +727,7 @@ export function TopNav() {
         ) : null}
 
         {!masterDataMode ? (
-        <div className="order-4 flex w-full min-w-0 items-center gap-2 md:order-2 md:w-auto md:flex-1 lg:order-3">
+        <div className="order-4 flex w-full min-w-0 items-center gap-2 md:order-2 md:w-auto md:min-w-[12rem] md:flex-1 lg:order-3">
           <div
             className="relative block min-w-0 flex-1 md:min-w-[12rem]"
             ref={quickSearchRef}
@@ -920,6 +920,24 @@ export function TopNav() {
         ) : <div className="order-4 hidden min-w-0 flex-1 lg:block" />}
 
         <div className="relative order-2 flex shrink-0 items-center gap-2 lg:order-4">
+          <button
+            aria-expanded={askCfsOpen}
+            aria-haspopup="dialog"
+            aria-label="Open Ask CFS"
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#35c98d]/28 bg-[#35c98d]/10 px-2.5 text-xs font-semibold text-[#baf5dc] transition hover:border-[#35c98d]/50 hover:bg-[#35c98d]/15 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70"
+            data-testid="shared-ask-cfs-toggle"
+            onClick={() => {
+              setCommandPaletteOpen(false);
+              setModeMenuOpen(false);
+              setMoreOpen(false);
+              onAskCfsOpenChange(!askCfsOpen);
+            }}
+            title="Ask CFS without leaving this workspace"
+            type="button"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span className="hidden sm:inline">Ask CFS</span>
+          </button>
           {!masterDataMode ? <button
             aria-label="Open command palette"
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white md:hidden xl:flex"

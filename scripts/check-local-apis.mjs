@@ -184,6 +184,9 @@ const askQuestions = {
     "Which values are observed and which are derived?",
     "What should not be interpreted as an official forecast?",
   ],
+  "master-data": [
+    "What does this governed dataset context contain?",
+  ],
 };
 
 function validateAskResponse(data) {
@@ -227,11 +230,20 @@ async function runAskChecks() {
         operationPath: "/ai/search",
         body: {
           app_mode: appMode,
-          filter_context: { selected_parcel_id: PARCEL },
+          filter_context: appMode === "master-data"
+            ? {
+                master_data_dataset_id: "permits",
+                master_data_dataset_name: "Permits",
+                master_data_filters: "permit_date gte",
+                mode: "master_data",
+              }
+            : { selected_parcel_id: PARCEL },
           mode: "live",
           query: question,
         },
-        fixture: `${appMode} question with canonical parcel context`,
+        fixture: appMode === "master-data"
+          ? "Master Data question with approved aggregate context"
+          : `${appMode} question with canonical parcel context`,
         validate: validateAskResponse,
         timeoutMs: 60_000,
       });

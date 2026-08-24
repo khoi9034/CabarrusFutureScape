@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { CfsAppMode } from "@/types";
 type ProductCard = {
   action: string;
-  accent: "cyan" | "emerald" | "gold";
+  accent: "cyan" | "gold";
   description: string;
   href: string;
   icon: typeof MapPinned;
@@ -24,7 +24,7 @@ const productCards: ProductCard[] = [
     action: "Open Planning",
     accent: "cyan",
     description:
-      "Explore parcels, development activity, infrastructure, environmental constraints, schools, and planning intelligence.",
+      "Explore parcels, development activity, planning layers, environmental constraints, schools, transportation, and planning intelligence.",
     href: "/?app=planning",
     icon: MapPinned,
     mode: "planning",
@@ -34,7 +34,7 @@ const productCards: ProductCard[] = [
     action: "Open Economics",
     accent: "gold",
     description:
-      "Evaluate tax base, revenue per acre, development potential, fiscal tradeoffs, and economic scenarios.",
+      "Explore economic indicators, development conditions, fiscal insights, and scenario analysis.",
     href: "/?app=economics",
     icon: BarChart3,
     mode: "economics",
@@ -44,35 +44,21 @@ const productCards: ProductCard[] = [
     action: "Open Master Data",
     accent: "cyan",
     description:
-      "Build governed extracts across six planning datasets with controlled fields, filters, joins, previews, and exports.",
+      "Find, filter, preview, join, spatialize, and export governed county datasets.",
     href: "/?app=master-data",
     icon: Database,
     mode: "master-data",
     title: "CFS Master Data",
   },
-  {
-    action: "Open Ask CFS",
-    accent: "emerald",
-    description:
-      "Ask questions in plain language and get evidence-grounded explanations of planning and economics context.",
-    href: "/?app=ask-cfs",
-    icon: Sparkles,
-    mode: "ask-cfs",
-    title: "Ask CFS",
-  },
 ];
 
 const accentStyles: Record<ProductCard["accent"], string> = {
   cyan: "border-[#68d8ff]/28 bg-[#07111f]/88 hover:border-[#68d8ff]/58 hover:bg-[#102235]/92 focus-visible:outline-[#68d8ff]/75",
-  emerald:
-    "border-[#35c98d]/28 bg-[#071510]/88 hover:border-[#35c98d]/58 hover:bg-[#0c2419]/92 focus-visible:outline-[#35c98d]/75",
   gold: "border-[#d8b86a]/28 bg-[#161207]/88 hover:border-[#d8b86a]/60 hover:bg-[#261f10]/92 focus-visible:outline-[#d8b86a]/75",
 };
 
 const iconStyles: Record<ProductCard["accent"], string> = {
   cyan: "border-[#68d8ff]/30 bg-[#68d8ff]/10 text-[#8fe7ff]",
-  emerald:
-    "border-[#35c98d]/30 bg-[#35c98d]/12 text-[#35c98d]",
   gold: "border-[#d8b86a]/30 bg-[#d8b86a]/12 text-[#f0cd79]",
 };
 
@@ -94,14 +80,14 @@ export function CfsMasterHome() {
             Cabarrus FutureScape
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            A planning intelligence and self-service data platform combining parcel-centered Planning, Economics scenario analysis, governed Master Data workflows, and Ask CFS.
+            A planning intelligence and self-service data platform combining parcel-centered Planning, Economics analysis, and governed Master Data workflows, with Ask CFS embedded throughout the platform.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             Portfolio demonstration using sanitized, cached public demo data where applicable; screening outputs are preliminary.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-5" aria-label="CFS products">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5" aria-label="CFS workspaces">
           {productCards.map((card) => {
             const Icon = card.icon;
 
@@ -140,6 +126,18 @@ export function CfsMasterHome() {
               </a>
             );
           })}
+        </div>
+
+        <div
+          className="flex items-center gap-3 rounded-lg border border-[#35c98d]/24 bg-[#071510]/78 px-4 py-3 text-sm text-slate-300"
+          data-testid="cfs-home-shared-ask-cfs"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#35c98d]/30 bg-[#35c98d]/12 text-[#35c98d]">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          <p>
+            <span className="font-semibold text-white">Ask CFS</span> is available throughout the platform to explain data, analysis, and results in plain language.
+          </p>
         </div>
       </section>
     </main>

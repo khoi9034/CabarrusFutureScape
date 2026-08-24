@@ -1,3 +1,4 @@
+import json
 import time
 from types import SimpleNamespace
 
@@ -799,6 +800,83 @@ def test_ai_search_filter_context_metadata_is_returned() -> None:
     assert response.context_freshness == "current_session"
     assert "active tab=Schools" in response.filtered_context_summary
     assert "Active dashboard context" in response.answer
+
+
+def test_ai_search_master_data_mode_uses_approved_workspace_context() -> None:
+    request = CfsAiSearchRequest(
+        app_mode="master-data",
+        filter_context={
+            "mode": "master_data",
+            "master_data_dataset_id": "permits",
+            "master_data_dataset_name": "Cabarrus permits",
+            "master_data_selected_fields": "permit_number, permit_type",
+            "master_data_filters": "permit_type eq",
+            "master_data_join": "permits_to_parcels",
+            "master_data_result_count": 31,
+            "master_data_match_percentage": 80,
+            "master_data_lineage": "permits → parcels",
+            "owner_name": "Must not leave the browser",
+        },
+        query="Explain this governed preview.",
+    )
+    context = ai_search_router._with_request_context(_context(), request)
+    response = CfsAiSearchService(_settings()).search(request, context)
+
+    assert response.domains == ["data_readiness"]
+    assert context["filter_context"] == {
+        key: value
+        for key, value in request.filter_context.items()
+        if key != "owner_name"
+    }
+    assert "Current Master Data context" in response.answer
+    assert "Cabarrus permits" in response.answer
+    assert "31 records with a 80% join match rate" in response.answer
+    assert "cannot expose restricted fields" in response.answer
+    assert "owner name" not in response.filtered_context_summary
+    assert "Must not leave the browser" not in response.answer
+
+
+def test_ai_search_provider_receives_only_sanitized_filter_context(monkeypatch) -> None:
+    captured: dict = {}
+
+    def provider_call(_url, payload, *_args, **_kwargs):
+        captured.update(payload)
+        return None
+
+    monkeypatch.setattr(ai_search_service, "_post_provider_json", provider_call)
+    request = CfsAiSearchRequest(
+        app_mode="master-data",
+        filter_context={
+            "master_data_dataset_id": "  permits  ",
+            "master_data_result_count": 31,
+            "master_data_match_percentage": 99.7,
+            "master_data_join": {"relationship_id": "permits_to_parcels"},
+            "owner_name": "Private owner",
+            "raw_sql": "select * from parcels",
+        },
+        query="Summarize this preview.",
+    )
+    service = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-4o-mini",
+            cfs_ai_provider="openai",
+            cfs_ai_provider_timeout_seconds=6.0,
+            openai_api_key="test-key",
+        )
+    )
+
+    service._provider_answer(request, _context(), ["data_readiness"])
+
+    provider_request = json.loads(captured["messages"][1]["content"])
+    assert provider_request["filter_context"] == {
+        "master_data_dataset_id": "permits",
+        "master_data_result_count": 31,
+        "master_data_match_percentage": 99.7,
+    }
+    assert provider_request["cfs_context"] == {}
+    assert "Private owner" not in captured["messages"][1]["content"]
+    assert "select * from parcels" not in captured["messages"][1]["content"]
 
 
 def test_ai_search_economics_mode_returns_economic_answer() -> None:

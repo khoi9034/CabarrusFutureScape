@@ -4,6 +4,7 @@ import { AlertTriangle, FileSearch, Loader2, Send, Sparkles } from "lucide-react
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import {
   askCfsEconomicsSuggestedPrompts,
+  askCfsMasterDataSuggestedPrompts,
   askCfsSuggestedPrompts,
   searchCfsAi,
 } from "@/lib/aiSearchService";
@@ -19,11 +20,23 @@ import type {
   CfsAiSearchResponse,
 } from "@/types/api";
 
-type AskCfsAppMode = "economics" | "planning";
+type AskCfsAppMode = "economics" | "master-data" | "planning";
 
 export interface AskCfsExternalRequest {
   request: CfsAiSearchRequest;
   requestId: number;
+}
+
+export interface AskCfsPanelProps {
+  appMode?: AskCfsAppMode;
+  externalRequest?: AskCfsExternalRequest | null;
+  filterContext?: CfsAiSearchRequest["filter_context"];
+  helperTextOverride?: string;
+  inputId?: string;
+  inputPlaceholderOverride?: string;
+  onResponse?: (response: CfsAiSearchResponse) => void;
+  suggestedPromptsOverride?: readonly string[];
+  visiblePromptCount?: number;
 }
 
 const EMPTY_CONVERSATION: CfsAiConversationTurn[] = [];
@@ -49,17 +62,13 @@ export function AskCfsPanel({
   appMode = "planning",
   externalRequest,
   filterContext,
+  helperTextOverride,
+  inputId = "ask-cfs-query",
+  inputPlaceholderOverride,
   onResponse,
   suggestedPromptsOverride,
   visiblePromptCount,
-}: {
-  appMode?: AskCfsAppMode;
-  externalRequest?: AskCfsExternalRequest | null;
-  filterContext?: CfsAiSearchRequest["filter_context"];
-  onResponse?: (response: CfsAiSearchResponse) => void;
-  suggestedPromptsOverride?: readonly string[];
-  visiblePromptCount?: number;
-}) {
+}: AskCfsPanelProps) {
   const {
     can,
     error: principalError,
@@ -93,13 +102,21 @@ export function AskCfsPanel({
   const suggestedPrompts = suggestedPromptsOverride ??
     (appMode === "economics"
       ? askCfsEconomicsSuggestedPrompts
+      : appMode === "master-data"
+        ? askCfsMasterDataSuggestedPrompts
       : askCfsSuggestedPrompts);
-  const helperText = appMode === "economics"
-    ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
-    : "Search across indicators, layers, methodology, and cached planning signals.";
-  const inputPlaceholder = appMode === "economics"
-    ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
-    : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness...";
+  const helperText = helperTextOverride ??
+    (appMode === "economics"
+      ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
+      : appMode === "master-data"
+        ? "Explain governed dataset metadata, approved fields, filters, joins, and result summaries."
+        : "Search across indicators, layers, methodology, and cached planning signals.");
+  const inputPlaceholder = inputPlaceholderOverride ??
+    (appMode === "economics"
+      ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
+      : appMode === "master-data"
+        ? "Ask about this dataset, approved fields, filters, joins, lineage, or exports..."
+        : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness...");
   const visiblePrompts = visiblePromptCount
     ? suggestedPrompts.slice(0, visiblePromptCount)
     : suggestedPrompts;
@@ -115,6 +132,12 @@ export function AskCfsPanel({
     filterContext?.project_id,
     filterContext?.active_project,
     filterContext?.selected_signal_id,
+    filterContext?.master_data_dataset_id,
+    filterContext?.master_data_selected_fields,
+    filterContext?.master_data_filters,
+    filterContext?.master_data_join,
+    filterContext?.master_data_result_count,
+    filterContext?.master_data_match_percentage,
   ].join("|");
   const inCurrentScope = contentScope === contextScopeKey;
   const scopedAnswer = inCurrentScope ? answer : null;
@@ -586,12 +609,12 @@ export function AskCfsPanel({
       </div>
 
       <form className="mt-4 flex flex-col gap-2 md:flex-row" onSubmit={onSubmit}>
-        <label className="sr-only" htmlFor="ask-cfs-query">
+        <label className="sr-only" htmlFor={inputId}>
           Ask CFS question
         </label>
         <input
           className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-[#68d8ff]/55 focus:ring-2 focus:ring-[#68d8ff]/15"
-          id="ask-cfs-query"
+          id={inputId}
           data-testid="ask-cfs-query"
           onChange={(event) => setQuery(event.target.value)}
           placeholder={inputPlaceholder}
@@ -775,6 +798,14 @@ const safeAskCfsFilterKeys = [
   "selected_candidate",
   "selected_parcel_id",
   "selected_signal_id",
+  "master_data_dataset_id",
+  "master_data_dataset_name",
+  "master_data_selected_fields",
+  "master_data_filters",
+  "master_data_join",
+  "master_data_result_count",
+  "master_data_match_percentage",
+  "master_data_lineage",
 ] as const;
 
 function safeAskCfsFilterContext(

@@ -51,7 +51,6 @@ export function DashboardUrlSync() {
       if (
         appMode === "planning" ||
         appMode === "economics" ||
-        appMode === "ask-cfs" ||
         appMode === "master-data"
       ) {
         setCfsAppMode(appMode);

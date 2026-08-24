@@ -24,6 +24,7 @@ def test_retired_investment_urls_redirect_home() -> None:
     app_types = read("src/types/index.ts")
 
     assert 'appMode === "consulting"' in page
+    assert 'appMode === "ask-cfs"' in page
     for key in (
         "investmentPage",
         "consultingPage",
@@ -38,6 +39,9 @@ def test_retired_investment_urls_redirect_home() -> None:
     assert 'redirect("/")' in page
     assert 'value === "consulting"' not in state
     assert '| "consulting"' not in app_types
+    assert 'value === "ask-cfs"' not in state
+    assert 'appMode === "ask-cfs"' not in url_sync
+    assert '| "ask-cfs"' not in app_types
 
 
 def test_home_and_switcher_expose_only_active_destinations() -> None:
@@ -45,17 +49,28 @@ def test_home_and_switcher_expose_only_active_destinations() -> None:
     top_nav = read("src/components/layout/TopNav.tsx")
     app_shell = read("src/components/layout/AppShell.tsx")
 
+    home_cards = home.split("const productCards", 1)[1].split(
+        "const accentStyles", 1
+    )[0]
+    switcher = top_nav.split("const appModeOptions", 1)[1].split(
+        "type QuickSearchStatus", 1
+    )[0]
     destinations = (
         ("CFS Planning", "Open Planning", "/?app=planning"),
         ("CFS Economics", "Open Economics", "/?app=economics"),
-        ("Ask CFS", "Open Ask CFS", "/?app=ask-cfs"),
         ("CFS Master Data", "Open Master Data", "/?app=master-data"),
     )
     for title, action, route in destinations:
-        assert title in home
-        assert action in home
-        assert route in home
+        assert title in home_cards
+        assert title in switcher
+        assert action in home_cards
+        assert route in home_cards
 
+    assert home_cards.count("action:") == 3
+    assert switcher.count("id:") == 3
+    assert "Open Ask CFS" not in home_cards
+    assert "/?app=ask-cfs" not in home_cards
+    assert 'data-testid="cfs-home-shared-ask-cfs"' in home
     assert "data-testid=\"cfs-master-home\"" in home
     assert "planning intelligence and self-service data platform" in home
     assert "CFS Investments" not in home
@@ -66,20 +81,26 @@ def test_home_and_switcher_expose_only_active_destinations() -> None:
     assert 'window.history.pushState(null, "", "/")' in top_nav
 
 
-def test_ask_cfs_is_a_first_class_destination() -> None:
+def test_ask_cfs_is_a_shared_workspace_drawer() -> None:
     app_shell = read("src/components/layout/AppShell.tsx")
+    drawer = read("src/components/dashboard/SharedAskCfsDrawer.tsx")
+    top_nav = read("src/components/layout/TopNav.tsx")
     app_types = read("src/types/index.ts")
     state = read("src/hooks/useDashboardState.tsx")
     url_sync = read("src/components/dashboard/DashboardUrlSync.tsx")
 
-    assert '| "ask-cfs"' in app_types
-    assert 'value === "ask-cfs"' in state
-    assert 'appMode === "ask-cfs"' in url_sync
-    assert 'cfsAppMode === "ask-cfs"' in app_shell
+    assert '| "ask-cfs"' not in app_types
+    assert 'value === "ask-cfs"' not in state
+    assert 'appMode === "ask-cfs"' not in url_sync
+    assert 'cfsAppMode === "ask-cfs"' not in app_shell
+    assert 'data-testid="shared-ask-cfs-toggle"' in top_nav
+    assert '<SharedAskCfsDrawer' in app_shell
+    assert 'appMode={cfsAppMode}' in app_shell
+    assert 'data-testid="shared-ask-cfs-drawer"' in drawer
     assert 'moduleName="Ask CFS"' in app_shell
-    assert '<AskCfsPanel' in app_shell
-    assert 'appMode="planning"' in app_shell
-    assert "Ask planning and economics questions" in app_shell
+    assert '<AskCfsPanel' in drawer
+    assert 'appMode={appMode}' in drawer
+    assert "without leaving {workspaceLabels[appMode]}" in drawer
 
 
 def test_planning_and_economics_navigation_remains_focused() -> None:
@@ -200,9 +221,9 @@ def test_master_data_workflow_remains_available() -> None:
     workspace = read("src/components/master-data/MasterDataWorkspace.tsx")
     app_shell = read("src/components/layout/AppShell.tsx")
 
-    assert "<MasterDataWorkspace />" in app_shell
+    assert "<MasterDataWorkspace onAskContextChange={setMasterDataAskContext} />" in app_shell
     assert "Master Data extract builder" in workspace
-    assert 'const steps = ["Choose Dataset", "Filter Records", "Choose Fields", "Preview", "Export"]' in workspace
+    assert 'const steps = ["Choose Dataset", "Filter Records", "Choose Fields", "Join / Enrich", "Preview", "Export"]' in workspace
     assert "master_data:export" in workspace
     assert "Portfolio Demo uses bundled sanitized samples" in workspace
 

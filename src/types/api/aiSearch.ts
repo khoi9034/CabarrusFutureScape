@@ -12,7 +12,7 @@ export type CfsAiDomain =
   | "zoning";
 
 export interface CfsAiSearchRequest {
-  app_mode?: "economics" | "planning";
+  app_mode?: "economics" | "master-data" | "planning";
   conversation_context?: CfsAiConversationTurn[];
   filter_context?: Record<string, string | number | boolean | null | undefined>;
   filters?: {

@@ -56,7 +56,7 @@ class CfsAiSelectedSignal(BaseModel):
 
 
 class CfsAiSearchRequest(BaseModel):
-    app_mode: Literal["economics", "planning"] = "planning"
+    app_mode: Literal["economics", "master-data", "planning"] = "planning"
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
     filter_context: dict[str, Any] = Field(default_factory=dict)
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
+import { SharedAskCfsSource } from "@/components/dashboard/SharedAskCfsDrawer";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getEconomicsEnterpriseExport,
@@ -151,6 +151,11 @@ export function EconomicMissionControl() {
       requestId: Date.now(),
     });
   }, []);
+  const handleAskCfsResponse = useCallback(
+    (response: { dashboard_actions?: CfsAiDashboardActions | null }) =>
+      setAskActions(response.dashboard_actions ?? null),
+    [],
+  );
 
   return (
     <div
@@ -183,10 +188,10 @@ export function EconomicMissionControl() {
       </section>
 
       <div className="mt-4">
-        <AskCfsPanel
+        <SharedAskCfsSource
           appMode="economics"
           externalRequest={askRequest}
-          onResponse={(response) => setAskActions(response.dashboard_actions)}
+          onResponse={handleAskCfsResponse}
         />
       </div>
 

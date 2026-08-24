@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -29,9 +30,41 @@ function walk(dir) {
 
 const home = read("src/components/layout/CfsMasterHome.tsx");
 assertIncludes("Master Home", home, "Portfolio demonstration using sanitized, cached public demo data");
+assert.deepEqual(
+  [...home.matchAll(/href: "\/\?app=([^\"]+)"/g)].map((match) => match[1]),
+  ["planning", "economics", "master-data"],
+  "Master Home must expose exactly three primary workspace cards.",
+);
+assertIncludes("Master Home", home, 'data-testid="cfs-home-shared-ask-cfs"');
+assertIncludes("Master Home", home, "lg:grid-cols-3");
+assertNotIncludes("Master Home", home, "cfs-home-card-ask-cfs");
+assertNotIncludes("Master Home", home, "xl:grid-cols-4");
 
-for (const route of ["app=planning", "app=economics", "app=master-data", "app=ask-cfs"]) {
-  assertIncludes("Master Home", home, route);
+const topNav = read("src/components/layout/TopNav.tsx");
+const appModeOptions = topNav.match(/const appModeOptions = \[([\s\S]*?)\] as const;/)?.[1] ?? "";
+assert.deepEqual(
+  [...appModeOptions.matchAll(/id: "([^\"]+)"/g)].map((match) => match[1]),
+  ["planning", "economics", "master-data"],
+  "Primary navigation must expose exactly three workspace choices.",
+);
+assertIncludes("Top Nav", topNav, 'data-testid="shared-ask-cfs-toggle"');
+
+const appShell = read("src/components/layout/AppShell.tsx");
+assertIncludes("App Shell", appShell, "<SharedAskCfsDrawer");
+assertIncludes("App Shell", appShell, "appMode={cfsAppMode}");
+
+const page = read("src/app/page.tsx");
+assert.match(
+  page,
+  /appMode === "ask-cfs"[\s\S]*?redirect\("\/"\);/,
+  "The retired standalone Ask CFS URL must redirect safely to Home.",
+);
+for (const path of [
+  "src/types/index.ts",
+  "src/hooks/useDashboardState.tsx",
+  "src/components/dashboard/DashboardUrlSync.tsx",
+]) {
+  assertNotIncludes(path, read(path), '"ask-cfs"');
 }
 
 for (const path of walk("src").filter((file) => /\.(ts|tsx)$/.test(file))) {

@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -30,8 +32,12 @@ import {
   Waves,
   X,
 } from "lucide-react";
-import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
+import {
+  SharedAskCfsDrawer,
+  SharedAskCfsRegistryProvider,
+} from "@/components/dashboard/SharedAskCfsDrawer";
+import type { AskCfsPanelProps } from "@/components/dashboard/AskCfsPanel";
 import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { IndicatorCenterWorkspace } from "@/components/dashboard/IndicatorCenterWorkspace";
 import {
@@ -51,6 +57,7 @@ import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState"
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { CfsAppMode, OverviewPanelWidthPreset } from "@/types";
+import type { CfsAiSearchRequest } from "@/types/api";
 
 const LEFT_PANEL_WIDTHS: Record<OverviewPanelWidthPreset, number> = {
   compact: 320,
@@ -108,6 +115,12 @@ function ProductShell() {
     setPlanningSnapshotView,
     setProductMode,
   } = useDashboardState();
+  const [askCfsOpen, setAskCfsOpen] = useState(false);
+  const [askCfsConfig, setAskCfsConfig] = useState<AskCfsPanelProps | null>(null);
+  const askCfsModeRef = useRef(cfsAppMode);
+  const [masterDataAskContext, setMasterDataAskContext] =
+    useState<CfsAiSearchRequest["filter_context"]>({ mode: "master_data" });
+  const openAskCfs = useCallback(() => setAskCfsOpen(true), []);
   const executivePrintMode = productMode === "executive_print";
   const parcelReviewMode =
     productMode === "due_diligence" || executivePrintMode;
@@ -145,26 +158,49 @@ function ProductShell() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMapFocusMode, setMapFocusMode]);
 
+  useLayoutEffect(() => {
+    if (askCfsModeRef.current !== cfsAppMode) setAskCfsOpen(false);
+    askCfsModeRef.current = cfsAppMode;
+  }, [cfsAppMode]);
+
   if (!cfsAppMode) {
     return <CfsMasterHome />;
   }
 
+  const sharedAskCfsProps: AskCfsPanelProps = {
+    ...askCfsConfig,
+    appMode: cfsAppMode,
+    filterContext:
+      askCfsConfig?.filterContext ??
+      (cfsAppMode === "master-data"
+        ? masterDataAskContext
+        : { selected_parcel_id: selectedParcelId ?? null }),
+    visiblePromptCount: askCfsConfig?.visiblePromptCount ?? 4,
+  };
+
   return (
-    <div
-      className={cn(
-        "relative flex min-h-screen flex-col overflow-x-hidden text-slate-100 lg:h-screen lg:overflow-hidden",
-        cfsAppMode === "economics"
-          ? "econ-app-backdrop"
-          : "cfs-command-backdrop metric-grid",
-      )}
+    <SharedAskCfsRegistryProvider
+      onConfigChange={setAskCfsConfig}
+      onOpen={openAskCfs}
     >
+      <div
+        className={cn(
+          "relative flex min-h-screen flex-col overflow-x-hidden text-slate-100 lg:h-screen lg:overflow-hidden",
+          cfsAppMode === "economics"
+            ? "econ-app-backdrop"
+            : "cfs-command-backdrop metric-grid",
+        )}
+      >
       {cfsAppMode === "economics" ? null : (
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,13,0.08),rgba(3,7,13,0.88))]" />
       )}
       <div className="pointer-events-none absolute left-0 right-0 top-[4.5rem] z-10 h-px gold-line opacity-70" />
 
       <div className="app-chrome">
-        <TopNav />
+        <TopNav
+          askCfsOpen={askCfsOpen}
+          onAskCfsOpenChange={setAskCfsOpen}
+        />
       </div>
 
       {cfsAppMode === "economics" ? (
@@ -179,28 +215,8 @@ function ProductShell() {
           moduleName="CFS Master Data"
           resetKey="master-data"
         >
-          <MasterDataWorkspace />
+          <MasterDataWorkspace onAskContextChange={setMasterDataAskContext} />
         </EnterpriseErrorBoundary>
-      ) : cfsAppMode === "ask-cfs" ? (
-        <main className="relative z-10 min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <EnterpriseErrorBoundary moduleName="Ask CFS" resetKey="ask-cfs">
-            <div className="mx-auto grid w-full max-w-5xl gap-4">
-              <section className="cfs-command-surface rounded-2xl p-5 sm:p-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-                  Explain the evidence
-                </p>
-                <h1 className="mt-2 text-3xl font-semibold text-white">Ask CFS</h1>
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-                  Ask planning and economics questions in plain language. Answers stay grounded in available CFS evidence, caveats, and recommended follow-up.
-                </p>
-              </section>
-              <AskCfsPanel
-                appMode="planning"
-                filterContext={{ selected_parcel_id: selectedParcelId ?? undefined }}
-              />
-            </div>
-          </EnterpriseErrorBoundary>
-        </main>
       ) : parcelReviewMode ? (
         <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
           <EnterpriseErrorBoundary
@@ -245,7 +261,19 @@ function ProductShell() {
       ) : (
         <StableOverviewWorkspace />
       )}
-    </div>
+        <EnterpriseErrorBoundary
+          moduleName="Ask CFS"
+          resetKey={`shared-ask-cfs-${cfsAppMode}`}
+        >
+          <SharedAskCfsDrawer
+            {...sharedAskCfsProps}
+            appMode={cfsAppMode}
+            onClose={() => setAskCfsOpen(false)}
+            open={askCfsOpen}
+          />
+        </EnterpriseErrorBoundary>
+      </div>
+    </SharedAskCfsRegistryProvider>
   );
 }
 

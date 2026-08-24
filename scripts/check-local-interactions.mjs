@@ -1008,6 +1008,47 @@ async function askQuestions(page, questions, { expectPersistence = true } = {}) 
   return conversationId;
 }
 
+async function assertThreeWorkspaceHome(page) {
+  const home = page.getByTestId("cfs-master-home");
+  await home.waitFor({ timeout: 45_000 });
+  const expected = [
+    ["planning", "CFS Planning", "/?app=planning"],
+    ["economics", "CFS Economics", "/?app=economics"],
+    ["master-data", "CFS Master Data", "/?app=master-data"],
+  ];
+  assert.equal(await home.locator('[data-testid^="cfs-home-card-"]').count(), expected.length);
+  for (const [mode, title, href] of expected) {
+    const card = home.getByTestId(`cfs-home-card-${mode}`);
+    assert.equal(await card.getAttribute("href"), href, `${title} Home route drifted.`);
+    await card.getByText(title, { exact: true }).waitFor();
+  }
+  assert.equal(await home.getByTestId("cfs-home-card-ask-cfs").count(), 0);
+  await home.getByTestId("cfs-home-shared-ask-cfs").getByText("Ask CFS", { exact: true }).waitFor();
+}
+
+async function openSharedAskCfsDrawer(page, { appMode, label }) {
+  const toggle = page.getByTestId("shared-ask-cfs-toggle");
+  assert.equal(new URL(page.url()).searchParams.get("app"), appMode);
+  await toggle.click();
+  const drawer = page.getByTestId("shared-ask-cfs-drawer");
+  await drawer.waitFor({ timeout: 45_000 });
+  await drawer.getByRole("heading", { name: `Ask CFS · ${label}`, exact: true }).waitFor();
+  assert.equal(new URL(page.url()).searchParams.get("app"), appMode, "Opening Ask CFS changed workspace.");
+  return drawer;
+}
+
+async function closeSharedAskCfsDrawer(page, drawer, appMode) {
+  await drawer.getByTestId("shared-ask-cfs-close").click();
+  await drawer.waitFor({ state: "hidden" });
+  assert.equal(new URL(page.url()).searchParams.get("app"), appMode, "Closing Ask CFS changed workspace.");
+}
+
+async function assertSharedAskCfsDrawer(page, { appMode, label }) {
+  const drawer = await openSharedAskCfsDrawer(page, { appMode, label });
+  await waitForRequiredApiDrain(page, `${label} shared Ask CFS open`);
+  await closeSharedAskCfsDrawer(page, drawer, appMode);
+}
+
 async function isolateAskCfsConversationLists(context) {
   const pattern = new RegExp(
     `^${API_ORIGIN.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/api/v1/ask-cfs/conversations(?:\\?.*)?$`,
@@ -1046,17 +1087,20 @@ async function selectParcel(
   await waitForRequiredApiDrain(page, "Parcel lookup startup");
   const generation = beginAcceptanceTransition(page);
   const search = page.getByRole("combobox", { name: "Search parcels" }).first();
-  const responsePromise = page.waitForResponse(
-    (response) =>
-      new URL(response.url()).pathname.replace(/\/$/, "") === "/parcels/search" &&
-      response.request().method() === "GET",
-    { timeout: 60_000 },
-  );
-  await search.click();
-  await search.fill("");
-  await delay(100);
-  await search.fill(parcelId);
-  const response = await responsePromise;
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (candidate) =>
+        new URL(candidate.url()).pathname.replace(/\/$/, "") === "/parcels/search" &&
+        candidate.request().method() === "GET",
+      { timeout: 60_000 },
+    ),
+    (async () => {
+      await search.click();
+      await search.fill("");
+      await delay(100);
+      await search.fill(parcelId);
+    })(),
+  ]);
   assert.equal(response.status(), 200, `Parcel search returned ${response.status()}.`);
   const option = page
     .locator("#top-parcel-search-results")
@@ -1133,6 +1177,10 @@ async function planningWorkflow(page) {
   await runCase("Planning", "Indicator Center and three grounded questions", async () => {
     await page.getByTestId("command-center-indicator-center").click();
     await page.getByTestId("indicator-center-dashboard").waitFor({ timeout: 30_000 });
+    const drawer = await openSharedAskCfsDrawer(page, {
+      appMode: "planning",
+      label: "CFS Planning",
+    });
     const conversationId = await askQuestions(page, [
       "What should I inspect first for this parcel?",
       "What does the flood review indicate?",
@@ -1156,6 +1204,7 @@ async function planningWorkflow(page) {
     await askPanel
       .getByText("Grounded CFS analysis", { exact: true })
       .waitFor({ state: "hidden" });
+    await closeSharedAskCfsDrawer(page, drawer, "planning");
   });
 
   await runCase("Planning", "Model Lab and Planning Snapshot", async () => {
@@ -1300,11 +1349,16 @@ async function economicsWorkflow(page) {
   });
 
   await runCase("Economics", "three grounded questions", async () => {
+    const drawer = await openSharedAskCfsDrawer(page, {
+      appMode: "economics",
+      label: "CFS Economics",
+    });
     await askQuestions(page, [
       "What does revenue per acre mean?",
       "Why is this parcel classified as underbuilt?",
       "Which values are observed and which are derived?",
     ]);
+    await closeSharedAskCfsDrawer(page, drawer, "economics");
   });
 
   await reloadAccepted(page);
@@ -1394,12 +1448,37 @@ async function navigationChecks(page) {
 }
 
 async function activeProductRouteChecks(page) {
-  await runCase("Navigation", "Master Data and Ask CFS routes load", async () => {
-    await goto(page, "?app=master-data");
-    await page.getByTestId("master-data-catalog").waitFor({ timeout: 45_000 });
-    await goto(page, "?app=ask-cfs");
-    await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor({ timeout: 45_000 });
+  await runCase("Home", "exactly three workspace cards and shared Ask CFS guidance", async () => {
+    await assertThreeWorkspaceHome(page);
   });
+
+  await runCase("Navigation", "legacy standalone Ask CFS route redirects to clean Home", async () => {
+    await waitForRequiredApiDrain(page, "Legacy Ask CFS redirect");
+    const generation = beginAcceptanceTransition(page);
+    await page.goto(`${BASE_URL}/?app=ask-cfs`, { waitUntil: "domcontentloaded" });
+    await page.waitForURL((url) => url.pathname === "/" && url.search === "", { timeout: 45_000 });
+    await assertThreeWorkspaceHome(page);
+    await assertHealthyPage(page);
+    completeAcceptanceTransition(page, generation);
+    await resolveMapDiagnosticsForPage(page);
+  });
+
+  for (const workspace of [
+    { appMode: "planning", label: "CFS Planning", product: "Planning" },
+    { appMode: "economics", label: "CFS Economics", product: "Economics" },
+    { appMode: "master-data", label: "CFS Master Data", product: "Master Data" },
+  ]) {
+    await goto(page, `?app=${workspace.appMode}`);
+    if (workspace.appMode === "master-data") {
+      await page.getByTestId("master-data-catalog").waitFor({ timeout: 45_000 });
+    }
+    await runCase(
+      workspace.product,
+      "shared Ask CFS opens, closes, and stays in workspace",
+      () => assertSharedAskCfsDrawer(page, workspace),
+    );
+  }
+  await navigateToHome(page);
 }
 
 async function offlineChecks(browser) {
@@ -1414,7 +1493,7 @@ async function offlineChecks(browser) {
   await runCase("Home", "renders with loopback traffic only", async () => {
     const generation = beginAcceptanceTransition(page);
     await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-    await page.getByText("Cabarrus FutureScape", { exact: true }).first().waitFor();
+    await assertThreeWorkspaceHome(page);
     await assertHealthyPage(page);
     completeAcceptanceTransition(page, generation);
     await resolveMapDiagnosticsForPage(page);
@@ -1429,7 +1508,12 @@ async function offlineChecks(browser) {
     if (await expand.count()) await expand.click();
     await toggleLayer(page, "Development Hotspots", "Development Activity");
     await page.getByTestId("command-center-indicator-center").click();
+    const drawer = await openSharedAskCfsDrawer(page, {
+      appMode: "planning",
+      label: "CFS Planning",
+    });
     await askQuestions(page, ["What data is still missing?"], { expectPersistence: false });
+    await closeSharedAskCfsDrawer(page, drawer, "planning");
   }, true);
   await runCase("Economics", "dashboard renders offline", async () => {
     await goto(page, "?app=economics");
@@ -1437,14 +1521,12 @@ async function offlineChecks(browser) {
     await page.getByText("Executive Economic Signals", { exact: true }).waitFor({
       timeout: 45_000,
     });
+    await assertSharedAskCfsDrawer(page, { appMode: "economics", label: "CFS Economics" });
   }, true);
   await runCase("Master Data", "catalog renders with external network blocked", async () => {
     await goto(page, "?app=master-data");
     await page.getByTestId("master-data-catalog").waitFor({ timeout: 45_000 });
-  }, true);
-  await runCase("Ask CFS", "standalone route renders with external network blocked", async () => {
-    await goto(page, "?app=ask-cfs");
-    await page.getByRole("heading", { name: "Ask CFS", exact: true }).first().waitFor({ timeout: 45_000 });
+    await assertSharedAskCfsDrawer(page, { appMode: "master-data", label: "CFS Master Data" });
   }, true);
 
   await page.waitForLoadState("networkidle", { timeout: 30_000 });

@@ -40,6 +40,15 @@ export const askCfsSuggestedPrompts = [
   "What should I inspect first?",
 ] as const;
 
+export const askCfsMasterDataSuggestedPrompts = [
+  "What does this dataset contain?",
+  "Which fields are useful for this analysis?",
+  "Explain these filters.",
+  "What does the match percentage mean?",
+  "Why are some records unmatched?",
+  "What does this export contain?",
+] as const;
+
 export const askCfsEconomicsSuggestedPrompts = [
   "What should I inspect first?",
   "Why is value per acre misleading countywide?",
@@ -184,6 +193,11 @@ async function searchDemoCfsAi(
 
   if (request.app_mode === "economics") {
     return sanitizeDemoResponse(await demoEconomicsAnswer(request));
+  }
+
+  if (request.app_mode === "master-data") {
+    const context = await buildDemoAiContext();
+    return sanitizeDemoResponse(demoMasterDataAnswer(request, context));
   }
 
   const context = await buildDemoAiContext();
@@ -1969,6 +1983,68 @@ function demoDataReadinessAnswer(context: DemoAiContext, domains: CfsAiDomain[])
       ),
     ],
     ["Open the Data Still Needed board and request official source datasets."],
+  );
+}
+
+function demoMasterDataAnswer(
+  request: CfsAiSearchRequest,
+  context: DemoAiContext,
+) {
+  const active = request.filter_context ?? {};
+  const dataset = typeof active.master_data_dataset_name === "string"
+    ? active.master_data_dataset_name
+    : typeof active.master_data_dataset_id === "string"
+      ? active.master_data_dataset_id
+      : "the selected governed dataset";
+  const selectedFields = typeof active.master_data_selected_fields === "string"
+    ? active.master_data_selected_fields
+    : "no fields selected yet";
+  const activeFilters = typeof active.master_data_filters === "string"
+    ? active.master_data_filters
+    : "no active filters";
+  const join = typeof active.master_data_join === "string"
+    ? active.master_data_join
+    : "no active join";
+  const resultCount = typeof active.master_data_result_count === "number"
+    ? active.master_data_result_count.toLocaleString()
+    : "not previewed";
+  const matchPercentage = typeof active.master_data_match_percentage === "number"
+    ? `${active.master_data_match_percentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`
+    : "not applicable";
+  return baseDemoResponse(
+    briefing(
+      [
+        "Current Master Data context",
+        `You are working with ${dataset}. Selected fields: ${selectedFields}. Active filters: ${activeFilters}. Join: ${join}.`,
+      ],
+      [
+        "Result summary",
+        `Current preview records: ${resultCount}. Join match rate: ${matchPercentage}.`,
+      ],
+      [
+        "Governance",
+        "Ask CFS can explain approved Demo metadata and aggregate results. It cannot expose restricted fields, execute SQL, bypass permissions, or mutate authoritative data.",
+      ],
+      [
+        "Inspect next",
+        bullets([
+          "Confirm the selected fields match the analysis purpose.",
+          "Review filter operators before comparing result counts.",
+          "Review match statistics and lineage before exporting.",
+        ]),
+      ],
+    ),
+    ["data_readiness"],
+    context.manifest.generated_at,
+    [
+      evidence(
+        "Governed Master Data context",
+        `Dataset ${typeof active.master_data_dataset_id === "string" ? active.master_data_dataset_id : "not selected"}; selected fields, filters, joins, and counts are limited to the sanitized Demo session.`,
+        "public/demo-data/master_data_v1b.json",
+        "limited",
+      ),
+    ],
+    ["Review the dataset metadata, match statistics, and lineage panel before exporting."],
   );
 }
 

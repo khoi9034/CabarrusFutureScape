@@ -71,7 +71,6 @@ export type ProductMode =
   | "workspace";
 
 export type CfsAppMode =
-  | "ask-cfs"
   | "economics"
   | "master-data"
   | "planning";

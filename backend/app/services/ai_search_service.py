@@ -3,6 +3,7 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import logging
+import math
 import re
 import threading
 import time
@@ -34,6 +35,72 @@ SAFE_CAVEATS = [
     "Preliminary school capacity watch is not an official enrollment forecast.",
     "Model Lab context is internal research only; no exact probabilities are shown.",
 ]
+
+SAFE_FILTER_CONTEXT_KEYS = frozenset(
+    {
+        "active_environmental_confidence",
+        "active_facility_context",
+        "active_layers",
+        "active_market_context",
+        "active_market_geography",
+        "active_market_geography_type",
+        "active_market_year",
+        "active_parcel_id",
+        "active_project",
+        "active_scenario",
+        "active_soil_context",
+        "active_tab",
+        "active_terrain_context",
+        "active_usable_area_proxy",
+        "active_wetland_context",
+        "data_confidence",
+        "economic_segment",
+        "filtered_signal_count",
+        "filtered_watchlist_rows",
+        "geography",
+        "master_data_dataset_id",
+        "master_data_dataset_name",
+        "master_data_filters",
+        "master_data_join",
+        "master_data_lineage",
+        "master_data_match_percentage",
+        "master_data_result_count",
+        "master_data_selected_fields",
+        "mode",
+        "opportunity_class",
+        "planning_mode",
+        "project_id",
+        "scenario_id",
+        "selected_candidate",
+        "selected_domain",
+        "selected_parcel_id",
+        "selected_parcel_pin14",
+        "selected_parcel_quality",
+        "selected_parcel_zoning",
+        "selected_signal_id",
+        "selected_signal_title",
+        "visible_kpis",
+        "visible_watchlist_rows",
+    }
+)
+
+
+def safe_filter_context(value: Any) -> dict[str, str | int | float | bool]:
+    if not isinstance(value, dict):
+        return {}
+    clean: dict[str, str | int | float | bool] = {}
+    for key, item in value.items():
+        if key not in SAFE_FILTER_CONTEXT_KEYS or len(clean) >= 24:
+            continue
+        if isinstance(item, bool):
+            clean[key] = item
+        elif isinstance(item, (int, float)) and math.isfinite(item):
+            clean[key] = item
+        elif isinstance(item, str):
+            text_value = " ".join(item.split())[:240]
+            if text_value and text_value != "All":
+                clean[key] = text_value
+    return clean
 
 RELATED_LAYERS = {
     "data_readiness": ["Data Still Needed", "Methodology"],
@@ -222,6 +289,8 @@ class CfsAiSearchService:
         domains = (
             ["economics"]
             if request.app_mode == "economics" and not request.filters.domains
+            else ["data_readiness"]
+            if request.app_mode == "master-data" and not request.filters.domains
             else request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
         )
         deterministic_start = time.perf_counter()
@@ -397,7 +466,7 @@ class CfsAiSearchService:
                         {
                             "domains": domains,
                             "query": request.query,
-                            "filter_context": request.filter_context,
+                            "filter_context": safe_filter_context(request.filter_context),
                             "conversation_context": [
                                 turn.model_dump(exclude_none=True)
                                 for turn in request.conversation_context[-5:]
@@ -405,7 +474,11 @@ class CfsAiSearchService:
                             "selected_signal": request.selected_signal.model_dump(exclude_none=True)
                             if request.selected_signal
                             else None,
-                            "cfs_context": compact_context(context),
+                            "cfs_context": (
+                                {}
+                                if request.app_mode == "master-data"
+                                else compact_context(context)
+                            ),
                             "deterministic_dashboard_actions": dashboard_actions_for_domains(
                                 domains,
                             ).model_dump(exclude_none=True),
@@ -521,6 +594,9 @@ def deterministic_answer(
 
     if request.selected_signal:
         return _selected_signal_answer(request, context, domains)
+
+    if request.app_mode == "master-data":
+        return sanitize_response(_master_data_answer(request, context, domains))
 
     primary_domain = domains[0] if domains else "general"
     builders = {
@@ -2721,6 +2797,78 @@ def _model_answer(
         ],
         ["Use Model Lab for research context, then verify source records before conclusions."],
     )
+
+
+def _master_data_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse:
+    active = context.get("filter_context")
+    filters = active if isinstance(active, dict) else safe_filter_context(request.filter_context)
+    dataset = filters.get("master_data_dataset_name") or filters.get("master_data_dataset_id") or "the selected governed dataset"
+    selected_fields = filters.get("master_data_selected_fields") or "no fields selected yet"
+    active_filters = filters.get("master_data_filters") or "no active filters"
+    join = filters.get("master_data_join") or "no active join"
+    result_count = filters.get("master_data_result_count")
+    match_percentage = filters.get("master_data_match_percentage")
+    lineage = filters.get("master_data_lineage") or "the governed dataset catalog"
+    answer = _briefing(
+        (
+            "Current Master Data context",
+            f"You are working with {dataset}. Selected fields: {selected_fields}. Active filters: {active_filters}. Join: {join}.",
+        ),
+        (
+            "Result summary",
+            (
+                f"The current preview reports {result_count} records"
+                if result_count is not None
+                else "Run Preview to establish a current result count"
+            )
+            + (
+                f" with a {match_percentage}% join match rate."
+                if match_percentage is not None
+                else "."
+            ),
+        ),
+        (
+            "Lineage and governance",
+            f"Lineage is reported from {lineage}. Ask CFS can explain approved metadata and aggregate results, but it cannot expose restricted fields, execute SQL, bypass permissions, or mutate authoritative data.",
+        ),
+        (
+            "Inspect next",
+            _bullets(
+                [
+                    "Confirm the selected fields match the analysis purpose.",
+                    "Review filter operators before comparing result counts.",
+                    "For joins, distinguish matched source records from output rows and retain unmatched records as documented.",
+                    "Read the lineage panel before exporting a derived output.",
+                ]
+            ),
+        ),
+    )
+    response = _response(
+        answer,
+        context,
+        domains or ["data_readiness"],
+        request.mode,
+        [
+            _evidence(
+                "Governed Master Data context",
+                f"Dataset {filters.get('master_data_dataset_id') or 'not selected'}; join {join}; selected fields and filters are limited to the approved UI context.",
+                "master_data_workspace_context",
+                "limited",
+            ),
+        ],
+        [
+            "Review the governed dataset metadata and lineage panel.",
+            "Preview the filtered result before creating a derived export.",
+        ],
+    )
+    response.caveats.append(
+        "Master Data counts and selections are current UI session context, not independently re-queried evidence from Ask CFS."
+    )
+    return response
 
 
 def _data_readiness_answer(
