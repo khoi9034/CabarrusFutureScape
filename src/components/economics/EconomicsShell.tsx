@@ -5175,18 +5175,33 @@ function UserChartLine({ rows }: { rows: Array<{ label: string; value: number }>
   }
   const chartRows = rows.slice(0, 8);
   const max = Math.max(...chartRows.map((row) => row.value), 1);
-  const points = chartRows
-    .map((row, index) => {
-      const x = chartRows.length === 1 ? 50 : (index / (chartRows.length - 1)) * 100;
-      const y = 100 - (row.value / max) * 84 - 8;
-      return `${x},${y}`;
-    })
-    .join(" ");
+  const chartPoints = chartRows.map((row, index) => {
+    const x = chartRows.length === 1 ? 50 : (index / (chartRows.length - 1)) * 100;
+    const y = 100 - (row.value / max) * 84 - 8;
+    return { row, x, y };
+  });
+  const points = chartPoints.map(({ x, y }) => `${x},${y}`).join(" ");
   return (
     <div className="grid gap-3">
-      <svg aria-label="Line / trend chart" className="h-44 w-full" preserveAspectRatio="none" role="img" viewBox="0 0 100 100">
-        <polyline fill="none" points={points} stroke="var(--econ-gold)" strokeWidth="3" vectorEffect="non-scaling-stroke" />
-      </svg>
+      <div className="rounded-xl border border-[var(--econ-border)] bg-black/15 p-3">
+        <svg aria-label="Line / trend chart" className="h-40 w-full overflow-visible" preserveAspectRatio="none" role="img" viewBox="0 0 100 100">
+          <title>Trend from {chartRows[0]?.label} to {chartRows.at(-1)?.label}</title>
+          {[20, 40, 60, 80].map((y) => (
+            <line key={y} stroke="rgba(255,255,255,0.07)" strokeDasharray="2 3" strokeWidth="1" vectorEffect="non-scaling-stroke" x1="0" x2="100" y1={y} y2={y} />
+          ))}
+          <polygon fill="rgba(240,205,121,0.09)" points={`0,92 ${points} 100,92`} />
+          <polyline fill="none" points={points} stroke="var(--econ-gold)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+          {chartPoints.map(({ row, x, y }) => (
+            <circle cx={x} cy={y} fill="var(--econ-surface)" key={row.label} r="2" stroke="var(--econ-gold)" strokeWidth="2" vectorEffect="non-scaling-stroke">
+              <title>{row.label}: {formatNumber(row.value)}</title>
+            </circle>
+          ))}
+        </svg>
+        <div className="mt-2 flex justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--econ-muted)]">
+          <span className="truncate" title={chartRows[0]?.label}>{chartRows[0]?.label}</span>
+          <span className="truncate text-right" title={chartRows.at(-1)?.label}>{chartRows.at(-1)?.label}</span>
+        </div>
+      </div>
       <EconomicsLegend rows={chartRows} />
     </div>
   );
@@ -5798,20 +5813,20 @@ function EconomicsBarChart({
     return <p className="text-sm text-[var(--econ-muted)]">Data not available.</p>;
   }
   return (
-    <div className="space-y-2">
+    <div className="grid gap-1">
       {rows.slice(0, 8).map((row) => (
-        <div key={row.label}>
+        <div className="rounded-lg px-2 py-1.5 transition hover:bg-white/[0.035]" key={row.label} title={`${row.label}: ${formatValue(row.value)}`}>
           <div className="flex justify-between gap-3 text-xs">
-            <span className="min-w-0 truncate text-[var(--econ-text)]">
+            <span className="min-w-0 truncate font-medium text-[var(--econ-text)]">
               {row.label}
             </span>
-            <span className="shrink-0 text-[var(--econ-muted)]">
+            <span className="shrink-0 font-semibold tabular-nums text-[#ead7a5]">
               {formatValue(row.value)}
             </span>
           </div>
-          <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/[0.07]">
+          <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-[linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px),rgba(255,255,255,0.045)] bg-[length:25%_100%]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[var(--econ-green)] via-[var(--econ-gold)] to-[var(--econ-risk)]"
+              className="h-full rounded-full bg-gradient-to-r from-[var(--econ-green)] via-[#a9c979] to-[var(--econ-gold)] shadow-[0_0_12px_rgba(216,184,106,0.16)]"
               style={{ width: `${max ? Math.max(5, (row.value / max) * 100) : 0}%` }}
             />
           </div>
@@ -5833,8 +5848,8 @@ function EconomicsDonutChart({ rows }: { rows: Array<{ label: string; value: num
     row,
   }));
   return (
-    <div className="grid gap-4 md:grid-cols-[10rem_minmax(0,1fr)]">
-      <svg aria-label="Donut chart" className="h-40 w-40" viewBox="0 0 42 42" role="img">
+    <div className="grid justify-items-center gap-4">
+      <svg aria-label="Donut chart" className="h-40 w-40 drop-shadow-[0_12px_24px_rgba(0,0,0,0.22)]" viewBox="0 0 42 42" role="img">
         <circle cx="21" cy="21" fill="transparent" r="15.9" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
         {segments.map(({ offset, percent, row }, index) => (
           <circle
@@ -5846,9 +5861,11 @@ function EconomicsDonutChart({ rows }: { rows: Array<{ label: string; value: num
             stroke={econChartColors[index % econChartColors.length]}
             strokeDasharray={`${percent} ${100 - percent}`}
             strokeDashoffset={-offset}
-            strokeWidth="7"
+            strokeWidth="6.5"
             transform="rotate(-90 21 21)"
-          />
+          >
+            <title>{row.label}: {formatNumber(row.value)} ({percent.toFixed(1)}%)</title>
+          </circle>
         ))}
         <text className="fill-[var(--econ-text)] text-[0.25rem] font-semibold" textAnchor="middle" x="21" y="20">
           {formatNumber(total)}
@@ -5857,16 +5874,22 @@ function EconomicsDonutChart({ rows }: { rows: Array<{ label: string; value: num
           signals
         </text>
       </svg>
-      <EconomicsLegend rows={chartRows} />
+      <EconomicsLegend rows={chartRows} total={total} />
     </div>
   );
 }
 
-function EconomicsLegend({ rows }: { rows: Array<{ label: string; value: number }> }) {
+function EconomicsLegend({
+  rows,
+  total,
+}: {
+  rows: Array<{ label: string; value: number }>;
+  total?: number;
+}) {
   return (
-    <div className="grid content-center gap-2">
+    <div className="grid w-full content-center gap-1.5">
       {rows.map((row, index) => (
-        <div className="flex items-center justify-between gap-3 text-xs" key={row.label}>
+        <div className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.025] px-2 py-1.5 text-xs" key={row.label} title={`${row.label}: ${formatNumber(row.value)}`}>
           <span className="flex min-w-0 items-center gap-2 text-[var(--econ-text)]">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -5874,7 +5897,9 @@ function EconomicsLegend({ rows }: { rows: Array<{ label: string; value: number 
             />
             <span className="truncate">{row.label}</span>
           </span>
-          <span className="text-[var(--econ-muted)]">{formatNumber(row.value)}</span>
+          <span className="shrink-0 tabular-nums text-[var(--econ-muted)]">
+            {formatNumber(row.value)}{total ? ` · ${((row.value / total) * 100).toFixed(1)}%` : ""}
+          </span>
         </div>
       ))}
     </div>
@@ -5916,11 +5941,11 @@ function EconomicsTrendChart({ rows }: { rows: EconomicsScenarioOutput[] }) {
     return <p className="text-sm text-[var(--econ-muted)]">Scenario data not available.</p>;
   }
   return (
-    <div className="grid gap-2">
+    <div className="relative grid gap-2 before:absolute before:bottom-4 before:left-[1.1rem] before:top-4 before:w-px before:bg-gradient-to-b before:from-[var(--econ-gold)]/50 before:to-[var(--econ-green)]/20">
       {rows.slice(0, 6).map((row, index) => (
-        <div className="grid grid-cols-[1.2rem_minmax(0,1fr)_8rem] items-center gap-2 text-xs" key={row.scenario_id}>
-          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: econChartColors[index % econChartColors.length] }} />
-          <span className="min-w-0 truncate text-[var(--econ-text)]">{row.title}</span>
+        <div className="relative grid grid-cols-[1.2rem_minmax(0,1fr)_minmax(6rem,8rem)] items-center gap-2 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] px-2 py-2 text-xs" key={row.scenario_id}>
+          <span className="z-10 h-3 w-3 rounded-full ring-4 ring-[var(--econ-surface)]" style={{ backgroundColor: econChartColors[index % econChartColors.length] }} />
+          <span className="min-w-0 truncate font-medium text-[var(--econ-text)]" title={row.title}>{row.title}</span>
           <span className={`rounded-lg border px-2 py-1 text-center ${bandClass(row.constraint_adjusted_opportunity_band)}`}>
             {row.constraint_adjusted_opportunity_band}
           </span>
@@ -10182,7 +10207,7 @@ const powerBiCsvTableMetadata = [
   table_name: keyof EconomicsPowerBiExportResponse["tables"];
 }>;
 
-const econChartColors = ["#f0cd79", "#55d38f", "#6d9de8", "#f47f5f", "#9b8cff", "#d9e2ef"];
+const econChartColors = ["#f0cd79", "#55d38f", "#c7a85f", "#78ad7c", "#8ea0b4", "#d9e2ef"];
 
 type EnterpriseOutputKind = "scenario" | "powerbi" | "planning" | "decision";
 

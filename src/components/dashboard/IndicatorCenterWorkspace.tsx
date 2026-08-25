@@ -3076,10 +3076,10 @@ function TinySparkline({ data }: { data: ChartDatum[] }) {
   const maxValue = Math.max(...data.map((datum) => datum.value), 0);
 
   return (
-    <div className="flex h-8 items-end gap-1 rounded border border-white/10 bg-black/18 px-2 py-1.5">
+    <div className="group flex h-9 items-end gap-1 rounded-lg border border-[#68d8ff]/12 bg-[linear-gradient(180deg,rgba(104,216,255,0.06),rgba(0,0,0,0.18))] px-2 py-1.5">
       {data.map((datum) => (
         <span
-          className="min-h-1 flex-1 rounded-t bg-[#68d8ff]/70"
+          className="min-h-1 flex-1 rounded-t bg-gradient-to-t from-[#2d9fc4]/55 to-[#8fe7ff] shadow-[0_0_10px_rgba(104,216,255,0.12)] transition-opacity group-hover:opacity-80"
           key={`${datum.label}-${datum.value}`}
           style={{
             height:
@@ -3158,7 +3158,7 @@ function MiniChartCard({
   const maxValue = Math.max(...data.map((datum) => datum.value), 0);
 
   return (
-    <div className="cfs-chart-panel rounded-md p-3">
+    <div className="cfs-chart-panel rounded-xl p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
       <div className="flex items-start justify-between gap-2">
         <p className="text-xs font-semibold text-white">{title}</p>
         <span className="rounded border border-white/10 bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-semibold text-slate-400">
@@ -3166,21 +3166,22 @@ function MiniChartCard({
         </span>
       </div>
       {data.length ? (
-        <div className="mt-3 grid gap-1.5">
+        <div className="mt-3 grid gap-1">
           {data.map((datum) => (
             <div
-              className="grid min-w-0 grid-cols-[minmax(5.5rem,8rem)_minmax(0,1fr)_4rem] items-center gap-2"
+              className="grid min-w-0 grid-cols-[minmax(5.5rem,8rem)_minmax(0,1fr)_4rem] items-center gap-2 rounded-lg px-1.5 py-1 transition hover:bg-[#68d8ff]/[0.055]"
               key={`${title}-${datum.label}`}
+              title={`${formatChartLabel(datum.label)}: ${formatCount(datum.value)}`}
             >
               <p
-                className="truncate text-[10px] font-semibold text-slate-400"
+                className="truncate text-[11px] font-medium text-slate-300"
                 title={datum.label}
               >
                 {formatChartLabel(datum.label)}
               </p>
-              <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+              <div className="h-2.5 overflow-hidden rounded-full bg-[linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px),rgba(255,255,255,0.045)] bg-[length:25%_100%]">
                 <div
-                  className="h-full rounded-full bg-[#68d8ff]/70"
+                  className="h-full rounded-full bg-gradient-to-r from-[#2d9fc4] via-[#68d8ff] to-[#b7f0ff] shadow-[0_0_12px_rgba(104,216,255,0.2)]"
                   style={{
                     width:
                       maxValue > 0
@@ -3189,7 +3190,7 @@ function MiniChartCard({
                   }}
                 />
               </div>
-              <p className="text-right text-[10px] font-semibold text-slate-300">
+              <p className="text-right text-[11px] font-semibold tabular-nums text-slate-200">
                 {formatCount(datum.value)}
               </p>
             </div>
