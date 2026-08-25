@@ -138,7 +138,7 @@ export function LocalContextFallbackMap({
             <path
               d={path}
               fill="#7d91a3"
-              fillOpacity="0.07"
+              fillOpacity="0"
               fillRule="evenodd"
               key={`municipality-${index}`}
               stroke="#a6b4c1"

@@ -3680,7 +3680,7 @@ function createDemoMunicipalityGraphic(
       spatialReference: { wkid: 4326 },
     }),
     symbol: {
-      color: [125, 145, 163, 0.08],
+      color: [125, 145, 163, 0],
       outline: {
         color: [166, 180, 193, 0.52],
         style: "short-dot",
