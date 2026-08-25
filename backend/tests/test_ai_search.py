@@ -836,6 +836,32 @@ def test_ai_search_master_data_mode_uses_approved_workspace_context() -> None:
     assert "Must not leave the browser" not in response.answer
 
 
+def test_ai_search_uses_only_approved_selected_hotspot_context() -> None:
+    request = CfsAiSearchRequest(
+        filter_context={
+            "selected_feature_type": "development_hotspot",
+            "selected_feature_id": "cluster-7",
+            "selected_feature_label": "Concord activity cluster",
+            "selected_feature_related_parcels": 87,
+            "selected_feature_permit_count": 132,
+            "selected_feature_analysis_period": "2023–2026",
+            "raw_rows": "must not leave the browser",
+        },
+        mode="demo",
+        query="Why is this considered a hotspot?",
+    )
+    context = ai_search_router._with_request_context(_context(), request)
+    response = CfsAiSearchService(_settings()).search(request, context)
+
+    assert "Concord activity cluster" in response.answer
+    assert "87 related parcels" in response.answer
+    assert "132 permits" in response.answer
+    assert "2023–2026" in response.answer
+    assert "not a prediction" in response.answer
+    assert "raw_rows" not in context["filter_context"]
+    assert "must not leave the browser" not in response.answer
+
+
 def test_ai_search_provider_receives_only_sanitized_filter_context(monkeypatch) -> None:
     captured: dict = {}
 

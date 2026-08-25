@@ -401,6 +401,7 @@ function PlanningIndicatorCenterWorkspace() {
     activeLayerIds,
     overviewCommandMode,
     selectedIndicatorCenterContext,
+    selectedDevelopmentHotspotContext,
     selectedParcelId,
     selectedParcelIntelligence,
     planningSnapshotCanWrite,
@@ -570,6 +571,21 @@ function PlanningIndicatorCenterWorkspace() {
         selectedParcelIntelligence?.parcelQualityStatus ?? null,
       selected_parcel_zoning:
         selectedParcelIntelligence?.zoningCode ?? null,
+      selected_feature_type: selectedDevelopmentHotspotContext
+        ? "development_hotspot"
+        : null,
+      selected_feature_id:
+        selectedDevelopmentHotspotContext?.clusterId ??
+        selectedDevelopmentHotspotContext?.officialParcelId ??
+        null,
+      selected_feature_label:
+        selectedDevelopmentHotspotContext?.areaLabel ?? null,
+      selected_feature_related_parcels:
+        selectedDevelopmentHotspotContext?.parcelsRepresented ?? null,
+      selected_feature_permit_count:
+        selectedDevelopmentHotspotContext?.totalPermitCount ?? null,
+      selected_feature_analysis_period:
+        selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
       selected_domain: selectedIndicatorCenterContext?.groupId ?? null,
       selected_signal_id: selectedIndicatorCenterContext?.indicatorId ?? null,
       selected_signal_title: selectedIndicatorCenterContext?.name ?? null,
@@ -582,6 +598,7 @@ function PlanningIndicatorCenterWorkspace() {
       overviewCommandMode,
       selectedParcelId,
       selectedParcelIntelligence,
+      selectedDevelopmentHotspotContext,
       selectedIndicatorCenterContext,
       visibleAttentionQueue.length,
       visibleExecutiveSignals.length,

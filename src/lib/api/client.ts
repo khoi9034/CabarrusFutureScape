@@ -132,6 +132,7 @@ export type CfsTechnicalEventName =
   | "powerbi_export"
   | "provider_fallback"
   | "reference_basemap_unavailable"
+  | "reference_basemap_fallback"
   | "report_generation";
 
 export interface CfsTechnicalEvent {

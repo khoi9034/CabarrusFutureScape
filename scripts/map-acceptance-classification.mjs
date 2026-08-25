@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const DEFAULT_OSM_URL_TEMPLATE =
+const DARK_OSM_URL_TEMPLATE =
+  "https://{subDomain}.basemaps.cartocdn.com/dark_all/{level}/{col}/{row}.png";
+const STANDARD_OSM_URL_TEMPLATE =
   "https://{subDomain}.tile.openstreetmap.org/{level}/{col}/{row}.png";
-const DEFAULT_OSM_ATTRIBUTION = "© OpenStreetMap contributors";
+const DEFAULT_OSM_ATTRIBUTION = "© OpenStreetMap contributors © CARTO";
 const OPTIONAL_NETWORK_ERRORS = new Set([
   "cors",
   "net::ERR_ABORTED",
@@ -28,18 +30,30 @@ export function optionalPublicMapResources({
 } = {}) {
   const configuredTemplate = urlTemplate
     ? normalizeTileUrlTemplate(urlTemplate)
-    : DEFAULT_OSM_URL_TEMPLATE;
-  return [
+    : DARK_OSM_URL_TEMPLATE;
+  const resources = [
     {
       id: "cfs-public-reference-basemap",
       kind: "base",
       attribution,
-      provider: urlTemplate ? "web-tile" : "openstreetmap",
+      provider: "web-tile",
       sampleUrl: new URL(expandTileUrlTemplate(configuredTemplate)).href,
       title: "OpenStreetMap visual basemap",
       urlTemplate: configuredTemplate,
     },
   ];
+  if (!urlTemplate) {
+    resources.push({
+      id: "cfs-public-reference-basemap-fallback",
+      kind: "base",
+      attribution: "© OpenStreetMap contributors",
+      provider: "openstreetmap",
+      sampleUrl: new URL(expandTileUrlTemplate(STANDARD_OSM_URL_TEMPLATE)).href,
+      title: "OpenStreetMap fallback basemap",
+      urlTemplate: STANDARD_OSM_URL_TEMPLATE,
+    });
+  }
+  return resources;
 }
 
 export function isApprovedOptionalPublicMapResource(
@@ -94,6 +108,7 @@ export function isExternalArcgisRequest(
       url.origin !== appOrigin &&
       (/(?:arcgis|esri)/i.test(url.hostname) ||
         /(?:^|\.)tile\.openstreetmap\.org$/i.test(url.hostname) ||
+        /(?:^|\.)basemaps\.cartocdn\.com$/i.test(url.hostname) ||
         resources.some((resource) => templateHostname(resource.urlTemplate) === url.hostname) ||
         /\/(?:sharing\/rest|rest\/services)(?:\/|$)|\/MapServer(?:\/|$)|\/oauth2\/|\/signin(?:\/|$)/i.test(
           url.pathname,

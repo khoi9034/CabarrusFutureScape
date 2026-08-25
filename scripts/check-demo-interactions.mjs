@@ -712,7 +712,8 @@ async function waitForMapReady(page) {
         element.getAttribute("data-map-view-ready-state") === "ready"
       );
     },
-    { timeout: 35_000 },
+    undefined,
+    { timeout: 90_000 },
   );
   const box = await map.boundingBox();
   assert(box && box.width > 300 && box.height > 250, `Map container is not usable: ${JSON.stringify(box)}`);
@@ -915,7 +916,8 @@ async function assertStaticAssets(baseUrl) {
 async function planningChecks(page, baseUrl) {
   await goto(page, baseUrl, "?app=planning");
   await check("Planning", "same-origin context map and navigation controls", ["workspace", "map", "county", "municipalities", "water", "roads", "labels", "zoom in", "zoom out", "reset"], async () => {
-    await page.getByTestId("command-center-explore-intelligence").click();
+    const explore = page.getByTestId("command-center-explore-intelligence");
+    if ((await explore.getAttribute("aria-pressed")) !== "true") await explore.click();
     const map = await waitForMapReady(page);
     await assertContextMapLayers(page);
     const image = await captureMapSurface(page);
@@ -1020,6 +1022,26 @@ async function planningChecks(page, baseUrl) {
       if (await show.count()) await show.click();
       await assertRenderedMapLayer(page, runtimeLayerId, fallbackLayerId);
       const renderedByArcGIS = await mapUsesArcGIS(page);
+      if (layer === "Development Hotspots" && renderedByArcGIS) {
+        await page.waitForFunction(() => {
+          const sample = window.__cfsGetMapDebugState?.().sampleHotspot;
+          return Boolean(sample && Number.isFinite(sample.x) && Number.isFinite(sample.y));
+        });
+        const debug = await page.evaluate(() => window.__cfsGetMapDebugState?.());
+        const box = await page.getByTestId("cfs-arcgis-map").boundingBox();
+        assert(box && debug?.sampleHotspot, "No visible development hotspot was available for hit testing.");
+        await page.mouse.click(
+          box.x + debug.sampleHotspot.x,
+          box.y + debug.sampleHotspot.y,
+        );
+        const intelligence = page.getByTestId("selected-map-feature-intelligence");
+        await intelligence.waitFor();
+        await intelligence.getByText("Related Parcels", { exact: true }).waitFor();
+        await intelligence.getByText("Permit Activity", { exact: true }).waitFor();
+        const zoomToExtent = intelligence.getByTestId("development-hotspot-zoom-to-extent");
+        await zoomToExtent.click({ timeout: 30_000 });
+        await assertRenderedMapLayer(page, "cfs-parcel-focus-layer", "selected-parcel");
+      }
       if (layer === "Development Hotspots" && !renderedByArcGIS) {
         for (const mode of ["Points", "Heatmap", "Clusters"]) {
           await card

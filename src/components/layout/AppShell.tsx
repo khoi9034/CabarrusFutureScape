@@ -104,6 +104,7 @@ function ProductShell() {
     cfsAppMode,
     parcelReviewView,
     productMode,
+    selectedDevelopmentHotspotContext,
     selectedParcelId,
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
@@ -167,14 +168,34 @@ function ProductShell() {
     return <CfsMasterHome />;
   }
 
+  const sharedAskCfsContext: CfsAiSearchRequest["filter_context"] =
+    cfsAppMode === "master-data"
+      ? masterDataAskContext
+      : {
+            selected_feature_analysis_period:
+              selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
+            selected_feature_id:
+              selectedDevelopmentHotspotContext?.clusterId ??
+              selectedDevelopmentHotspotContext?.officialParcelId ??
+              null,
+            selected_feature_label:
+              selectedDevelopmentHotspotContext?.areaLabel ?? null,
+            selected_feature_permit_count:
+              selectedDevelopmentHotspotContext?.totalPermitCount ?? null,
+            selected_feature_related_parcels:
+              selectedDevelopmentHotspotContext?.parcelsRepresented ?? null,
+            selected_feature_type: selectedDevelopmentHotspotContext
+              ? "development_hotspot"
+              : null,
+            selected_parcel_id: selectedParcelId ?? null,
+        };
   const sharedAskCfsProps: AskCfsPanelProps = {
     ...askCfsConfig,
     appMode: cfsAppMode,
-    filterContext:
-      askCfsConfig?.filterContext ??
-      (cfsAppMode === "master-data"
-        ? masterDataAskContext
-        : { selected_parcel_id: selectedParcelId ?? null }),
+    filterContext: {
+      ...(askCfsConfig?.filterContext ?? {}),
+      ...sharedAskCfsContext,
+    },
     visiblePromptCount: askCfsConfig?.visiblePromptCount ?? 4,
   };
 

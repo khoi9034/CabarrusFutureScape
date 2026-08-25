@@ -53,6 +53,7 @@ import {
 } from "@/lib/gis/arcgisRuntime";
 import {
   CFS_BASEMAP_PROVIDER_CONFIG,
+  createCfsStandardOsmFallbackLayer,
   createCfsVisualBasemapLayer,
 } from "@/lib/gis/basemapProvider";
 import { updateSelectedParcelSymbols } from "@/lib/gis/mockSceneLayers";
@@ -263,6 +264,11 @@ declare global {
       }>;
       ready: boolean;
       readyState: string;
+      sampleHotspot: {
+        areaLabel: string;
+        x: number;
+        y: number;
+      } | null;
       spatialReferenceWkid: number | null;
       sampleParcel: {
         parcelId: string;
@@ -1490,6 +1496,7 @@ export function SceneViewContainer() {
             );
 
             if (!handledSchoolClick) {
+              closeHotspotInfo();
               await interactionController.handleClick(event);
             }
           })().catch((error) => {
@@ -1615,61 +1622,90 @@ export function SceneViewContainer() {
         setReferenceBasemapState("loading");
         visualBasemapLayer = createCfsVisualBasemapLayer(runtime);
         visualBasemapAbortController = new AbortController();
-        const visualLayer = visualBasemapLayer;
-        const visualLayerAbortController = visualBasemapAbortController;
-        void withTimeout(
-          visualLayer
-            .load()
-            .then(() =>
+        const activateVisualLayer = async (
+          visualLayer: WebTileLayer,
+          visualLayerAbortController: AbortController,
+        ) => {
+          await withTimeout(
+            visualLayer.load().then(() =>
               visualLayer.fetchTile(10, 404, 282, {
                 signal: visualLayerAbortController.signal,
               }),
-            )
-            .then(async () => {
+            ),
+            10_000,
+            "OpenStreetMap visual basemap timed out.",
+          );
+          if (
+            !isCurrentAttempt() ||
+            view.destroyed ||
+            visualLayerAbortController.signal.aborted ||
+            visualBasemapLayer !== visualLayer
+          ) {
+            visualLayer.destroy();
+            return false;
+          }
+          contextBasemap.baseLayers.add(visualLayer, 0);
+          const layerView = await view.whenLayerView(visualLayer as Layer);
+          await withTimeout(
+            runtime.reactiveUtils.whenOnce(() => !layerView.updating),
+            10_000,
+            "OpenStreetMap visual basemap rendering timed out.",
+          );
+          if (
+            !isCurrentAttempt() ||
+            view.destroyed ||
+            visualLayerAbortController.signal.aborted ||
+            visualBasemapLayer !== visualLayer
+          ) {
+            return false;
+          }
+          contextLayers.placeLabels.visible = false;
+          setReferenceBasemapState("ready");
+          return true;
+        };
+        const removeVisualLayer = (
+          visualLayer: WebTileLayer,
+          visualLayerAbortController: AbortController,
+        ) => {
+          visualLayerAbortController.abort();
+          contextBasemap.baseLayers.remove(visualLayer);
+          if (!visualLayer.destroyed) visualLayer.destroy();
+          if (visualBasemapLayer === visualLayer) visualBasemapLayer = null;
+        };
+        void (async () => {
+          const darkLayer = visualBasemapLayer as WebTileLayer;
+          const darkController = visualBasemapAbortController as AbortController;
+          try {
+            await activateVisualLayer(darkLayer, darkController);
+          } catch (darkError) {
+            removeVisualLayer(darkLayer, darkController);
+            if (!isCurrentAttempt()) return;
+
+            const fallbackLayer = createCfsStandardOsmFallbackLayer(runtime);
+            const fallbackController = new AbortController();
+            visualBasemapLayer = fallbackLayer;
+            visualBasemapAbortController = fallbackController;
+            try {
+              await activateVisualLayer(fallbackLayer, fallbackController);
+              recordTechnicalEvent("reference_basemap_fallback", {
+                reason: getSceneErrorMessage(darkError),
+              });
+            } catch (fallbackError) {
+              removeVisualLayer(fallbackLayer, fallbackController);
+              contextLayers.placeLabels.visible = true;
               if (
-                !isCurrentAttempt() ||
-                view.destroyed ||
-                visualLayerAbortController.signal.aborted ||
-                visualBasemapLayer !== visualLayer
+                !isCurrentAttempt()
               ) {
-                visualLayer.destroy();
                 return;
               }
-              contextBasemap.baseLayers.add(visualLayer, 0);
-              const layerView = await view.whenLayerView(visualLayer as Layer);
-              await runtime.reactiveUtils.whenOnce(() => !layerView.updating);
-              if (
-                !isCurrentAttempt() ||
-                view.destroyed ||
-                visualLayerAbortController.signal.aborted ||
-                visualBasemapLayer !== visualLayer
-              ) {
-                return;
-              }
-              contextLayers.placeLabels.visible = false;
-              setReferenceBasemapState("ready");
-            }),
-          10_000,
-          "OpenStreetMap visual basemap timed out.",
-        )
-          .catch((error) => {
-            visualLayerAbortController.abort();
-            contextBasemap.baseLayers.remove(visualLayer);
-            if (!visualLayer.destroyed) {
-              visualLayer.destroy();
+              setReferenceBasemapState("failed");
+              recordTechnicalEvent("reference_basemap_unavailable", {
+                dark_reason: getSceneErrorMessage(darkError),
+                reason: getSceneErrorMessage(fallbackError),
+              });
             }
-            if (visualBasemapLayer === visualLayer) {
-              visualBasemapLayer = null;
-            }
-            contextLayers.placeLabels.visible = true;
-            if (!isCurrentAttempt()) {
-              return;
-            }
-            setReferenceBasemapState("failed");
-            recordTechnicalEvent("reference_basemap_unavailable", {
-              reason: getSceneErrorMessage(error),
-            });
-          });
+          }
+        })();
       } catch (error) {
         if (!isCurrentAttempt()) {
           return;
@@ -3349,12 +3385,46 @@ function registerSceneViewDebugState(runtime: ArcGISRuntime, view: SceneView) {
       }) ?? [],
     ready: view.ready,
     readyState: view.readyState,
+    sampleHotspot: getSampleHotspotScreenPoint(view),
     sampleParcel: getSampleParcelScreenPoint(view),
     scale: typeof view.scale === "number" ? view.scale : null,
     sdkVersion: ARCGIS_SDK_VERSION,
     spatialReferenceWkid: view.spatialReference?.wkid ?? null,
     zoom: typeof view.zoom === "number" ? view.zoom : null,
   });
+}
+
+function getSampleHotspotScreenPoint(view: SceneView) {
+  const layer = view.map?.allLayers.find(
+    (candidate) => candidate.id === "cfs-development-hotspots-layer",
+  ) as GraphicsLayer | undefined;
+  return (
+    layer?.graphics
+      .toArray()
+      .filter(
+        (candidate) => candidate.attributes?.graphicRole === "development-hotspot",
+      )
+      .map((graphic) => {
+        const geometry = graphic.geometry;
+        const mapPoint =
+          geometry?.type === "point"
+            ? geometry
+            : (geometry as { extent?: { center?: unknown } } | null)?.extent?.center;
+        const screenPoint = mapPoint ? view.toScreen(mapPoint as never) : null;
+        return screenPoint &&
+          screenPoint.x > 0 &&
+          screenPoint.x < view.width &&
+          screenPoint.y > 0 &&
+          screenPoint.y < view.height
+          ? {
+              areaLabel: graphic.attributes?.areaLabel ?? "Development hotspot",
+              x: screenPoint.x,
+              y: screenPoint.y,
+            }
+          : null;
+      })
+      .find(Boolean) ?? null
+  );
 }
 
 function getSampleParcelScreenPoint(view: SceneView) {
@@ -5873,6 +5943,7 @@ function createDevelopmentHotspotContextFromMarker(
 
   return {
     activityClass: marker.developmentActivityClass,
+    analysisPeriod: formatDevelopmentHotspotAnalysisPeriod([marker]),
     areaLabel: marker.officialParcelId,
     caveat: "Observed permit context, not a prediction.",
     contextKind: "individual",
@@ -5916,6 +5987,7 @@ function createDevelopmentHotspotContextFromCell(
 
   return {
     activityClass: cell.activityClass,
+    analysisPeriod: formatDevelopmentHotspotAnalysisPeriod(cell.markers),
     areaLabel,
     caveat: "Observed permit/development activity only. Not a prediction.",
     clusterId: cell.clusterId,
@@ -5952,6 +6024,7 @@ function createDevelopmentHotspotContextAttributes(
 ) {
   return {
     activityClass: context.activityClass,
+    analysisPeriod: context.analysisPeriod,
     areaLabel: context.areaLabel,
     caveat: context.caveat,
     clusterId: context.clusterId ?? null,
@@ -6003,6 +6076,21 @@ function createDevelopmentHotspotAreaLabel(
   return `Development activity cluster of ${formatDevelopmentCount(
     cell.recordsRepresented,
   )} records`;
+}
+
+function formatDevelopmentHotspotAnalysisPeriod(
+  markers: DevelopmentHotspotMapMarker[],
+) {
+  const starts = markers
+    .map((marker) => marker.firstPermitDate?.slice(0, 4))
+    .filter((year): year is string => /^\d{4}$/.test(year ?? ""));
+  const ends = markers
+    .map((marker) => marker.latestPermitDate?.slice(0, 4))
+    .filter((year): year is string => /^\d{4}$/.test(year ?? ""));
+  if (!starts.length && !ends.length) return null;
+  const start = starts.sort()[0] ?? ends.sort()[0];
+  const end = ends.sort().at(-1) ?? starts.sort().at(-1);
+  return start === end ? start : `${start}–${end}`;
 }
 
 function formatDevelopmentHotspotRecentActivityLabel(
@@ -7285,6 +7373,7 @@ function createDevelopmentHotspotSelectionContext(
 
   return {
     activityClass: stringAttribute(attributes.activityClass),
+    analysisPeriod: stringAttribute(attributes.analysisPeriod),
     areaLabel:
       stringAttribute(attributes.areaLabel) ??
       stringAttribute(attributes.officialParcelId) ??

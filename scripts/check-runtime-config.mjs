@@ -110,9 +110,9 @@ assert.throws(
 );
 
 assert.deepEqual(resolveBasemap({}), {
-  attribution: "© OpenStreetMap contributors",
-  kind: "openstreetmap",
-  urlTemplate: "https://{subDomain}.tile.openstreetmap.org/{level}/{col}/{row}.png",
+  attribution: "© OpenStreetMap contributors © CARTO",
+  kind: "web-tile",
+  urlTemplate: "https://{subDomain}.basemaps.cartocdn.com/dark_all/{level}/{col}/{row}.png",
 });
 assert.deepEqual(
   resolveBasemap({
@@ -130,7 +130,7 @@ assert.deepEqual(
     urlTemplate: "https://tiles.example.gov/osm/{level}/{col}/{row}.png",
   }),
   {
-    attribution: "© OpenStreetMap contributors",
+    attribution: "© OpenStreetMap contributors © CARTO",
     kind: "web-tile",
     urlTemplate: "https://tiles.example.gov/osm/{level}/{col}/{row}.png",
   },

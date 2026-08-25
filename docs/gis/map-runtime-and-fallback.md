@@ -5,17 +5,19 @@
 ArcGIS MapView is the primary renderer in demo, local, and enterprise modes.
 It starts with a custom `Basemap` made from the existing same-origin Cabarrus
 county outline, municipality, hydrography, major-road, and place-label
-graphics. It then loads the ArcGIS SDK `OpenStreetMapLayer` underneath that
-context without a Portal item, API key, or ArcGIS sign-in. Once OpenStreetMap
-is ready, its labels replace the local place labels while the same-origin
-layers remain the required interactive fallback.
+graphics. It then loads CARTO's credential-free dark OSM-derived raster tiles
+through ArcGIS `WebTileLayer`, underneath that context and without a Portal
+item, API key, or ArcGIS sign-in. If the dark provider is unavailable, the SDK
+`OpenStreetMapLayer` is attempted before the required same-origin context takes
+over. Once a public visual layer is ready, its labels replace the local place
+labels while the same-origin layers remain the required interactive fallback.
 
 `NEXT_PUBLIC_CFS_BASEMAP_URL_TEMPLATE` may point Enterprise deployments to one
 approved web-tile host using either `{z}/{x}/{y}` or
 `{level}/{col}/{row}` placeholders. The URL must use HTTPS and must not contain
 credentials, a query, a fragment, subdomain expansion, or any other template
 tokens. `NEXT_PUBLIC_CFS_BASEMAP_ATTRIBUTION` supplies the provider attribution;
-it defaults to `© OpenStreetMap contributors`. A failed visual basemap is
+it defaults to `© OpenStreetMap contributors © CARTO`. A failed visual basemap is
 removed without destroying MapView; the same-origin context and local labels
 remain interactive and a small nonblocking warning is shown.
 

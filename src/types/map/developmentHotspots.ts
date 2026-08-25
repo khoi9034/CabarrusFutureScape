@@ -106,12 +106,14 @@ export interface DevelopmentHotspotMapMarker {
   developmentActivityScore: number | null;
   demolitionPermits: number;
   dominantZoningCodeRaw: string | null;
+  firstPermitDate?: string | null;
   dominantGrowthSignal: string | null;
   dominantPermitSegment: string | null;
   highValuePermits: number;
   industrialActivityPermits: number;
   institutionalActivityPermits: number;
   majorValuePermits: number;
+  latestPermitDate?: string | null;
   minorMaintenancePermits: number;
   officialParcelId: string;
   permitSignalScoreAvg: number | null;
@@ -155,6 +157,7 @@ export interface DevelopmentHotspotSegmentCounts {
 }
 
 export interface SelectedDevelopmentHotspotContext {
+  analysisPeriod?: string | null;
   activityClass: string | null;
   areaLabel: string;
   caveat: string;

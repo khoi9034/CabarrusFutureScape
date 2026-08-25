@@ -83,6 +83,12 @@ import {
   USE_DEMO_DATA,
 } from "@/lib/api/client";
 import {
+  HOTSPOT_PARCEL_HIGHLIGHT_LIMIT,
+  resolveDevelopmentHotspotInspectionFocus,
+  type DevelopmentHotspotInspectionFocus,
+} from "@/lib/map/developmentHotspotInspection";
+import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
+import {
   getModeScopedActiveLayers,
   isExploreCountywideMode,
   isModelLabMode,
@@ -2684,13 +2690,32 @@ function SelectedDevelopmentHotspotCard({
   context: SelectedDevelopmentHotspotContext;
 }) {
   const isCluster = context.contextKind === "cluster";
+  const [inspection, setInspection] =
+    useState<DevelopmentHotspotInspectionFocus | null>(null);
+  const [inspectionError, setInspectionError] = useState<string | null>(null);
   const segmentMix = formatDevelopmentHotspotSegmentMix(context);
   const topDrivers = context.topDrivers.length
     ? context.topDrivers
     : ["Observed permit concentration"];
 
+  useEffect(() => {
+    const controller = new AbortController();
+    setInspection(null);
+    setInspectionError(null);
+    void resolveDevelopmentHotspotInspectionFocus(context, controller.signal)
+      .then(setInspection)
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setInspectionError("Detailed intelligence is temporarily unavailable.");
+      });
+    return () => controller.abort();
+  }, [context]);
+
   return (
-    <div className="rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.065] p-3">
+    <div
+      className="rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.065] p-3"
+      data-testid="selected-map-feature-intelligence"
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f6d98e]">
@@ -2709,6 +2734,16 @@ function SelectedDevelopmentHotspotCard({
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Unique parcel records represented by the selected map feature."
+          label="Related Parcels"
+          value={formatDevelopmentCount(context.parcelsRepresented)}
+        />
+        <BriefStat
+          caveat="Observed permits represented by the current layer filters."
+          label="Permit Activity"
+          value={formatDevelopmentCount(context.totalPermitCount)}
+        />
         <BriefStat
           caveat="Observed permit segment, not prediction."
           label={isCluster ? "Dominant Segment" : "Activity Segment"}
@@ -2731,6 +2766,40 @@ function SelectedDevelopmentHotspotCard({
           label="Recent Context"
           value={context.latestActivityLabel}
         />
+        <BriefStat
+          caveat="Available source activity dates for represented parcels."
+          label="Analysis Period"
+          value={context.analysisPeriod ?? "Data needed"}
+        />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          className="inline-flex items-center gap-1.5 rounded-md border border-[#68d8ff]/30 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15 disabled:cursor-wait disabled:opacity-50"
+          data-testid="development-hotspot-zoom-to-extent"
+          disabled={!inspection}
+          onClick={() => {
+            if (inspection) dispatchParcelMapFocusRequest(inspection.focus);
+          }}
+          type="button"
+        >
+          <Crosshair className="h-3.5 w-3.5" />
+          Zoom to extent
+        </button>
+        {inspection ? (
+          <p className="text-[11px] text-slate-400">
+            Extent from {inspection.requestedParcelCount} parcel record
+            {inspection.requestedParcelCount === 1 ? "" : "s"}; {inspection.highlightedParcelCount} outline
+            {inspection.highlightedParcelCount === 1 ? "" : "s"} available.
+            {context.parcelsRepresented > HOTSPOT_PARCEL_HIGHLIGHT_LIMIT
+              ? ` Highlighting is capped at ${HOTSPOT_PARCEL_HIGHLIGHT_LIMIT}; the related parcel count remains ${formatDevelopmentCount(context.parcelsRepresented)}.`
+              : ""}
+          </p>
+        ) : inspectionError ? (
+          <p className="text-[11px] text-[#f6d98e]">{inspectionError}</p>
+        ) : (
+          <p className="text-[11px] text-slate-500">Resolving related parcel extent…</p>
+        )}
       </div>
 
       {segmentMix ? (

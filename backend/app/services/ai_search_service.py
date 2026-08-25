@@ -73,6 +73,12 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "scenario_id",
         "selected_candidate",
         "selected_domain",
+        "selected_feature_analysis_period",
+        "selected_feature_id",
+        "selected_feature_label",
+        "selected_feature_permit_count",
+        "selected_feature_related_parcels",
+        "selected_feature_type",
         "selected_parcel_id",
         "selected_parcel_pin14",
         "selected_parcel_quality",
@@ -594,6 +600,9 @@ def deterministic_answer(
 
     if request.selected_signal:
         return _selected_signal_answer(request, context, domains)
+
+    if request.filter_context.get("selected_feature_type") == "development_hotspot":
+        return sanitize_response(_selected_feature_answer(request, context, domains))
 
     if request.app_mode == "master-data":
         return sanitize_response(_master_data_answer(request, context, domains))
@@ -2931,6 +2940,43 @@ def _data_readiness_answer(
             "Request official data sources listed in the Data Still Needed board.",
             "Ask: What should I inspect first?",
         ],
+    )
+
+
+def _selected_feature_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse:
+    filters = safe_filter_context(request.filter_context)
+    label = filters.get("selected_feature_label") or "the selected development hotspot"
+    parcels = filters.get("selected_feature_related_parcels")
+    permits = filters.get("selected_feature_permit_count")
+    period = filters.get("selected_feature_analysis_period") or "the available analysis period"
+    answer = _briefing(
+        ("Selected feature", f"{label} is an observed development-activity feature, not a prediction."),
+        (
+            "Observed activity",
+            f"It represents {parcels if parcels is not None else 'an unavailable number of'} related parcels and {permits if permits is not None else 'an unavailable number of'} permits across {period}.",
+        ),
+        (
+            "Interpretation",
+            "Use the related-parcel extent, permit mix, zoning context, and source records for planning review; do not treat concentration as a forecast or entitlement decision.",
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [
+            _evidence(
+                "Development Hotspot",
+                f"{parcels if parcels is not None else 'Unavailable'} related parcels; {permits if permits is not None else 'Unavailable'} observed permits; period {period}.",
+                "development_activity",
+            )
+        ],
+        ["Inspect the selected parcel extent and underlying permit records."],
     )
 
 
