@@ -1041,6 +1041,16 @@ async function planningChecks(page, baseUrl) {
         const zoomToExtent = intelligence.getByTestId("development-hotspot-zoom-to-extent");
         await zoomToExtent.click({ timeout: 30_000 });
         await assertRenderedMapLayer(page, "cfs-parcel-focus-layer", "selected-parcel");
+        await page.getByTestId("shared-ask-cfs-toggle").click();
+        const drawer = page.getByTestId("shared-ask-cfs-drawer");
+        await drawer.getByRole("textbox", { name: "Ask CFS question" }).fill(
+          "Summarize the selected development activity feature.",
+        );
+        await drawer.getByRole("button", { name: "Ask", exact: true }).click();
+        await drawer.getByRole("button", { name: "Reset conversation" }).waitFor({ timeout: 20_000 });
+        await drawer.getByText(/related parcels; .* observed permits; period /i).first().waitFor();
+        await drawer.getByText(/not a prediction/i).first().waitFor();
+        await drawer.getByTestId("shared-ask-cfs-close").click();
       }
       if (layer === "Development Hotspots" && !renderedByArcGIS) {
         for (const mode of ["Points", "Heatmap", "Clusters"]) {
@@ -1467,6 +1477,7 @@ async function assertMasterDataMapReady(page, expectedMappedFeatures) {
 
 async function assertSharedAskCfsDrawer(page, { appMode, label, question = null }) {
   const blockedBefore = diagnostics.blockedRequests.length;
+  await page.getByText(label, { exact: true }).first().waitFor();
   const toggle = page.getByTestId("shared-ask-cfs-toggle");
   assert.equal(new URL(page.url()).searchParams.get("app"), appMode);
   await toggle.click();

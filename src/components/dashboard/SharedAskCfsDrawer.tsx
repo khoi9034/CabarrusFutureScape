@@ -115,7 +115,6 @@ export function SharedAskCfsDrawer({
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
-      onClose={onClose}
       ref={dialogRef}
     >
       <div className="flex h-full min-h-0 flex-col">

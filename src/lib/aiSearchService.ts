@@ -201,6 +201,9 @@ async function searchDemoCfsAi(
   }
 
   const context = await buildDemoAiContext();
+  if (request.filter_context?.selected_feature_type === "development_hotspot") {
+    return sanitizeDemoResponse(demoSelectedFeatureAnswer(request, context));
+  }
   const domains = request.filters?.domains?.length
     ? request.filters.domains
     : resolveDemoDomains(request);
@@ -2061,6 +2064,37 @@ function demoSimpleAnswer(
     context.manifest.generated_at,
     [evidence(title, answer, "public/demo-data/indicator_summary.json")],
     [action],
+  );
+}
+
+function demoSelectedFeatureAnswer(
+  request: CfsAiSearchRequest,
+  context: DemoAiContext,
+) {
+  const filters = request.filter_context ?? {};
+  const label = typeof filters.selected_feature_label === "string"
+    ? filters.selected_feature_label
+    : "the selected development hotspot";
+  const parcels = typeof filters.selected_feature_related_parcels === "number"
+    ? filters.selected_feature_related_parcels
+    : null;
+  const permits = typeof filters.selected_feature_permit_count === "number"
+    ? filters.selected_feature_permit_count
+    : null;
+  const period = typeof filters.selected_feature_analysis_period === "string"
+    ? filters.selected_feature_analysis_period
+    : "the available analysis period";
+  const detail = `${parcels ?? "Unavailable"} related parcels; ${permits ?? "Unavailable"} observed permits; period ${period}.`;
+  return baseDemoResponse(
+    briefing(
+      ["Selected feature", `${label} is an observed development-activity feature, not a prediction.`],
+      ["Observed activity", detail],
+      ["Interpretation", "Use the related-parcel extent and source records for planning review; do not treat concentration as a forecast or entitlement decision."],
+    ),
+    ["permits"],
+    context.manifest.generated_at,
+    [evidence("Development Hotspot", detail, "public/demo-data/development_hotspots.json")],
+    ["Inspect the selected parcel extent and underlying permit records."],
   );
 }
 
