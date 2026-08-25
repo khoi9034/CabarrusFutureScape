@@ -46,6 +46,7 @@ export function createMockSceneLayers(runtime: ArcGISRuntime): MockSceneLayerMap
 
   layers["parcel-intelligence"] = new GraphicsLayer({
     id: "parcel-intelligence",
+    minScale: 20_000,
     title: "Parcel Intelligence",
   });
   layers["parcel-intelligence"].addMany(
@@ -216,10 +217,10 @@ export function updateSelectedParcelSymbols(
 
 function getDemoParcelFootprintSymbol(selected: boolean): GraphicSymbolProperties {
   return {
-    color: selected ? [216, 184, 106, 0.3] : [104, 216, 255, 0.11],
+    color: selected ? [216, 184, 106, 0.3] : [174, 190, 203, 0.01],
     outline: {
-      color: selected ? [255, 238, 178, 0.98] : [104, 216, 255, 0.56],
-      width: selected ? 2.3 : 0.85,
+      color: selected ? [255, 238, 178, 0.98] : [174, 190, 203, 0.24],
+      width: selected ? 2.3 : 0.55,
     },
     type: "simple-fill",
   };
@@ -234,10 +235,10 @@ function getParcelFootprintSymbol(
   selected: boolean,
 ): GraphicSymbolProperties {
   return {
-    color: selected ? [216, 184, 106, 0.34] : [104, 216, 255, 0.14],
+    color: selected ? [216, 184, 106, 0.34] : [174, 190, 203, 0.01],
     outline: {
-      color: selected ? [255, 238, 178, 0.95] : [104, 216, 255, 0.48],
-      width: selected ? 2 : 0.7,
+      color: selected ? [255, 238, 178, 0.95] : [174, 190, 203, 0.24],
+      width: selected ? 2 : 0.55,
     },
     type: "simple-fill",
   };

@@ -1280,6 +1280,17 @@ async function assertParcelHit(page, map) {
   });
   if ((await show.count()) && (await show.isVisible())) await show.click();
   await waitForLayer(page, "parcel-intelligence", true, true);
+  let parcelState = await getDebugState(page);
+  for (let attempt = 0; Number(parcelState.scale) > 20_000 && attempt < 8; attempt += 1) {
+    const box = await map.boundingBox();
+    const sample = parcelState.sampleParcel;
+    assert(box && sample, "No rendered parcel was available for detail zoom.");
+    const previousScale = parcelState.scale;
+    await page.mouse.dblclick(box.x + sample.x, box.y + sample.y, { delay: 80 });
+    await waitForScaleDirection(page, previousScale, "smaller");
+    parcelState = await getDebugState(page);
+  }
+  assert(Number(parcelState.scale) <= 20_000, "Parcel detail scale was not reached.");
   await page.waitForFunction(() => {
     const state = window.__cfsGetMapDebugState?.();
     return Boolean(state?.sampleParcel && Number.isFinite(state.sampleParcel.x) && Number.isFinite(state.sampleParcel.y));

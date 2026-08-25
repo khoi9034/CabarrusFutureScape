@@ -3682,9 +3682,9 @@ function createDemoMunicipalityGraphic(
     symbol: {
       color: [125, 145, 163, 0],
       outline: {
-        color: [166, 180, 193, 0.52],
-        style: "short-dot",
-        width: 1.1,
+        color: [166, 180, 193, 0.18],
+        style: "solid",
+        width: 0.75,
       },
       type: "simple-fill",
     } as unknown as Graphic["symbol"],
@@ -3808,10 +3808,10 @@ function createDemoParcelGraphic(
 
 function createDemoParcelSymbol(selected: boolean) {
   return {
-    color: selected ? [216, 184, 106, 0.3] : [104, 216, 255, 0.11],
+    color: selected ? [216, 184, 106, 0.3] : [174, 190, 203, 0.01],
     outline: {
-      color: selected ? [255, 238, 178, 0.98] : [104, 216, 255, 0.56],
-      width: selected ? 2.3 : 0.85,
+      color: selected ? [255, 238, 178, 0.98] : [174, 190, 203, 0.24],
+      width: selected ? 2.3 : 0.55,
     },
     type: "simple-fill",
   } as unknown as Graphic["symbol"];

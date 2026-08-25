@@ -1594,6 +1594,7 @@ async function offlineMapChecks(browser, baseUrl) {
   const arcgisRequests = [];
   const optionalFailures = [];
   const sameOriginPaths = new Set();
+  let provenHealth = null;
   await context.route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (
@@ -1658,9 +1659,12 @@ async function offlineMapChecks(browser, baseUrl) {
       }),
       `ArcGIS attempted an unapproved external or unversioned request: ${arcgisRequests.map(redactMapDiagnosticUrl).join(" | ")}`,
     );
-    const health = await readRequiredMapHealth(page, origin);
+    provenHealth = await readRequiredMapHealth(page, origin);
     for (const failure of optionalFailures) {
-      const resolved = resolveMapDiagnostic(failure, { health, lifecycle: "current" });
+      const resolved = resolveMapDiagnostic(failure, {
+        health: provenHealth,
+        lifecycle: "current",
+      });
       diagnostics.mapDiagnostics.push(resolved);
       assert.equal(resolved.fatal, false, resolved.reason);
       diagnostics.optionalPublicBasemapFailures.push(resolved);
@@ -1675,6 +1679,7 @@ async function offlineMapChecks(browser, baseUrl) {
     console.log("PASS Planning: external network isolation");
   } finally {
     await closeAcceptanceContext(context);
+    await resolveMapDiagnosticsForPage(page, provenHealth);
   }
 }
 

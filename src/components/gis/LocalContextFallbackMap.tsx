@@ -142,9 +142,8 @@ export function LocalContextFallbackMap({
               fillRule="evenodd"
               key={`municipality-${index}`}
               stroke="#a6b4c1"
-              strokeDasharray="5 5"
-              strokeOpacity="0.44"
-              strokeWidth="1.25"
+              strokeOpacity="0.18"
+              strokeWidth="0.75"
               vectorEffect="non-scaling-stroke"
             />
           ))}
