@@ -1002,7 +1002,7 @@ async function askQuestions(page, questions, { expectPersistence = true } = {}) 
     assert(body.evidence?.length > 0, "Ask CFS answer had no evidence.");
     assert(body.caveats?.length > 0, "Ask CFS answer had no caveats.");
     await panel.getByText("Grounded CFS analysis", { exact: true }).waitFor();
-    await panel.getByText(/^Evidence used \([1-9]\d*\)$/).waitFor();
+    await panel.getByText(/^Evidence \([1-9]\d*\)$/).waitFor();
     await panel.getByText("Limitations", { exact: true }).waitFor();
   }
   return conversationId;
@@ -1029,10 +1029,39 @@ async function assertThreeWorkspaceHome(page) {
 async function openSharedAskCfsDrawer(page, { appMode, label }) {
   const toggle = page.getByTestId("shared-ask-cfs-toggle");
   assert.equal(new URL(page.url()).searchParams.get("app"), appMode);
+  await page.waitForFunction(() => {
+    const element = document.querySelector('[data-testid="shared-ask-cfs-toggle"]');
+    return element && Object.keys(element).some((key) => key.startsWith("__reactProps$"));
+  });
   await toggle.click();
   const drawer = page.getByTestId("shared-ask-cfs-drawer");
   await drawer.waitFor({ timeout: 45_000 });
-  await drawer.getByRole("heading", { name: `Ask CFS · ${label}`, exact: true }).waitFor();
+  await drawer.getByRole("heading", { name: `Ask CFS · ${label.replace(/^CFS /, "")}`, exact: true }).waitFor();
+  assert.equal(await drawer.evaluate((element) => element.tagName), "ASIDE");
+  assert.equal(await drawer.getAttribute("aria-modal"), null, "Ask CFS became modal.");
+  if ((page.viewportSize()?.width ?? 0) >= 1280) {
+    assert.equal(
+      await page.getByTestId("shared-ask-cfs-backdrop").evaluate(
+        (element) => getComputedStyle(element).display,
+      ),
+      "none",
+      "Desktop Ask CFS dimmed or blocked the workspace.",
+    );
+  }
+  if ((page.viewportSize()?.width ?? 0) >= 1400) {
+    await page.waitForFunction(
+      () => getComputedStyle(
+        document.querySelector('[data-testid="cfs-workspace-frame"]'),
+      ).paddingRight === "400px",
+    );
+    assert.equal(
+      await page.getByTestId("cfs-workspace-frame").evaluate(
+        (element) => getComputedStyle(element).paddingRight,
+      ),
+      "400px",
+      "Desktop Ask CFS did not reserve its docked workspace width.",
+    );
+  }
   assert.equal(new URL(page.url()).searchParams.get("app"), appMode, "Opening Ask CFS changed workspace.");
   return drawer;
 }

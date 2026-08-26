@@ -164,6 +164,13 @@ function ProductShell() {
     askCfsModeRef.current = cfsAppMode;
   }, [cfsAppMode]);
 
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() =>
+      window.dispatchEvent(new Event("resize")),
+    );
+    return () => window.cancelAnimationFrame(frame);
+  }, [askCfsOpen]);
+
   if (!cfsAppMode) {
     return <CfsMasterHome />;
   }
@@ -224,6 +231,13 @@ function ProductShell() {
         />
       </div>
 
+      <div
+        className={cn(
+          "relative z-10 flex min-h-0 flex-1 flex-col transition-[padding-right] duration-200 ease-out",
+          askCfsOpen && "min-[1400px]:pr-[25rem]",
+        )}
+        data-testid="cfs-workspace-frame"
+      >
       {cfsAppMode === "economics" ? (
         <EnterpriseErrorBoundary
           moduleName="CFS Economics"
@@ -282,6 +296,7 @@ function ProductShell() {
       ) : (
         <StableOverviewWorkspace />
       )}
+      </div>
         <EnterpriseErrorBoundary
           moduleName="Ask CFS"
           resetKey={`shared-ask-cfs-${cfsAppMode}`}

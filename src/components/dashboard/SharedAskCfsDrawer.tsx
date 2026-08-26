@@ -16,9 +16,9 @@ import {
 import type { CfsAppMode } from "@/types";
 
 const workspaceLabels: Record<CfsAppMode, string> = {
-  economics: "CFS Economics",
-  "master-data": "CFS Master Data",
-  planning: "CFS Planning",
+  economics: "Economics",
+  "master-data": "Master Data",
+  planning: "Planning",
 };
 
 const SharedAskCfsContext = createContext<{
@@ -93,42 +93,79 @@ export function SharedAskCfsDrawer({
   onClose: () => void;
   open: boolean;
 }) {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   const appMode = panelProps.appMode ?? "planning";
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
+    if (!open) return;
+    const frame = window.requestAnimationFrame(() => {
+      panelRef.current
+        ?.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          '[data-testid="ask-cfs-query"]',
+        )
+        ?.focus();
+    });
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const mobile = window.matchMedia("(max-width: 1279px)");
+    const previousOverflow = document.body.style.overflow;
+    const syncOverflow = () => {
+      document.body.style.overflow = mobile.matches ? "hidden" : previousOverflow;
+    };
+    syncOverflow();
+    mobile.addEventListener("change", syncOverflow);
+    return () => {
+      mobile.removeEventListener("change", syncOverflow);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   return (
-    <dialog
-      aria-labelledby="shared-ask-cfs-title"
-      className="fixed inset-y-0 right-0 m-0 ml-auto h-dvh max-h-dvh w-full max-w-xl overflow-hidden border-0 border-l border-[#35c98d]/28 bg-[#06101c]/98 p-0 text-slate-100 shadow-[-28px_0_100px_rgba(0,0,0,0.58)] backdrop:bg-[#02050a]/72 backdrop:backdrop-blur-sm"
-      data-testid="shared-ask-cfs-drawer"
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-      ref={dialogRef}
-    >
-      <div className="flex h-full min-h-0 flex-col">
+    <>
+      <button
+        aria-hidden="true"
+        aria-label="Close Ask CFS"
+        className={`fixed inset-0 z-[80] bg-[#02050a]/60 transition-opacity duration-150 xl:hidden ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        data-testid="shared-ask-cfs-backdrop"
+        onClick={onClose}
+        tabIndex={-1}
+        type="button"
+      />
+      <aside
+        aria-hidden={!open}
+        aria-labelledby="shared-ask-cfs-title"
+        className={`fixed inset-y-0 right-0 z-[90] flex w-full flex-col overflow-hidden border-l border-[#35c98d]/24 bg-[#06101c]/98 text-slate-100 shadow-[-20px_0_55px_rgba(0,0,0,0.42)] transition-[transform,visibility] duration-200 ease-out sm:w-[25rem] xl:top-[var(--cfs-top-nav-height)] xl:h-[calc(100dvh-var(--cfs-top-nav-height))] min-[1400px]:shadow-none ${
+          open
+            ? "visible translate-x-0"
+            : "invisible pointer-events-none translate-x-full"
+        }`}
+        data-testid="shared-ask-cfs-drawer"
+        id="shared-ask-cfs-panel"
+        ref={panelRef}
+      >
         <header className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-white/[0.035] px-4 py-3 sm:px-5">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#35c98d]/30 bg-[#35c98d]/12 text-[#7ae6b8]">
-            <Sparkles className="h-5 w-5" />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#35c98d]/30 bg-[#35c98d]/12 text-[#7ae6b8]">
+            <Sparkles className="h-4 w-4" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7ae6b8]">
-              Shared intelligence layer
-            </p>
             <h2 className="truncate text-lg font-semibold text-white" id="shared-ask-cfs-title">
               Ask CFS · {workspaceLabels[appMode]}
             </h2>
+            <p className="truncate text-xs text-slate-400">
+              Shared intelligence layer
+            </p>
           </div>
           <button
             aria-label="Close Ask CFS"
@@ -140,17 +177,14 @@ export function SharedAskCfsDrawer({
             <X className="h-4 w-4" />
           </button>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-5">
-          <p className="mb-3 text-xs leading-5 text-slate-400">
-            Ask questions without leaving {workspaceLabels[appMode]}. Responses use approved CFS context and retain the current workspace.
-          </p>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5 pt-3 sm:px-5">
           <AskCfsPanel
             {...panelProps}
             appMode={appMode}
             inputId="shared-ask-cfs-query"
           />
         </div>
-      </div>
-    </dialog>
+      </aside>
+    </>
   );
 }

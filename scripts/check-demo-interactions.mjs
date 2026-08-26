@@ -699,22 +699,49 @@ async function assertImageDifference(before, after, label, minimum = 0.05) {
 async function waitForMapReady(page) {
   const map = page.getByTestId("cfs-arcgis-map");
   await map.waitFor({ timeout: 30_000 });
-  await page.waitForFunction(
-    () => {
+  try {
+    await page.waitForFunction(
+      () => {
+        const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
+        return (
+          element?.getAttribute("data-static-context-ready") === "true" &&
+          element.getAttribute("data-map-renderer-state") === "interactive_ready" &&
+          element.getAttribute("data-interactive-ready") === "true" &&
+          element.getAttribute("data-map-renderer") === "interactive" &&
+          element.getAttribute("data-arcgis-runtime-state") === "ready" &&
+          element.getAttribute("data-arcgis-view-state") === "ready" &&
+          element.getAttribute("data-map-view-ready-state") === "ready"
+        );
+      },
+      undefined,
+      { timeout: 90_000 },
+    );
+  } catch (error) {
+    const state = await page.evaluate(() => {
       const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
-      return (
-        element?.getAttribute("data-static-context-ready") === "true" &&
-        element.getAttribute("data-map-renderer-state") === "interactive_ready" &&
-        element.getAttribute("data-interactive-ready") === "true" &&
-        element.getAttribute("data-map-renderer") === "interactive" &&
-        element.getAttribute("data-arcgis-runtime-state") === "ready" &&
-        element.getAttribute("data-arcgis-view-state") === "ready" &&
-        element.getAttribute("data-map-view-ready-state") === "ready"
-      );
-    },
-    undefined,
-    { timeout: 90_000 },
-  );
+      const fallback = document.querySelector('[data-testid="cfs-local-context-map"]');
+      const debug = window.__cfsGetMapDebugState?.();
+      return {
+        attributes: element
+          ? Object.fromEntries([...element.attributes]
+              .filter((attribute) => attribute.name.startsWith("data-"))
+              .map((attribute) => [attribute.name, attribute.value]))
+          : null,
+        debug: debug
+          ? {
+              basemapId: debug.basemapId,
+              layerCount: debug.layerCount,
+              ready: debug.ready,
+              readyState: debug.readyState,
+            }
+          : null,
+        fallbackOpacity: fallback ? getComputedStyle(fallback).opacity : null,
+      };
+    });
+    throw new Error(`MapView readiness timed out: ${JSON.stringify(state)}`, {
+      cause: error,
+    });
+  }
   const box = await map.boundingBox();
   assert(box && box.width > 300 && box.height > 250, `Map container is not usable: ${JSON.stringify(box)}`);
   assert(Number(await map.getAttribute("data-context-county-features")) > 0, "County context is empty.");
@@ -1480,10 +1507,39 @@ async function assertSharedAskCfsDrawer(page, { appMode, label, question = null 
   await page.getByText(label, { exact: true }).first().waitFor();
   const toggle = page.getByTestId("shared-ask-cfs-toggle");
   assert.equal(new URL(page.url()).searchParams.get("app"), appMode);
+  await page.waitForFunction(() => {
+    const element = document.querySelector('[data-testid="shared-ask-cfs-toggle"]');
+    return element && Object.keys(element).some((key) => key.startsWith("__reactProps$"));
+  });
   await toggle.click();
   const drawer = page.getByTestId("shared-ask-cfs-drawer");
   await drawer.waitFor();
-  await drawer.getByRole("heading", { name: `Ask CFS · ${label}`, exact: true }).waitFor();
+  await drawer.getByRole("heading", { name: `Ask CFS · ${label.replace(/^CFS /, "")}`, exact: true }).waitFor();
+  assert.equal(await drawer.evaluate((element) => element.tagName), "ASIDE");
+  assert.equal(await drawer.getAttribute("aria-modal"), null, "Ask CFS became modal.");
+  if ((page.viewportSize()?.width ?? 0) >= 1280) {
+    assert.equal(
+      await page.getByTestId("shared-ask-cfs-backdrop").evaluate(
+        (element) => getComputedStyle(element).display,
+      ),
+      "none",
+      "Desktop Ask CFS dimmed or blocked the workspace.",
+    );
+  }
+  if ((page.viewportSize()?.width ?? 0) >= 1400) {
+    await page.waitForFunction(
+      () => getComputedStyle(
+        document.querySelector('[data-testid="cfs-workspace-frame"]'),
+      ).paddingRight === "400px",
+    );
+    assert.equal(
+      await page.getByTestId("cfs-workspace-frame").evaluate(
+        (element) => getComputedStyle(element).paddingRight,
+      ),
+      "400px",
+      "Desktop Ask CFS did not reserve its docked workspace width.",
+    );
+  }
   assert.equal(new URL(page.url()).searchParams.get("app"), appMode, "Opening Ask CFS changed workspace.");
   if (question) {
     await drawer.getByRole("textbox", { name: "Ask CFS question" }).fill(question);
@@ -1522,23 +1578,34 @@ async function sharedAskCfsChecks(page, baseUrl) {
     },
   ]) {
     await goto(page, baseUrl, `?app=${workspace.appMode}`);
+    const mapAttempt = workspace.appMode === "planning"
+      ? await (await waitForMapReady(page)).getAttribute("data-map-initialization-attempt")
+      : null;
     await check(
       workspace.product,
       "shared Ask CFS opens, answers without a backend, closes, and stays in workspace",
       ["shared Ask CFS", "drawer", "answer", "close", "workspace preserved", "zero backend"],
       () => assertSharedAskCfsDrawer(page, workspace),
     );
+    if (workspace.appMode === "planning") {
+      assert.equal(
+        await (await waitForMapReady(page)).getAttribute("data-map-initialization-attempt"),
+        mapAttempt,
+        "Shared Ask CFS reinitialized the Planning MapView.",
+      );
+    }
   }
 }
 
 async function mobileChecks(browser, baseUrl) {
+  const origin = new URL(baseUrl).origin;
   for (const [product, query] of [
     ["Planning", "?app=planning"],
     ["Economics", "?app=economics"],
     ["Master Data", "?app=master-data"],
   ]) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    attachDiagnostics(context, new URL(baseUrl).origin);
+    attachDiagnostics(context, origin);
     const page = await context.newPage();
     await goto(page, baseUrl, query);
     if (product === "Planning") {
@@ -1582,6 +1649,12 @@ async function mobileChecks(browser, baseUrl) {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert(overflow <= 2, `${product} has ${overflow}px horizontal mobile overflow.`);
     await assertHealthyText(page);
+    if (product === "Planning") {
+      await resolveMapDiagnosticsForPage(
+        page,
+        await readRequiredMapHealth(page, origin),
+      );
+    }
     await closeAcceptanceContext(context);
     record(product, "mobile viewport workflow", ["mobile layout"]);
     console.log(`PASS ${product}: mobile viewport workflow`);

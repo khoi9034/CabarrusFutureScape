@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, FileSearch, Loader2, Send, Sparkles } from "lucide-react";
+import { AlertTriangle, FileSearch, Loader2, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import {
   askCfsEconomicsSuggestedPrompts,
@@ -592,55 +592,50 @@ export function AskCfsPanel({
 
   return (
     <section
-      className="cfs-command-surface rounded-xl border-[#68d8ff]/20 p-4"
+      className="min-w-0"
       data-conversation-id={conversationId ?? undefined}
       data-provider={askCfsConversationRepository.provider}
     >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#68d8ff]/25 bg-[#68d8ff]/10 text-[#9be9ff]">
-              <Sparkles className="h-4 w-4" />
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold text-white">Ask CFS</h2>
-              <p className="text-xs text-slate-400">{helperText}</p>
-            </div>
-          </div>
-        </div>
-        <span className="w-fit rounded-full border border-[#f6d98e]/25 bg-[#f6d98e]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f6d98e]">
-          {USE_DEMO_DATA ? "Portfolio Demo AI Preview" : "Grounded local answers"}
-        </span>
-      </div>
-
-      <form className="mt-4 flex flex-col gap-2 md:flex-row" onSubmit={onSubmit}>
-        <label className="sr-only" htmlFor={inputId}>
-          Ask CFS question
-        </label>
-        <input
-          className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-[#68d8ff]/55 focus:ring-2 focus:ring-[#68d8ff]/15"
-          id={inputId}
-          data-testid="ask-cfs-query"
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={inputPlaceholder}
-          value={query}
-        />
-        <button
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#68d8ff]/30 bg-[#68d8ff]/12 px-4 py-3 text-sm font-semibold text-[#c6f4ff] transition hover:border-[#68d8ff]/55 hover:bg-[#68d8ff]/18 disabled:cursor-not-allowed disabled:opacity-50"
-          data-testid="ask-cfs-submit"
-          disabled={
-            scopedIsLoading ||
-            persistenceBusy ||
-            !query.trim() ||
-            !productAccessReady ||
-            !canUseAskCfs
-          }
-          type="submit"
+      <div className="sticky top-0 z-10 -mx-1 bg-[#06101c] px-1 pb-3">
+        <p className="mb-2 text-xs leading-5 text-slate-400">{helperText}</p>
+        <form
+          className="rounded-xl border border-white/12 bg-black/25 p-2 transition focus-within:border-[#68d8ff]/45 focus-within:ring-2 focus-within:ring-[#68d8ff]/10"
+          onSubmit={onSubmit}
         >
-          {scopedIsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          Ask
-        </button>
-      </form>
+          <label className="sr-only" htmlFor={inputId}>
+            Ask CFS question
+          </label>
+          <textarea
+            className="block min-h-16 w-full resize-none bg-transparent px-1 py-1 text-sm leading-5 text-white outline-none placeholder:text-slate-500"
+            data-testid="ask-cfs-query"
+            id={inputId}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={inputPlaceholder}
+            rows={2}
+            value={query}
+          />
+          <div className="mt-1 flex items-center justify-between gap-2 border-t border-white/8 pt-2">
+            <span className="text-[10px] text-slate-500">
+              {USE_DEMO_DATA ? "Demo context" : "Grounded CFS context"}
+            </span>
+            <button
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#68d8ff]/30 bg-[#68d8ff]/12 px-3 py-2 text-xs font-semibold text-[#c6f4ff] transition hover:border-[#68d8ff]/55 hover:bg-[#68d8ff]/18 disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="ask-cfs-submit"
+              disabled={
+                scopedIsLoading ||
+                persistenceBusy ||
+                !query.trim() ||
+                !productAccessReady ||
+                !canUseAskCfs
+              }
+              type="submit"
+            >
+              {scopedIsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              Ask
+            </button>
+          </div>
+        </form>
+      </div>
 
       {persistenceError || persistenceStatus ? (
         <div
@@ -672,7 +667,7 @@ export function AskCfsPanel({
       ) : null}
 
       {scopedIsLoading ? (
-        <div className="mt-3 rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs leading-5 text-slate-300">
+        <div className="rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs leading-5 text-slate-300">
           <span className="font-semibold text-[#9be9ff]">
             Preparing grounded CFS briefing...
           </span>{" "}
@@ -900,87 +895,74 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
     );
 
   return (
-    <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
-      <div className="rounded-xl border border-white/10 bg-black/24 p-4">
-        <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9be9ff]">
+    <article className="mt-4 border-t border-white/10 pt-4">
+      <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-[#9be9ff]">
           <FileSearch className="h-3.5 w-3.5" />
           {askCfsProviderLabel(response)}
-        </div>
-        <p className="mb-3 rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-          {askCfsSourceLine(response)}
-        </p>
-        {openAiFallbackActive ? (
-          <p className="mb-3 w-fit rounded border border-[#f6d98e]/20 bg-[#f6d98e]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f6d98e]">
-            Provider: OpenAI configured / Status: fallback active / Reason: rate limit/quota
-          </p>
-        ) : null}
-        <div className="whitespace-pre-line text-sm leading-6 text-slate-100">
-          {response.answer}
-        </div>
-        <InlineList title="Key findings" values={response.key_findings ?? []} />
-        <section className="mt-4 border-t border-white/10 pt-4">
-          <h3 className="text-xs font-semibold text-slate-300">
-            Evidence used ({response.evidence.length})
-          </h3>
-          <div className="mt-3 grid gap-2 md:grid-cols-2">
-            {response.evidence.map((item) => (
-              <article
-                className="border-l-2 border-[#68d8ff]/25 pl-3"
-                key={`${item.source}-${item.title}`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold text-white">{item.title}</h3>
-                  <span className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#b7f0ff]">
-                    {item.confidence.replace("_", " ")}
-                  </span>
-                </div>
-                <p className="mt-2 text-xs leading-5 text-slate-300">{item.detail}</p>
-                <p className="mt-2 truncate text-[10px] text-slate-500" title={item.source}>
-                  {item.source}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-        {response.interpretation ? (
-          <section className="mt-4 border-t border-white/10 pt-4">
-            <h3 className="text-xs font-semibold text-[#9be9ff]">
-              Interpretation
-            </h3>
-            <p className="mt-2 text-xs leading-5 text-slate-300">
-              {response.interpretation}
-            </p>
-          </section>
-        ) : null}
-        <InlineList
-          title="Limitations"
-          tone="amber"
-          values={response.limitations ?? response.caveats}
-        />
-        <InlineList
-          title="What to do next"
-          values={
-            response.recommended_next_actions ?? response.suggested_actions
-          }
-        />
       </div>
-
-      <aside className="space-y-3">
-        <CompactList title="Related layers" values={response.related_layers} />
-        <CompactList
-          title="Recommended layers to inspect"
-          values={response.dashboard_actions?.recommended_layers ?? []}
-        />
-        <CompactList
-          title="Follow-up questions"
-          values={response.suggested_follow_up_questions ?? []}
-        />
-        <p className="px-1 text-[10px] leading-4 text-slate-500">
-          Request {response.request_id ?? "not recorded"} / Prompt{" "}
-          {response.prompt_version ?? "not recorded"}
+      {openAiFallbackActive ? (
+        <p className="mb-3 rounded-lg border border-[#f6d98e]/20 bg-[#f6d98e]/10 px-3 py-2 text-xs text-[#f6d98e]">
+          OpenAI enhancement is unavailable due to rate limits; grounded CFS analysis remains active.
         </p>
-      </aside>
-    </div>
+      ) : null}
+      <div className="whitespace-pre-line text-sm leading-6 text-slate-100">
+        {response.answer}
+      </div>
+      <InlineList title="Key findings" values={response.key_findings ?? []} />
+      <section className="mt-4 border-t border-white/10 pt-4">
+        <h3 className="text-xs font-semibold text-slate-300">
+          Evidence ({response.evidence.length})
+        </h3>
+        <div className="mt-3 space-y-3">
+          {response.evidence.map((item) => (
+            <div
+              className="border-l-2 border-[#68d8ff]/25 pl-3"
+              key={`${item.source}-${item.title}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <h4 className="text-xs font-semibold text-white">{item.title}</h4>
+                <span className="shrink-0 rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-[#b7f0ff]">
+                  {item.confidence.replace("_", " ")}
+                </span>
+              </div>
+              <p className="mt-1.5 text-xs leading-5 text-slate-300">{item.detail}</p>
+              <p className="mt-1 break-words text-[10px] leading-4 text-slate-500">
+                {item.source}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+      {response.interpretation ? (
+        <section className="mt-4 border-t border-white/10 pt-4">
+          <h3 className="text-xs font-semibold text-[#9be9ff]">Interpretation</h3>
+          <p className="mt-2 text-xs leading-5 text-slate-300">
+            {response.interpretation}
+          </p>
+        </section>
+      ) : null}
+      <InlineList
+        title="Limitations"
+        tone="amber"
+        values={response.limitations ?? response.caveats}
+      />
+      <InlineList
+        title="Recommended next look"
+        values={response.recommended_next_actions ?? response.suggested_actions}
+      />
+      <InlineList
+        title="Related context"
+        values={[...new Set([
+          ...response.related_layers,
+          ...(response.dashboard_actions?.recommended_layers ?? []),
+        ])]}
+      />
+      <InlineList
+        title="Follow-up questions"
+        values={response.suggested_follow_up_questions ?? []}
+      />
+      <DataContext response={response} />
+    </article>
   );
 }
 
@@ -1026,21 +1008,14 @@ function askCfsProviderLabel(response: CfsAiSearchResponse) {
   return "Grounded CFS analysis";
 }
 
-function askCfsSourceLine(response: CfsAiSearchResponse) {
+function askCfsSource(response: CfsAiSearchResponse) {
   const source =
     response.data_source === "portfolio_demo_extract" || response.data_mode === "demo"
       ? "Portfolio Demo · cached demo extract"
       : response.data_source === "local_live_backend"
         ? "Local live backend"
         : response.data_source ?? "CFS context";
-  const freshness = response.context_freshness
-    ? ` · ${response.context_freshness.replaceAll("_", " ")}`
-    : "";
-  const updated = response.as_of ? ` · Updated: ${formatAskCfsDate(response.as_of)}` : "";
-  const filters = response.filtered_context_summary
-    ? ` · Filters: ${response.filtered_context_summary}`
-    : "";
-  return `Source: ${source}${updated}${freshness}${filters}`;
+  return source;
 }
 
 function formatAskCfsDate(value: string) {
@@ -1048,36 +1023,29 @@ function formatAskCfsDate(value: string) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
-function CompactList({
-  title,
-  tone = "cyan",
-  values,
-}: {
-  title: string;
-  tone?: "amber" | "cyan";
-  values: string[];
-}) {
+function DataContext({ response }: { response: CfsAiSearchResponse }) {
+  const rows = [
+    ["Source", askCfsSource(response)],
+    ["Updated", response.as_of ? formatAskCfsDate(response.as_of) : "Not recorded"],
+    ["Freshness", response.context_freshness?.replaceAll("_", " ") ?? "Not recorded"],
+    ["Filters", response.filtered_context_summary ?? "Current workspace context"],
+    ["Provider", `${response.provider ?? "none"} · ${response.provider_status ?? "grounded"}`],
+    ["Request", response.request_id ?? "Not recorded"],
+    ["Prompt", response.prompt_version ?? "Not recorded"],
+  ];
   return (
-    <div className="rounded-xl border border-white/10 bg-black/24 p-3">
-      <h3
-        className={
-          tone === "amber"
-            ? "text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f6d98e]"
-            : "text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9be9ff]"
-        }
-      >
-        {title}
-      </h3>
-      <ul className="mt-2 space-y-1.5 text-xs leading-5 text-slate-300">
-        {(values.length ? values : ["Not available from current context."]).map(
-          (value) => (
-            <li className="flex gap-2" key={value}>
-              <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-current opacity-70" />
-              <span>{value}</span>
-            </li>
-          ),
-        )}
-      </ul>
-    </div>
+    <details className="mt-4 border-t border-white/10 pt-4 text-xs">
+      <summary className="cursor-pointer font-semibold text-slate-300">
+        Data context
+      </summary>
+      <dl className="mt-3 space-y-2 rounded-lg bg-white/[0.025] p-3">
+        {rows.map(([label, value]) => (
+          <div className="grid grid-cols-[4.25rem_minmax(0,1fr)] gap-2" key={label}>
+            <dt className="text-slate-500">{label}</dt>
+            <dd className="min-w-0 break-words text-slate-300">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </details>
   );
 }
