@@ -317,6 +317,13 @@ export interface PlanningSnapshot {
   mapContext: {
     cameraSummary?: string;
     description: string;
+    extent?: {
+      xmax: number;
+      xmin: number;
+      ymax: number;
+      ymin: number;
+      spatialReference?: { wkid?: number };
+    };
     extentCaptured: boolean;
     extentSummary?: string;
   };

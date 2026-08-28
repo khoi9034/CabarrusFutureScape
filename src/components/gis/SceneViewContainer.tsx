@@ -242,6 +242,7 @@ interface CfsMapSnapshotCaptureResult {
   cameraSummary?: string;
   capturedAt?: string | null;
   dataUrl?: string | null;
+  extent?: FloodZoneExtent;
   extentSummary?: string;
   failureReason?: string | null;
   status: "captured" | "failed" | "unavailable";
@@ -250,6 +251,7 @@ interface CfsMapSnapshotCaptureResult {
 declare global {
   interface Window {
     __cfsCaptureMapSnapshot?: () => Promise<CfsMapSnapshotCaptureResult>;
+    __cfsRestoreMapSnapshot?: (extent: FloodZoneExtent) => Promise<void>;
     __cfsGetMapDebugState?: () => {
       assetsPath: string;
       basemapId: string | null;
@@ -1848,6 +1850,9 @@ export function SceneViewContainer() {
       if (window.__cfsCaptureMapSnapshot) {
         delete window.__cfsCaptureMapSnapshot;
       }
+      if (window.__cfsRestoreMapSnapshot) {
+        delete window.__cfsRestoreMapSnapshot;
+      }
       if (window.__cfsGetMapDebugState) {
         delete window.__cfsGetMapDebugState;
       }
@@ -3213,6 +3218,12 @@ function registerStaticMapSnapshotCapture() {
         cameraSummary: `Cabarrus County vector map; viewBox ${source.getAttribute("viewBox") ?? "county extent"}`,
         capturedAt: new Date().toISOString(),
         dataUrl,
+        extent: {
+          xmax: -80.276,
+          xmin: -80.806,
+          ymax: 35.504,
+          ymin: 35.185,
+        },
         extentSummary: "Cabarrus County, North Carolina",
         status: "captured",
       };
@@ -3300,9 +3311,8 @@ function registerSceneViewSnapshotCapture(
     }
 
     const capturedAt = new Date().toISOString();
-    const extentSummary = formatSceneViewExtent(
-      getSceneViewWgs84Extent(runtime, view),
-    );
+    const extent = getSceneViewWgs84Extent(runtime, view);
+    const extentSummary = formatSceneViewExtent(extent);
     const cameraSummary = formatSceneViewCamera(view);
 
     try {
@@ -3316,6 +3326,7 @@ function registerSceneViewSnapshotCapture(
         return {
           cameraSummary,
           capturedAt,
+          extent: extent ?? undefined,
           extentSummary,
           failureReason: "MapView screenshot API is not available.",
           status: "unavailable",
@@ -3328,6 +3339,7 @@ function registerSceneViewSnapshotCapture(
         return {
           cameraSummary,
           capturedAt,
+          extent: extent ?? undefined,
           extentSummary,
           failureReason: "MapView returned no screenshot image.",
           status: "failed",
@@ -3338,6 +3350,7 @@ function registerSceneViewSnapshotCapture(
         cameraSummary,
         capturedAt,
         dataUrl: screenshot.dataUrl,
+        extent: extent ?? undefined,
         extentSummary,
         status: "captured",
       };
@@ -3345,6 +3358,7 @@ function registerSceneViewSnapshotCapture(
       return {
         cameraSummary,
         capturedAt,
+        extent: extent ?? undefined,
         extentSummary,
         failureReason:
           error instanceof Error
@@ -3353,6 +3367,16 @@ function registerSceneViewSnapshotCapture(
         status: "failed",
       };
     }
+  };
+  window.__cfsRestoreMapSnapshot = async (extent) => {
+    if (view.destroyed) return;
+    await view.goTo(new runtime.Extent({
+      spatialReference: { wkid: 4326 },
+      xmax: extent.xmax,
+      xmin: extent.xmin,
+      ymax: extent.ymax,
+      ymin: extent.ymin,
+    }));
   };
 }
 

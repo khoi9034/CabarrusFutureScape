@@ -1255,19 +1255,30 @@ async function planningWorkflow(page) {
         { timeout: 60_000 },
       );
       await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
+      await page.getByTestId("planning-snapshot-new-note").fill("Local interaction persistence proof");
+      await page.getByTestId("planning-snapshot-confirm-save").click();
       const created = await createResponse;
       const createdPayload = await created.json();
       assert.equal(created.status(), 201, "Planning Snapshot create failed.");
+      assert.match(
+        createdPayload.data?.title ?? "",
+        /^Parcel CFS-PARCEL-0149726579 — Planning Review$/,
+      );
+      assert.equal(createdPayload.data?.notes, "Local interaction persistence proof");
       assert.match(createdPayload.data?.id ?? "", /^[0-9a-f-]{36}$/i, "Planning Snapshot create omitted its UUID.");
       snapshotId = createdPayload.data.id;
       rememberOwned("planning", snapshotId);
 
       await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
       const library = page.getByTestId("planning-snapshot-library");
-      await library.getByText("Planning Snapshot Library", { exact: true }).waitFor();
+      await library.getByText("Planning Snapshots", { exact: true }).waitFor();
       const card = library.locator(
         `[data-testid="planning-snapshot-card"][data-snapshot-id="${snapshotId}"]`,
       );
+      await card.waitFor({ timeout: 45_000 });
+      await card.getByTestId("planning-snapshot-open").click();
+      await page.locator('button[aria-label^="Workspace:"][aria-pressed="true"]').waitFor();
+      await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
       await card.waitFor({ timeout: 45_000 });
       const archiveResponse = page.waitForResponse(
         (response) =>

@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { DataRegistryPanel } from "@/components/dashboard/DataRegistryPanel";
 import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { EventStreamPanel } from "@/components/dashboard/EventStreamPanel";
@@ -88,6 +89,7 @@ import {
   type DevelopmentHotspotInspectionFocus,
 } from "@/lib/map/developmentHotspotInspection";
 import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
+import { planningSnapshotDefaultTitle } from "@/lib/product/planningSnapshotPresentation";
 import {
   getModeScopedActiveLayers,
   isExploreCountywideMode,
@@ -406,6 +408,9 @@ function OverviewModeContent({
 }) {
   const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
+  const [snapshotDialogOpen, setSnapshotDialogOpen] = useState(false);
+  const [snapshotName, setSnapshotName] = useState("");
+  const [snapshotNote, setSnapshotNote] = useState("");
   const [parcelIdCopied, setParcelIdCopied] = useState(false);
   const [countywideBriefOverride, setCountywideBriefOverride] = useState<{
     parcelId: string | null;
@@ -471,6 +476,18 @@ function OverviewModeContent({
     ),
   );
 
+  const openSnapshotDialog = useCallback(() => {
+    setSnapshotName(
+      planningSnapshotDefaultTitle({
+        hasDevelopmentActivity: Boolean(selectedDevelopmentHotspotContext),
+        overviewCommandMode,
+        selectedParcelId: selectedParcelOfficialId,
+      }),
+    );
+    setSnapshotNote("");
+    setSnapshotDialogOpen(true);
+  }, [overviewCommandMode, selectedDevelopmentHotspotContext, selectedParcelOfficialId]);
+
   const handleSaveOverviewSnapshot = useCallback(async () => {
     if (!planningSnapshotCanWrite || snapshotSaving) {
       return;
@@ -491,7 +508,7 @@ function OverviewModeContent({
         overviewCommandMode,
         Boolean(selectedParcelForSnapshot),
       );
-      const nextSnapshot = buildPlanningSnapshot({
+      const capturedSnapshot = buildPlanningSnapshot({
         activeLayerIds: scopedActiveLayerIds,
         activeLayerLabels,
         developmentActivity,
@@ -514,8 +531,22 @@ function OverviewModeContent({
           toIndicatorCenterSnapshotSummaries(indicatorCenterCards),
         selectedModelResearchContext,
       });
+      const nextSnapshot = {
+        ...capturedSnapshot,
+        notes: snapshotNote.trim(),
+        snapshotTitle:
+          snapshotName.trim() ||
+          planningSnapshotDefaultTitle({
+            hasDevelopmentActivity: Boolean(
+              capturedSnapshot.developmentActivityContext,
+            ),
+            overviewCommandMode: capturedSnapshot.overviewCommandMode,
+            selectedParcelId: capturedSnapshot.selectedParcelId,
+          }),
+      };
       const savedSnapshot = await savePlanningSnapshot(nextSnapshot);
       if (!savedSnapshot) return;
+      setSnapshotDialogOpen(false);
       setPlanningSnapshotView("overview");
       setSnapshotSaved(true);
       window.dispatchEvent(
@@ -546,12 +577,14 @@ function OverviewModeContent({
     selectedParcelForSnapshot,
     setPlanningSnapshotView,
     snapshotSaving,
+    snapshotName,
+    snapshotNote,
     scopedActiveLayerIds,
   ]);
 
   useEffect(() => {
     function handleCommandCenterSave() {
-      void handleSaveOverviewSnapshot();
+      openSnapshotDialog();
     }
     function handleCountywideIntelligence() {
       setOverviewCommandMode("countywide");
@@ -585,13 +618,26 @@ function OverviewModeContent({
       window.removeEventListener(CFS_OPEN_MODEL_LAB_EVENT, handleModelLab);
     };
   }, [
-    handleSaveOverviewSnapshot,
+    openSnapshotDialog,
     selectedParcelOfficialId,
     setOverviewCommandMode,
   ]);
 
   if (controllerOnly) {
-    return null;
+    return (
+      <PlanningSnapshotSaveDialog
+        activeLayerLabels={activeLayerLabels}
+        onClose={() => setSnapshotDialogOpen(false)}
+        onNameChange={setSnapshotName}
+        onNoteChange={setSnapshotNote}
+        onSave={() => void handleSaveOverviewSnapshot()}
+        open={snapshotDialogOpen}
+        selectedParcelId={selectedParcelOfficialId}
+        snapshotName={snapshotName}
+        snapshotNote={snapshotNote}
+        saving={snapshotSaving}
+      />
+    );
   }
 
   const countywideBriefVisible =
@@ -635,7 +681,7 @@ function OverviewModeContent({
               parcelId: selectedParcelOfficialId ?? null,
             });
           }}
-          onSaveSnapshot={handleSaveOverviewSnapshot}
+          onSaveSnapshot={openSnapshotDialog}
           selectedModelResearchContext={selectedModelResearchContext}
           selectedParcelId={selectedParcelOfficialId}
           snapshotSaving={snapshotSaving}
@@ -653,7 +699,7 @@ function OverviewModeContent({
             setPlanningSnapshotView("overview");
             setProductMode("due_diligence");
           }}
-          onSaveSnapshot={handleSaveOverviewSnapshot}
+          onSaveSnapshot={openSnapshotDialog}
           selectedGroupIds={selectedIndicatorCenterGroupIds}
           selectedIndicator={selectedIndicatorCenterContext}
           selectedParcelId={selectedParcelOfficialId}
@@ -668,7 +714,7 @@ function OverviewModeContent({
             setPlanningSnapshotView("overview");
             setProductMode("due_diligence");
           }}
-          onSaveSnapshot={handleSaveOverviewSnapshot}
+          onSaveSnapshot={openSnapshotDialog}
           planningSnapshot={planningSnapshot}
           savedPlanningSnapshots={savedPlanningSnapshots}
           selectedParcelId={selectedParcelOfficialId}
@@ -688,7 +734,7 @@ function OverviewModeContent({
           }}
           onCopyParcelId={handleCopyParcelId}
           onFocusMap={() => setMapFocusMode(true)}
-          onSaveSnapshot={handleSaveOverviewSnapshot}
+          onSaveSnapshot={openSnapshotDialog}
           onShowSelectedParcel={() => {
             setCountywideBriefOverride(null);
           }}
@@ -714,7 +760,139 @@ function OverviewModeContent({
         onClear={clearSelectedSchoolUtilizationZone}
         zone={selectedSchoolUtilizationZone}
       />
+      <PlanningSnapshotSaveDialog
+        activeLayerLabels={activeLayerLabels}
+        onClose={() => setSnapshotDialogOpen(false)}
+        onNameChange={setSnapshotName}
+        onNoteChange={setSnapshotNote}
+        onSave={() => void handleSaveOverviewSnapshot()}
+        open={snapshotDialogOpen}
+        selectedParcelId={selectedParcelOfficialId}
+        snapshotName={snapshotName}
+        snapshotNote={snapshotNote}
+        saving={snapshotSaving}
+      />
     </div>
+  );
+}
+
+function PlanningSnapshotSaveDialog({
+  activeLayerLabels,
+  onClose,
+  onNameChange,
+  onNoteChange,
+  onSave,
+  open,
+  saving,
+  selectedParcelId,
+  snapshotName,
+  snapshotNote,
+}: {
+  activeLayerLabels: string[];
+  onClose: () => void;
+  onNameChange: (value: string) => void;
+  onNoteChange: (value: string) => void;
+  onSave: () => void;
+  open: boolean;
+  saving: boolean;
+  selectedParcelId: string | null;
+  snapshotName: string;
+  snapshotNote: string;
+}) {
+  if (!open || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      aria-labelledby="planning-snapshot-dialog-title"
+      aria-modal="true"
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-[#020611]/75 p-4 backdrop-blur-sm"
+      data-testid="planning-snapshot-save-dialog"
+      role="dialog"
+    >
+      <form
+        className="w-full max-w-lg rounded-xl border border-[#68d8ff]/25 bg-[#081321] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.6)]"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSave();
+        }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+              Save Planning Snapshot
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-white" id="planning-snapshot-dialog-title">
+              Save what you are looking at now
+            </h2>
+          </div>
+          <button
+            aria-label="Close Save Planning Snapshot"
+            className="rounded-md border border-white/10 p-2 text-slate-400 hover:bg-white/[0.06] hover:text-white"
+            disabled={saving}
+            onClick={onClose}
+            type="button"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mt-5 grid gap-4">
+          <label className="grid gap-1.5 text-xs font-semibold text-slate-300">
+            Name
+            <input
+              autoFocus
+              className="rounded-md border border-white/12 bg-black/25 px-3 py-2.5 text-sm text-white outline-none focus:border-[#68d8ff]/55"
+              data-testid="planning-snapshot-new-name"
+              maxLength={240}
+              onChange={(event) => onNameChange(event.target.value)}
+              value={snapshotName}
+            />
+          </label>
+          <label className="grid gap-1.5 text-xs font-semibold text-slate-300">
+            Optional note
+            <textarea
+              className="min-h-20 resize-y rounded-md border border-white/12 bg-black/25 px-3 py-2.5 text-sm text-white outline-none focus:border-[#68d8ff]/55"
+              data-testid="planning-snapshot-new-note"
+              maxLength={4000}
+              onChange={(event) => onNoteChange(event.target.value)}
+              placeholder="What are you reviewing?"
+              value={snapshotNote}
+            />
+          </label>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] p-3">
+          <p className="text-xs font-semibold text-slate-200">What will be saved</p>
+          <ul className="mt-2 grid gap-1.5 text-xs text-slate-400 sm:grid-cols-2">
+            <li>✓ Current map view</li>
+            <li>✓ {activeLayerLabels.length} visible planning layers</li>
+            <li>✓ {selectedParcelId ? `Selected parcel ${selectedParcelId}` : "Current area context"}</li>
+            <li>✓ Planning intelligence</li>
+            <li>✓ Current analysis context</li>
+          </ul>
+        </div>
+
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            className="rounded-md border border-white/12 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-white/[0.05]"
+            disabled={saving}
+            onClick={onClose}
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            className="rounded-md border border-[#55d38f]/35 bg-[#55d38f]/12 px-4 py-2 text-sm font-semibold text-[#c5f8d7] disabled:opacity-60"
+            data-testid="planning-snapshot-confirm-save"
+            disabled={saving || !snapshotName.trim()}
+            type="submit"
+          >
+            {saving ? "Saving…" : "Save Snapshot"}
+          </button>
+        </div>
+      </form>
+    </div>,
+    document.body,
   );
 }
 
@@ -3335,6 +3513,7 @@ interface PlanningMapSnapshotCapture {
   cameraSummary?: string;
   capturedAt?: string | null;
   dataUrl?: string | null;
+  extent?: PlanningSnapshot["mapContext"]["extent"];
   extentSummary?: string;
   failureReason?: string | null;
   status: "captured" | "failed" | "unavailable";
@@ -4207,6 +4386,7 @@ function buildPlanningSnapshot({
     ],
     mapContext: {
       cameraSummary: mapSnapshot.cameraSummary,
+      extent: mapSnapshot.extent,
       description:
         activeLayerLabels.length > 0
           ? `Snapshot captured from ${focusModeLabel} with ${activeLayerLabels.join(", ")} active.`
@@ -4849,6 +5029,7 @@ function buildContextOnlyPlanningSnapshot({
     ],
     mapContext: {
       cameraSummary: mapSnapshot.cameraSummary,
+      extent: mapSnapshot.extent,
       description:
         activeLayerLabels.length > 0
           ? `Snapshot captured from ${focusModeLabel} with ${activeLayerSummary} active.`

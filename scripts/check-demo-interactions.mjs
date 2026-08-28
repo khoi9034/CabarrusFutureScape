@@ -1199,6 +1199,12 @@ async function planningChecks(page, baseUrl) {
       "Planning Snapshot did not capture the visible map.",
     );
     await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
+    assert.match(
+      await page.getByTestId("planning-snapshot-new-name").inputValue(),
+      /^Model Research View — [A-Z][a-z]{2} \d{1,2}, \d{4}$/,
+    );
+    await page.getByTestId("planning-snapshot-new-note").fill("Browser Demo persistence proof");
+    await page.getByTestId("planning-snapshot-confirm-save").click();
     await page
       .locator('[data-testid="planning-persistence-status"][data-state="saved"]')
       .waitFor();
@@ -1207,15 +1213,19 @@ async function planningChecks(page, baseUrl) {
     await page
       .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
       .waitFor();
-    await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
-    await page.getByText("1 saved", { exact: true }).first().waitFor();
-    await page
-      .getByAltText("Planning snapshot map thumbnail", { exact: true })
-      .first()
-      .waitFor({ timeout: 20_000 });
+    await page.getByText("Planning Snapshots", { exact: true }).waitFor();
+    await page.getByText("Saved analyses", { exact: true }).waitFor();
+    const savedAnalysis = page.getByTestId("planning-snapshot-card").first();
+    await savedAnalysis.getByText(/Model research view with/).waitFor();
+    await savedAnalysis.getByText(/Browser Demo persistence proof/).waitFor();
+    await page.getByTestId("planning-snapshot-open").first().click();
+    await page.locator('button[aria-label^="Workspace:"][aria-pressed="true"]').waitFor();
+    await snapshotMode.click();
+    await page.getByText("Planning Snapshots", { exact: true }).waitFor();
     page.once("dialog", (dialog) => dialog.accept("Browser acceptance snapshot"));
     await page.getByRole("button", { name: "Rename", exact: true }).first().click();
     await page.getByText("Browser acceptance snapshot", { exact: true }).waitFor();
+    await page.getByTestId("planning-snapshot-details").first().click();
     const section = page.getByRole("checkbox", { name: /^(?:Map|Dashboard) Snapshot$/ });
     if (await section.count()) {
       const before = await section.isChecked();
@@ -1239,7 +1249,7 @@ async function planningChecks(page, baseUrl) {
           await page
             .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
             .waitFor();
-          await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
+          await page.getByText("Planning Snapshots", { exact: true }).waitFor();
           assert.equal(
             await page
               .getByRole("checkbox", { name: /^(?:Map|Dashboard) Snapshot$/ })
@@ -1258,7 +1268,7 @@ async function planningChecks(page, baseUrl) {
     assert.equal(await page.evaluate(() => sessionStorage.getItem("cfs-print-invoked")), "true");
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Archive", exact: true }).first().click();
-    await page.getByRole("heading", { name: "No planning snapshots saved yet", exact: true }).waitFor();
+    await page.getByTestId("planning-snapshot-library").getByRole("heading", { name: "No planning snapshots saved yet", exact: true }).waitFor();
   });
 }
 

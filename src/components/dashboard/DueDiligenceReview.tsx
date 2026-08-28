@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import {
   developmentModelLabSummary,
@@ -51,6 +51,7 @@ import { useSelectedParcelPermitEvents } from "@/hooks/useSelectedParcelPermitEv
 import { useSelectedParcelSchoolConstraint } from "@/hooks/useSelectedParcelSchoolConstraint";
 import { useTransportationContextSummary } from "@/hooks/useTransportationContextSummary";
 import { cn, formatCurrency } from "@/lib/utils";
+import { planningSnapshotSummary } from "@/lib/product/planningSnapshotPresentation";
 import type {
   ParcelReviewView,
   PlanningSnapshot,
@@ -112,11 +113,49 @@ export function DueDiligenceReview({
     retryPlanningSnapshotSave,
     savePlanningSnapshotChanges,
     savedPlanningSnapshots,
+    selectParcel,
+    setActiveLayerIds,
     setActivePlanningSnapshot,
+    setDevelopmentHotspotsEnabled,
+    setFloodConstraintsEnabled,
+    setFloodZonesEnabled,
+    setOverviewCommandMode,
+    setSchoolUtilizationZonesEnabled,
     setPlanningSnapshotNotes,
     setPlanningSnapshotSectionIncluded,
     setPlanningSnapshotView,
   } = useDashboardState();
+
+  function openSnapshotInPlanning(snapshotId: string) {
+    const snapshot = savedPlanningSnapshots.find(
+      (item) => item.snapshotId === snapshotId,
+    );
+    if (!snapshot) return;
+
+    setActivePlanningSnapshot(snapshotId);
+    setActiveLayerIds(snapshot.activeLayerIds ?? []);
+    setOverviewCommandMode(snapshot.overviewCommandMode ?? "countywide");
+    setDevelopmentHotspotsEnabled(Boolean(snapshot.developmentActivityContext));
+    setFloodConstraintsEnabled(
+      snapshot.activeLayers.some((layer) => /flood constraints/i.test(layer)),
+    );
+    setFloodZonesEnabled(
+      snapshot.activeLayers.some((layer) => /fema flood/i.test(layer)),
+    );
+    setSchoolUtilizationZonesEnabled(
+      snapshot.activeLayers.some((layer) => /school utilization/i.test(layer)),
+    );
+    if (snapshot.selectedParcelId) {
+      selectParcel(snapshot.selectedParcelId, { source: "dashboard" });
+    }
+    setPlanningSnapshotView("overview");
+    setProductMode("workspace");
+    window.setTimeout(() => {
+      if (snapshot.mapContext.extent) {
+        void window.__cfsRestoreMapSnapshot?.(snapshot.mapContext.extent);
+      }
+    }, 0);
+  }
 
   const snapshotLibraryProps: PlanningSnapshotLibraryProps = {
     activeSnapshotId: activePlanningSnapshotId,
@@ -125,6 +164,8 @@ export function DueDiligenceReview({
     legacyNotice: planningSnapshotLegacyNotice,
     onDelete: deletePlanningSnapshot,
     onReload: reloadPlanningSnapshots,
+    onNew: () => setProductMode("workspace"),
+    onOpenInPlanning: openSnapshotInPlanning,
     onRename: renamePlanningSnapshot,
     onRetry: retryPlanningSnapshotSave,
     onSaveChanges: savePlanningSnapshotChanges,
@@ -1626,6 +1667,8 @@ interface PlanningSnapshotLibraryProps {
   hasUnsavedChanges: boolean;
   legacyNotice: string | null;
   onDelete: (snapshotId: string) => Promise<boolean>;
+  onNew: () => void;
+  onOpenInPlanning: (snapshotId: string) => void;
   onReload: () => void;
   onRename: (snapshotId: string, snapshotTitle: string) => void;
   onRetry: () => Promise<PlanningSnapshot | null>;
@@ -1645,6 +1688,8 @@ function PlanningSnapshotLibraryPanel({
   hasUnsavedChanges,
   legacyNotice,
   onDelete,
+  onNew,
+  onOpenInPlanning,
   onReload,
   onRename,
   onRetry,
@@ -1655,10 +1700,26 @@ function PlanningSnapshotLibraryPanel({
   persistence,
   snapshots,
 }: PlanningSnapshotLibraryProps) {
+  const [filter, setFilter] = useState<"all" | "area" | "parcel">("all");
+  const [search, setSearch] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
   const activeSnapshot = snapshots.find(
     (snapshot) => snapshot.snapshotId === activeSnapshotId,
   );
   const busy = persistence.status === "loading" || persistence.status === "saving";
+  const visibleSnapshots = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return snapshots.filter((snapshot) => {
+      if (filter === "parcel" && !snapshot.selectedParcelId) return false;
+      if (filter === "area" && snapshot.selectedParcelId) return false;
+      return (
+        !query ||
+        getSnapshotLibraryTitle(snapshot).toLocaleLowerCase().includes(query) ||
+        planningSnapshotSummary(snapshot).toLocaleLowerCase().includes(query) ||
+        snapshot.notes?.toLocaleLowerCase().includes(query)
+      );
+    });
+  }, [filter, search, snapshots]);
 
   return (
     <section
@@ -1668,20 +1729,50 @@ function PlanningSnapshotLibraryPanel({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-            Planning Snapshot Library
+            Planning Snapshots
           </p>
-          <h3 className="mt-1 text-base font-semibold text-white">
-            Saved report snapshots
+          <h3 className="mt-1 text-lg font-semibold text-white">
+            Saved analyses
           </h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
-            Compact saved views from Overview. Open one to build or print the
-            executive summary.
+            Open a saved analysis and continue where you left off.
           </p>
         </div>
-        <StatusBadge
-          label={`${snapshots.length} saved`}
-          tone={snapshots.length ? "info" : "neutral"}
+        <button
+          className="rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-3 py-2 text-xs font-semibold text-[#bdf6d1]"
+          onClick={onNew}
+          type="button"
+        >
+          New Snapshot
+        </button>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <input
+          aria-label="Search snapshots"
+          className="min-w-0 flex-1 rounded-md border border-white/10 bg-black/22 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-[#68d8ff]/45"
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search snapshots..."
+          value={search}
         />
+        <div className="flex gap-1 rounded-md border border-white/10 bg-black/18 p-1">
+          {(["all", "parcel", "area"] as const).map((value) => (
+            <button
+              aria-pressed={filter === value}
+              className={cn(
+                "rounded px-3 py-1.5 text-xs font-semibold capitalize",
+                filter === value
+                  ? "bg-[#68d8ff]/14 text-[#c6f5ff]"
+                  : "text-slate-400 hover:text-white",
+              )}
+              key={value}
+              onClick={() => setFilter(value)}
+              type="button"
+            >
+              {value === "all" ? "Recent" : value}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div
@@ -1705,11 +1796,11 @@ function PlanningSnapshotLibraryPanel({
         </p>
       ) : null}
 
-      {activeSnapshot ? (
+      {activeSnapshot && showDetails ? (
         <div className="mt-4 grid gap-3 rounded-lg border border-[#68d8ff]/20 bg-[#68d8ff]/[0.045] p-3">
           <div className="grid gap-3 md:grid-cols-2">
             <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-              Snapshot title
+              Name
               <input
                 className="rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45"
                 data-testid="planning-snapshot-title"
@@ -1722,14 +1813,14 @@ function PlanningSnapshotLibraryPanel({
               />
             </label>
             <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-              Staff notes
+              Notes
               <input
                 className="rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45"
                 data-testid="planning-snapshot-notes"
                 disabled={!canWrite || busy}
                 maxLength={4000}
                 onChange={(event) => onSetNotes(event.target.value)}
-                placeholder="Optional governed snapshot note"
+                placeholder="Optional note"
                 value={activeSnapshot.notes ?? ""}
               />
             </label>
@@ -1751,7 +1842,7 @@ function PlanningSnapshotLibraryPanel({
               onClick={() => void onVersion()}
               type="button"
             >
-              Create Version {activeSnapshot.currentVersion ?? 1}
+              Save as New Version
             </button>
             <button
               className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200"
@@ -1760,7 +1851,7 @@ function PlanningSnapshotLibraryPanel({
               onClick={onReload}
               type="button"
             >
-              Reload Library
+              Refresh
             </button>
             {persistence.status === "conflict" ||
             persistence.status === "error" ||
@@ -1776,16 +1867,17 @@ function PlanningSnapshotLibraryPanel({
               </button>
             ) : null}
             <span className="text-xs text-slate-400">
-              Current version: {activeSnapshot.currentVersion ?? 1}
-              {persistence.sessionOnly ? " / session-only demo" : ""}
+              Version History: {activeSnapshot.currentVersion ?? 1} saved
+              {(activeSnapshot.currentVersion ?? 1) === 1 ? " version" : " versions"}
+              {persistence.sessionOnly ? " / Demo session" : ""}
             </span>
           </div>
         </div>
       ) : null}
 
-      {snapshots.length ? (
-        <div className="mt-4 grid gap-3 xl:grid-cols-2">
-          {snapshots.map((snapshot) => {
+      {visibleSnapshots.length ? (
+        <div className="mt-4 grid gap-2">
+          {visibleSnapshots.map((snapshot) => {
             const active = snapshot.snapshotId === activeSnapshotId;
             const dashboardSnapshot = isIndicatorDashboardSnapshot(snapshot);
             const dashboardCaptured = hasCapturedDashboardImage(snapshot);
@@ -1808,8 +1900,8 @@ function PlanningSnapshotLibraryPanel({
                 data-testid="planning-snapshot-card"
                 key={snapshot.snapshotId}
               >
-                <div className="grid gap-0 sm:grid-cols-[9.5rem_minmax(0,1fr)]">
-                  <div className="relative min-h-28 overflow-hidden border-b border-white/10 bg-[#020814] sm:border-b-0 sm:border-r">
+                <div className="grid gap-0">
+                  <div className="hidden">
                     {dashboardSnapshot && dashboardCaptured && snapshot.dashboardImageDataUrl ? (
                       <Image
                         alt={
@@ -1862,52 +1954,42 @@ function PlanningSnapshotLibraryPanel({
                           {formatDateTime(snapshot.createdAt)}
                         </p>
                       </div>
-                      <StatusBadge
-                        label={getSnapshotVisualStatusLabel(snapshot)}
-                        tone={captured ? "positive" : "caution"}
-                      />
+                      <span className="shrink-0 text-xs text-slate-500">
+                        {snapshot.selectedParcelId
+                          ? `Parcel ${snapshot.selectedParcelId}`
+                          : getSnapshotContextLabel(snapshot)}
+                      </span>
                     </div>
 
-                    <div className="mt-3 grid gap-2 text-xs text-slate-400">
-                      <CompactSnapshotFact
-                        label="Parcel"
-                        value={snapshot.selectedParcelId ?? "Map/context only"}
-                      />
-                      <CompactSnapshotFact
-                        label="Type"
-                        value={getSnapshotContextLabel(snapshot)}
-                      />
-                      <CompactSnapshotFact
-                        label="Visual"
-                        value={
-                          dashboardSnapshot
-                            ? captured
-                              ? "Dashboard captured"
-                              : "Dashboard unavailable"
-                            : captured
-                              ? "Map captured"
-                              : "Map unavailable"
-                        }
-                      />
-                      <CompactSnapshotFact
-                        label="Layers"
-                        value={`${snapshot.activeLayers.length} included`}
-                      />
-                      <CompactSnapshotFact
-                        label="Brief"
-                        value={getSnapshotIntelligenceBriefTitle(snapshot)}
-                      />
-                    </div>
+                    <p className="mt-2 text-sm leading-5 text-slate-300">
+                      {planningSnapshotSummary(snapshot)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {snapshot.activeLayers.length} visible {snapshot.activeLayers.length === 1 ? "layer" : "layers"}
+                      {snapshot.developmentActivityContext ? " • Selected development context" : ""}
+                      {snapshot.notes ? ` • ${snapshot.notes}` : ""}
+                    </p>
 
-                    <div className="mt-3 grid grid-cols-3 gap-2">
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                       <button
-                        className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2 text-xs font-semibold text-[#bdf6d1] transition hover:bg-[#55d38f]/15"
                         data-testid="planning-snapshot-open"
-                        onClick={() => onUse(snapshot.snapshotId)}
+                        onClick={() => onOpenInPlanning(snapshot.snapshotId)}
                         type="button"
                       >
-                        <FileText className="h-3.5 w-3.5" />
+                        <MapPinned className="h-3.5 w-3.5" />
                         Open
+                      </button>
+                      <button
+                        className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300"
+                        data-testid="planning-snapshot-details"
+                        onClick={() => {
+                          onUse(snapshot.snapshotId);
+                          setShowDetails(true);
+                        }}
+                        type="button"
+                      >
+                        Details
                       </button>
                       <button
                         className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
@@ -1953,9 +2035,24 @@ function PlanningSnapshotLibraryPanel({
           })}
         </div>
       ) : (
-        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] p-4 text-sm leading-6 text-slate-400">
-          No planning snapshots saved yet. Go to Workspace, search/select a
-          parcel or adjust the map, then click Save Snapshot.
+        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] p-6 text-center">
+          <h4 className="text-base font-semibold text-white">
+            {snapshots.length ? "No snapshots match your search" : "No planning snapshots saved yet"}
+          </h4>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">
+            {snapshots.length
+              ? "Try a different search or view."
+              : "Save a Planning Snapshot to preserve the map, layers, selected property, and analysis you are working with."}
+          </p>
+          {!snapshots.length ? (
+            <button
+              className="mt-4 rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2 text-sm font-semibold text-[#bdf6d1]"
+              onClick={onNew}
+              type="button"
+            >
+              Go to Planning
+            </button>
+          ) : null}
         </div>
       )}
     </section>

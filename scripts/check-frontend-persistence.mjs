@@ -177,12 +177,17 @@ function isRequiredApiWork(url) {
   return url.origin === API_ORIGIN;
 }
 
-async function waitForRequiredApiDrain(context, label) {
+async function waitForRequiredApiDrain(context, label, { ignoreHealth = false } = {}) {
   const deadline = Date.now() + 60_000;
   let quietSince = null;
   while (Date.now() < deadline) {
-    const pending = contextPendingRequiredApiRequests.get(context);
-    if (!pending?.size) {
+    const pending = [...(contextPendingRequiredApiRequests.get(context)?.values() ?? [])].filter(
+      (entry) =>
+        !ignoreHealth ||
+        entry.method !== "GET" ||
+        !REQUIRED_HEALTH_PATHS.has(new URL(entry.url).pathname),
+    );
+    if (!pending.length) {
       quietSince ??= Date.now();
       if (Date.now() - quietSince >= 500) return;
     } else {
@@ -190,11 +195,53 @@ async function waitForRequiredApiDrain(context, label) {
     }
     await delay(100);
   }
-  const pendingEntries = [...(contextPendingRequiredApiRequests.get(context)?.values() ?? [])];
+  const pendingEntries = [...(contextPendingRequiredApiRequests.get(context)?.values() ?? [])].filter(
+    (entry) =>
+      !ignoreHealth ||
+      entry.method !== "GET" ||
+      !REQUIRED_HEALTH_PATHS.has(new URL(entry.url).pathname),
+  );
   const pending = pendingEntries
     .slice(0, 8)
     .map(({ method, url }) => `${method} ${redactMapDiagnosticUrl(url)}`);
   throw new Error(`${label} left required API requests pending: ${pending.join(", ")}`);
+}
+
+function reconcileAcceptedTeardownHealthRequests(context, pages) {
+  const pending = contextPendingRequiredApiRequests.get(context);
+  if (!pending?.size) return;
+  for (const [request, entry] of pending) {
+    if (
+      !pages.has(entry.page) ||
+      !acceptedTeardownPages.has(entry.page) ||
+      entry.method !== "GET" ||
+      !REQUIRED_HEALTH_PATHS.has(new URL(entry.url).pathname)
+    ) {
+      continue;
+    }
+    assert(
+      entry.responseStatus === null ||
+        (entry.responseStatus >= 200 && entry.responseStatus < 300),
+      `Accepted teardown observed a failed required health response: HTTP ${entry.responseStatus} ${redactMapDiagnosticUrl(entry.url)}`,
+    );
+    report.diagnostics.accepted_stale_required_api_requests.push({
+      acceptance_generation: entry.acceptanceGeneration,
+      accepted_teardown: true,
+      method: entry.method,
+      observed_navigation_epoch: entry.navigationEpoch,
+      page_url: redactMapDiagnosticUrl(entry.page.url()),
+      request_id: entry.requestId,
+      request_sequence: entry.sequence,
+      started_at: entry.startedAt,
+      url: redactMapDiagnosticUrl(entry.url),
+    });
+    const healthLifecycle = healthRequestLifecycles.get(request);
+    if (healthLifecycle) {
+      healthLifecycle.accepted_teardown_at = new Date().toISOString();
+      healthLifecycle.terminal_state = "accepted_teardown";
+    }
+    pending.delete(request);
+  }
 }
 
 function reconcileSupersededRequiredApiRequests(page) {
@@ -446,7 +493,7 @@ async function seedRestartRecords(context) {
       await goto(page, LOCAL_URL, "?app=planning");
       const activeRenderer = await waitForInteractiveMap(page);
       const snapshotCreated = await productWrite(page, "POST", /^\/api\/v1\/planning\/snapshots$/, () =>
-        page.getByTestId("planning-snapshot-save").click(),
+        submitPlanningSnapshot(page, () => page.getByTestId("planning-snapshot-save").click(), `${PREFIX} Restart Planning`, "Restart persistence proof"),
       );
       const snapshotId = productId(snapshotCreated, "Restart Planning snapshot");
       remember("planning", "/api/v1/planning/snapshots", snapshotId);
@@ -840,7 +887,7 @@ async function localPlanning(context) {
         const save = page.getByTestId("planning-snapshot-save");
         await poll(async () => !(await save.isDisabled()), 60_000);
         const created = await productWrite(page, "POST", /^\/api\/v1\/planning\/snapshots$/, () =>
-          save.click(),
+          submitPlanningSnapshot(page, () => save.click(), `${PREFIX} Late List Planning`),
         );
         const id = productId(created, "Planning snapshot created while initial list was pending");
         remember("planning", "/api/v1/planning/snapshots", id);
@@ -867,7 +914,7 @@ async function localPlanning(context) {
       const activeRenderer = await waitForInteractiveMap(page);
       const create = page.getByTestId("planning-snapshot-save");
       await create.waitFor({ timeout: 45_000 });
-      const created = await productWrite(page, "POST", /^\/api\/v1\/planning\/snapshots$/, () => create.click());
+      const created = await productWrite(page, "POST", /^\/api\/v1\/planning\/snapshots$/, () => submitPlanningSnapshot(page, () => create.click(), `${PREFIX} Planning`));
       const id = productId(created, "Planning snapshot create");
       remember("planning", "/api/v1/planning/snapshots", id);
       const createdRenderer = created.data.map_state.map_renderer;
@@ -1521,6 +1568,7 @@ async function localPermissionDenial(context, ownedAskConversationId) {
       });
       await goto(page, LOCAL_URL, "?app=planning");
       await page.getByTestId("planning-snapshot-save").click();
+      await page.getByTestId("planning-snapshot-confirm-save").click();
       const statuses = page.getByTestId("planning-persistence-status");
       await statuses.first().waitFor({ timeout: 30_000 });
       await poll(async () => (await statuses.allInnerTexts()).some((text) => /permission|denied|not authorized/i.test(text)));
@@ -1760,7 +1808,7 @@ async function localAuthorizationMatrix() {
       await waitForInteractiveMap(page);
       const create = page.getByTestId("planning-snapshot-save").first();
       await poll(async () => !(await create.isDisabled()));
-      const created = await productWrite(page, "POST", /^\/api\/v1\/planning\/snapshots$/, () => create.click());
+      const created = await productWrite(page, "POST", /^\/api\/v1\/planning\/snapshots$/, () => submitPlanningSnapshot(page, () => create.click(), `${PREFIX} Planner Planning`));
       const id = productId(created, "Planner Planning snapshot create");
       remember("planning", "/api/v1/planning/snapshots", id);
       await planningStatus(page, ["saved", "ready"]);
@@ -2215,6 +2263,7 @@ async function demoChecks() {
     await runCase("DEMO", "Planning, report drafts, Economics, Report Bucket, and Ask CFS remain session-only", async () => {
       await goto(page, baseUrl, "?app=planning", true);
       await page.getByTestId("planning-snapshot-save").click();
+      await page.getByTestId("planning-snapshot-confirm-save").click();
       await planningStatus(page, ["saved", "ready"]);
       const card = page.getByTestId("planning-snapshot-card").first();
       if (!(await card.isVisible())) {
@@ -2369,14 +2418,23 @@ async function loadEconomicScenario(page, id, name) {
   await poll(async () => (await page.getByTestId("economic-scenario-name").inputValue()) === name);
 }
 
+async function submitPlanningSnapshot(page, trigger, name, note = "") {
+  await trigger();
+  const dialog = page.getByTestId("planning-snapshot-save-dialog");
+  await dialog.waitFor({ timeout: 30_000 });
+  await dialog.getByTestId("planning-snapshot-new-name").fill(name);
+  if (note) await dialog.getByTestId("planning-snapshot-new-note").fill(note);
+  await dialog.getByTestId("planning-snapshot-confirm-save").click();
+}
+
 async function openPlanningSnapshot(page, id) {
   const card = planningCard(page, id);
   if (!(await card.isVisible().catch(() => false))) {
     await page.getByRole("button", { name: /^Planning Snapshot:/ }).click();
   }
   await card.waitFor({ timeout: 45_000 });
-  const open = card.getByTestId("planning-snapshot-open");
-  if (await open.count()) await open.click();
+  const details = card.getByTestId("planning-snapshot-details");
+  if (await details.count()) await details.click();
   else await card.click();
   await page.getByTestId("planning-snapshot-title").waitFor({ timeout: 30_000 });
 }
@@ -2396,14 +2454,10 @@ async function waitForInteractiveMap(page) {
 async function openPlanningAskCfs(page) {
   const query = page.getByTestId("ask-cfs-query").first();
   if (!(await query.isVisible().catch(() => false))) {
-    const intelligenceBrief = page.locator("#cfs-intelligence-brief");
-    if (await intelligenceBrief.getByRole("heading", { name: "Countywide indicators", exact: true }).isVisible()) {
-      await intelligenceBrief.getByText("Land Opportunity Screener", { exact: true }).waitFor({ timeout: 45_000 });
-    }
     await waitForRequiredApiDrain(page.context(), "Planning workspace switch");
-    const indicatorCenter = page.getByTestId("command-center-indicator-center");
-    await indicatorCenter.waitFor({ timeout: 45_000 });
-    await indicatorCenter.click();
+    const openAskCfs = page.getByRole("button", { name: "Open Ask CFS", exact: true });
+    await openAskCfs.waitFor({ timeout: 45_000 });
+    await openAskCfs.click();
     await query.waitFor({ timeout: 45_000 });
     await waitForRequiredApiDrain(page.context(), "Ask CFS startup");
     return;
@@ -3241,18 +3295,22 @@ async function cacheMapHealthBeforeTeardown(page) {
 async function closeAcceptedPage(page) {
   if (page.isClosed()) return;
   await cacheMapHealthBeforeTeardown(page);
-  await waitForRequiredApiDrain(page.context(), "Page teardown");
   acceptedTeardownPages.add(page);
+  await waitForRequiredApiDrain(page.context(), "Page teardown", { ignoreHealth: true });
   await page.close();
+  reconcileAcceptedTeardownHealthRequests(page.context(), new Set([page]));
+  await waitForRequiredApiDrain(page.context(), "Page teardown");
 }
 
 async function closeAcceptedContext(context) {
   const pages = context.pages().filter((page) => !page.isClosed());
   for (const page of pages) await cacheMapHealthBeforeTeardown(page);
-  await waitForRequiredApiDrain(context, "Context teardown");
   for (const page of pages) acceptedTeardownPages.add(page);
+  await waitForRequiredApiDrain(context, "Context teardown", { ignoreHealth: true });
   try {
     await context.close();
+    reconcileAcceptedTeardownHealthRequests(context, new Set(pages));
+    await waitForRequiredApiDrain(context, "Context teardown");
     assert.equal(
       contextPendingRequiredApiRequests.get(context)?.size ?? 0,
       0,

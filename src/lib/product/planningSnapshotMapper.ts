@@ -178,6 +178,7 @@ function planningMapState(snapshot: PlanningSnapshot): JsonObject {
     active_layer_labels: snapshot.activeLayers,
     camera_summary: snapshot.mapContext.cameraSummary ?? null,
     description: snapshot.mapContext.description,
+    extent: snapshot.mapContext.extent ?? null,
     extent_captured: snapshot.mapContext.extentCaptured,
     extent_summary: snapshot.mapContext.extentSummary ?? null,
     map_renderer: currentMapRenderer() ?? snapshot.mapRenderer ?? "unknown",
