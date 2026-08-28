@@ -65,7 +65,7 @@ const iconStyles: Record<ProductCard["accent"], string> = {
 export function CfsMasterHome() {
   return (
     <main
-      className="relative min-h-screen overflow-x-hidden bg-[#03070d] px-4 py-8 text-slate-100 sm:px-6 lg:px-8"
+      className="cfs-county-home relative min-h-screen overflow-x-hidden bg-[#03070d] px-4 py-8 text-slate-100 sm:px-6 lg:px-8"
       data-testid="cfs-master-home"
     >
       <div className="pointer-events-none absolute inset-0 metric-grid opacity-70" />

@@ -1,24 +1,31 @@
 :root {
-  --background: #03070d;
-  --foreground: #edf4ff;
-  --panel: rgba(10, 18, 30, 0.78);
-  --panel-strong: rgba(5, 12, 22, 0.94);
-  --graphite: #171b23;
-  --gold: #d8b86a;
-  --cyan: #68d8ff;
-  --teal: #29e4c5;
-  --magenta: #ec5cff;
-  --green: #55d38f;
+  --brand-dark-blue: #003882;
+  --brand-light-blue: #00a3e0;
+  --brand-pale-blue: #e5f5fb;
+  --brand-nectar: #fae073;
+  --brand-orange: #d48500;
+  --brand-green: #338c26;
+  --brand-silver: #8f8f8c;
+  --background: #041f3d;
+  --foreground: #f7fbff;
+  --panel: rgba(5, 45, 82, 0.88);
+  --panel-strong: rgba(3, 33, 64, 0.97);
+  --graphite: #123552;
+  --gold: var(--brand-nectar);
+  --cyan: var(--brand-light-blue);
+  --teal: var(--brand-light-blue);
+  --magenta: var(--brand-light-blue);
+  --green: var(--brand-green);
   --danger: #ff6b6b;
-  --econ-bg: #11100e;
-  --econ-panel: rgba(31, 29, 24, 0.9);
-  --econ-border: rgba(216, 184, 106, 0.18);
-  --econ-gold: #d8b86a;
-  --econ-green: #7dbf7a;
+  --econ-bg: var(--background);
+  --econ-panel: var(--panel);
+  --econ-border: rgba(0, 163, 224, 0.24);
+  --econ-gold: var(--brand-light-blue);
+  --econ-green: #75bd68;
   --econ-risk: #c97455;
-  --econ-blue: #7f9db8;
-  --econ-muted: #a9a49a;
-  --econ-text: #f4efe4;
+  --econ-blue: #77c8e9;
+  --econ-muted: #b9c9d6;
+  --econ-text: var(--foreground);
   --cfs-top-nav-height: 4.5rem;
 }
 
@@ -40,23 +47,21 @@ body {
 
 body {
   background:
-    radial-gradient(circle at 16% 8%, rgba(104, 216, 255, 0.13), transparent 24rem),
-    radial-gradient(circle at 82% 18%, rgba(236, 92, 255, 0.075), transparent 22rem),
-    radial-gradient(circle at 70% 88%, rgba(216, 184, 106, 0.08), transparent 20rem),
-    linear-gradient(135deg, #02050b 0%, #06111e 46%, #04070d 100%);
+    linear-gradient(180deg, rgba(0, 163, 224, 0.08), transparent 18rem),
+    linear-gradient(135deg, #032a52 0%, #041f3d 52%, #032547 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), "Segoe UI", Arial, sans-serif;
 }
 
 body::before {
   background-image:
-    linear-gradient(rgba(104, 216, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(104, 216, 255, 0.035) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
   content: "";
   inset: 0;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.68), transparent 72%);
-  opacity: 0.72;
+  opacity: 0.32;
   pointer-events: none;
   position: fixed;
   z-index: 0;
@@ -81,41 +86,28 @@ select:disabled {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid rgba(216, 184, 106, 0.65);
+  outline: 2px solid rgba(0, 163, 224, 0.85);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: rgba(216, 184, 106, 0.35);
-  color: #fff8df;
+  background: rgba(0, 163, 224, 0.38);
+  color: #ffffff;
 }
 
 .glass-panel {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.052), transparent 34%),
-    linear-gradient(180deg, rgba(10, 20, 34, 0.88), rgba(4, 10, 18, 0.78));
-  border: 1px solid rgba(130, 205, 235, 0.18);
-  box-shadow:
-    0 20px 64px rgba(0, 0, 0, 0.34),
-    0 0 32px rgba(104, 216, 255, 0.045),
-    inset 0 1px 0 rgba(255, 255, 255, 0.075);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(8, 56, 98, 0.96), rgba(4, 38, 74, 0.96));
+  border: 1px solid rgba(119, 200, 233, 0.24);
+  box-shadow: 0 12px 32px rgba(0, 24, 56, 0.22);
+  backdrop-filter: blur(10px);
 }
 
 .cfs-command-backdrop {
-  background:
-    radial-gradient(circle at 10% 4%, rgba(104, 216, 255, 0.12), transparent 22rem),
-    radial-gradient(circle at 92% 10%, rgba(236, 92, 255, 0.07), transparent 20rem),
-    radial-gradient(circle at 82% 90%, rgba(216, 184, 106, 0.08), transparent 22rem),
-    #03070d;
+  background: linear-gradient(135deg, #032a52, var(--background) 54%, #032547);
 }
 
 .econ-app-backdrop {
-  background:
-    radial-gradient(circle at 16% 8%, rgba(216, 184, 106, 0.13), transparent 22rem),
-    radial-gradient(circle at 92% 16%, rgba(127, 157, 184, 0.1), transparent 24rem),
-    radial-gradient(circle at 74% 88%, rgba(125, 191, 122, 0.08), transparent 22rem),
-    linear-gradient(135deg, #0d0c0a 0%, #171512 48%, #0b0f12 100%);
+  background: linear-gradient(135deg, #032a52, var(--background) 54%, #032547);
 }
 
 .econ-app-backdrop::before {
@@ -130,16 +122,14 @@ select:focus-visible {
   content: "";
   inset: 0;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.72), transparent 78%);
-  opacity: 0.78;
+  opacity: 0.22;
   pointer-events: none;
   position: fixed;
   z-index: 0;
 }
 
 .econ-command-bar {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015)),
-    rgba(17, 16, 14, 0.96);
+  background: rgba(0, 56, 130, 0.96);
   border-bottom: 1px solid var(--econ-border);
   box-shadow:
     0 18px 46px rgba(0, 0, 0, 0.38),
@@ -147,9 +137,7 @@ select:focus-visible {
 }
 
 .econ-product-nav {
-  background:
-    linear-gradient(180deg, rgba(216, 184, 106, 0.08), rgba(255, 255, 255, 0.018)),
-    rgba(20, 18, 15, 0.82);
+  background: rgba(5, 45, 82, 0.9);
   border: 1px solid var(--econ-border);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.075),
@@ -163,9 +151,7 @@ select:focus-visible {
 .econ-hero,
 .econ-panel,
 .econ-card {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
-    var(--econ-panel);
+  background: linear-gradient(180deg, rgba(10, 69, 116, 0.96), rgba(4, 42, 80, 0.96));
   border: 1px solid var(--econ-border);
   box-shadow:
     0 22px 60px rgba(0, 0, 0, 0.28),
@@ -173,9 +159,7 @@ select:focus-visible {
 }
 
 .econ-hero {
-  background:
-    linear-gradient(135deg, rgba(216, 184, 106, 0.14), rgba(127, 157, 184, 0.08) 44%, rgba(125, 191, 122, 0.06)),
-    rgba(22, 20, 17, 0.92);
+  background: linear-gradient(135deg, rgba(0, 56, 130, 0.98), rgba(0, 112, 166, 0.92));
 }
 
 .econ-eyebrow {
@@ -187,22 +171,15 @@ select:focus-visible {
 }
 
 .cfs-command-surface {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.018)),
-    linear-gradient(135deg, rgba(10, 24, 39, 0.92), rgba(4, 10, 18, 0.88));
-  border: 1px solid rgba(104, 216, 255, 0.18);
-  box-shadow:
-    0 22px 70px rgba(0, 0, 0, 0.34),
-    0 0 42px rgba(104, 216, 255, 0.055),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(8, 56, 98, 0.96), rgba(4, 38, 74, 0.96));
+  border: 1px solid rgba(119, 200, 233, 0.24);
+  box-shadow: 0 14px 36px rgba(0, 24, 56, 0.24);
   overflow: hidden;
   position: relative;
 }
 
 .cfs-command-surface::before {
-  background:
-    linear-gradient(90deg, transparent, rgba(104, 216, 255, 0.24), transparent),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 30%);
+  background: linear-gradient(90deg, var(--brand-light-blue), rgba(0, 163, 224, 0.14), transparent 72%);
   content: "";
   height: 1px;
   inset: 0 0 auto;
@@ -212,18 +189,14 @@ select:focus-visible {
 }
 
 .cfs-command-card {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018)),
-    rgba(5, 14, 26, 0.74);
-  border: 1px solid rgba(148, 180, 210, 0.13);
-  box-shadow:
-    0 14px 42px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: rgba(7, 51, 91, 0.88);
+  border: 1px solid rgba(143, 177, 200, 0.22);
+  box-shadow: 0 8px 22px rgba(0, 24, 56, 0.18);
   position: relative;
 }
 
 .cfs-command-card::before {
-  background: linear-gradient(180deg, rgba(104, 216, 255, 0.36), transparent);
+  background: linear-gradient(180deg, var(--brand-light-blue), transparent);
   border-radius: 9999px;
   content: "";
   inset: 0 auto 0 0;
@@ -234,11 +207,8 @@ select:focus-visible {
 }
 
 .cfs-command-card:hover {
-  border-color: rgba(104, 216, 255, 0.26);
-  box-shadow:
-    0 16px 46px rgba(0, 0, 0, 0.28),
-    0 0 32px rgba(104, 216, 255, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  border-color: rgba(0, 163, 224, 0.48);
+  box-shadow: 0 10px 26px rgba(0, 24, 56, 0.24);
 }
 
 .cfs-status-chip {
@@ -297,9 +267,9 @@ select:focus-visible {
 
 .metric-grid {
   background-image:
-    linear-gradient(rgba(104, 216, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(104, 216, 255, 0.07) 1px, transparent 1px);
-  background-size: 34px 34px;
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
 
 .cfs-command-bar {
@@ -534,9 +504,165 @@ select:focus-visible {
   display: none;
 }
 
+/* County brand normalization for existing utility-heavy product surfaces. */
+[class*="bg-[#03070d]"],
+[class*="bg-[#020814]"],
+[class*="bg-[#050911]"],
+[class*="bg-[#060b12]"],
+[class*="bg-[#06101a]"],
+[class*="bg-[#07111f]"],
+[class*="bg-[#08111d]"],
+[class*="bg-[#0a111c]"],
+[class*="bg-[#0d1320]"],
+[class*="bg-[#11151b]"],
+[class*="bg-[#111722]"],
+[class*="bg-[#171a20]"] {
+  background-color: rgba(4, 38, 74, 0.97) !important;
+}
+
+[class*="bg-[#1b1506]"],
+[class*="bg-[#161207]"],
+[class*="bg-[#261f10]"] {
+  background-color: rgba(7, 51, 91, 0.92) !important;
+}
+
+[class*="text-[#68d8ff]"],
+[class*="text-[#8fe7ff]"],
+[class*="text-[#9be9ff]"],
+[class*="text-[#9ee8ff]"],
+[class*="text-[#9eeeff]"],
+[class*="text-[#b7f0ff]"],
+[class*="text-[#bfefff]"],
+[class*="text-[#d7f8ff]"],
+[class*="text-[#dff8ff]"],
+[class*="text-[#dff9ff]"] {
+  color: #88d6f2 !important;
+}
+
+[class*="text-[#d8b86a]"],
+[class*="text-[#f0cd79]"],
+[class*="text-[#f6d98e]"],
+[class*="text-[#f7dc93]"],
+[class*="text-[#ffe6a6]"] {
+  color: #b8e4f5 !important;
+}
+
+[class*="text-[#ec5cff]"],
+[class*="text-[#f4c7ff]"] {
+  color: #88d6f2 !important;
+}
+
+[class*="text-[#35c98d]"],
+[class*="text-[#55d38f]"],
+[class*="text-[#5cd38f]"],
+[class*="text-[#a8f3c4]"],
+[class*="text-[#b9ffd1]"],
+[class*="text-[#bff8d1]"] {
+  color: #a6d99d !important;
+}
+
+[class*="border-[#68d8ff]"],
+[class*="border-[#8fe7ff]"],
+[class*="border-[#d8b86a]"],
+[class*="border-[#f0cd79]"],
+[class*="border-[#ec5cff]"] {
+  border-color: rgba(0, 163, 224, 0.38) !important;
+}
+
+[class*="bg-[#68d8ff]"],
+[class*="bg-[#8fe7ff]"],
+[class*="bg-[#d8b86a]"],
+[class*="bg-[#f0cd79]"],
+[class*="bg-[#ec5cff]"] {
+  background-color: rgba(0, 163, 224, 0.14) !important;
+}
+
+[class*="border-[#35c98d]"],
+[class*="border-[#55d38f]"],
+[class*="border-[#5cd38f]"] {
+  border-color: rgba(51, 140, 38, 0.45) !important;
+}
+
+[class*="bg-[#35c98d]"],
+[class*="bg-[#55d38f]"],
+[class*="bg-[#5cd38f]"] {
+  background-color: rgba(51, 140, 38, 0.18) !important;
+}
+
+input,
+select,
+textarea {
+  accent-color: var(--brand-light-blue);
+}
+
+table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+thead {
+  background-color: rgba(0, 56, 130, 0.72);
+}
+
+tbody tr {
+  border-color: rgba(143, 177, 200, 0.2);
+}
+
+.cfs-county-home {
+  background: linear-gradient(135deg, #ffffff 0%, var(--brand-pale-blue) 72%, #d7eef8 100%) !important;
+  color: var(--brand-dark-blue);
+}
+
+.cfs-county-home > div:nth-child(2) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(229, 245, 251, 0.4)) !important;
+}
+
+.cfs-county-home [data-testid^="cfs-home-card-"] {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(0, 56, 130, 0.2) !important;
+  box-shadow: 0 16px 36px rgba(0, 56, 130, 0.12) !important;
+}
+
+.cfs-county-home [data-testid^="cfs-home-card-"]:hover {
+  border-color: rgba(0, 163, 224, 0.62) !important;
+  box-shadow: 0 18px 42px rgba(0, 56, 130, 0.18) !important;
+}
+
+.cfs-county-home [data-testid^="cfs-home-card-"] > span:first-child {
+  background: var(--brand-dark-blue) !important;
+  border-color: var(--brand-dark-blue) !important;
+  color: #ffffff !important;
+}
+
+.cfs-county-home [class*="text-[#8fe7ff]"] {
+  color: #0079aa !important;
+}
+
+.cfs-county-home .text-white {
+  color: var(--brand-dark-blue) !important;
+}
+
+.cfs-county-home .text-slate-300 {
+  color: #38546c !important;
+}
+
+.cfs-county-home .text-slate-400 {
+  color: #5a7082 !important;
+}
+
+.cfs-county-home [data-testid="cfs-home-shared-ask-cfs"] {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-color: rgba(51, 140, 38, 0.28) !important;
+}
+
+dialog,
+[role="dialog"] {
+  --panel: rgba(4, 38, 74, 0.98);
+}
+
 .esri-view {
-  --calcite-ui-brand: var(--gold);
-  --calcite-ui-brand-hover: #f0cd79;
+  --calcite-ui-brand: var(--brand-light-blue);
+  --calcite-ui-brand-hover: #5bc4e9;
   background: #050911;
 }
 
