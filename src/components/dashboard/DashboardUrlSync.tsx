@@ -49,6 +49,7 @@ export function DashboardUrlSync() {
       const nextState = deserializeDashboardUrlState(currentSearch);
       const appMode = new URLSearchParams(currentSearch).get("app");
       if (
+        appMode === "management" ||
         appMode === "planning" ||
         appMode === "economics" ||
         appMode === "master-data"
@@ -59,7 +60,7 @@ export function DashboardUrlSync() {
         return;
       }
 
-      if (appMode === "master-data") {
+      if (appMode === "management" || appMode === "master-data") {
         return;
       }
 
@@ -144,7 +145,11 @@ export function DashboardUrlSync() {
       return;
     }
 
-    if (!cfsAppMode || cfsAppMode === "master-data") {
+    if (
+      !cfsAppMode ||
+      cfsAppMode === "management" ||
+      cfsAppMode === "master-data"
+    ) {
       return;
     }
 

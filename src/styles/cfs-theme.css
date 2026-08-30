@@ -666,11 +666,11 @@ tbody tr {
   color: #a8d6e0 !important;
 }
 
-.cfs-county-home [data-testid="cfs-home-card-economics"]::before {
+.cfs-county-home [data-testid="cfs-home-card-builder"]::before {
   background: linear-gradient(180deg, #d8c675, transparent 78%);
 }
 
-.cfs-county-home [data-testid="cfs-home-card-economics"] > span:first-child {
+.cfs-county-home [data-testid="cfs-home-card-builder"] > span:first-child {
   background: rgba(216, 198, 117, 0.08) !important;
   border-color: rgba(216, 198, 117, 0.22) !important;
   color: #dfcf91 !important;

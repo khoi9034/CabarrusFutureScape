@@ -13,9 +13,8 @@ import {
   AskCfsPanel,
   type AskCfsPanelProps,
 } from "@/components/dashboard/AskCfsPanel";
-import type { CfsAppMode } from "@/types";
 
-const workspaceLabels: Record<CfsAppMode, string> = {
+const workspaceLabels: Record<NonNullable<AskCfsPanelProps["appMode"]>, string> = {
   economics: "Economics",
   "master-data": "Master Data",
   planning: "Planning",
@@ -88,10 +87,12 @@ export function SharedAskCfsSource(props: AskCfsPanelProps) {
 export function SharedAskCfsDrawer({
   onClose,
   open,
+  workspaceLabel,
   ...panelProps
 }: AskCfsPanelProps & {
   onClose: () => void;
   open: boolean;
+  workspaceLabel?: string;
 }) {
   const panelRef = useRef<HTMLElement | null>(null);
   const appMode = panelProps.appMode ?? "planning";
@@ -161,7 +162,7 @@ export function SharedAskCfsDrawer({
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-lg font-semibold text-white" id="shared-ask-cfs-title">
-              Ask CFS · {workspaceLabels[appMode]}
+              Ask CFS · {workspaceLabel ?? workspaceLabels[appMode]}
             </h2>
             <p className="truncate text-xs text-slate-400">
               Shared intelligence layer

@@ -2,53 +2,41 @@
 
 import {
   ArrowRight,
-  BarChart3,
-  Database,
-  MapPinned,
+  BriefcaseBusiness,
+  Layers3,
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CfsAppMode } from "@/types";
 type ProductCard = {
   action: string;
   accent: "cyan" | "gold";
   description: string;
   href: string;
-  icon: typeof MapPinned;
-  mode: CfsAppMode;
+  icon: typeof Layers3;
+  id: "builder" | "management";
   title: string;
 };
 
 const productCards: ProductCard[] = [
   {
-    action: "Open Planning",
+    action: "Open Management",
     accent: "cyan",
     description:
-      "Explore parcels, development activity, planning layers, environmental constraints, schools, transportation, and planning intelligence.",
-    href: "/?app=planning",
-    icon: MapPinned,
-    mode: "planning",
-    title: "CFS Planning",
+      "Countywide insights, planning trends, economic conditions, development signals, and executive decision support.",
+    href: "/?app=management&section=overview",
+    icon: BriefcaseBusiness,
+    id: "management",
+    title: "CFS Management",
   },
   {
-    action: "Open Economics",
+    action: "Open Builder",
     accent: "gold",
     description:
-      "Explore economic indicators, development conditions, fiscal insights, and scenario analysis.",
-    href: "/?app=economics",
-    icon: BarChart3,
-    mode: "economics",
-    title: "CFS Economics",
-  },
-  {
-    action: "Open Master Data",
-    accent: "cyan",
-    description:
-      "Find, filter, preview, join, spatialize, and export governed county datasets.",
-    href: "/?app=master-data",
-    icon: Database,
-    mode: "master-data",
-    title: "CFS Master Data",
+      "Explore maps, investigate parcels, analyze planning conditions, build datasets, run scenarios, and perform detailed staff analysis.",
+    href: "/?app=planning",
+    icon: Layers3,
+    id: "builder",
+    title: "CFS Builder",
   },
 ];
 
@@ -80,26 +68,26 @@ export function CfsMasterHome() {
             Cabarrus FutureScape
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            A planning intelligence and self-service data platform combining parcel-centered Planning, Economics analysis, and governed Master Data workflows, with Ask CFS embedded throughout the platform.
+            Planning intelligence for decisions and day-to-day analysis.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             Portfolio demonstration using sanitized, cached public demo data where applicable; screening outputs are preliminary.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5" aria-label="CFS workspaces">
+        <div className="grid gap-4 md:grid-cols-2 lg:gap-5" aria-label="CFS experiences">
           {productCards.map((card) => {
             const Icon = card.icon;
 
             return (
               <a
                 className={cn(
-                  "group flex min-h-[20rem] w-full flex-col justify-between rounded-lg border p-5 text-left shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl transition duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 sm:aspect-square sm:min-h-0 lg:p-6",
+                  "group flex min-h-[19rem] w-full flex-col justify-between rounded-lg border p-5 text-left shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl transition duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 lg:p-6",
                   accentStyles[card.accent],
                 )}
-                data-testid={`cfs-home-card-${card.mode}`}
+                data-testid={`cfs-home-card-${card.id}`}
                 href={card.href}
-                key={card.mode}
+                key={card.id}
               >
                 <span
                   className={cn(

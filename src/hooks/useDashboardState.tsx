@@ -330,6 +330,7 @@ const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
 
 function isCfsAppMode(value: unknown): value is CfsAppMode {
   return (
+    value === "management" ||
     value === "planning" ||
     value === "economics" ||
     value === "master-data"
@@ -547,7 +548,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
         const appMode = new URLSearchParams(window.location.search).get("app");
         const nextMode = isCfsAppMode(appMode) ? appMode : null;
         setCfsAppModeState(nextMode);
-        if (nextMode === "planning") {
+        if (nextMode === "management" || nextMode === "planning") {
           setProductMode("workspace");
         } else if (nextMode === "economics") {
           setEconomicsSection("dashboard");

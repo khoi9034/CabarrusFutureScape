@@ -25,6 +25,7 @@ export default async function Home({ searchParams }: { searchParams: HomeSearchP
   }
 
   const initialAppMode: CfsAppMode | undefined =
+    appMode === "management" ||
     appMode === "planning" ||
     appMode === "economics" ||
     appMode === "master-data"

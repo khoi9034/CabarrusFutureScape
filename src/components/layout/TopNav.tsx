@@ -4,12 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
   BookOpen,
+  BriefcaseBusiness,
   ChevronDown,
   Command,
   Database,
   FileSearch,
   Home,
   LayoutDashboard,
+  Layers3,
   Loader2,
   Map,
   MoreHorizontal,
@@ -21,10 +23,7 @@ import {
   UserRound,
   XCircle,
 } from "lucide-react";
-import {
-  appIdentity,
-  dashboardStatusLabels,
-} from "@/data/mock/dashboardMockData";
+import { dashboardStatusLabels } from "@/data/mock/dashboardMockData";
 import { CommandPalette } from "@/components/dashboard/CommandPalette";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import { useDashboardState } from "@/hooks/useDashboardState";
@@ -54,7 +53,12 @@ import { searchDemoParcels } from "@/lib/demo-data/client";
 import { getDemoParcelMapFocus } from "@/lib/demo-data/mapLayerClient";
 import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
 import { cn } from "@/lib/utils";
-import type { EconomicsSection, ProductMode } from "@/types";
+import type {
+  CfsAppMode,
+  EconomicsSection,
+  ManagementSection,
+  ProductMode,
+} from "@/types";
 import type { DashboardRoleId } from "@/types/userRoles";
 import type { DashboardViewMode } from "@/types/workspace";
 import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
@@ -130,26 +134,37 @@ const economicsProductModes: Array<{
 const QUICK_SEARCH_LIMIT = 8;
 const QUICK_SEARCH_MIN_LENGTH = 3;
 const DEMO_QUICK_SEARCH_SUGGESTION_LIMIT = 5;
-const appModeOptions = [
+const builderModes = [
   {
     description: "Growth pressure, permits, constraints, schools, and Model Lab.",
     id: "planning",
     label: "Planning Intelligence",
-    shortLabel: "CFS Planning",
+    shortLabel: "Planning",
   },
   {
     description: "Parcel economics, tax-base opportunity, public cost risk, and scenarios.",
     id: "economics",
     label: "Economic Intelligence",
-    shortLabel: "CFS Economics",
+    shortLabel: "Economics",
   },
   {
     description: "Governed Parcel and Permit previews, filters, fields, and derived exports.",
     id: "master-data",
     label: "Master Data",
-    shortLabel: "CFS Master Data",
+    shortLabel: "Master Data",
   },
 ] as const;
+
+const managementSections: ReadonlyArray<{
+  id: ManagementSection;
+  label: string;
+  shortLabel: string;
+}> = [
+  { id: "overview", label: "Overview", shortLabel: "Overview" },
+  { id: "planning-insights", label: "Planning Insights", shortLabel: "Planning" },
+  { id: "economic-insights", label: "Economic Insights", shortLabel: "Economic" },
+  { id: "development-signals", label: "Development Signals", shortLabel: "Signals" },
+];
 
 type QuickSearchStatus =
   | "empty"
@@ -161,10 +176,14 @@ type QuickSearchStatus =
 
 export function TopNav({
   askCfsOpen,
+  managementSection,
   onAskCfsOpenChange,
+  onManagementSectionChange,
 }: {
   askCfsOpen: boolean;
+  managementSection: ManagementSection;
   onAskCfsOpenChange: (open: boolean) => void;
+  onManagementSectionChange: (section: ManagementSection) => void;
 }) {
   const {
     activeRole,
@@ -189,7 +208,6 @@ export function TopNav({
   const productPrincipal = useProductPrincipal();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [modeMenuOpen, setModeMenuOpen] = useState(false);
   const [quickSearchError, setQuickSearchError] = useState<string | null>(null);
   const [quickSearchOpen, setQuickSearchOpen] = useState(false);
   const [quickSearchQuery, setQuickSearchQuery] = useState("");
@@ -226,7 +244,9 @@ export function TopNav({
       : "Static";
   const runtimeStatusTone = USE_BACKEND_API ? localRuntime.tone : "blue";
   const masterDataMode = cfsAppMode === "master-data";
-  const quickSearchEnabled = !masterDataMode;
+  const managementMode = cfsAppMode === "management";
+  const builderMode = !managementMode;
+  const quickSearchEnabled = !managementMode && !masterDataMode;
   const searchPlaceholder = USE_DEMO_DATA
     ? "Search demo parcel, PIN, zoning, subdivision"
     : cfsAppMode === "economics"
@@ -237,16 +257,13 @@ export function TopNav({
     : cfsAppMode === "economics"
       ? "Search parcels, PINs, zoning, subdivisions, or neighborhoods"
       : "Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods";
-  const currentAppMode =
-    appModeOptions.find((option) => option.id === cfsAppMode) ??
-    appModeOptions[0];
-  const selectAppMode = useCallback((mode: typeof appModeOptions[number]["id"]) => {
+  const selectAppMode = useCallback((mode: CfsAppMode) => {
     if (typeof window !== "undefined" && mode !== cfsAppMode) {
-      window.history.pushState(
-        null,
-        "",
-        `/?app=${mode}`,
-      );
+      if (mode === "management") {
+        onManagementSectionChange("overview");
+      } else {
+        window.history.pushState(null, "", `/?app=${mode}`);
+      }
     }
     setCfsAppMode(mode);
     if (mode === "planning") {
@@ -255,9 +272,9 @@ export function TopNav({
     } else if (mode === "economics") {
       setEconomicsSection("dashboard");
     }
-    setModeMenuOpen(false);
   }, [
     cfsAppMode,
+    onManagementSectionChange,
     setCfsAppMode,
     setEconomicsSection,
     setOverviewCommandMode,
@@ -268,7 +285,6 @@ export function TopNav({
       window.history.pushState(null, "", "/");
     }
     setCfsAppMode(null);
-    setModeMenuOpen(false);
     setMoreOpen(false);
   }, [setCfsAppMode]);
 
@@ -538,13 +554,13 @@ export function TopNav({
 
       <header
         className={cn(
-          "relative z-30 flex min-h-[var(--cfs-top-nav-height)] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:gap-3 lg:px-4 2xl:flex-nowrap",
+          "relative z-30 flex min-h-[var(--cfs-top-nav-height)] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:gap-3 lg:px-4 xl:flex-nowrap",
           cfsAppMode === "economics"
             ? "econ-command-bar"
             : "cfs-command-bar border-b border-[#68d8ff]/14 bg-[#03070d]/94",
         )}
       >
-        <div className="order-1 relative flex min-w-[16rem] max-w-[24rem] shrink-0 items-center gap-3">
+        <div className="order-1 flex shrink-0 items-center gap-2">
           <button
             aria-label="Return to CFS Home"
             className="inline-flex h-12 shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75"
@@ -554,128 +570,76 @@ export function TopNav({
             <Home className="h-4 w-4" />
             <span className="hidden sm:inline">Home</span>
           </button>
-          <button
-            aria-expanded={modeMenuOpen}
-            aria-haspopup="menu"
-            className="group flex min-w-0 items-center gap-3 rounded-xl border border-[#68d8ff]/18 bg-[#07111f]/88 px-2.5 py-2 text-left shadow-[0_0_28px_rgba(104,216,255,0.12)] transition hover:border-[#68d8ff]/36 hover:bg-[#102235]/86 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75"
-            onClick={() => setModeMenuOpen((open) => !open)}
-            type="button"
-          >
-            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#68d8ff]/28 bg-[#68d8ff]/[0.1]">
-              {cfsAppMode === "economics" ? (
-                <BarChart3 className="h-4 w-4 text-[#f0cd79]" />
-              ) : masterDataMode ? (
-                <Database className="h-4 w-4 text-[#8fe7ff]" />
-              ) : (
-                <Map className="h-4 w-4 text-[#f0cd79]" />
-              )}
-              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border border-[#060b12] bg-[#55d38f]" />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[#8fe7ff]">
-                {appIdentity.eyebrow}
-              </span>
-              <span className="block truncate text-base font-semibold leading-5 text-white">
-                {currentAppMode.shortLabel}
-              </span>
-            </span>
-            <ChevronDown
-              className={cn(
-                "ml-auto h-4 w-4 shrink-0 text-slate-500 transition",
-                modeMenuOpen && "rotate-180 text-[#8fe7ff]",
-              )}
-            />
-          </button>
-
-          {modeMenuOpen ? (
-            <div
-              className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-[19rem] max-w-[calc(100vw-1.5rem)] rounded-xl border border-[#68d8ff]/20 bg-[#06101c]/98 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl"
-              role="menu"
-            >
-              {appModeOptions.map((option) => {
-                const active = option.id === cfsAppMode;
-                return (
-                  <button
-                    aria-checked={active}
-                    className={cn(
-                      "flex w-full min-w-0 flex-col rounded-lg border px-3 py-2.5 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70",
-                      active
-                        ? "border-[#68d8ff]/45 bg-[#68d8ff]/12 text-white"
-                        : "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/[0.055] hover:text-white",
-                    )}
-                    key={option.id}
-                    onClick={() => selectAppMode(option.id)}
-                    role="menuitemradio"
-                    type="button"
-                  >
-                    <span className="text-sm font-semibold">
-                      {option.label}
-                    </span>
-                    <span className="mt-1 text-xs leading-5 text-slate-500">
-                      {option.description}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
-        </div>
-
-        {cfsAppMode === "economics" ? (
           <nav
-            aria-label="CFS Economics sections"
-            className="econ-product-nav order-3 grid w-full min-w-0 grid-cols-2 gap-1 rounded-2xl p-1.5 lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
+            aria-label="CFS experience"
+            className="grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-white/[0.035] p-1"
           >
-            {economicsProductModes.map((mode) => {
-              const Icon = mode.icon;
-              const active = activeEconomicsSection === mode.id;
-
+            {[
+              { icon: BriefcaseBusiness, id: "management" as const, label: "Management" },
+              { icon: Layers3, id: "builder" as const, label: "Builder" },
+            ].map((experience) => {
+              const Icon = experience.icon;
+              const active = experience.id === "management" ? managementMode : builderMode;
               return (
                 <button
-                  aria-label={`${mode.label}: ${mode.title}`}
                   aria-pressed={active}
                   className={cn(
-                    "group relative inline-flex h-10 min-w-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-2.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/75 sm:px-3 lg:justify-start lg:px-3.5 lg:text-xs xl:text-[13px]",
+                    "inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-3 text-xs font-semibold transition",
                     active
-                      ? "border-[#d8b86a]/58 bg-[#2b2315]/95 text-[#fff4d2] shadow-[0_0_26px_rgba(216,184,106,0.18),inset_0_1px_0_rgba(255,255,255,0.08)]"
-                      : "border-transparent bg-transparent text-[#b8b1a3] hover:border-[#d8b86a]/22 hover:bg-white/[0.045] hover:text-white",
+                      ? "border-[#78bfd2]/35 bg-[#78bfd2]/12 text-white"
+                      : "border-transparent text-slate-400 hover:bg-white/[0.05] hover:text-white",
                   )}
-                  key={mode.id}
-                  onClick={() => setEconomicsSection(mode.id)}
-                  title={mode.title}
+                  data-testid={`cfs-experience-${experience.id}`}
+                  key={experience.id}
+                  onClick={() => selectAppMode(experience.id === "management" ? "management" : cfsAppMode === "economics" || cfsAppMode === "master-data" ? cfsAppMode : "planning")}
                   type="button"
                 >
-                  <Icon
-                    className={cn(
-                      "h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-105",
-                      active ? "text-[#d8b86a]" : "text-[#8fa4b8] group-hover:text-[#f0cd79]",
-                    )}
-                  />
-                  <span className="min-w-0 truncate">
-                    <span className="hidden xl:inline">{mode.label}</span>
-                    <span className="inline xl:hidden">{mode.shortLabel}</span>
-                  </span>
-                  <span className="sr-only">{mode.description}</span>
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{experience.label}</span>
                 </button>
               );
             })}
           </nav>
-        ) : cfsAppMode === "planning" ? (
-          <nav
-            aria-label="CFS product mode"
-            className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-3 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
-          >
-            {productModes.map((mode) => {
-              const Icon = mode.icon;
-              const active =
-                mode.id === "due_diligence"
-                  ? productMode === "due_diligence" ||
-                    productMode === "executive_print"
-                  : productMode === mode.id;
+        </div>
 
+        {managementMode ? (
+          <nav
+            aria-label="CFS Management sections"
+            className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-xl border border-white/10 bg-white/[0.035] p-1 lg:order-2 lg:w-auto lg:shrink-0"
+          >
+            {managementSections.map((item) => {
+              const active = managementSection === item.id;
               return (
                 <button
-                  aria-label={`${mode.label}: ${mode.title}`}
+                  aria-pressed={active}
+                  className={cn(
+                    "inline-flex h-10 min-w-0 items-center justify-center rounded-lg border px-2 text-[11px] font-semibold transition sm:px-3 lg:text-xs",
+                    active
+                      ? "border-[#78bfd2]/35 bg-[#78bfd2]/12 text-white"
+                      : "border-transparent text-slate-400 hover:bg-white/[0.05] hover:text-white",
+                  )}
+                  data-testid={`management-nav-${item.id}`}
+                  key={item.id}
+                  onClick={() => onManagementSectionChange(item.id)}
+                  type="button"
+                >
+                  <span className="hidden xl:inline">{item.label}</span>
+                  <span className="xl:hidden">{item.shortLabel}</span>
+                </button>
+              );
+            })}
+          </nav>
+        ) : (
+          <nav
+            aria-label="CFS Builder workspaces"
+            className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-3 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
+          >
+            {builderModes.map((mode) => {
+              const Icon = mode.id === "planning" ? Map : mode.id === "economics" ? BarChart3 : Database;
+              const active = cfsAppMode === mode.id;
+              return (
+                <button
+                  aria-label={`${mode.label}: ${mode.description}`}
                   aria-pressed={active}
                   className={cn(
                     "group relative inline-flex h-10 min-w-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-2.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75 sm:px-3 lg:justify-start lg:px-3.5 lg:text-xs xl:text-[13px]",
@@ -684,15 +648,8 @@ export function TopNav({
                       : "border-transparent bg-transparent text-slate-400 hover:border-[#68d8ff]/18 hover:bg-white/[0.055] hover:text-white",
                   )}
                   key={mode.id}
-                  onClick={() => {
-                    if (mode.id === "due_diligence") {
-                      setParcelReviewView("review");
-                      setPlanningSnapshotView("overview");
-                    }
-
-                    setProductMode(mode.id);
-                  }}
-                  title={mode.title}
+                  onClick={() => selectAppMode(mode.id)}
+                  title={mode.description}
                   type="button"
                 >
                   <span
@@ -716,17 +673,17 @@ export function TopNav({
                     )}
                   />
                   <span className="min-w-0 truncate">
-                    <span className="hidden xl:inline">{mode.label}</span>
-                    <span className="inline xl:hidden">{mode.shortLabel}</span>
+                    <span className="hidden 2xl:inline">{mode.label}</span>
+                    <span className="inline 2xl:hidden">{mode.shortLabel}</span>
                   </span>
                   <span className="sr-only">{mode.description}</span>
                 </button>
               );
             })}
           </nav>
-        ) : null}
+        )}
 
-        {!masterDataMode ? (
+        {quickSearchEnabled ? (
         <div className="order-4 flex w-full min-w-0 items-center gap-2 md:order-2 md:w-auto md:min-w-[12rem] md:flex-1 lg:order-3">
           <div
             className="relative block min-w-0 flex-1 md:min-w-[12rem]"
@@ -928,7 +885,6 @@ export function TopNav({
             data-testid="shared-ask-cfs-toggle"
             onClick={() => {
               setCommandPaletteOpen(false);
-              setModeMenuOpen(false);
               setMoreOpen(false);
               onAskCfsOpenChange(!askCfsOpen);
             }}
@@ -938,7 +894,7 @@ export function TopNav({
             <Sparkles className="h-4 w-4" />
             <span className="hidden sm:inline">Ask CFS</span>
           </button>
-          {!masterDataMode ? <button
+          {quickSearchEnabled ? <button
             aria-label="Open command palette"
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white md:hidden xl:flex"
             onClick={() => setCommandPaletteOpen(true)}
@@ -950,7 +906,9 @@ export function TopNav({
           <button
             aria-expanded={moreOpen}
             aria-label={
-              cfsAppMode === "economics"
+              managementMode
+                ? "Open Management sources and methodology"
+                : cfsAppMode === "economics"
                 ? "Open economics controls"
                 : masterDataMode
                     ? "Open Master Data controls"
@@ -959,7 +917,9 @@ export function TopNav({
             className="flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:text-white"
             onClick={() => setMoreOpen((open) => !open)}
             title={
-              cfsAppMode === "economics"
+              managementMode
+                ? "Management sources and methodology"
+                : cfsAppMode === "economics"
                 ? "Economics status and mode controls"
                 : masterDataMode
                     ? "Master Data status and access"
@@ -979,7 +939,35 @@ export function TopNav({
 
           {moreOpen ? (
             <div className="absolute right-0 top-11 z-50 w-[min(24rem,calc(100vw-1.5rem))] rounded-lg border border-white/10 bg-[#08111d]/98 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-              {cfsAppMode === "economics" ? (
+              {managementMode ? (
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-[#78bfd2]/20 bg-[#78bfd2]/8 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9bd1de]">
+                      CFS Management
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-slate-300">
+                      Leadership views summarize existing CFS evidence. Detailed controls remain in Builder.
+                    </p>
+                  </div>
+                  <button
+                    className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-left text-sm font-semibold text-slate-200 transition hover:border-[#78bfd2]/30 hover:bg-white/[0.06]"
+                    onClick={() => {
+                      selectAppMode("planning");
+                      setProductMode("methodology");
+                      setMoreOpen(false);
+                    }}
+                    type="button"
+                  >
+                    Sources &amp; methodology
+                    <BookOpen className="h-4 w-4 text-[#9bd1de]" />
+                  </button>
+                  <CompactStatusChip
+                    icon={Activity}
+                    label={runtimeStatusLabel}
+                    tone={runtimeStatusTone}
+                  />
+                </div>
+              ) : cfsAppMode === "economics" ? (
                 <div className="grid gap-3">
                   <div className="rounded-lg border border-[#d8b86a]/20 bg-[#d8b86a]/10 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
@@ -989,6 +977,23 @@ export function TopNav({
                       Use the top navigation for Power BI & Tools,
                       Economic Dashboard, and Print.
                     </p>
+                  </div>
+                  <div className="grid gap-2">
+                    {economicsProductModes.map((mode) => (
+                      <button
+                        aria-pressed={activeEconomicsSection === mode.id}
+                        className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-left text-sm text-slate-200 transition hover:border-[#dfcf91]/30 hover:bg-white/[0.06]"
+                        key={mode.id}
+                        onClick={() => {
+                          setEconomicsSection(mode.id);
+                          setMoreOpen(false);
+                        }}
+                        type="button"
+                      >
+                        {mode.label}
+                        <span className="text-xs text-slate-500">{mode.shortLabel}</span>
+                      </button>
+                    ))}
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <CompactStatusChip
@@ -1021,6 +1026,31 @@ export function TopNav({
                 </div>
               ) : (
                 <div className="grid gap-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    {productModes.map((mode) => (
+                      <button
+                        aria-pressed={
+                          mode.id === "due_diligence"
+                            ? productMode === "due_diligence" || productMode === "executive_print"
+                            : productMode === mode.id
+                        }
+                        className="rounded-lg border border-white/10 bg-white/[0.035] px-2 py-2 text-xs font-semibold text-slate-200 transition hover:border-[#78bfd2]/30 hover:bg-white/[0.06]"
+                        key={mode.id}
+                        onClick={() => {
+                          if (mode.id === "due_diligence") {
+                            setParcelReviewView("review");
+                            setPlanningSnapshotView("overview");
+                          }
+                          setProductMode(mode.id);
+                          setMoreOpen(false);
+                        }}
+                        title={mode.title}
+                        type="button"
+                      >
+                        {mode.shortLabel}
+                      </button>
+                    ))}
+                  </div>
                   <label className="relative block min-w-0">
                     <UserRound className="pointer-events-none absolute left-3 top-[2.05rem] h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
                     <span className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">

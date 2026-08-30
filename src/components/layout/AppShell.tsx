@@ -50,13 +50,18 @@ import { EconomicsShell } from "@/components/economics/EconomicsShell";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { CfsMasterHome } from "@/components/layout/CfsMasterHome";
 import { MasterDataWorkspace } from "@/components/master-data/MasterDataWorkspace";
+import { ManagementWorkspace } from "@/components/management/ManagementWorkspace";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
-import type { CfsAppMode, OverviewPanelWidthPreset } from "@/types";
+import type {
+  CfsAppMode,
+  ManagementSection,
+  OverviewPanelWidthPreset,
+} from "@/types";
 import type { CfsAiSearchRequest } from "@/types/api";
 
 const LEFT_PANEL_WIDTHS: Record<OverviewPanelWidthPreset, number> = {
@@ -118,6 +123,8 @@ function ProductShell() {
   } = useDashboardState();
   const [askCfsOpen, setAskCfsOpen] = useState(false);
   const [askCfsConfig, setAskCfsConfig] = useState<AskCfsPanelProps | null>(null);
+  const [managementSection, setManagementSectionState] =
+    useState<ManagementSection>("overview");
   const askCfsModeRef = useRef(cfsAppMode);
   const [masterDataAskContext, setMasterDataAskContext] =
     useState<CfsAiSearchRequest["filter_context"]>({ mode: "master_data" });
@@ -171,12 +178,32 @@ function ProductShell() {
     return () => window.cancelAnimationFrame(frame);
   }, [askCfsOpen]);
 
+  useEffect(() => {
+    const syncManagementSection = () => {
+      const section = new URLSearchParams(window.location.search).get("section");
+      setManagementSectionState(isManagementSection(section) ? section : "overview");
+    };
+    syncManagementSection();
+    window.addEventListener("popstate", syncManagementSection);
+    return () => window.removeEventListener("popstate", syncManagementSection);
+  }, []);
+
+  const setManagementSection = useCallback((section: ManagementSection) => {
+    setManagementSectionState(section);
+    window.history.pushState(null, "", `/?app=management&section=${section}`);
+  }, []);
+
   if (!cfsAppMode) {
     return <CfsMasterHome />;
   }
 
   const sharedAskCfsContext: CfsAiSearchRequest["filter_context"] =
-    cfsAppMode === "master-data"
+    cfsAppMode === "management"
+      ? {
+          experience: "management",
+          management_section: managementSection,
+        }
+      : cfsAppMode === "master-data"
       ? masterDataAskContext
       : {
             selected_feature_analysis_period:
@@ -198,11 +225,28 @@ function ProductShell() {
         };
   const sharedAskCfsProps: AskCfsPanelProps = {
     ...askCfsConfig,
-    appMode: cfsAppMode,
+    appMode: cfsAppMode === "management" ? "planning" : cfsAppMode,
     filterContext: {
       ...(askCfsConfig?.filterContext ?? {}),
       ...sharedAskCfsContext,
     },
+    helperTextOverride:
+      cfsAppMode === "management"
+        ? "Ask for a concise leadership briefing grounded in current CFS evidence and caveats."
+        : askCfsConfig?.helperTextOverride,
+    inputPlaceholderOverride:
+      cfsAppMode === "management"
+        ? "Ask what leadership should know..."
+        : askCfsConfig?.inputPlaceholderOverride,
+    suggestedPromptsOverride:
+      cfsAppMode === "management"
+        ? [
+            "Summarize the biggest planning concerns.",
+            "What changed in development activity?",
+            "What should I pay attention to before the meeting?",
+            "Which data limitations should leadership understand?",
+          ]
+        : askCfsConfig?.suggestedPromptsOverride,
     visiblePromptCount: askCfsConfig?.visiblePromptCount ?? 4,
   };
 
@@ -227,7 +271,9 @@ function ProductShell() {
       <div className="app-chrome">
         <TopNav
           askCfsOpen={askCfsOpen}
+          managementSection={managementSection}
           onAskCfsOpenChange={setAskCfsOpen}
+          onManagementSectionChange={setManagementSection}
         />
       </div>
 
@@ -238,7 +284,14 @@ function ProductShell() {
         )}
         data-testid="cfs-workspace-frame"
       >
-      {cfsAppMode === "economics" ? (
+      {cfsAppMode === "management" ? (
+        <EnterpriseErrorBoundary
+          moduleName="CFS Management"
+          resetKey={`management-${managementSection}`}
+        >
+          <ManagementWorkspace section={managementSection} />
+        </EnterpriseErrorBoundary>
+      ) : cfsAppMode === "economics" ? (
         <EnterpriseErrorBoundary
           moduleName="CFS Economics"
           resetKey="economics"
@@ -303,13 +356,23 @@ function ProductShell() {
         >
           <SharedAskCfsDrawer
             {...sharedAskCfsProps}
-            appMode={cfsAppMode}
+            appMode={cfsAppMode === "management" ? "planning" : cfsAppMode}
             onClose={() => setAskCfsOpen(false)}
             open={askCfsOpen}
+            workspaceLabel={cfsAppMode === "management" ? "Management" : undefined}
           />
         </EnterpriseErrorBoundary>
       </div>
     </SharedAskCfsRegistryProvider>
+  );
+}
+
+function isManagementSection(value: string | null): value is ManagementSection {
+  return (
+    value === "overview" ||
+    value === "planning-insights" ||
+    value === "economic-insights" ||
+    value === "development-signals"
   );
 }
 

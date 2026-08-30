@@ -72,8 +72,15 @@ export type ProductMode =
 
 export type CfsAppMode =
   | "economics"
+  | "management"
   | "master-data"
   | "planning";
+
+export type ManagementSection =
+  | "development-signals"
+  | "economic-insights"
+  | "overview"
+  | "planning-insights";
 
 export type EconomicsSection =
   | "dashboard"
