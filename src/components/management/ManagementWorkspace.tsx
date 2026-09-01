@@ -88,7 +88,7 @@ export function ManagementWorkspace({ section }: { section: ManagementSection })
 
         {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} openEconomicsBuilder={openEconomicsBuilder} /> : null}
         {section === "planning-insights" ? <Planning flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} openBuilder={openPlanningBuilder} /> : null}
-        {section === "economic-insights" ? <Economics economics={economics} openBuilder={openEconomicsBuilder} /> : null}
+        {section === "economic-insights" ? <Economics economics={economics} openBuilder={openEconomicsBuilder} trendDirection={trends.trendDirection} trendRows={trendRows} /> : null}
         {section === "development-signals" ? <Signals model={model} preview={modelPreview} markers={signalMarkers} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
 
         <footer className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-slate-400"><ShieldCheck className="h-4 w-4 text-[#77c99b]" /> Management uses approved CFS evidence. Detailed controls, sources, and methodology remain in Builder.</footer>
@@ -140,10 +140,15 @@ function Planning({ flood, hotspots, hotspotMarkers, hotspotRows, schools, selec
   </>;
 }
 
-function Economics({ economics, openBuilder }: any) {
+function Economics({ economics, openBuilder, trendDirection, trendRows }: any) {
   const data = economics.data;
+  const currentScenario = data?.scenario_outputs[0];
   return <>
     <KpiGrid items={data ? [["Parcels analyzed", number.format(data.summary.total_parcels_analyzed), freshness(data.context_freshness ?? "current")], ["High opportunity", number.format(data.summary.high_opportunity_count), "Current"], ["Underbuilt watch", number.format(data.summary.underbuilt_candidate_count), "Decision support"], ["Median value / acre", formatMoney(data.summary.median_value_per_acre), "Current"], ["Total assessed value", formatMoney(data.summary.total_assessed_value), "Current"]] : []} />
+    <TwoColumns>
+      <Panel eyebrow="Economic trend" title="Development-linked activity"><CfsTrendChart ariaLabel="Development-linked economic activity trend" rows={trendRows} /></Panel>
+      <Panel eyebrow="Current economic posture" title="What the portfolio indicates now"><StatusRows rows={data ? [["Development activity", clean(trendDirection || "Current trend available")], ["Fiscal / service balance", currentScenario ? clean(currentScenario.constraint_adjusted_opportunity_band) : "Unavailable"], ["Land-value signal", formatMoney(data.summary.median_value_per_acre)], ["Planning implication", data.summary.high_opportunity_count ? `${number.format(data.summary.high_opportunity_count)} parcels warrant deeper economic screening in Builder.` : "Continue portfolio screening as current evidence changes."]] : []} /></Panel>
+    </TwoColumns>
     <TwoColumns>
       <Panel eyebrow="Opportunity mix" title="Portfolio classification"><CfsRankedBarChart ariaLabel="Economic opportunity classes" rows={(data?.opportunity_class_breakdown ?? []).map((row: any) => ({ label: clean(row.opportunity_class), value: row.count }))} /></Panel>
       <Panel eyebrow="Geographic comparison" title="Assessed-value coverage"><CfsRankedBarChart ariaLabel="Economic parcels by geography" rows={(data?.jurisdiction_value_summary ?? []).slice(0, 8).map((row: any) => ({ label: row.geography_label || "Unspecified", value: row.parcel_count }))} /></Panel>
@@ -166,8 +171,8 @@ function Signals({ model, preview, markers, selected, setSelected, openBuilder }
     </TwoColumns>
     <TwoColumns>
       <Panel eyebrow="Geographic context" title="Strongest development signals"><ManagementMapPreview ariaLabel="Development signal map" markers={markers} onSelect={(marker) => setSelected(preview.markers.find((item: ModelResearchPreviewMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-signal-map" /></Panel>
-      <Panel eyebrow="Selected signal" title={selected ? selected.approximateAreaLabel || "Selected development signal" : "Select a signal on the map"}>
-        {selected ? <><StatusRows rows={[["Signal band", clean(selected.researchRankBand)], ["Label", clean(selected.researchSignalLabel)], ["Model", clean(selected.modelVersion)]]} /><p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Major contributing context</p><ul className="mt-2 space-y-2 text-sm text-slate-300">{selected.topDrivers.map((driver: string) => <li key={driver}>• {clean(driver)}</li>)}</ul><p className="mt-4 text-xs leading-5 text-amber-100/80">{selected.caveat}</p></> : <CompactEmpty>Click a signal to review its band, drivers, and caveat.</CompactEmpty>}
+      <Panel eyebrow="Signal watchlist" title={selected ? selected.approximateAreaLabel || "Selected development signal" : "Highest-signal areas"}>
+        {selected ? <><StatusRows rows={[["Signal band", clean(selected.researchRankBand)], ["Label", clean(selected.researchSignalLabel)], ["Model", clean(selected.modelVersion)]]} /><p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Major contributing context</p><ul className="mt-2 space-y-2 text-sm text-slate-300">{selected.topDrivers.map((driver: string) => <li key={driver}>• {clean(driver)}</li>)}</ul><p className="mt-4 text-xs leading-5 text-amber-100/80">{selected.caveat}</p></> : <><Watchlist rows={preview.markers.slice(0, 5).map((marker: ModelResearchPreviewMarker) => [marker.approximateAreaLabel || marker.officialParcelId, clean(marker.researchRankBand)])} /><p className="mt-3 text-xs leading-5 text-slate-400">Select a map signal for parcel-level evidence and research caveats.</p></>}
         <Action disabled={!selected} onClick={() => openBuilder(selected?.officialParcelId, selected ?? undefined)}>Investigate in Builder</Action>
       </Panel>
     </TwoColumns>
