@@ -110,6 +110,7 @@ function ProductShell() {
     parcelReviewView,
     productMode,
     selectedDevelopmentHotspotContext,
+    selectedModelResearchContext,
     selectedParcelId,
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
@@ -202,6 +203,31 @@ function ProductShell() {
       ? {
           experience: "management",
           management_section: managementSection,
+          selected_feature_id:
+            selectedDevelopmentHotspotContext?.clusterId ??
+            selectedDevelopmentHotspotContext?.officialParcelId ??
+            selectedModelResearchContext?.clusterId ??
+            selectedModelResearchContext?.officialParcelId ??
+            null,
+          selected_feature_label:
+            selectedDevelopmentHotspotContext?.areaLabel ??
+            selectedModelResearchContext?.approximateAreaLabel ??
+            null,
+          selected_feature_permit_count:
+            selectedDevelopmentHotspotContext?.totalPermitCount ?? null,
+          selected_feature_related_parcels:
+            selectedDevelopmentHotspotContext?.parcelsRepresented ??
+            selectedModelResearchContext?.representedFeatureCount ??
+            null,
+          selected_feature_type: selectedDevelopmentHotspotContext
+            ? "development_hotspot"
+            : selectedModelResearchContext
+              ? "development_signal"
+              : null,
+          selected_feature_signal_band:
+            selectedModelResearchContext?.researchRankBand ?? null,
+          selected_feature_top_drivers:
+            selectedModelResearchContext?.topDrivers.join(", ") ?? null,
         }
       : cfsAppMode === "master-data"
       ? masterDataAskContext
@@ -240,12 +266,7 @@ function ProductShell() {
         : askCfsConfig?.inputPlaceholderOverride,
     suggestedPromptsOverride:
       cfsAppMode === "management"
-        ? [
-            "Summarize the biggest planning concerns.",
-            "What changed in development activity?",
-            "What should I pay attention to before the meeting?",
-            "Which data limitations should leadership understand?",
-          ]
+        ? managementSuggestedPrompts[managementSection]
         : askCfsConfig?.suggestedPromptsOverride,
     visiblePromptCount: askCfsConfig?.visiblePromptCount ?? 4,
   };
@@ -366,6 +387,33 @@ function ProductShell() {
     </SharedAskCfsRegistryProvider>
   );
 }
+
+const managementSuggestedPrompts: Record<ManagementSection, readonly string[]> = {
+  overview: [
+    "Summarize the biggest issues for today's planning meeting.",
+    "What changed in development activity?",
+    "Which constraints need leadership attention?",
+    "Which data limitations should leadership understand?",
+  ],
+  "planning-insights": [
+    "Why are these hotspots receiving attention?",
+    "Which observed activity is most concentrated?",
+    "Which constraints overlap current activity?",
+    "What should staff investigate in Builder?",
+  ],
+  "economic-insights": [
+    "What are the major economic tradeoffs?",
+    "Which opportunity classes are most common?",
+    "What does the scenario comparison show?",
+    "Which economic data limitations matter?",
+  ],
+  "development-signals": [
+    "Why is this area showing a stronger development signal?",
+    "What do the top model drivers mean?",
+    "How should leadership interpret validation?",
+    "Which model limitations require caution?",
+  ],
+};
 
 function isManagementSection(value: string | null): value is ManagementSection {
   return (

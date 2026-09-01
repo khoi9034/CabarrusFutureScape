@@ -9,6 +9,7 @@ import {
 } from "@/lib/adapters/developmentHotspotsAdapter";
 import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentHotspots } from "@/lib/api/development";
+import { getDemoManagementDevelopmentHotspots } from "@/lib/demo-data/mapLayerClient";
 
 export function useDevelopmentHotspots() {
   const [hotspots, setHotspots] = useState<DevelopmentHotspotsViewModel>(() => {
@@ -26,6 +27,19 @@ export function useDevelopmentHotspots() {
   });
 
   useEffect(() => {
+    if (USE_DEMO_DATA) {
+      let active = true;
+      void getDemoManagementDevelopmentHotspots()
+        .then((markers) => {
+          if (!active) return;
+          setHotspots((current) => ({ ...current, markers }));
+        })
+        .catch(() => undefined);
+      return () => {
+        active = false;
+      };
+    }
+
     if (!USE_BACKEND_API) {
       return;
     }

@@ -346,6 +346,27 @@ export async function getDemoDevelopmentHotspotsBySegment(
     .filter((marker): marker is DevelopmentHotspotMapMarker => Boolean(marker));
 }
 
+export async function getDemoManagementDevelopmentHotspots(limit = 40) {
+  const layer = await getDemoGeoJsonLayer("development_hotspots");
+  return layer.features
+    .map((feature) => {
+      const properties = getProperties(feature);
+      const segment =
+        asString(properties.permit_segment) ??
+        asString(properties.dominant_permit_segment);
+      const marker = isDevelopmentHotspotSegment(segment)
+        ? toDemoDevelopmentHotspotMarker(feature, segment, {})
+        : null;
+      if (marker) {
+        marker.managementLabel = asString(properties.label) ?? undefined;
+      }
+      return marker;
+    })
+    .filter((marker): marker is DevelopmentHotspotMapMarker => Boolean(marker))
+    .sort((left, right) => right.totalPermitCount - left.totalPermitCount)
+    .slice(0, limit);
+}
+
 export async function getDemoModelLabMarkers({
   limit = 500,
   signal = "higher",
@@ -624,6 +645,24 @@ function toDemoDevelopmentHotspotMarker(
     totalPermitCount: selectedSegmentCount,
     zoningJurisdictionName: asString(properties.zoning_jurisdiction_name),
   };
+}
+
+function isDevelopmentHotspotSegment(
+  value: string | null,
+): value is Exclude<DevelopmentHotspotPermitSegmentFilter, "all"> {
+  return Boolean(
+    value &&
+      [
+        "administrative_or_unknown",
+        "commercial_activity",
+        "demolition",
+        "industrial_activity",
+        "institutional_activity",
+        "minor_maintenance",
+        "redevelopment_signal",
+        "residential_growth",
+      ].includes(value),
+  );
 }
 
 function toDemoModelLabMarker(

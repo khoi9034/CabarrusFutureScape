@@ -113,6 +113,7 @@ export interface DevelopmentHotspotMapMarker {
   industrialActivityPermits: number;
   institutionalActivityPermits: number;
   majorValuePermits: number;
+  managementLabel?: string;
   latestPermitDate?: string | null;
   minorMaintenancePermits: number;
   officialParcelId: string;

@@ -7,11 +7,14 @@ import type {
   DevelopmentHotspotsResponse,
 } from "@/types/api";
 import type { DevelopmentPanelSource } from "@/lib/adapters/developmentActivitySummaryAdapter";
+import { normalizeDevelopmentHotspotMapMarkers } from "@/lib/adapters/developmentHotspotMapAdapter";
+import type { DevelopmentHotspotMapMarker } from "@/types/map/developmentHotspots";
 
 export interface DevelopmentHotspotsViewModel {
   errorMessage: string | null;
   hotspots: DevelopmentHotspotRecord[];
   isLoading: boolean;
+  markers: DevelopmentHotspotMapMarker[];
   source: DevelopmentPanelSource;
   totalCount: number;
 }
@@ -74,6 +77,7 @@ export function getStaticDevelopmentHotspots(): DevelopmentHotspotsViewModel {
     errorMessage: null,
     hotspots: developmentHotspotParcels,
     isLoading: false,
+    markers: [],
     source: "static",
     totalCount: developmentHotspotParcels.length,
   };
@@ -84,6 +88,7 @@ export function getUnavailableDevelopmentHotspots(): DevelopmentHotspotsViewMode
     errorMessage: null,
     hotspots: [],
     isLoading: false,
+    markers: [],
     source: "fallback",
     totalCount: 0,
   };
@@ -98,6 +103,7 @@ export function normalizeDevelopmentHotspots(
 
   return {
     hotspots: response.results.map(mapHotspotResult),
+    markers: normalizeDevelopmentHotspotMapMarkers(response).markers,
     totalCount: response.total_count,
   };
 }
