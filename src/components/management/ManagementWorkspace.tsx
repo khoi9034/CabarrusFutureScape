@@ -4,11 +4,13 @@ import { ArrowRight, Save, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { CfsRankedBarChart, CfsTrendChart, type CfsChartRow } from "@/components/management/CfsManagementCharts";
 import { ManagementMapPreview, type ManagementMapMarker } from "@/components/management/ManagementMapPreview";
+import { BackendRecoveryPanel } from "@/components/layout/BackendRecoveryPanel";
 import { PlanningSnapshotSaveController } from "@/components/dashboard/IntelligencePanel";
 import { CFS_SAVE_PLANNING_SNAPSHOT_EVENT } from "@/components/dashboard/OverviewCommandCenter";
 import { developmentModelLabSummary } from "@/data/intelligence/developmentModelLab";
 import { indicatorCenterDefinitions } from "@/data/intelligence/indicatorCenter";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import type { BackendAvailabilityController } from "@/hooks/useBackendAvailability";
 import { useDevelopmentActivitySummary } from "@/hooks/useDevelopmentActivitySummary";
 import { useDevelopmentHotspots } from "@/hooks/useDevelopmentHotspots";
 import { useDevelopmentPredictionResearchStatus, standardizedDevelopmentPredictionMetrics } from "@/hooks/useDevelopmentPredictionResearchStatus";
@@ -24,7 +26,25 @@ import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPrevie
 const number = new Intl.NumberFormat("en-US");
 const money = new Intl.NumberFormat("en-US", { notation: "compact", style: "currency", currency: "USD", maximumFractionDigits: 1 });
 
-export function ManagementWorkspace({ section }: { section: ManagementSection }) {
+export function ManagementWorkspace({ backend, section }: { backend: BackendAvailabilityController; section: ManagementSection }) {
+  if (backend.status !== "healthy") {
+    return (
+      <main className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8" data-management-section={section} data-testid="cfs-management-workspace">
+        <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-5">
+          <header className="cfs-command-surface rounded-2xl px-5 py-6 sm:px-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9bd1de]">CFS Management</p>
+            <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{title(section)}</h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">{description(section)}</p>
+          </header>
+          <BackendRecoveryPanel controller={backend} />
+        </div>
+      </main>
+    );
+  }
+  return <ManagementDataWorkspace section={section} />;
+}
+
+function ManagementDataWorkspace({ section }: { section: ManagementSection }) {
   const dashboard = useDashboardState();
   const development = useDevelopmentActivitySummary();
   const trends = useDevelopmentTrends();
@@ -154,7 +174,7 @@ function Economics({ economics, openBuilder, trendDirection, trendRows }: any) {
       <Panel eyebrow="Geographic comparison" title="Assessed-value coverage"><CfsRankedBarChart ariaLabel="Economic parcels by geography" rows={(data?.jurisdiction_value_summary ?? []).slice(0, 8).map((row: any) => ({ label: row.geography_label || "Unspecified", value: row.parcel_count }))} /></Panel>
     </TwoColumns>
     <Panel eyebrow="Scenario results" title="Comparison without Builder controls">
-      {data?.scenario_outputs?.length ? <div className="grid gap-3 md:grid-cols-2">{data.scenario_outputs.slice(0, 4).map((scenario: any) => <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4" key={scenario.scenario_id}><p className="font-semibold text-white">{scenario.title}</p><StatusRows rows={[["Revenue / acre", clean(scenario.revenue_per_acre_band)], ["Service burden", clean(scenario.service_burden_band)], ["Infrastructure burden", clean(scenario.infrastructure_burden_band)], ["Net condition", clean(scenario.constraint_adjusted_opportunity_band)]]} /></article>)}</div> : <CompactEmpty>{economics.error ?? "Current scenario outputs are unavailable."}</CompactEmpty>}
+      {data?.scenario_outputs?.length ? <div className="grid gap-3 md:grid-cols-2">{data.scenario_outputs.slice(0, 4).map((scenario: any) => <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4" key={scenario.scenario_id}><p className="font-semibold text-white">{scenario.title}</p><StatusRows rows={[["Revenue / acre", clean(scenario.revenue_per_acre_band)], ["Service burden", clean(scenario.service_burden_band)], ["Infrastructure burden", clean(scenario.infrastructure_burden_band)], ["Net condition", clean(scenario.constraint_adjusted_opportunity_band)]]} /></article>)}</div> : <CompactEmpty>Economic intelligence is temporarily unavailable.</CompactEmpty>}
       <Action onClick={openBuilder}>Open in Builder Economics</Action>
     </Panel>
   </>;

@@ -47,6 +47,7 @@ import {
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
 import { OverviewCommandCenter } from "@/components/dashboard/OverviewCommandCenter";
 import { EconomicsShell } from "@/components/economics/EconomicsShell";
+import { BackendRecoveryPanel } from "@/components/layout/BackendRecoveryPanel";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { CfsMasterHome } from "@/components/layout/CfsMasterHome";
 import { MasterDataWorkspace } from "@/components/master-data/MasterDataWorkspace";
@@ -55,6 +56,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
+import { useBackendAvailability } from "@/hooks/useBackendAvailability";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type {
@@ -101,6 +103,7 @@ export function AppShell({
 }
 
 function ProductShell() {
+  const backendAvailability = useBackendAvailability();
   const {
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
@@ -305,12 +308,21 @@ function ProductShell() {
         )}
         data-testid="cfs-workspace-frame"
       >
+      {cfsAppMode !== "management" || backendAvailability.status === "healthy" ? (
+        <div className="px-4 pt-4 sm:px-6 lg:px-8">
+          <BackendRecoveryPanel compact controller={backendAvailability} />
+        </div>
+      ) : null}
       {cfsAppMode === "management" ? (
         <EnterpriseErrorBoundary
           moduleName="CFS Management"
           resetKey={`management-${managementSection}`}
         >
-          <ManagementWorkspace section={managementSection} />
+          <ManagementWorkspace
+            backend={backendAvailability}
+            key={`management-${managementSection}-${backendAvailability.refreshKey}`}
+            section={managementSection}
+          />
         </EnterpriseErrorBoundary>
       ) : cfsAppMode === "economics" ? (
         <EnterpriseErrorBoundary

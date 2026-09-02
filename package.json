@@ -18,6 +18,7 @@
     "check:acceptance": "node scripts/check-product-acceptance.mjs",
     "check:arcgis-assets": "node scripts/sync-arcgis-assets.mjs --check",
     "check:ask-cfs": "python scripts/check_ask_cfs.py",
+    "check:backend-recovery": "node scripts/check-backend-recovery.mjs",
     "check:data-provenance": "python scripts/check_data_provenance.py",
     "check:demo-functionality": "node scripts/check-demo-functionality.mjs",
     "check:demo-interactions": "node scripts/check-demo-interactions.mjs",
