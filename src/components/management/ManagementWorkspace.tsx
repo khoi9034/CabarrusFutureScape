@@ -142,7 +142,7 @@ function Planning({ flood, hotspots, hotspotMarkers, hotspotRows, schools, selec
 
 function Economics({ economics, openBuilder, trendDirection, trendRows }: any) {
   const data = economics.data;
-  const currentScenario = data?.scenario_outputs[0];
+  const currentScenario = data?.scenario_outputs?.[0];
   return <>
     <KpiGrid items={data ? [["Parcels analyzed", number.format(data.summary.total_parcels_analyzed), freshness(data.context_freshness ?? "current")], ["High opportunity", number.format(data.summary.high_opportunity_count), "Current"], ["Underbuilt watch", number.format(data.summary.underbuilt_candidate_count), "Decision support"], ["Median value / acre", formatMoney(data.summary.median_value_per_acre), "Current"], ["Total assessed value", formatMoney(data.summary.total_assessed_value), "Current"]] : []} />
     <TwoColumns>
@@ -154,7 +154,7 @@ function Economics({ economics, openBuilder, trendDirection, trendRows }: any) {
       <Panel eyebrow="Geographic comparison" title="Assessed-value coverage"><CfsRankedBarChart ariaLabel="Economic parcels by geography" rows={(data?.jurisdiction_value_summary ?? []).slice(0, 8).map((row: any) => ({ label: row.geography_label || "Unspecified", value: row.parcel_count }))} /></Panel>
     </TwoColumns>
     <Panel eyebrow="Scenario results" title="Comparison without Builder controls">
-      {data?.scenario_outputs.length ? <div className="grid gap-3 md:grid-cols-2">{data.scenario_outputs.slice(0, 4).map((scenario: any) => <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4" key={scenario.scenario_id}><p className="font-semibold text-white">{scenario.title}</p><StatusRows rows={[["Revenue / acre", clean(scenario.revenue_per_acre_band)], ["Service burden", clean(scenario.service_burden_band)], ["Infrastructure burden", clean(scenario.infrastructure_burden_band)], ["Net condition", clean(scenario.constraint_adjusted_opportunity_band)]]} /></article>)}</div> : <CompactEmpty>{economics.error ?? "Current scenario outputs are unavailable."}</CompactEmpty>}
+      {data?.scenario_outputs?.length ? <div className="grid gap-3 md:grid-cols-2">{data.scenario_outputs.slice(0, 4).map((scenario: any) => <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4" key={scenario.scenario_id}><p className="font-semibold text-white">{scenario.title}</p><StatusRows rows={[["Revenue / acre", clean(scenario.revenue_per_acre_band)], ["Service burden", clean(scenario.service_burden_band)], ["Infrastructure burden", clean(scenario.infrastructure_burden_band)], ["Net condition", clean(scenario.constraint_adjusted_opportunity_band)]]} /></article>)}</div> : <CompactEmpty>{economics.error ?? "Current scenario outputs are unavailable."}</CompactEmpty>}
       <Action onClick={openBuilder}>Open in Builder Economics</Action>
     </Panel>
   </>;
