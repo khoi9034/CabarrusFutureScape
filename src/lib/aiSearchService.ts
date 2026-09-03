@@ -15,7 +15,7 @@ import {
   getDemoEconomicsPowerBiExport,
   getDemoSchoolCapacityWatch,
 } from "@/lib/demo-data/client";
-import { getDemoSchoolPressureResponse } from "@/lib/demo-data/mapLayerClient";
+import { getDemoMapContext, getDemoSchoolPressureResponse } from "@/lib/demo-data/mapLayerClient";
 import type {
   CfsAiDashboardActions,
   CfsAiConversationTurn,
@@ -31,13 +31,12 @@ import type {
 } from "@/types/api";
 
 export const askCfsSuggestedPrompts = [
-  "What are the main permit trends?",
-  "Which school areas need review?",
-  "Summarize floodplain review signals.",
-  "What changed in observed development activity?",
-  "Where is data coverage incomplete?",
-  "Explain Model Lab in safe language.",
-  "What should I inspect first?",
+  "Summarize this map view",
+  "How many permits are visible?",
+  "Which parcels should I inspect?",
+  "What constraints are in this area?",
+  "Which hotspots are visible?",
+  "What should I look at next?",
 ] as const;
 
 export const askCfsMasterDataSuggestedPrompts = [
@@ -201,6 +200,9 @@ async function searchDemoCfsAi(
   }
 
   const context = await buildDemoAiContext();
+  if (isDemoMapContextQuery(request)) {
+    return sanitizeDemoResponse(await demoMapExtentAnswer(request));
+  }
   if (request.filter_context?.selected_feature_type === "development_hotspot") {
     return sanitizeDemoResponse(demoSelectedFeatureAnswer(request, context));
   }
@@ -256,6 +258,139 @@ async function searchDemoCfsAi(
               : demoGeneralAnswer(context, domains);
 
   return sanitizeDemoResponse(response);
+}
+
+function isDemoMapContextQuery(request: CfsAiSearchRequest) {
+  if (!request.map_context) return false;
+  const normalized = request.query.toLowerCase();
+  const phrases = [
+    "around here", "current map", "current screen", "current view", "map view", "in my screen", "in my view",
+    "in this area", "in this view", "looking at", "on the map", "these hotspots",
+    "these parcels", "these permits", "visible", "which parcels", "what should i look at",
+    "which ones", "inspect first", "look at next",
+  ];
+  return phrases.some((phrase) => normalized.includes(phrase)) ||
+    (request.conversation_context ?? []).slice(-3).some((turn) =>
+      phrases.slice(0, 14).some((phrase) => turn.query.toLowerCase().includes(phrase)),
+    );
+}
+
+async function demoMapExtentAnswer(request: CfsAiSearchRequest): Promise<CfsAiSearchResponse> {
+  const extent = request.map_context!.extent;
+  const context = await getDemoMapContext(true);
+  const visible = (features: typeof context.parcels.features) =>
+    features.filter((feature) => demoFeatureIntersectsExtent(feature.geometry?.coordinates, extent));
+  const parcels = visible(context.parcels.features);
+  const hotspots = visible(context.developmentHotspots.features).filter((feature) => {
+    const properties = feature.properties ?? {};
+    const segment = String(properties.permit_segment ?? properties.dominant_permit_segment ?? "");
+    if (request.map_context!.permit_segment && segment !== request.map_context!.permit_segment) return false;
+    const start = demoNumber(properties.year_start || properties.year);
+    const end = demoNumber(properties.year_end || properties.year);
+    return (!request.map_context!.permit_year_start || !end || end >= request.map_context!.permit_year_start) &&
+      (!request.map_context!.permit_year_end || !start || start <= request.map_context!.permit_year_end);
+  });
+  const flood = visible(context.floodplain.features);
+  const schools = visible(context.schoolCapacity.features);
+  const permitCount = hotspots.reduce(
+    (sum, feature) => sum + demoPermitCount(feature.properties ?? {}, request.map_context!),
+    0,
+  );
+  const ranked = hotspots
+    .map((feature) => ({
+      count: demoPermitCount(feature.properties ?? {}, request.map_context!),
+      latest: String(feature.properties?.latest_activity_date ?? "date unavailable"),
+      parcel: String(feature.properties?.pin14 ?? feature.properties?.official_parcel_id ?? "parcel unavailable"),
+    }))
+    .sort((left, right) => right.count - left.count)
+    .slice(0, 3);
+  const query = request.query.toLowerCase();
+  const priorSignature = [...(request.conversation_context ?? [])]
+    .reverse()
+    .find((turn) => turn.map_view_signature)?.map_view_signature;
+  const viewNote = priorSignature && priorSignature !== request.map_context!.view_signature
+    ? "The map view changed, so this answer uses the new visible extent."
+    : "This answer uses the current visible map extent.";
+  const candidates = ranked.map((item) =>
+    `Parcel ${item.parcel}: ${format(item.count)} permit records; latest ${item.latest}`,
+  );
+  let answer: string;
+  if (query.includes("permit") && /how many|count|number/.test(query)) {
+    answer = `${viewNote} Your current map view contains ${format(permitCount)} permit records in the sanitized Demo map extract.`;
+  } else if (query.includes("parcel") && /how many|count|number/.test(query)) {
+    answer = `${viewNote} ${format(parcels.length)} parcel features intersect the current Demo map view.`;
+  } else if (query.includes("hotspot")) {
+    answer = briefing(["Current-view hotspots", `${viewNote} ${format(hotspots.length)} Development Hotspots are visible.`], ["Review first", bullets(candidates)]);
+  } else if (/constraint|flood|school|transport/.test(query)) {
+    answer = briefing(["Current-view constraints", `${viewNote} ${format(flood.length)} flood-review features and ${format(schools.length)} school-capacity areas intersect the view.`], ["Planning use", "Use these sanitized Demo features for workflow demonstration only; confirm governing sources for real planning review."]);
+  } else if (/inspect|look at|which ones|which three/.test(query)) {
+    answer = briefing(["Review first", `${viewNote} These mapped activity records may deserve review because they have the largest permit counts in the current Demo extent.`], ["Candidates", bullets(candidates.length ? candidates : ["No mapped activity records are visible."])], ["Caveat", "This is a review queue, not a regulatory determination or forecast."]);
+  } else {
+    const selection = request.map_context!.selected_parcel_id
+      ? `Selected parcel: ${request.map_context!.selected_parcel_id}.`
+      : request.map_context!.selected_feature_id
+        ? `Selected feature: ${request.map_context!.selected_feature_label ?? request.map_context!.selected_feature_id}.`
+        : "No parcel or map feature is selected.";
+    answer = briefing(["Current map view", `${viewNote} ${format(parcels.length)} parcels, ${format(permitCount)} permit records, and ${format(hotspots.length)} Development Hotspots are visible.`], ["Constraint context", `${format(flood.length)} flood-review features and ${format(schools.length)} school-capacity areas intersect the view.`], ["Selection", selection], ["Inspect next", bullets(candidates.length ? candidates : ["Pan or zoom to mapped activity."])]);
+  }
+  return baseDemoResponse(
+    answer,
+    resolveDemoDomains(request),
+    context.developmentHotspots.metadata?.generated_at ?? null,
+    [
+      evidence("Permit activity", `${format(permitCount)} records in the current Demo extent.`, "Permit activity"),
+      evidence("Parcel data", `${format(parcels.length)} parcel features in view.`, "Parcel data"),
+      evidence("Development Hotspots", `${format(hotspots.length)} hotspots in view.`, "Development Hotspots"),
+      evidence("FEMA Floodplain Review", `${format(flood.length)} flood-review features in view.`, "FEMA Floodplain Review"),
+    ],
+    ["Pan or zoom, then ask again to refresh the current-view summary."],
+  );
+}
+
+function demoFeatureIntersectsExtent(
+  coordinates: unknown,
+  extent: NonNullable<CfsAiSearchRequest["map_context"]>["extent"],
+) {
+  let maxLatitude = -Infinity;
+  let maxLongitude = -Infinity;
+  let minLatitude = Infinity;
+  let minLongitude = Infinity;
+  const visit = (value: unknown) => {
+    if (!Array.isArray(value)) return;
+    if (value.length >= 2 && typeof value[0] === "number" && typeof value[1] === "number") {
+      minLongitude = Math.min(minLongitude, value[0]);
+      maxLongitude = Math.max(maxLongitude, value[0]);
+      minLatitude = Math.min(minLatitude, value[1]);
+      maxLatitude = Math.max(maxLatitude, value[1]);
+      return;
+    }
+    value.forEach(visit);
+  };
+  visit(coordinates);
+  return minLongitude <= extent.xmax && maxLongitude >= extent.xmin &&
+    minLatitude <= extent.ymax && maxLatitude >= extent.ymin;
+}
+
+function demoNumber(value: unknown) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function demoPermitCount(
+  properties: Record<string, unknown>,
+  mapContext: NonNullable<CfsAiSearchRequest["map_context"]>,
+) {
+  const yearly = properties.yearly_counts;
+  if ((mapContext.permit_year_start || mapContext.permit_year_end) && yearly && typeof yearly === "object" && !Array.isArray(yearly)) {
+    return Object.entries(yearly).reduce((sum, [year, value]) => {
+      const numericYear = Number(year);
+      return numericYear >= (mapContext.permit_year_start ?? numericYear) &&
+        numericYear <= (mapContext.permit_year_end ?? numericYear)
+        ? sum + demoNumber(value)
+        : sum;
+    }, 0);
+  }
+  return demoNumber(properties.total_permit_count);
 }
 
 async function demoEconomicsAnswer(

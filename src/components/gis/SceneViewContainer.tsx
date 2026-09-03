@@ -262,6 +262,7 @@ declare global {
       layers: Array<{
         graphicsCount: number | null;
         id: string;
+        title: string;
         visible: boolean;
       }>;
       ready: boolean;
@@ -3404,6 +3405,7 @@ function registerSceneViewDebugState(runtime: ArcGISRuntime, view: SceneView) {
               ? graphics.length
               : null,
           id: layer.id,
+          title: layer.title || layer.id,
           visible: layer.visible,
         };
       }) ?? [],

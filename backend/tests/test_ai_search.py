@@ -900,9 +900,195 @@ def test_ai_search_provider_receives_only_sanitized_filter_context(monkeypatch) 
         "master_data_result_count": 31,
         "master_data_match_percentage": 99.7,
     }
-    assert provider_request["cfs_context"] == {}
+    assert provider_request["cfs_context"]["workspace_context"] == {
+        "master_data_dataset_id": "permits",
+        "master_data_result_count": 31,
+        "master_data_match_percentage": 99.7,
+    }
     assert "Private owner" not in captured["messages"][1]["content"]
     assert "select * from parcels" not in captured["messages"][1]["content"]
+
+
+def test_ai_search_map_extent_uses_bounded_postgis_summary() -> None:
+    captured: dict = {}
+    row = {
+        "parcel_count": 287,
+        "permit_count": 43,
+        "permit_date_min": "2024-01-02",
+        "permit_date_max": "2026-07-30",
+        "residential_permit_count": 21,
+        "commercial_permit_count": 8,
+        "major_value_permit_count": 3,
+        "hotspot_count": 2,
+        "flood_review_parcel_count": 5,
+        "school_zone_count": 2,
+        "school_pressure_zone_count": 1,
+        "top_permits": [{"permit_number": "PR-43", "activity_date": "2026-07-30"}],
+        "top_hotspots": [{"official_parcel_id": "P-7", "total_permit_count": 11}],
+    }
+
+    class Result:
+        def mappings(self):
+            return self
+
+        def one(self):
+            return row
+
+    class Db:
+        def execute(self, statement, params):
+            captured["calls"] = captured.get("calls", 0) + 1
+            captured["statement"] = str(statement)
+            captured["params"] = params
+            return Result()
+
+    request = CfsAiSearchRequest(
+        app_mode="planning",
+        map_context={
+            "center": {"latitude": 35.4, "longitude": -80.6},
+            "extent": {"xmin": -80.7, "ymin": 35.3, "xmax": -80.5, "ymax": 35.5},
+            "permit_segment": "commercial_activity",
+            "permit_year_end": 2025,
+            "permit_year_start": 2024,
+            "view_signature": "west",
+            "visible_layers": [{"id": "permits", "name": "Development Hotspots", "visible": True}],
+            "zoom": 12,
+        },
+        query="How many permits are in my current screen?",
+    )
+    context = ai_search_router._with_request_context(_context(), request, Db())
+    cached_context = ai_search_router._with_request_context(_context(), request, Db())
+    response = CfsAiSearchService(_settings()).search(request, context)
+
+    assert captured["params"] == {
+        "countywide": False,
+        "include_top_hotspots": False,
+        "include_top_permits": False,
+        "permit_segment": "commercial_activity",
+        "permit_year_end": 2025,
+        "permit_year_start": 2024,
+        "xmin": -80.7,
+        "ymin": 35.3,
+        "xmax": -80.5,
+        "ymax": 35.5,
+    }
+    assert "ST_MakeEnvelope" in captured["statement"]
+    assert captured["calls"] == 1
+    assert cached_context["map_extent_summary"]["permit_count"] == 43
+    assert "43 permit records" in response.answer
+    assert response.evidence[1].detail == "287 parcels intersect the current extent."
+
+
+def test_ai_search_map_follow_up_uses_new_view() -> None:
+    request = CfsAiSearchRequest(
+        app_mode="planning",
+        conversation_context=[{
+            "map_view_signature": "old-view",
+            "query": "How many permits are visible?",
+        }],
+        map_context={
+            "center": {"latitude": 35.25, "longitude": -80.45},
+            "extent": {"xmin": -80.5, "ymin": 35.2, "xmax": -80.4, "ymax": 35.3},
+            "view_signature": "new-view",
+            "visible_layers": [],
+            "zoom": 14,
+        },
+        query="Which ones should I inspect first?",
+    )
+    context = {
+        **_context(),
+        "map_extent_summary": {
+            "parcel_count": 2,
+            "permit_count": 3,
+            "top_permits": [{
+                "permit_number": "PR-9",
+                "activity_date": "2026-07-30",
+                "permit_segment": "commercial_activity",
+                "is_major_value": True,
+            }],
+        },
+    }
+    response = CfsAiSearchService(_settings()).search(request, context)
+
+    assert "map view changed" in response.answer
+    assert "PR-9" in response.answer
+    assert "major-value signal" in response.answer
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        ("How many parcels are visible?", "287 parcels intersect"),
+        ("Which development hotspots are in my view?", "2 Development Hotspots"),
+        ("Are any visible parcels affected by flood constraints?", "5 visible parcels require flood review"),
+        ("Summarize what I'm looking at.", "287 parcels, 43 permit records, and 2 Development Hotspots"),
+    ],
+)
+def test_ai_search_map_question_types(query: str, expected: str) -> None:
+    request = CfsAiSearchRequest(
+        app_mode="planning",
+        map_context={
+            "center": {"latitude": 35.4, "longitude": -80.6},
+            "extent": {"xmin": -80.7, "ymin": 35.3, "xmax": -80.5, "ymax": 35.5},
+            "view_signature": "map-view",
+            "visible_layers": [{"id": "flood", "name": "Floodplain Review", "visible": True}],
+            "zoom": 12,
+        },
+        query=query,
+    )
+    context = {
+        **_context(),
+        "map_extent_summary": {
+            "parcel_count": 287,
+            "permit_count": 43,
+            "hotspot_count": 2,
+            "flood_review_parcel_count": 5,
+            "school_zone_count": 2,
+            "school_pressure_zone_count": 1,
+            "top_hotspots": [{"official_parcel_id": "P-7", "total_permit_count": 11}],
+        },
+    }
+
+    response = CfsAiSearchService(_settings()).search(request, context)
+
+    assert expected in response.answer
+    assert len(response.evidence) == 4
+
+
+def test_ai_search_provider_retrieves_only_question_relevant_evidence(monkeypatch) -> None:
+    captured: dict = {}
+
+    def provider_call(_url, payload, *_args, **_kwargs):
+        captured.update(payload)
+        return None
+
+    monkeypatch.setattr(ai_search_service, "_post_provider_json", provider_call)
+    request = CfsAiSearchRequest(
+        filter_context={
+            "selected_parcel_id": "parcel-7",
+            "selected_parcel_zoning": "LDR",
+            "owner_name": "Private owner",
+        },
+        query="Is flooding a concern for this parcel?",
+    )
+    CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="configured-model",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    )._provider_answer(request, _context(), ["flood"])
+
+    provider_request = json.loads(captured["messages"][1]["content"])
+    grounded = provider_request["cfs_context"]
+    assert grounded["workspace_context"] == {
+        "selected_parcel_id": "parcel-7",
+        "selected_parcel_zoning": "LDR",
+    }
+    assert set(grounded["indicator_intelligence"]) == {"floodplain_detail"}
+    assert "economics_intelligence" not in grounded
+    assert "school_pressure" not in grounded
+    assert "Private owner" not in captured["messages"][1]["content"]
 
 
 def test_ai_search_economics_mode_returns_economic_answer() -> None:

@@ -61,6 +61,7 @@ export function SharedAskCfsSource(props: AskCfsPanelProps) {
     props.filterContext,
     props.helperTextOverride,
     props.inputPlaceholderOverride,
+    props.mapAware,
     props.onResponse,
     props.suggestedPromptsOverride,
     props.visiblePromptCount,

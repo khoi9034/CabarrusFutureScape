@@ -105,11 +105,13 @@ export function AppShell({
 function ProductShell() {
   const backendAvailability = useBackendAvailability();
   const {
+    developmentHotspotControls,
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
     floodZonesEnabled,
     isMapFocusMode,
     cfsAppMode,
+    overviewCommandMode,
     parcelReviewView,
     productMode,
     selectedDevelopmentHotspotContext,
@@ -235,6 +237,11 @@ function ProductShell() {
       : cfsAppMode === "master-data"
       ? masterDataAskContext
       : {
+            active_tab: productMode,
+            planning_mode: overviewCommandMode,
+            permit_segment: developmentHotspotControls.permitSegment,
+            permit_year_end: developmentHotspotControls.permitYearEnd,
+            permit_year_start: developmentHotspotControls.permitYearStart,
             selected_feature_analysis_period:
               selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
             selected_feature_id:
@@ -267,6 +274,7 @@ function ProductShell() {
       cfsAppMode === "management"
         ? "Ask what leadership should know..."
         : askCfsConfig?.inputPlaceholderOverride,
+    mapAware: cfsAppMode === "planning",
     suggestedPromptsOverride:
       cfsAppMode === "management"
         ? managementSuggestedPrompts[managementSection]

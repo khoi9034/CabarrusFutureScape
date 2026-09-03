@@ -266,6 +266,34 @@ DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
     ("methodology", ("method", "explain", "caveat", "limitation")),
 ]
 
+MAP_CONTEXT_PHRASES = (
+    "around here",
+    "current map",
+    "current screen",
+    "current view",
+    "map view",
+    "in my screen",
+    "in my view",
+    "in this area",
+    "in this view",
+    "looking at",
+    "on the map",
+    "these hotspots",
+    "these parcels",
+    "these permits",
+    "visible right now",
+    "visible",
+    "which parcels",
+    "what should i look at",
+)
+MAP_FOLLOW_UP_PHRASES = (
+    "which ones",
+    "which three",
+    "inspect first",
+    "look at next",
+    "what should i inspect",
+)
+
 UNSAFE_REPLACEMENTS = {
     r"\bwill\s+be\s+developed\b": "has observed planning context",
     r"\bwill\s+develop\b": "shows observed permit activity",
@@ -480,10 +508,10 @@ class CfsAiSearchService:
                             "selected_signal": request.selected_signal.model_dump(exclude_none=True)
                             if request.selected_signal
                             else None,
-                            "cfs_context": (
-                                {}
-                                if request.app_mode == "master-data"
-                                else compact_context(context)
+                            "cfs_context": grounded_context_for_request(
+                                context,
+                                request,
+                                domains,
                             ),
                             "deterministic_dashboard_actions": dashboard_actions_for_domains(
                                 domains,
@@ -598,6 +626,9 @@ def deterministic_answer(
     if safety_kind := classify_safety_query(request.query):
         return _safety_answer(request, context, safety_kind)
 
+    if is_map_context_query(request) and request.map_context:
+        return sanitize_response(_map_extent_answer(request, context, domains))
+
     if request.selected_signal:
         return _selected_signal_answer(request, context, domains)
 
@@ -706,14 +737,77 @@ def dashboard_actions_for_domains(
     return CfsAiDashboardActions.model_validate(payload)
 
 
-def compact_context(context: CfsAiContext) -> CfsAiContext:
-    return {
-        "economics_intelligence": context.get("economics_intelligence"),
-        "indicator_intelligence": context.get("indicator_intelligence"),
-        "indicator_summary": context.get("indicator_summary"),
-        "school_pressure": context.get("school_pressure"),
-        "methodology": context.get("methodology"),
+_INTELLIGENCE_KEYS_BY_DOMAIN: dict[CfsAiDomain, tuple[str, ...]] = {
+    "data_readiness": ("data_readiness_detail", "domain_readiness", "watchlist"),
+    "flood": ("floodplain_detail",),
+    "general": (
+        "development_activity_detail",
+        "floodplain_detail",
+        "school_pressure_detail",
+    ),
+    "methodology": ("data_readiness_detail", "domain_readiness"),
+    "model_lab": ("data_readiness_detail",),
+    "permits": ("development_activity_detail",),
+    "schools": ("school_pressure_detail",),
+    "transportation": ("data_readiness_detail",),
+    "utilities": ("data_readiness_detail",),
+    "zoning": ("data_readiness_detail",),
+    "economics": (),
+}
+
+
+def grounded_context_for_request(
+    context: CfsAiContext,
+    request: CfsAiSearchRequest,
+    domains: list[CfsAiDomain],
+) -> CfsAiContext:
+    """Return only approved evidence relevant to this question and workspace."""
+
+    grounded: CfsAiContext = {
+        "as_of": context.get("as_of"),
+        "context_freshness": context.get("context_freshness"),
+        "data_source": context.get("data_source"),
     }
+    workspace = safe_filter_context(request.filter_context)
+    if workspace:
+        grounded["workspace_context"] = workspace
+    if request.map_context:
+        grounded["map_context"] = request.map_context.model_dump(exclude_none=True)
+    if context.get("map_extent_summary"):
+        grounded["map_extent_summary"] = context["map_extent_summary"]
+    if request.app_mode == "master-data":
+        return grounded
+    if request.app_mode == "economics":
+        grounded["economics_intelligence"] = context.get("economics_intelligence") or {}
+        return grounded
+
+    intelligence = context.get("indicator_intelligence")
+    if isinstance(intelligence, dict):
+        keys = {
+            key
+            for domain in domains
+            for key in _INTELLIGENCE_KEYS_BY_DOMAIN.get(domain, ())
+        }
+        selected = {key: intelligence[key] for key in keys if key in intelligence}
+        if selected:
+            grounded["indicator_intelligence"] = selected
+    if "schools" in domains:
+        grounded["school_pressure"] = context.get("school_pressure") or {}
+    if set(domains) & {"methodology", "model_lab", "schools"}:
+        grounded["methodology"] = context.get("methodology") or {}
+    return grounded
+
+
+def is_map_context_query(request: CfsAiSearchRequest) -> bool:
+    if request.app_mode != "planning" or request.map_context is None:
+        return False
+    normalized = " ".join(request.query.lower().split())
+    if any(phrase in normalized for phrase in MAP_CONTEXT_PHRASES):
+        return True
+    return any(phrase in normalized for phrase in MAP_FOLLOW_UP_PHRASES) and any(
+        any(map_phrase in turn.query.lower() for map_phrase in MAP_CONTEXT_PHRASES)
+        for turn in request.conversation_context[-3:]
+    )
 
 
 def _mark_provider_unavailable(reason: str) -> None:
@@ -2514,7 +2608,7 @@ def _selected_signal_actions(
     return actions
 
 
-def _permit_answer(
+def _permit_answer_context(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
     domains: list[CfsAiDomain],
@@ -2530,6 +2624,161 @@ def _permit_answer(
         f"across {_fmt(active_parcels)} active parcels."
         if total_records or active_parcels
         else "CFS does not have permit totals in the current compact context."
+    )
+    return detail, top_types, top_segments, top_geographies, total_records, active_parcels, total_sentence
+
+
+def _map_extent_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse:
+    summary = context.get("map_extent_summary")
+    if not isinstance(summary, dict) or summary.get("status") == "unavailable":
+        return _response(
+            "Current map context is available, but CFS could not retrieve the viewport summary. Try again after the map finishes loading.",
+            context,
+            domains,
+            request.mode,
+            [_evidence("Current Planning map", "Viewport data is temporarily unavailable.", "Current map view", "limited")],
+            ["Wait for the map to settle, then try the question again."],
+        )
+
+    query = request.query.lower()
+    permits = int(summary.get("permit_count") or 0)
+    parcels = int(summary.get("parcel_count") or 0)
+    hotspots = int(summary.get("hotspot_count") or 0)
+    flood = int(summary.get("flood_review_parcel_count") or 0)
+    school_zones = int(summary.get("school_zone_count") or 0)
+    school_pressure = int(summary.get("school_pressure_zone_count") or 0)
+    top_permits = summary.get("top_permits") if isinstance(summary.get("top_permits"), list) else []
+    top_hotspots = summary.get("top_hotspots") if isinstance(summary.get("top_hotspots"), list) else []
+    active_layers = [
+        layer.name
+        for layer in request.map_context.visible_layers
+        if layer.visible
+    ][:8]
+    selected_context = (
+        f"Selected parcel: {request.map_context.selected_parcel_id}."
+        if request.map_context.selected_parcel_id
+        else f"Selected feature: {request.map_context.selected_feature_label or request.map_context.selected_feature_id}."
+        if request.map_context.selected_feature_id
+        else "No parcel or map feature is selected."
+    )
+    previous_signature = next(
+        (turn.map_view_signature for turn in reversed(request.conversation_context) if turn.map_view_signature),
+        None,
+    )
+    view_note = (
+        "The map view changed since the prior question, so this answer uses the new visible extent. "
+        if previous_signature and previous_signature != request.map_context.view_signature
+        else "This answer uses the current visible map extent. "
+    )
+
+    if "permit" in query and any(term in query for term in ("how many", "count", "number")):
+        date_range = _map_date_range(summary)
+        answer = f"{view_note}Your current map view contains {_fmt(permits)} permit records{date_range}."
+        breakdown = [
+            f"Residential growth: {_fmt(summary.get('residential_permit_count'))}",
+            f"Commercial activity: {_fmt(summary.get('commercial_permit_count'))}",
+            f"Major-value permits: {_fmt(summary.get('major_value_permit_count'))}",
+        ]
+        answer += "\n\n" + _bullets(breakdown)
+    elif "parcel" in query and any(term in query for term in ("how many", "count", "number")):
+        answer = f"{view_note}{_fmt(parcels)} parcels intersect the current map view."
+    elif "hotspot" in query:
+        names = [_map_hotspot_line(item) for item in top_hotspots[:5]]
+        answer = f"{view_note}{_fmt(hotspots)} Development Hotspots are in the current view."
+        if names:
+            answer += "\n\nHighest-activity parcels in view\n" + _bullets(names)
+    elif any(term in query for term in ("constraint", "flood", "school", "transport")):
+        answer = _briefing(
+            ("Current-view constraints", f"{view_note}{_fmt(flood)} visible parcels require flood review; {_fmt(school_zones)} school attendance zones intersect the view, including {_fmt(school_pressure)} with over-capacity context."),
+            ("Active context layers", _bullets(active_layers or ["No optional planning layers are currently active."])),
+            ("Planning use", "Treat these as screening and coordination signals. Confirm parcel-specific flood, school, and transportation requirements with the governing source."),
+        )
+    elif any(term in query for term in ("inspect", "look at", "which ones", "which three")):
+        prefer_permits = (
+            "permit" in query
+            or "permits" in domains
+            or any("permit" in turn.query.lower() for turn in request.conversation_context[-3:])
+        )
+        candidates = (
+            [_map_permit_line(item) for item in top_permits[:3]]
+            if prefer_permits
+            else [_map_hotspot_line(item) for item in top_hotspots[:3]]
+        )
+        answer = _briefing(
+            ("Review first", f"{view_note}These {len(candidates)} records may deserve review because CFS ranked recent, major-value, flood-review, and concentrated permit signals already approved for planning screening."),
+            ("Candidates", _bullets(candidates or ["No ranked records are available in the current view."])),
+            ("Caveat", "This is a review queue, not a regulatory determination or development forecast."),
+        )
+    else:
+        answer = _briefing(
+            ("Current map view", f"{view_note}{_fmt(parcels)} parcels, {_fmt(permits)} permit records, and {_fmt(hotspots)} Development Hotspots intersect the view."),
+            ("Constraint context", f"{_fmt(flood)} parcels require flood review; {_fmt(school_zones)} school attendance zones intersect the view, including {_fmt(school_pressure)} with over-capacity context."),
+            ("Visible layers", _bullets(active_layers or ["No optional planning layers are currently active."])),
+            ("Selection", selected_context),
+            ("Inspect next", _bullets([_map_hotspot_line(item) for item in top_hotspots[:3]] or ["Pan or zoom to an area with mapped planning activity."])),
+        )
+
+    return _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [
+            _evidence("Permit activity", f"{_fmt(permits)} records intersect the current extent.", "Permit activity"),
+            _evidence("Parcel data", f"{_fmt(parcels)} parcels intersect the current extent.", "Parcel data"),
+            _evidence("Development Hotspots", f"{_fmt(hotspots)} hotspots are in view.", "Development Hotspots"),
+            _evidence("FEMA Floodplain Review", f"{_fmt(flood)} visible parcels require flood review.", "FEMA Floodplain Review"),
+        ],
+        ["Inspect the highest-ranked visible record.", "Pan or zoom, then ask again to refresh the current-view summary."],
+    )
+
+
+def _map_date_range(summary: dict[str, Any]) -> str:
+    start = summary.get("permit_date_min")
+    end = summary.get("permit_date_max")
+    return f" dated {start} through {end}" if start and end else ""
+
+
+def _map_permit_line(item: Any) -> str:
+    if not isinstance(item, dict):
+        return "Permit record"
+    label = item.get("permit_number") or item.get("permit_id") or "Permit record"
+    reasons = [
+        str(item.get("activity_date") or "date unavailable"),
+        str(item.get("permit_segment") or item.get("permit_type") or "type unavailable").replace("_", " "),
+    ]
+    if item.get("is_major_value"):
+        reasons.append("major-value signal")
+    if item.get("flood_review_required"):
+        reasons.append("flood review")
+    parcel = item.get("pin14") or item.get("official_parcel_id")
+    return f"{label}{f' · parcel {parcel}' if parcel else ''} — {', '.join(reasons)}"
+
+
+def _map_hotspot_line(item: Any) -> str:
+    if not isinstance(item, dict):
+        return "Development hotspot"
+    parcel = item.get("pin14") or item.get("official_parcel_id") or "Parcel unavailable"
+    return (
+        f"Parcel {parcel}: {_fmt(item.get('total_permit_count'))} permits, "
+        f"{_fmt(item.get('recent_permit_count_1yr'))} in the recent one-year window; "
+        f"latest {item.get('latest_permit_date') or 'date unavailable'}"
+    )
+
+
+def _permit_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse:
+    detail, top_types, top_segments, top_geographies, total_records, active_parcels, total_sentence = _permit_answer_context(
+        request,
+        context,
+        domains,
     )
     answer = _briefing(
         (

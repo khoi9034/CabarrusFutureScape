@@ -16,6 +16,7 @@ import { getAskCfsConversationRepository } from "@/lib/product/runtimeRepository
 import type { AskCfsMessageRecord, JsonObject, JsonValue } from "@/lib/product/types";
 import type {
   CfsAiConversationTurn,
+  CfsAiMapContext,
   CfsAiSearchRequest,
   CfsAiSearchResponse,
 } from "@/types/api";
@@ -34,6 +35,7 @@ export interface AskCfsPanelProps {
   helperTextOverride?: string;
   inputId?: string;
   inputPlaceholderOverride?: string;
+  mapAware?: boolean;
   onResponse?: (response: CfsAiSearchResponse) => void;
   suggestedPromptsOverride?: readonly string[];
   visiblePromptCount?: number;
@@ -65,6 +67,7 @@ export function AskCfsPanel({
   helperTextOverride,
   inputId = "ask-cfs-query",
   inputPlaceholderOverride,
+  mapAware = false,
   onResponse,
   suggestedPromptsOverride,
   visiblePromptCount,
@@ -84,6 +87,7 @@ export function AskCfsPanel({
   const [turns, setTurns] = useState<CfsAiConversationTurn[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
+  const [lastMapContext, setLastMapContext] = useState<CfsAiMapContext | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [persistenceAttempt, setPersistenceAttempt] = useState(0);
   const [persistenceBusy, setPersistenceBusy] = useState(false);
@@ -405,6 +409,10 @@ export function AskCfsPanel({
         ...(filterContext ?? {}),
         ...(requestOverrides.filter_context ?? {}),
       };
+      const mapContext = mapAware
+        ? captureAskCfsMapContext(activeFilterContext)
+        : null;
+      setLastMapContext(mapContext);
       const response = await searchCfsAi({
         ...requestOverrides,
         app_mode: appMode,
@@ -413,10 +421,11 @@ export function AskCfsPanel({
           ? activeFilterContext
           : undefined,
         mode: USE_DEMO_DATA ? "demo" : "live",
+        map_context: mapContext,
         query: trimmedQuery,
       });
       if (requestId !== latestRequestId.current) return;
-      const turn = toConversationTurn(trimmedQuery, response);
+      const turn = toConversationTurn(trimmedQuery, response, mapContext?.view_signature);
       setAnswer(response);
       setTurns(
         [...scopedTurns, turn].slice(-5),
@@ -598,6 +607,13 @@ export function AskCfsPanel({
     >
       <div className="sticky top-0 z-10 -mx-1 bg-[#06101c] px-1 pb-3">
         <p className="mb-2 text-xs leading-5 text-slate-400">{helperText}</p>
+        {mapAware ? (
+          <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9be9ff]" data-testid="ask-cfs-map-context">
+            <span className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/8 px-2 py-1">Context: Current Planning map</span>
+            {lastMapContext ? <span className="rounded-full border border-white/10 px-2 py-1">{lastMapContext.visible_layers.filter((layer) => layer.visible).length} active layers</span> : null}
+            {lastMapContext?.selected_parcel_id ? <span className="rounded-full border border-white/10 px-2 py-1">Parcel selected</span> : null}
+          </div>
+        ) : null}
         <form
           className="rounded-xl border border-white/12 bg-black/25 p-2 transition focus-within:border-[#68d8ff]/45 focus-within:ring-2 focus-within:ring-[#68d8ff]/10"
           onSubmit={onSubmit}
@@ -755,15 +771,71 @@ export function AskCfsPanel({
 function toConversationTurn(
   query: string,
   response: CfsAiSearchResponse,
+  mapViewSignature?: string | null,
 ): CfsAiConversationTurn {
   return {
     answer_summary: response.answer.split("\n").find(Boolean)?.slice(0, 280) ?? "",
     dashboard_actions: response.dashboard_actions,
     focused_domain:
       response.dashboard_actions.focus_domain ?? response.domains[0] ?? null,
+    map_view_signature: mapViewSignature ?? null,
     query,
     related_layers: response.related_layers.slice(0, 6),
   };
+}
+
+function captureAskCfsMapContext(
+  filterContext: CfsAiSearchRequest["filter_context"],
+): CfsAiMapContext | null {
+  const debug = window.__cfsGetMapDebugState?.();
+  const fallback = document.querySelector<HTMLElement>("[data-map-extent]")?.dataset;
+  const fallbackExtent = fallback?.mapExtent?.split(",").map(Number);
+  const extent = debug?.extent ?? (
+    fallbackExtent?.length === 4 && fallbackExtent.every(Number.isFinite)
+      ? { xmin: fallbackExtent[0], ymin: fallbackExtent[1], xmax: fallbackExtent[2], ymax: fallbackExtent[3] }
+      : null
+  );
+  if (!extent || extent.xmin >= extent.xmax || extent.ymin >= extent.ymax) return null;
+
+  const rounded = [extent.xmin, extent.ymin, extent.xmax, extent.ymax]
+    .map((value) => value.toFixed(4));
+  return {
+    center: {
+      latitude: (extent.ymin + extent.ymax) / 2,
+      longitude: (extent.xmin + extent.xmax) / 2,
+    },
+    current_tab: stringContextValue(filterContext?.active_tab),
+    current_tool: stringContextValue(filterContext?.current_tool),
+    extent,
+    planning_mode: stringContextValue(filterContext?.planning_mode),
+    permit_segment: nonAllStringContextValue(filterContext?.permit_segment),
+    permit_year_end: numberContextValue(filterContext?.permit_year_end),
+    permit_year_start: numberContextValue(filterContext?.permit_year_start),
+    selected_feature_id: stringContextValue(filterContext?.selected_feature_id),
+    selected_feature_label: stringContextValue(filterContext?.selected_feature_label),
+    selected_feature_type: stringContextValue(filterContext?.selected_feature_type),
+    selected_parcel_id: stringContextValue(filterContext?.selected_parcel_id),
+    view_signature: rounded.join("|"),
+    visible_layers: (debug?.layers ?? []).slice(0, 32).map((layer) => ({
+      id: layer.id.slice(0, 120),
+      name: layer.title.slice(0, 160),
+      visible: layer.visible,
+    })),
+    zoom: debug?.zoom ?? (fallback?.mapZoom ? Number(fallback.mapZoom) : null),
+  };
+}
+
+function stringContextValue(value: unknown) {
+  return typeof value === "string" && value ? value.slice(0, 200) : null;
+}
+
+function numberContextValue(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function nonAllStringContextValue(value: unknown) {
+  const selected = stringContextValue(value);
+  return selected && selected.toLowerCase() !== "all" ? selected : null;
 }
 
 function conversationTurnsFromMessages(

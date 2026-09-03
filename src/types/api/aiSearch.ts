@@ -20,6 +20,7 @@ export interface CfsAiSearchRequest {
     year_end?: number | null;
     year_start?: number | null;
   };
+  map_context?: CfsAiMapContext | null;
   mode?: "demo" | "live";
   query: string;
   request_type?: "powerbi_report_plan" | null;
@@ -39,8 +40,27 @@ export interface CfsAiConversationTurn {
   answer_summary?: string | null;
   dashboard_actions?: CfsAiDashboardActions;
   focused_domain?: string | null;
+  map_view_signature?: string | null;
   query: string;
   related_layers?: string[];
+}
+
+export interface CfsAiMapContext {
+  center: { latitude: number; longitude: number };
+  current_tab?: string | null;
+  current_tool?: string | null;
+  extent: { xmax: number; xmin: number; ymax: number; ymin: number };
+  planning_mode?: string | null;
+  permit_segment?: string | null;
+  permit_year_end?: number | null;
+  permit_year_start?: number | null;
+  selected_feature_id?: string | null;
+  selected_feature_label?: string | null;
+  selected_feature_type?: string | null;
+  selected_parcel_id?: string | null;
+  view_signature: string;
+  visible_layers: Array<{ id: string; name: string; visible: boolean }>;
+  zoom: number | null;
 }
 
 export interface CfsAiEvidenceItem {

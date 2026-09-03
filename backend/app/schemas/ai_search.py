@@ -1,7 +1,7 @@
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 CfsAiDomain = Literal[
     "data_readiness",
@@ -42,6 +42,7 @@ class CfsAiConversationTurn(BaseModel):
     answer_summary: str | None = Field(default=None, max_length=500)
     dashboard_actions: dict[str, Any] = Field(default_factory=dict)
     focused_domain: str | None = Field(default=None, max_length=50)
+    map_view_signature: str | None = Field(default=None, max_length=120)
     query: str = Field(max_length=500)
     related_layers: list[str] = Field(default_factory=list, max_length=8)
 
@@ -55,11 +56,64 @@ class CfsAiSelectedSignal(BaseModel):
     title: str = Field(max_length=200)
 
 
+class CfsAiMapExtent(BaseModel):
+    xmax: float = Field(ge=-180, le=180)
+    xmin: float = Field(ge=-180, le=180)
+    ymax: float = Field(ge=-90, le=90)
+    ymin: float = Field(ge=-90, le=90)
+
+    @model_validator(mode="after")
+    def validate_bounds(self) -> "CfsAiMapExtent":
+        if self.xmin >= self.xmax or self.ymin >= self.ymax:
+            raise ValueError("map extent must have increasing bounds")
+        return self
+
+
+class CfsAiMapCenter(BaseModel):
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+
+
+class CfsAiVisibleLayer(BaseModel):
+    id: str = Field(max_length=120)
+    name: str = Field(max_length=160)
+    visible: bool
+
+
+class CfsAiMapContext(BaseModel):
+    center: CfsAiMapCenter
+    current_tab: str | None = Field(default=None, max_length=80)
+    current_tool: str | None = Field(default=None, max_length=80)
+    extent: CfsAiMapExtent
+    planning_mode: str | None = Field(default=None, max_length=80)
+    permit_segment: str | None = Field(default=None, max_length=80)
+    permit_year_end: int | None = Field(default=None, ge=1900, le=2200)
+    permit_year_start: int | None = Field(default=None, ge=1900, le=2200)
+    selected_feature_id: str | None = Field(default=None, max_length=120)
+    selected_feature_label: str | None = Field(default=None, max_length=200)
+    selected_feature_type: str | None = Field(default=None, max_length=80)
+    selected_parcel_id: str | None = Field(default=None, max_length=120)
+    view_signature: str = Field(max_length=120)
+    visible_layers: list[CfsAiVisibleLayer] = Field(default_factory=list, max_length=32)
+    zoom: float | None = Field(default=None, ge=0, le=30)
+
+    @model_validator(mode="after")
+    def validate_year_range(self) -> "CfsAiMapContext":
+        if (
+            self.permit_year_start is not None
+            and self.permit_year_end is not None
+            and self.permit_year_start > self.permit_year_end
+        ):
+            raise ValueError("permit year range must be increasing")
+        return self
+
+
 class CfsAiSearchRequest(BaseModel):
     app_mode: Literal["economics", "master-data", "planning"] = "planning"
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
     filter_context: dict[str, Any] = Field(default_factory=dict)
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)
+    map_context: CfsAiMapContext | None = None
     mode: Literal["demo", "live"] = "live"
     query: str = Field(min_length=1, max_length=500)
     request_type: Literal["powerbi_report_plan"] | None = None
