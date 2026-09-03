@@ -23,9 +23,11 @@ const chartTheme = {
 
 export function CfsTrendChart({
   ariaLabel,
+  emptyMessage = "No records are available for this view.",
   rows,
 }: {
   ariaLabel: string;
+  emptyMessage?: string;
   rows: readonly CfsChartRow[];
 }) {
   const definition = useMemo(
@@ -65,15 +67,17 @@ export function CfsTrendChart({
       initialWidth={720}
     />
   ) : (
-    <ChartUnavailable />
+    <ChartUnavailable message={emptyMessage} />
   );
 }
 
 export function CfsRankedBarChart({
   ariaLabel,
+  emptyMessage = "No records are available for this view.",
   rows,
 }: {
   ariaLabel: string;
+  emptyMessage?: string;
   rows: readonly CfsChartRow[];
 }) {
   const visibleRows = useMemo(
@@ -117,14 +121,14 @@ export function CfsRankedBarChart({
       initialWidth={720}
     />
   ) : (
-    <ChartUnavailable />
+    <ChartUnavailable message={emptyMessage} />
   );
 }
 
-function ChartUnavailable() {
+function ChartUnavailable({ message }: { message: string }) {
   return (
     <p className="rounded-lg border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-400">
-      Current source data is unavailable, so no empty chart is shown.
+      {message}
     </p>
   );
 }

@@ -13,7 +13,7 @@ import { useDashboardState } from "@/hooks/useDashboardState";
 import type { BackendAvailabilityController } from "@/hooks/useBackendAvailability";
 import { useDevelopmentActivitySummary } from "@/hooks/useDevelopmentActivitySummary";
 import { useDevelopmentHotspots } from "@/hooks/useDevelopmentHotspots";
-import { useDevelopmentPredictionResearchStatus, standardizedDevelopmentPredictionMetrics } from "@/hooks/useDevelopmentPredictionResearchStatus";
+import { useDevelopmentPredictionResearchStatus } from "@/hooks/useDevelopmentPredictionResearchStatus";
 import { useDevelopmentTrends } from "@/hooks/useDevelopmentTrends";
 import { useEconomicsIntelligence } from "@/hooks/useEconomicsIntelligence";
 import { useFloodConstraintSummary } from "@/hooks/useFloodConstraintSummary";
@@ -106,8 +106,8 @@ function ManagementDataWorkspace({ section }: { section: ManagementSection }) {
           </div>
         </header>
 
-        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} openEconomicsBuilder={openEconomicsBuilder} /> : null}
-        {section === "planning-insights" ? <Planning flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} openBuilder={openPlanningBuilder} /> : null}
+        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={trends.source} openEconomicsBuilder={openEconomicsBuilder} /> : null}
+        {section === "planning-insights" ? <Planning flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} trendSource={trends.source} openBuilder={openPlanningBuilder} /> : null}
         {section === "economic-insights" ? <Economics economics={economics} openBuilder={openEconomicsBuilder} trendDirection={trends.trendDirection} trendRows={trendRows} /> : null}
         {section === "development-signals" ? <Signals model={model} preview={modelPreview} markers={signalMarkers} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
 
@@ -117,38 +117,39 @@ function ManagementDataWorkspace({ section }: { section: ManagementSection }) {
   );
 }
 
-function Overview({ development, economics, flood, hotspots, hotspotRows, model, schools, trendRows, openEconomicsBuilder }: any) {
+function Overview({ development, economics, flood, hotspots, hotspotRows, model, schools, trendRows, trendSource, openEconomicsBuilder }: any) {
   const strongest = model.rankingSummary.class_distribution.slice(0, 2).reduce((sum: number, row: any) => sum + row.row_count, 0);
   return <>
     <KpiGrid items={[
-      ["Permit activity", development.isLoading ? "Loading" : number.format(development.totalPermits), freshness(development.source)],
-      ["Active hotspots", hotspots.isLoading ? "Loading" : number.format(hotspots.totalCount), freshness(hotspots.source)],
+      ["Permit activity", countValue(development.source, development.isLoading, development.totalPermits), datedStatus(development.source, development.activityDateMax)],
+      ["Active hotspots", countValue(hotspots.source, hotspots.isLoading, hotspots.totalCount), datedStatus(hotspots.source, latestHotspotDate(hotspots))],
       ["Flood review", metric(flood.metrics, "review-required-parcels"), freshness(flood.source)],
-      ["School posture", schools.capacityStatusLabel, schools.source === "unavailable" ? "Unavailable" : "Limited"],
-      ["Elevated signals", number.format(strongest), freshness(model.source)],
-      ["Economic posture", economics.data ? number.format(economics.data.summary.high_opportunity_count) : economics.error ? "Unavailable" : "Loading", economics.data?.as_of ? `Updated ${formatDate(economics.data.as_of)}` : freshness(economics.error ? "unavailable" : "loading")],
+      ["School posture", schools.isLoading ? "Loading" : sourceAvailable(schools.source) ? schools.capacityStatusLabel : "Unavailable", sourceAvailable(schools.source) ? "Limited" : "Unavailable"],
+      ["Elevated signals", countValue(model.source, model.isLoading, strongest), sourceAvailable(model.source) ? "Limited" : "Unavailable"],
+      ["Economic posture", economics.data ? number.format(economics.data.summary.high_opportunity_count) : economics.error ? "Unavailable" : "Loading", economics.data ? freshness(economics.data.context_freshness ?? "current") : freshness(economics.error ? "unavailable" : "loading")],
     ]} />
     <TwoColumns>
-      <Panel eyebrow="Development activity" title="Recent permit trend"><CfsTrendChart ariaLabel="Recent development permit activity" rows={trendRows} /></Panel>
-      <Panel eyebrow="Planning attention" title="Highest-activity areas"><Watchlist rows={hotspotRows.slice(0, 5).map((item: CfsChartRow) => [item.label, `${number.format(item.value)} permits`])} /></Panel>
+      <Panel eyebrow="Development activity" title="Recent permit trend"><CfsTrendChart ariaLabel="Recent development permit activity" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
+      <Panel eyebrow="Planning attention" title="Highest-activity areas"><Watchlist emptyMessage={unavailableMessage(hotspots.source, "No high-activity areas were identified.")} rows={hotspotRows.slice(0, 5).map((item: CfsChartRow) => [item.label, `${number.format(item.value)} permits`])} /></Panel>
     </TwoColumns>
     <ThreeColumns>
       <Panel eyebrow="Constraint posture" title="Review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")]]} /></Panel>
       <Panel eyebrow="Economic snapshot" title="County portfolio"><StatusRows rows={economics.data ? [["Parcels analyzed", number.format(economics.data.summary.total_parcels_analyzed)], ["High opportunity", number.format(economics.data.summary.high_opportunity_count)], ["Assessed value", formatMoney(economics.data.summary.total_assessed_value)]] : []} /><Action onClick={openEconomicsBuilder}>Open in Builder Economics</Action></Panel>
-      <Panel eyebrow="Development signals" title="Research posture"><StatusRows rows={[["Parcels evaluated", number.format(model.rankingSummary.unique_parcel_count)], ["Strongest bands", number.format(strongest)], ["Validation", clean(model.rankingSummary.calibration_status)]]} /></Panel>
+      <Panel eyebrow="Development signals" title="Decision-support posture"><StatusRows rows={sourceAvailable(model.source) ? [["Parcels evaluated", number.format(model.rankingSummary.unique_parcel_count)], ["Strongest bands", number.format(strongest)], ["Validation", "Limited — use as supporting evidence only"]] : []} /></Panel>
     </ThreeColumns>
+    <DataTrust items={[permitTrust(development), floodTrust(flood), schoolTrust(schools), economicsTrust(economics), modelTrust(model)]} />
   </>;
 }
 
-function Planning({ flood, hotspots, hotspotMarkers, hotspotRows, schools, selected, setSelected, trendRows, openBuilder }: any) {
+function Planning({ flood, hotspots, hotspotMarkers, hotspotRows, schools, selected, setSelected, trendRows, trendSource, openBuilder }: any) {
   return <>
     <TwoColumns>
-      <Panel eyebrow="Development activity" title="Recent permit trend"><CfsTrendChart ariaLabel="Planning development activity trend" rows={trendRows} /></Panel>
-      <Panel eyebrow="Development hotspots" title="Ranked permit activity"><CfsRankedBarChart ariaLabel="Ranked development hotspots" rows={hotspotRows} /></Panel>
+      <Panel eyebrow="Development activity" title="Recent permit trend"><CfsTrendChart ariaLabel="Planning development activity trend" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
+      <Panel eyebrow="Development hotspots" title="Ranked permit activity"><CfsRankedBarChart ariaLabel="Ranked development hotspots" emptyMessage={unavailableMessage(hotspots.source, "No development hotspots were identified.")} rows={hotspotRows} /></Panel>
     </TwoColumns>
     <TwoColumns>
       <Panel eyebrow="Geographic context" title="Development hotspots"><ManagementMapPreview ariaLabel="Development hotspot map" markers={hotspotMarkers} onSelect={(marker) => setSelected(hotspots.markers.find((item: DevelopmentHotspotMapMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-hotspot-map" /></Panel>
-      <Panel eyebrow="Selected hotspot" title={selected ? selected.pin14 || "Development hotspot" : "Select a hotspot on the map"}>
+      <Panel eyebrow="Selected hotspot" title={selected ? selected.managementLabel || selected.zoningJurisdictionName || "Selected development hotspot" : "Select a hotspot on the map"}>
         {selected ? <StatusRows rows={[["Permit activity", number.format(selected.totalPermitCount)], ["Recent 3 years", number.format(selected.recentPermitCount3yr)], ["Signal", clean(selected.developmentActivityClass)], ["Period", dateRange(selected.firstPermitDate, selected.latestPermitDate)]]} /> : <CompactEmpty>Click a hotspot to review its current observed evidence.</CompactEmpty>}
         <Action disabled={!selected} onClick={() => openBuilder(selected?.officialParcelId)}>Open in Builder</Action>
       </Panel>
@@ -157,6 +158,7 @@ function Planning({ flood, hotspots, hotspotMarkers, hotspotRows, schools, selec
       <Panel eyebrow="Constraints" title="Current review posture"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe flood impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")], ["School capacity", schools.capacityStatusLabel]]} /></Panel>
       <Panel eyebrow="Planning watchlist" title="Highest-attention indicators"><Watchlist rows={indicatorCenterDefinitions.filter((item) => ["High Attention", "Review Needed"].includes(item.priorityLabel)).slice(0, 5).map((item) => [item.name, item.priorityLabel])} /></Panel>
     </TwoColumns>
+    <DataTrust items={[hotspotTrust(hotspots), floodTrust(flood), schoolTrust(schools)]} />
   </>;
 }
 
@@ -164,38 +166,44 @@ function Economics({ economics, openBuilder, trendDirection, trendRows }: any) {
   const data = economics.data;
   const currentScenario = data?.scenario_outputs?.[0];
   return <>
-    <KpiGrid items={data ? [["Parcels analyzed", number.format(data.summary.total_parcels_analyzed), freshness(data.context_freshness ?? "current")], ["High opportunity", number.format(data.summary.high_opportunity_count), "Current"], ["Underbuilt watch", number.format(data.summary.underbuilt_candidate_count), "Decision support"], ["Median value / acre", formatMoney(data.summary.median_value_per_acre), "Current"], ["Total assessed value", formatMoney(data.summary.total_assessed_value), "Current"]] : []} />
+    <KpiGrid items={data ? [["Parcels analyzed", number.format(data.summary.total_parcels_analyzed), freshness(data.context_freshness ?? "current")], ["High opportunity", number.format(data.summary.high_opportunity_count), "Current"], ["Underbuilt watch", number.format(data.summary.underbuilt_candidate_count), "Limited"], ["Median value / acre", formatMoney(data.summary.median_value_per_acre), "Current"], ["Total assessed value", formatMoney(data.summary.total_assessed_value), "Current"]] : []} />
     <TwoColumns>
-      <Panel eyebrow="Economic trend" title="Development-linked activity"><CfsTrendChart ariaLabel="Development-linked economic activity trend" rows={trendRows} /></Panel>
+      <Panel eyebrow="Economic trend" title="Development-linked activity"><CfsTrendChart ariaLabel="Development-linked economic activity trend" emptyMessage="Development activity is unavailable for this comparison." rows={trendRows} /></Panel>
       <Panel eyebrow="Current economic posture" title="What the portfolio indicates now"><StatusRows rows={data ? [["Development activity", clean(trendDirection || "Current trend available")], ["Fiscal / service balance", currentScenario ? clean(currentScenario.constraint_adjusted_opportunity_band) : "Unavailable"], ["Land-value signal", formatMoney(data.summary.median_value_per_acre)], ["Planning implication", data.summary.high_opportunity_count ? `${number.format(data.summary.high_opportunity_count)} parcels warrant deeper economic screening in Builder.` : "Continue portfolio screening as current evidence changes."]] : []} /></Panel>
     </TwoColumns>
     <TwoColumns>
       <Panel eyebrow="Opportunity mix" title="Portfolio classification"><CfsRankedBarChart ariaLabel="Economic opportunity classes" rows={(data?.opportunity_class_breakdown ?? []).map((row: any) => ({ label: clean(row.opportunity_class), value: row.count }))} /></Panel>
-      <Panel eyebrow="Geographic comparison" title="Assessed-value coverage"><CfsRankedBarChart ariaLabel="Economic parcels by geography" rows={(data?.jurisdiction_value_summary ?? []).slice(0, 8).map((row: any) => ({ label: row.geography_label || "Unspecified", value: row.parcel_count }))} /></Panel>
+      <Panel eyebrow="Geographic comparison" title="Assessed-value coverage"><CfsRankedBarChart ariaLabel="Economic parcels by geography" rows={(data?.jurisdiction_value_summary ?? []).slice(0, 8).map((row: any) => ({ label: areaLabel(row.geography_label), value: row.parcel_count }))} /></Panel>
     </TwoColumns>
     <Panel eyebrow="Scenario results" title="Comparison without Builder controls">
       {data?.scenario_outputs?.length ? <div className="grid gap-3 md:grid-cols-2">{data.scenario_outputs.slice(0, 4).map((scenario: any) => <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4" key={scenario.scenario_id}><p className="font-semibold text-white">{scenario.title}</p><StatusRows rows={[["Revenue / acre", clean(scenario.revenue_per_acre_band)], ["Service burden", clean(scenario.service_burden_band)], ["Infrastructure burden", clean(scenario.infrastructure_burden_band)], ["Net condition", clean(scenario.constraint_adjusted_opportunity_band)]]} /></article>)}</div> : <CompactEmpty>Economic intelligence is temporarily unavailable.</CompactEmpty>}
       <Action onClick={openBuilder}>Open in Builder Economics</Action>
     </Panel>
+    <DataTrust items={[economicsTrust(economics)]} />
   </>;
 }
 
 function Signals({ model, preview, markers, selected, setSelected, openBuilder }: any) {
   const strongest = model.rankingSummary.class_distribution.slice(0, 2).reduce((sum: number, row: any) => sum + row.row_count, 0);
+  const modelIsAvailable = sourceAvailable(model.source);
+  const previewIsAvailable = preview.status === "ready" && ["api", "demo"].includes(preview.source);
+  const elevatedCount = modelIsAvailable ? strongest : previewIsAvailable ? preview.totalCount : null;
   return <>
     <Panel eyebrow="Development signals" title="Observed patterns associated with later activity"><p className="max-w-4xl text-sm leading-6 text-slate-300">Identifies parcels or areas exhibiting patterns historically associated with later development activity. This is a decision-support signal—not an approval forecast or certainty.</p></Panel>
-    <KpiGrid items={[["Parcels evaluated", model.rankingSummary.unique_parcel_count ? number.format(model.rankingSummary.unique_parcel_count) : "Unavailable", freshness(model.source)], ["Elevated-signal parcels", number.format(strongest || preview.totalCount), "Research only"], ["Model period", model.rankingSummary.experiment_id, "Internal research"], ["Validation", clean(model.rankingSummary.calibration_status), "Limited"]]} />
+    <KpiGrid items={[["Parcels evaluated", countValue(model.source, model.isLoading, model.rankingSummary.unique_parcel_count), modelIsAvailable ? "Limited" : "Unavailable"], ["Elevated-signal parcels", elevatedCount === null ? "Unavailable" : number.format(elevatedCount), elevatedCount === null ? "Unavailable" : "Limited"], ["Evidence period", modelIsAvailable || previewIsAvailable ? "2014–2022" : "Unavailable", modelIsAvailable || previewIsAvailable ? "Limited" : "Unavailable"], ["Validation", modelIsAvailable ? "Useful for ranking; not forecasting" : "Unavailable", modelIsAvailable ? "Limited" : "Unavailable"]]} />
+    <Panel eyebrow="Model trust" title="How to use these signals"><StatusRows rows={modelIsAvailable || previewIsAvailable ? [["Training period", "2014–2019"], ["Validation period", "2020–2021"], ["Test period", "2022"], ["Last trained", "Not published"], ["Primary drivers", "Historical zoning, transportation access, and tax/value context"]] : []} /><p className="mt-4 text-sm leading-6 text-slate-300">Use these patterns as supporting evidence only. They are not an approval forecast or certainty, and observed relationships can change.</p></Panel>
     <TwoColumns>
-      <Panel eyebrow="Signal distribution" title="Relative research bands"><CfsRankedBarChart ariaLabel="Development signal distribution" rows={model.rankingSummary.class_distribution.map((row: any) => ({ label: clean(row.development_signal_class), value: row.row_count }))} /></Panel>
-      <Panel eyebrow="Model validation" title="Aggregate performance"><CfsRankedBarChart ariaLabel="Development model validation comparison" rows={developmentModelLabSummary.evaluationRows.map((row) => ({ label: row.variant, value: Number(row.liftTop5) }))} /><p className="mt-3 text-xs leading-5 text-slate-400">Lift at the top 5% improved from {standardizedDevelopmentPredictionMetrics.baselineLiftAtTop5.toFixed(2)}× to {standardizedDevelopmentPredictionMetrics.currentBestLiftAtTop5.toFixed(2)}×. Probability calibration remains weak.</p></Panel>
+      <Panel eyebrow="Signal distribution" title="Relative signal bands"><CfsRankedBarChart ariaLabel="Development signal distribution" emptyMessage={unavailableMessage(model.source, "No elevated development signals were identified.")} rows={model.rankingSummary.class_distribution.map((row: any) => ({ label: signalLabel(row.development_signal_class), value: row.row_count }))} /></Panel>
+      <Panel eyebrow="Validation" title="Historical ranking check"><CfsRankedBarChart ariaLabel="Development signal historical validation comparison" emptyMessage="Historical validation is unavailable." rows={modelIsAvailable ? developmentModelLabSummary.evaluationRows.map((row) => ({ label: row.variant, value: Number(row.liftTop5) })) : []} />{modelIsAvailable ? <p className="mt-3 text-xs leading-5 text-slate-400">The current research version identifies more later activity in its highest-ranked group than the earlier baseline, but it is not reliable enough for forecasts.</p> : null}</Panel>
     </TwoColumns>
     <TwoColumns>
       <Panel eyebrow="Geographic context" title="Strongest development signals"><ManagementMapPreview ariaLabel="Development signal map" markers={markers} onSelect={(marker) => setSelected(preview.markers.find((item: ModelResearchPreviewMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-signal-map" /></Panel>
       <Panel eyebrow="Signal watchlist" title={selected ? selected.approximateAreaLabel || "Selected development signal" : "Highest-signal areas"}>
-        {selected ? <><StatusRows rows={[["Signal band", clean(selected.researchRankBand)], ["Label", clean(selected.researchSignalLabel)], ["Model", clean(selected.modelVersion)]]} /><p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Major contributing context</p><ul className="mt-2 space-y-2 text-sm text-slate-300">{selected.topDrivers.map((driver: string) => <li key={driver}>• {clean(driver)}</li>)}</ul><p className="mt-4 text-xs leading-5 text-amber-100/80">{selected.caveat}</p></> : <><Watchlist rows={preview.markers.slice(0, 5).map((marker: ModelResearchPreviewMarker) => [marker.approximateAreaLabel || marker.officialParcelId, clean(marker.researchRankBand)])} /><p className="mt-3 text-xs leading-5 text-slate-400">Select a map signal for parcel-level evidence and research caveats.</p></>}
+        {selected ? <><StatusRows rows={[["Signal band", signalLabel(selected.researchRankBand)], ["Pattern", signalLabel(selected.researchSignalLabel)]]} /><p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Major contributing context</p><ul className="mt-2 space-y-2 text-sm text-slate-300">{selected.topDrivers.map((driver: string) => <li key={driver}>• {clean(driver)}</li>)}</ul><p className="mt-4 text-xs leading-5 text-amber-100/80">Decision support only. Review the underlying evidence in Builder before drawing conclusions.</p></> : <><Watchlist emptyMessage={preview.status === "empty" ? "No elevated signals were identified." : "Development signal geography is unavailable."} rows={preview.markers.slice(0, 5).map((marker: ModelResearchPreviewMarker) => [marker.approximateAreaLabel || "County parcel area", signalLabel(marker.researchRankBand)])} /><p className="mt-3 text-xs leading-5 text-slate-400">Select a map signal for its supporting evidence and limitations.</p></>}
         <Action disabled={!selected} onClick={() => openBuilder(selected?.officialParcelId, selected ?? undefined)}>Investigate in Builder</Action>
       </Panel>
     </TwoColumns>
+    <DataTrust items={[modelTrust(model, preview)]} />
   </>;
 }
 
@@ -203,13 +211,18 @@ function Panel({ children, eyebrow, title }: { children: ReactNode; eyebrow: str
 function TwoColumns({ children }: { children: ReactNode }) { return <div className="grid gap-5 xl:grid-cols-2">{children}</div>; }
 function ThreeColumns({ children }: { children: ReactNode }) { return <div className="grid gap-5 lg:grid-cols-3">{children}</div>; }
 function KpiGrid({ items }: { items: string[][] }) { return items.length ? <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{items.map(([label, value, status]) => <article className="cfs-command-surface rounded-xl p-4" key={label}><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p><p className="mt-2 break-words text-2xl font-semibold text-white">{value}</p><p className="mt-2 text-xs text-[#9bd1de]">{status}</p></article>)}</section> : <CompactEmpty>Current summary data is unavailable.</CompactEmpty>; }
-function StatusRows({ rows }: { rows: string[][] }) { return rows.length ? <dl className="space-y-3">{rows.map(([label, value]) => <div className="flex items-start justify-between gap-4 border-b border-white/8 pb-3 last:border-0" key={label}><dt className="text-sm text-slate-400">{label}</dt><dd className="max-w-[60%] text-right text-sm font-semibold capitalize text-white">{value}</dd></div>)}</dl> : <CompactEmpty>Current source data is unavailable.</CompactEmpty>; }
-function Watchlist({ rows }: { rows: string[][] }) { return rows.length ? <ol className="space-y-3">{rows.map(([label, value], index) => <li className="flex items-center gap-3 rounded-lg border border-white/8 bg-white/[0.025] p-3" key={`${label}-${index}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#82c9d8]/12 text-xs font-bold text-[#9bd1de]">{index + 1}</span><span className="min-w-0 flex-1 text-sm font-medium text-white">{label}</span><span className="text-xs text-slate-400">{value}</span></li>)}</ol> : <CompactEmpty>No current high-attention records.</CompactEmpty>; }
+function StatusRows({ rows }: { rows: string[][] }) { return rows.length ? <dl className="space-y-3">{rows.map(([label, value]) => <div className="flex items-start justify-between gap-4 border-b border-white/8 pb-3 last:border-0" key={label}><dt className="text-sm text-slate-400">{label}</dt><dd className="max-w-[60%] text-right text-sm font-semibold text-white">{value}</dd></div>)}</dl> : <CompactEmpty>This information is currently unavailable.</CompactEmpty>; }
+function Watchlist({ emptyMessage = "No high-attention records are present in the current data.", rows }: { emptyMessage?: string; rows: string[][] }) { return rows.length ? <ol className="space-y-3">{rows.map(([label, value], index) => <li className="flex items-center gap-3 rounded-lg border border-white/8 bg-white/[0.025] p-3" key={`${label}-${index}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#82c9d8]/12 text-xs font-bold text-[#9bd1de]">{index + 1}</span><span className="min-w-0 flex-1 text-sm font-medium text-white">{label}</span><span className="text-xs text-slate-400">{value}</span></li>)}</ol> : <CompactEmpty>{emptyMessage}</CompactEmpty>; }
 function Action({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick: () => void }) { return <button className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#82c9d8]/30 bg-[#82c9d8]/10 px-3.5 py-2 text-sm font-semibold text-[#bce3eb] transition hover:bg-[#82c9d8]/15 disabled:cursor-not-allowed disabled:opacity-40" disabled={disabled} onClick={onClick}>{children}<ArrowRight className="h-4 w-4" /></button>; }
 function CompactEmpty({ children }: { children: ReactNode }) { return <p className="rounded-lg border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-400">{children}</p>; }
 
-function toHotspotMapMarker(marker: DevelopmentHotspotMapMarker): ManagementMapMarker { return { id: marker.officialParcelId, label: marker.pin14 || marker.officialParcelId, latitude: marker.centroid.latitude, longitude: marker.centroid.longitude, tone: "hotspot" }; }
-function toSignalMapMarker(marker: ModelResearchPreviewMarker): ManagementMapMarker { return { id: marker.officialParcelId, label: marker.approximateAreaLabel || marker.officialParcelId, latitude: marker.centroid.latitude, longitude: marker.centroid.longitude, tone: "signal" }; }
+type TrustStatus = "Current" | "Limited" | "Stale" | "Unavailable";
+type TrustItem = { coverage: string; currentThrough: string; label: string; note?: string; source: string; status: TrustStatus };
+function DataTrust({ items }: { items: TrustItem[] }) { return <section aria-label="Data status" className="cfs-command-surface rounded-2xl p-5 sm:p-6" data-testid="management-data-trust"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9bd1de]">Data status</p><div className="mt-4 divide-y divide-white/8">{items.map((item) => <div className="grid gap-2 py-3 first:pt-0 last:pb-0 md:grid-cols-[minmax(10rem,1.1fr)_minmax(12rem,1.5fr)_minmax(8rem,1fr)_auto] md:items-center" key={item.label}><div><p className="text-sm font-semibold text-white">{item.label}</p>{item.note ? <p className="mt-1 text-xs leading-5 text-slate-400">{item.note}</p> : null}</div><p className="text-xs text-slate-400"><span className="text-slate-500">Source:</span> {item.source}<br /><span className="text-slate-500">Current through:</span> {item.currentThrough}</p><p className="text-xs text-slate-400"><span className="text-slate-500">Coverage:</span> {item.coverage}</p><StatusBadge status={item.status} /></div>)}</div></section>; }
+function StatusBadge({ status }: { status: TrustStatus }) { const tone = status === "Current" ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-100" : status === "Unavailable" ? "border-rose-300/25 bg-rose-300/10 text-rose-100" : status === "Stale" ? "border-amber-300/25 bg-amber-300/10 text-amber-100" : "border-sky-300/25 bg-sky-300/10 text-sky-100"; return <span className={`w-fit rounded-full border px-2.5 py-1 text-xs font-semibold ${tone}`}>{status}</span>; }
+
+function toHotspotMapMarker(marker: DevelopmentHotspotMapMarker): ManagementMapMarker { return { id: marker.officialParcelId, label: marker.managementLabel || marker.zoningJurisdictionName || "Development hotspot", latitude: marker.centroid.latitude, longitude: marker.centroid.longitude, tone: "hotspot" }; }
+function toSignalMapMarker(marker: ModelResearchPreviewMarker): ManagementMapMarker { return { id: marker.officialParcelId, label: marker.approximateAreaLabel || "County parcel area", latitude: marker.centroid.latitude, longitude: marker.centroid.longitude, tone: "signal" }; }
 function toHotspotContext(marker: DevelopmentHotspotMapMarker): SelectedDevelopmentHotspotContext {
   return {
     analysisPeriod: dateRange(marker.firstPermitDate, marker.latestPermitDate),
@@ -250,7 +263,20 @@ function toHotspotContext(marker: DevelopmentHotspotMapMarker): SelectedDevelopm
 }
 function metric(items: { id: string; value: string }[], id: string) { return items.find((item) => item.id === id)?.value ?? "Unavailable"; }
 function clean(value: string) { return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); }
-function freshness(source: string) { return source === "api" || source === "current" || source === "current_session" ? "Current" : source === "loading" ? "Loading" : source === "unavailable" || source === "fallback" ? "Unavailable" : "Demo extract"; }
+function freshness(source: string) { return source === "api" || source === "current" || source === "current_session" || source === "static" || source === "demo" ? "Current" : source === "documented" || source === "fallback_partial" ? "Limited" : "Unavailable"; }
+function sourceAvailable(source: string) { return !["fallback", "loading", "none", "unavailable"].includes(source); }
+function countValue(source: string, isLoading: boolean, value: number) { return isLoading ? "Loading" : sourceAvailable(source) ? number.format(value) : "Unavailable"; }
+function unavailableMessage(source: string, emptyMessage: string) { return sourceAvailable(source) ? emptyMessage : "This information is currently unavailable."; }
+function permitTrust(development: any): TrustItem { const available = sourceAvailable(development.source); return { coverage: available ? `${number.format(development.totalPermits)} permit records` : "Unavailable", currentThrough: available && development.activityDateMax ? formatDate(development.activityDateMax) : "Unavailable", label: "Permit activity", source: development.source === "static" ? "Sanitized CFS demo extract" : "Cabarrus County permit records", status: datedStatus(development.source, development.activityDateMax) }; }
+function hotspotTrust(hotspots: any): TrustItem { const available = sourceAvailable(hotspots.source); const latest = latestHotspotDate(hotspots); return { coverage: available ? `${number.format(hotspots.totalCount)} ranked areas` : "Unavailable", currentThrough: latest ? formatDate(latest) : available ? "Permit record period" : "Unavailable", label: "Development hotspots", source: hotspots.source === "static" ? "Sanitized CFS demo extract" : "Cabarrus County permit records", status: datedStatus(hotspots.source, latest) }; }
+function floodTrust(flood: any): TrustItem { const available = sourceAvailable(flood.source); return { coverage: available ? `${number.format(flood.totalParcels)} parcels` : "Unavailable", currentThrough: available ? "Source date not published" : "Unavailable", label: "Flood review", note: available ? "Mapped flood context supports screening; verify site conditions during review." : undefined, source: flood.source === "demo" ? "Sanitized FEMA/CFS demo context" : "FEMA floodplain and CFS parcel overlay", status: available ? "Limited" : "Unavailable" }; }
+function schoolTrust(schools: any): TrustItem { const available = sourceAvailable(schools.source); const schoolYear = schools.utilizationSeedRows.map((row: any) => row.schoolYear).filter(Boolean).sort().at(-1); return { coverage: available ? `${number.format(schools.totalParcels)} parcel assignments` : "Unavailable", currentThrough: schoolYear || (available ? "Source date not published" : "Unavailable"), label: "School capacity", note: available ? "Official capacity information is incomplete." : undefined, source: schools.source === "demo" ? "Sanitized CCS / CFS demo context" : "CCS / CFS planning context", status: available ? "Limited" : "Unavailable" }; }
+function economicsTrust(economics: any): TrustItem { const data = economics.data; const limited = data?.context_freshness === "fallback_partial"; return { coverage: data ? `${number.format(data.summary.total_parcels_analyzed)} parcels` : "Unavailable", currentThrough: data?.as_of ? formatDate(data.as_of) : "Unavailable", label: "Economic intelligence", note: limited ? "Some supporting context is incomplete." : undefined, source: data?.mode === "demo" ? "Sanitized CFS demo portfolio" : "CFS parcel economics", status: data ? limited ? "Limited" : "Current" : "Unavailable" }; }
+function modelTrust(model: any, preview?: any): TrustItem { const summaryAvailable = sourceAvailable(model.source); const previewAvailable = preview?.status === "ready" && ["api", "demo"].includes(preview.source); const available = summaryAvailable || previewAvailable; const coverage = summaryAvailable ? `${number.format(model.rankingSummary.unique_parcel_count)} parcels` : previewAvailable ? `${number.format(preview.totalCount)} elevated-signal records` : "Unavailable"; return { coverage, currentThrough: available ? "2022" : "Unavailable", label: "Development signals", note: available ? "Decision support only; not an approval forecast or certainty." : undefined, source: "CFS historical permit and parcel research", status: available ? "Limited" : "Unavailable" }; }
+function signalLabel(value: string) { return clean(value).replace("Development Signal", "Signal").replace("Research ", ""); }
+function areaLabel(value?: string | null) { return !value || /^parcel context\b/i.test(value) ? "Other parcel area" : value; }
+function latestHotspotDate(hotspots: any) { return hotspots.hotspots.map((row: any) => row.latest_permit_date).filter(Boolean).sort().at(-1) ?? null; }
+function datedStatus(source: string, date?: string | null): TrustStatus { if (!sourceAvailable(source)) return "Unavailable"; if (!date) return "Limited"; const parsed = new Date(date); return Number.isNaN(parsed.getTime()) || Date.now() - parsed.getTime() > 180 * 24 * 60 * 60 * 1000 ? "Stale" : "Current"; }
 function formatMoney(value: number | null) { return typeof value === "number" ? money.format(value) : "Unavailable"; }
 function formatDate(value: string) { const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString("en-US", { month: "short", year: "numeric" }); }
 function dateRange(start?: string | null, end?: string | null) { return start || end ? `${start ? formatDate(start) : "Earlier"}–${end ? formatDate(end) : "Current"}` : "Current record"; }

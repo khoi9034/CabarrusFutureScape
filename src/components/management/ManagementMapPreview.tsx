@@ -33,7 +33,6 @@ export function ManagementMapPreview({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const onSelectRef = useRef(onSelect);
   const [state, setState] = useState<"error" | "loading" | "ready">("loading");
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -47,7 +46,6 @@ export function ManagementMapPreview({
     let clickHandle: { remove: () => void } | null = null;
     let scene: CfsResultSceneView | null = null;
     setState("loading");
-    setError(null);
 
     void (async () => {
       try {
@@ -126,11 +124,7 @@ export function ManagementMapPreview({
         if (!cancelled) setState("ready");
       } catch (caught) {
         if (cancelled || controller.signal.aborted) return;
-        setError(
-          caught instanceof Error
-            ? caught.message
-            : "Management map could not start.",
-        );
+        console.error("Management map preview could not start.", caught);
         setState("error");
       }
     })();
@@ -170,9 +164,7 @@ export function ManagementMapPreview({
             <p className="mt-2 text-sm font-semibold text-white">
               {state === "loading" ? "Loading county context…" : "Map unavailable"}
             </p>
-            {error ? (
-              <p className="mt-1 text-xs leading-5 text-slate-400">{error}</p>
-            ) : null}
+            {state === "error" ? <p className="mt-1 text-xs leading-5 text-slate-400">Open in Builder to continue the geographic review.</p> : null}
           </div>
         </div>
       ) : null}
