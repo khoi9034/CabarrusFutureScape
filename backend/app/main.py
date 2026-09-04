@@ -24,6 +24,7 @@ from app.routers import (
     constraints_router,
     development_router,
     economics_router,
+    imagery_router,
     indicators_router,
     parcel_router,
     school_constraints_router,
@@ -302,6 +303,8 @@ def _safe_error_summary(exc: BaseException) -> str:
         settings.postgres_password,
         settings.cfs_staging_access_token,
         settings.openai_api_key,
+        settings.cfs_eagleview_api_key,
+        settings.cfs_eagleview_secret_key,
         settings.applicationinsights_connection_string,
     ):
         if secret:
@@ -313,6 +316,7 @@ app.include_router(product_v1_router)
 
 legacy_routers = (
     parcel_router.router,
+    imagery_router.router,
     development_router.router,
     economics_router.router,
     temporal_router.router,

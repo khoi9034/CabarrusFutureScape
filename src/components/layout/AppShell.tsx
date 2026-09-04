@@ -33,6 +33,7 @@ import {
   X,
 } from "lucide-react";
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
+import { ParcelImageryPanel } from "@/components/dashboard/ParcelImageryPanel";
 import {
   SharedAskCfsDrawer,
   SharedAskCfsRegistryProvider,
@@ -58,6 +59,7 @@ import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
 import { useBackendAvailability } from "@/hooks/useBackendAvailability";
 import { USE_DEMO_DATA } from "@/lib/api/client";
+import type { ParcelImageryAskContext } from "@/lib/api/imagery";
 import { cn } from "@/lib/utils";
 import type {
   CfsAppMode,
@@ -134,6 +136,8 @@ function ProductShell() {
   const askCfsModeRef = useRef(cfsAppMode);
   const [masterDataAskContext, setMasterDataAskContext] =
     useState<CfsAiSearchRequest["filter_context"]>({ mode: "master_data" });
+  const [parcelImageryAskContext, setParcelImageryAskContext] =
+    useState<ParcelImageryAskContext | null>(null);
   const openAskCfs = useCallback(() => setAskCfsOpen(true), []);
   const executivePrintMode = productMode === "executive_print";
   const parcelReviewMode =
@@ -258,7 +262,10 @@ function ProductShell() {
               ? "development_hotspot"
               : null,
             selected_parcel_id: selectedParcelId ?? null,
-        };
+            imagery_available: parcelImageryAskContext?.imagery_available,
+            imagery_capture_date: parcelImageryAskContext?.imagery_capture_date,
+            imagery_directions: parcelImageryAskContext?.imagery_directions,
+          };
   const sharedAskCfsProps: AskCfsPanelProps = {
     ...askCfsConfig,
     appMode: cfsAppMode === "management" ? "planning" : cfsAppMode,
@@ -388,7 +395,9 @@ function ProductShell() {
           }}
         />
       ) : (
-        <StableOverviewWorkspace />
+        <StableOverviewWorkspace
+          onImageryContextChange={setParcelImageryAskContext}
+        />
       )}
       </div>
         <EnterpriseErrorBoundary
@@ -1036,7 +1045,11 @@ function OverviewLandingPage({
   );
 }
 
-function StableOverviewWorkspace() {
+function StableOverviewWorkspace({
+  onImageryContextChange,
+}: {
+  onImageryContextChange: (context: ParcelImageryAskContext | null) => void;
+}) {
   const {
     isMapFocusMode,
     overviewCommandMode,
@@ -1052,6 +1065,7 @@ function StableOverviewWorkspace() {
     LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
   );
   const [draggingLayerRail, setDraggingLayerRail] = useState(false);
+  const [parcelImageryOpen, setParcelImageryOpen] = useState(false);
   const compactLayoutAppliedRef = useRef<boolean | null>(null);
   const commandCenterHidden = overviewLayout.commandCenter === "hidden";
   const leftPanelHidden = overviewLayout.leftPanel === "hidden";
@@ -1256,7 +1270,7 @@ function StableOverviewWorkspace() {
 
         {!isMapFocusMode && !rightPanelHidden && !indicatorCenterDashboardMode ? (
           <aside
-            className="absolute inset-y-0 right-0 z-[70] flex h-full min-h-0 w-[min(24rem,calc(100vw-1.5rem))] shrink-0 overflow-visible bg-[#07111f] shadow-2xl md:relative md:z-auto md:w-[var(--desktop-rail-width)] md:bg-transparent md:shadow-none"
+            className="absolute inset-y-0 right-0 z-[70] flex h-full min-h-0 w-[min(24rem,calc(100vw-1.5rem))] shrink-0 flex-col gap-3 overflow-y-auto bg-[#07111f] shadow-2xl md:relative md:z-auto md:w-[var(--desktop-rail-width)] md:bg-transparent md:shadow-none"
             style={
               {
                 "--desktop-rail-width": `${rightPanelWidth}px`,
@@ -1272,12 +1286,21 @@ function StableOverviewWorkspace() {
             >
               <X className="h-4 w-4" />
             </button>
-            <EnterpriseErrorBoundary
-              moduleName="Intelligence Panel"
-              resetKey={`overview-stable-${selectedParcelId ?? "none"}`}
-            >
-              <IntelligencePanel />
-            </EnterpriseErrorBoundary>
+            <ParcelImageryPanel
+              key={`${selectedParcelId ?? "no-parcel"}-${parcelImageryOpen ? "open" : "closed"}`}
+              onContextChange={onImageryContextChange}
+              onOpenChange={setParcelImageryOpen}
+              open={parcelImageryOpen}
+              parcelId={selectedParcelId}
+            />
+            <div className="min-h-0 flex-1">
+              <EnterpriseErrorBoundary
+                moduleName="Intelligence Panel"
+                resetKey={`overview-stable-${selectedParcelId ?? "none"}`}
+              >
+                <IntelligencePanel />
+              </EnterpriseErrorBoundary>
+            </div>
           </aside>
         ) : null}
       </div>

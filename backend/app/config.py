@@ -235,6 +235,20 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("OPENAI_API_KEY"),
     )
+    cfs_eagleview_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_EAGLEVIEW_API_KEY"),
+    )
+    cfs_eagleview_secret_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_EAGLEVIEW_SECRET_KEY"),
+    )
+    cfs_eagleview_timeout_seconds: float = Field(
+        default=10.0,
+        gt=0,
+        le=30,
+        validation_alias=AliasChoices("CFS_EAGLEVIEW_TIMEOUT_SECONDS"),
+    )
     county_tax_rate_per_100: float = Field(
         default=0.57,
         validation_alias=AliasChoices("CFS_COUNTY_TAX_RATE_PER_100"),

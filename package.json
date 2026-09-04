@@ -23,6 +23,8 @@
     "check:data-provenance": "python scripts/check_data_provenance.py",
     "check:demo-functionality": "node scripts/check-demo-functionality.mjs",
     "check:demo-interactions": "node scripts/check-demo-interactions.mjs",
+    "check:eagleview-imagery": "node scripts/check-eagleview-imagery.mjs",
+    "check:eagleview-imagery-local": "node scripts/check-eagleview-imagery.mjs --local",
     "check:local-data": "python scripts/check_cfs_local_data.py",
     "check:local-apis": "node scripts/check-local-apis.mjs",
     "check:local-interactions": "node scripts/check-local-interactions.mjs",
