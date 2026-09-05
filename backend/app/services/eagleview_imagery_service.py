@@ -1,15 +1,18 @@
 import hashlib
 import hmac
+import math
 import time
 from dataclasses import dataclass
 from typing import Literal, Protocol
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 import httpx
 
 ImageryDirection = Literal["north", "south", "east", "west"]
 DIRECTIONS: tuple[ImageryDirection, ...] = ("north", "south", "east", "west")
 GATEWAY_URL = "https://pol.pictometry.com/Gateway/v1"
+ALLOWED_IMAGE_HOST_SUFFIX = ".pictometry.com"
+EXPECTED_IMAGE_MEDIA_TYPE = "image/jpeg"
 
 
 class ImageryProvider(Protocol):
@@ -67,6 +70,7 @@ class EagleViewImageryProvider:
 
     def search(self, latitude: float, longitude: float) -> list[ImageryRecord]:
         self._require_configuration()
+        _validate_coordinates(latitude, longitude)
         payload = self._get_json(
             f"{GATEWAY_URL}/search/{latitude},{longitude}/{quote(self.api_key, safe='')}"
         )
@@ -83,7 +87,7 @@ class EagleViewImageryProvider:
             if not isinstance(candidate, dict):
                 continue
             resource = candidate.get("imageResource")
-            if not isinstance(resource, str) or not resource.startswith("https://"):
+            if not isinstance(resource, str) or not _is_allowed_image_resource(resource):
                 continue
             capture_date = candidate.get("date")
             records.append(
@@ -102,17 +106,19 @@ class EagleViewImageryProvider:
         width: int,
         height: int,
     ) -> ImageryBytes:
+        if not _is_allowed_image_resource(record.resource):
+            raise ImageryProviderUnavailable("EagleView returned an invalid image resource.")
         token = self._authenticate()
         url = (
             f"{record.resource}/{quote(token, safe='')}"
             f"/width:{width};height:{height};imageFormat:jpg"
         )
         response = self._get(url)
-        media_type = response.headers.get("content-type", "image/jpeg").split(
+        media_type = response.headers.get("content-type", "").split(
             ";",
             1,
-        )[0]
-        if not media_type.startswith("image/"):
+        )[0].strip().lower()
+        if media_type != EXPECTED_IMAGE_MEDIA_TYPE or not response.content:
             raise ImageryProviderUnavailable(
                 "EagleView returned an invalid image response."
             )
@@ -137,7 +143,7 @@ class EagleViewImageryProvider:
             )
         # ponytail: token lifetime is not in the provider contract supplied to CFS;
         # authenticate per image until an explicit expiry can support safe reuse.
-        return token
+        return token.strip()
 
     def _get_json(self, url: str) -> dict[str, object]:
         response = self._get(url)
@@ -156,7 +162,7 @@ class EagleViewImageryProvider:
             else:
                 response = httpx.get(
                     url,
-                    follow_redirects=True,
+                    follow_redirects=False,
                     timeout=self.timeout_seconds,
                 )
             response.raise_for_status()
@@ -173,4 +179,36 @@ class EagleViewImageryProvider:
 
 def _response_body(payload: dict[str, object]) -> dict[str, object]:
     nested = payload.get("response")
-    return nested if isinstance(nested, dict) else payload
+    if not isinstance(nested, dict):
+        raise ImageryProviderUnavailable("EagleView returned an invalid response.")
+    return nested
+
+
+def _validate_coordinates(latitude: float, longitude: float) -> None:
+    if (
+        not math.isfinite(latitude)
+        or not math.isfinite(longitude)
+        or not -90 <= latitude <= 90
+        or not -180 <= longitude <= 180
+    ):
+        raise ImageryProviderUnavailable("Parcel coordinates are invalid.")
+
+
+def _is_allowed_image_resource(resource: str) -> bool:
+    try:
+        parsed = urlsplit(resource)
+        hostname = (parsed.hostname or "").lower()
+        return (
+            parsed.scheme.lower() == "https"
+            and parsed.username is None
+            and parsed.password is None
+            and parsed.port in (None, 443)
+            and not parsed.query
+            and not parsed.fragment
+            and (
+                hostname == ALLOWED_IMAGE_HOST_SUFFIX.removeprefix(".")
+                or hostname.endswith(ALLOWED_IMAGE_HOST_SUFFIX)
+            )
+        )
+    except ValueError:
+        return False

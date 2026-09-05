@@ -99,7 +99,10 @@ def get_parcel_imagery_image(
     return Response(
         content=image.content,
         media_type=image.media_type,
-        headers={"Cache-Control": "private, max-age=300"},
+        headers={
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
     )
 
 

@@ -17,6 +17,11 @@ authenticates server-side and proxies a bounded 800x600 or 1600x1200 JPEG.
 EagleView failure does not affect API readiness, parcel search, the planning
 map, or other intelligence.
 
+The proxy accepts only HTTPS image resources on `pictometry.com` subdomains,
+does not follow redirects, requires non-empty `image/jpeg` content, and returns
+`private, no-store` responses. Actual display, storage, and caching remain
+subject to Cabarrus County's EagleView license terms.
+
 The public Demo makes no provider request and displays sanitized metadata with
 a non-EagleView placeholder. A future approved imagery provider can implement
 the small `ImageryProvider` protocol without changing Builder selection flow.

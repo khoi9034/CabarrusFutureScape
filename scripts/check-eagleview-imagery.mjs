@@ -113,7 +113,8 @@ function parcelSearchResponse(parcelId) {
   };
 }
 
-async function attachLocalApi(page) {
+async function attachLocalApi(page, metadataCalls, imageRequests) {
+  let retryEnabled = false;
   await page.route("http://127.0.0.1:8000/**", async (route) => {
     const url = new URL(route.request().url());
     const headers = {
@@ -141,28 +142,40 @@ async function attachLocalApi(page) {
     const metadata = url.pathname.match(/^\/imagery\/eagleview\/parcel\/([^/]+)$/);
     if (metadata) {
       const parcelId = decodeURIComponent(metadata[1]);
-      await delay(350);
-      if (parcelId.endsWith("-2")) {
+      const callCount = (metadataCalls.get(parcelId) ?? 0) + 1;
+      metadataCalls.set(parcelId, callCount);
+      await delay(parcelId.endsWith("-A") ? 4_000 : parcelId.endsWith("-B") ? 2_500 : parcelId.endsWith("-C") ? 50 : 350);
+      if (parcelId.endsWith("-2") && !retryEnabled) {
         await route.fulfill({ status: 503, headers, body: JSON.stringify({ detail: "Imagery service is temporarily unavailable." }) });
       } else if (parcelId.endsWith("-3")) {
         await route.fulfill({ status: 503, headers, body: JSON.stringify({ detail: "EagleView imagery is not configured." }) });
       } else {
+        const images = parcelId.endsWith("-4")
+          ? []
+          : parcelId.endsWith("-A")
+            ? [{ direction: "north", capture_date: "2024-01-01" }]
+            : parcelId.endsWith("-B")
+              ? [{ direction: "east", capture_date: "2025-02-02" }]
+              : parcelId.endsWith("-C")
+                ? [{ direction: "west", capture_date: "2026-09-03" }]
+                : [
+                    { direction: "north", capture_date: "2026-08-14" },
+                    { direction: "east", capture_date: "2026-08-13" },
+                  ];
         await route.fulfill({
           headers,
           body: JSON.stringify({
             parcel_id: parcelId,
             location: { latitude: 35.41, longitude: -80.58 },
             provider: "EagleView/Pictometry",
-            images: [
-              { direction: "north", capture_date: "2026-08-14" },
-              { direction: "east", capture_date: "2026-08-13" },
-            ],
+            images,
           }),
         });
       }
       return;
     }
-    if (/\/imagery\/eagleview\/parcel\/[^/]+\/image\/(north|east)$/.test(url.pathname)) {
+    if (/\/imagery\/eagleview\/parcel\/[^/]+\/image\/(north|south|east|west)$/.test(url.pathname)) {
+      imageRequests.push(url.toString());
       await route.fulfill({
         headers: { "access-control-allow-origin": "*", "content-type": "image/svg+xml" },
         body: '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="6"><rect width="8" height="6" fill="#26384a"/></svg>',
@@ -171,6 +184,7 @@ async function attachLocalApi(page) {
     }
     await route.fulfill({ status: 503, headers, body: JSON.stringify({ detail: "Focused test" }) });
   });
+  return { enableRetry: () => { retryEnabled = true; } };
 }
 
 async function selectParcel(page, parcelId) {
@@ -190,7 +204,9 @@ async function selectParcel(page, parcelId) {
 }
 
 async function checkLocal(page) {
-  await attachLocalApi(page);
+  const metadataCalls = new Map();
+  const imageRequests = [];
+  const localApi = await attachLocalApi(page, metadataCalls, imageRequests);
   await page.goto(`${await startLocal()}/?app=planning`, { waitUntil: "domcontentloaded" });
   await selectParcel(page, "CFS-PARCEL-1");
   const panelButton = page.getByRole("button", { name: /Parcel imagery/i });
@@ -203,10 +219,40 @@ async function checkLocal(page) {
   await selectParcel(page, "CFS-PARCEL-2");
   await page.getByText("Imagery service is temporarily unavailable.", { exact: true }).first().waitFor();
   assert.equal(await page.getByAltText("east EagleView parcel imagery").count(), 0, "Stale parcel imagery remained visible.");
+  const callsBeforeRetry = metadataCalls.get("CFS-PARCEL-2");
+  await page.waitForTimeout(750);
+  assert.equal(metadataCalls.get("CFS-PARCEL-2"), callsBeforeRetry, "Imagery retried without user action.");
+  localApi.enableRetry();
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await page.getByRole("button", { name: "east", exact: true }).waitFor();
+  assert.equal(metadataCalls.get("CFS-PARCEL-2"), callsBeforeRetry + 1, "Retry did not issue exactly one new metadata request.");
 
   await selectParcel(page, "CFS-PARCEL-3");
   await page.getByText("EagleView imagery is not configured.", { exact: true }).waitFor();
-  console.log("PASS EagleView imagery: Local loading, image, direction, stale-clear, provider-error, and unconfigured states");
+  await page.getByTestId("cfs-arcgis-map").waitFor();
+  await page.getByLabel("Workspace intelligence panel", { exact: true }).waitFor();
+  await page.getByRole("button", { name: "Open Ask CFS", exact: true }).waitFor();
+  await page.getByLabel("CFS Builder workspaces", { exact: true }).waitFor();
+  await page.getByRole("button", { name: "Clear selected parcel", exact: true }).waitFor();
+
+  await selectParcel(page, "CFS-PARCEL-4");
+  await page.getByText("No EagleView imagery was found for this parcel.", { exact: true }).waitFor();
+
+  await selectParcel(page, "CFS-PARCEL-A");
+  await selectParcel(page, "CFS-PARCEL-B");
+  await selectParcel(page, "CFS-PARCEL-C");
+  await page.getByText("Direction: west", { exact: true }).waitFor();
+  await page.waitForTimeout(4_500);
+  await page.getByText("Direction: west", { exact: true }).waitFor();
+  await page.getByText("Captured: Sep 3, 2026", { exact: true }).waitFor();
+  assert.equal(await page.getByText("Direction: north", { exact: true }).count(), 0, "Late Parcel A metadata replaced Parcel C.");
+  assert.equal(await page.getByText("Direction: east", { exact: true }).count(), 0, "Late Parcel B metadata replaced Parcel C.");
+  for (const parcelId of ["CFS-PARCEL-A", "CFS-PARCEL-B", "CFS-PARCEL-C"]) {
+    assert((metadataCalls.get(parcelId) ?? 0) >= 1 && metadataCalls.get(parcelId) <= 2, `${parcelId} issued excessive metadata requests.`);
+  }
+  assert(imageRequests.every((url) => url.includes("width=800") && url.includes("height=600")), "Initial imagery fetched a larger inspection image.");
+  assert.equal(imageRequests.filter((url) => url.includes("CFS-PARCEL-A") || url.includes("CFS-PARCEL-B")).length, 0, "Superseded parcels fetched image bytes.");
+  console.log("PASS EagleView imagery: Local selection, lazy image, direction, empty, retry, unavailable, unconfigured, and A/B/C stale-response safety");
 }
 
 async function main() {
@@ -222,6 +268,7 @@ async function main() {
   }
   const baseUrl = await startDemo();
   const providerRequests = [];
+  const localBackendRequests = [];
   const browser = await chromium.launch({
     executablePath: browserExecutable(),
     headless: true,
@@ -231,6 +278,7 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     page.on("request", (request) => {
       if (request.url().includes("/imagery/eagleview")) providerRequests.push(request.url());
+      if (/^https?:\/\/(localhost|127\.0\.0\.1):8000(?:\/|$)/.test(request.url())) localBackendRequests.push(request.url());
     });
     await page.goto(`${baseUrl}/?app=planning`, { waitUntil: "domcontentloaded" });
     const search = page.getByRole("combobox", { name: "Search parcels" });
@@ -248,6 +296,7 @@ async function main() {
     await page.getByRole("button", { name: "Clear selected parcel", exact: true }).click();
     await panelButton.waitFor({ state: "hidden" });
     assert.deepEqual(providerRequests, [], "Public Demo called the EagleView backend.");
+    assert.deepEqual(localBackendRequests, [], "Public Demo called the Local CFS backend.");
     console.log("PASS EagleView imagery: Demo selection, direction switch, clear, and backend independence");
   } finally {
     await browser.close();

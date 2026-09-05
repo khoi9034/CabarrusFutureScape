@@ -255,7 +255,10 @@ function formatCaptureDate(value: string | null) {
   const date = new Date(value);
   return Number.isNaN(date.valueOf())
     ? value
-    : new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(date);
+    : new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeZone: "UTC",
+      }).format(date);
 }
 
 function safeMessage(message: string) {
