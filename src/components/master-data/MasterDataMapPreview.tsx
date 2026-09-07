@@ -5,6 +5,7 @@ import type Graphic from "@arcgis/core/Graphic";
 import type Layer from "@arcgis/core/layers/Layer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadArcGISRuntime, type ArcGISRuntime } from "@/lib/gis/arcgisRuntime";
+import { loadCfsVisualBasemapLayer } from "@/lib/gis/basemapProvider";
 import {
   createCfsResultSceneView,
   destroyCfsResultSceneView,
@@ -69,8 +70,7 @@ export function MasterDataMapPreview({
           AbortSignal.timeout(10_000),
         ]);
         try {
-          await visualLayer.load({ signal: basemapSignal });
-          await visualLayer.fetchTile(10, 404, 282, { signal: basemapSignal });
+          await loadCfsVisualBasemapLayer(visualLayer, basemapSignal);
           if (cancelled || basemapSignal.aborted) return;
           basemap.baseLayers.add(visualLayer, 0);
           const layerView = await scene.view.whenLayerView(visualLayer as Layer);

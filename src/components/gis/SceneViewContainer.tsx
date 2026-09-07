@@ -5,7 +5,6 @@ import type Extent from "@arcgis/core/geometry/Extent";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type Layer from "@arcgis/core/layers/Layer";
-import type WebTileLayer from "@arcgis/core/layers/WebTileLayer";
 import type MapView from "@arcgis/core/views/MapView";
 import {
   useCallback,
@@ -53,8 +52,10 @@ import {
 } from "@/lib/gis/arcgisRuntime";
 import {
   CFS_BASEMAP_PROVIDER_CONFIG,
+  type CfsVisualBasemapLayer,
   createCfsStandardOsmFallbackLayer,
   createCfsVisualBasemapLayer,
+  loadCfsVisualBasemapLayer,
 } from "@/lib/gis/basemapProvider";
 import { updateSelectedParcelSymbols } from "@/lib/gis/mockSceneLayers";
 import {
@@ -994,7 +995,7 @@ export function SceneViewContainer() {
     let readyWatchHandle: ArcGISHandle | null = null;
     let refocusEventHandler: (() => void) | null = null;
     let visualBasemapAbortController: AbortController | null = null;
-    let visualBasemapLayer: WebTileLayer | null = null;
+    let visualBasemapLayer: CfsVisualBasemapLayer | null = null;
     let zoomWatchHandle: ArcGISHandle | null = null;
     const initializationAttemptId = ++initializationAttemptRef.current;
     const isCurrentAttempt = () =>
@@ -1626,14 +1627,13 @@ export function SceneViewContainer() {
         visualBasemapLayer = createCfsVisualBasemapLayer(runtime);
         visualBasemapAbortController = new AbortController();
         const activateVisualLayer = async (
-          visualLayer: WebTileLayer,
+          visualLayer: CfsVisualBasemapLayer,
           visualLayerAbortController: AbortController,
         ) => {
           await withTimeout(
-            visualLayer.load().then(() =>
-              visualLayer.fetchTile(10, 404, 282, {
-                signal: visualLayerAbortController.signal,
-              }),
+            loadCfsVisualBasemapLayer(
+              visualLayer,
+              visualLayerAbortController.signal,
             ),
             10_000,
             "OpenStreetMap visual basemap timed out.",
@@ -1667,7 +1667,7 @@ export function SceneViewContainer() {
           return true;
         };
         const removeVisualLayer = (
-          visualLayer: WebTileLayer,
+          visualLayer: CfsVisualBasemapLayer,
           visualLayerAbortController: AbortController,
         ) => {
           visualLayerAbortController.abort();
@@ -1676,7 +1676,7 @@ export function SceneViewContainer() {
           if (visualBasemapLayer === visualLayer) visualBasemapLayer = null;
         };
         void (async () => {
-          const darkLayer = visualBasemapLayer as WebTileLayer;
+          const darkLayer = visualBasemapLayer as CfsVisualBasemapLayer;
           const darkController = visualBasemapAbortController as AbortController;
           try {
             await activateVisualLayer(darkLayer, darkController);

@@ -1,13 +1,17 @@
+import type OpenStreetMapLayer from "@arcgis/core/layers/OpenStreetMapLayer";
+import type VectorTileLayer from "@arcgis/core/layers/VectorTileLayer";
 import type WebTileLayer from "@arcgis/core/layers/WebTileLayer";
 import type { ArcGISRuntime } from "@/lib/gis/arcgisRuntime";
 
 export const CFS_PUBLIC_BASEMAP_LAYER_ID = "cfs-public-reference-basemap";
-export const CFS_DARK_OSM_URL_TEMPLATE =
-  "https://{subDomain}.basemaps.cartocdn.com/dark_all/{level}/{col}/{row}.png";
+export const CFS_OPENFREE_MAP_STYLE_URL =
+  "https://tiles.openfreemap.org/styles/dark";
 export const CFS_DEFAULT_OSM_URL_TEMPLATE =
   "https://{subDomain}.tile.openstreetmap.org/{level}/{col}/{row}.png";
 export const CFS_DEFAULT_OSM_ATTRIBUTION =
-  "© OpenStreetMap contributors © CARTO";
+  "© OpenStreetMap contributors";
+export const CFS_OPENFREE_MAP_ATTRIBUTION =
+  "OpenFreeMap © OpenMapTiles Data from OpenStreetMap";
 
 export interface CfsBasemapEnvironment {
   attribution?: string;
@@ -16,9 +20,14 @@ export interface CfsBasemapEnvironment {
 
 export interface CfsBasemapProviderConfig {
   attribution: string;
-  kind: "openstreetmap" | "web-tile";
+  kind: "vector-tile" | "web-tile";
   urlTemplate: string;
 }
+
+export type CfsVisualBasemapLayer =
+  | OpenStreetMapLayer
+  | VectorTileLayer
+  | WebTileLayer;
 
 const publicEnvironment: CfsBasemapEnvironment = {
   attribution: process.env.NEXT_PUBLIC_CFS_BASEMAP_ATTRIBUTION,
@@ -31,47 +40,63 @@ export const CFS_BASEMAP_PROVIDER_CONFIG =
 export function resolveBasemapProviderConfig(
   environment: CfsBasemapEnvironment,
 ): CfsBasemapProviderConfig {
-  const attribution =
-    environment.attribution?.trim() || CFS_DEFAULT_OSM_ATTRIBUTION;
   const urlTemplate = environment.urlTemplate?.trim();
 
   if (!urlTemplate) {
     return {
-      attribution,
-      kind: "web-tile",
-      urlTemplate: CFS_DARK_OSM_URL_TEMPLATE,
+      attribution: CFS_OPENFREE_MAP_ATTRIBUTION,
+      kind: "vector-tile",
+      urlTemplate: CFS_OPENFREE_MAP_STYLE_URL,
     };
   }
 
   validateWebTileTemplate(urlTemplate);
-  return { attribution, kind: "web-tile", urlTemplate };
+  return {
+    attribution:
+      environment.attribution?.trim() || CFS_DEFAULT_OSM_ATTRIBUTION,
+    kind: "web-tile",
+    urlTemplate,
+  };
 }
 
 export function createCfsVisualBasemapLayer(
   runtime: ArcGISRuntime,
   config = CFS_BASEMAP_PROVIDER_CONFIG,
-): WebTileLayer {
+): CfsVisualBasemapLayer {
   const properties = {
     copyright: config.attribution,
     id: CFS_PUBLIC_BASEMAP_LAYER_ID,
     listMode: "hide" as const,
-    title: "OpenStreetMap visual basemap",
+    title:
+      config.kind === "vector-tile"
+        ? "OpenFreeMap dark visual basemap"
+        : "OpenStreetMap visual basemap",
   };
 
-  if (config.kind === "web-tile") {
-    return new runtime.WebTileLayer({
+  if (config.kind === "vector-tile") {
+    return new runtime.VectorTileLayer({
       ...properties,
-      subDomains: config.urlTemplate.includes("{subDomain}")
-        ? ["a", "b", "c", "d"]
-        : undefined,
-      urlTemplate: config.urlTemplate,
+      url: config.urlTemplate,
     });
   }
 
-  const layer = new runtime.OpenStreetMapLayer(properties);
-  // OpenStreetMapLayer supplies its own default copyright after construction.
-  layer.copyright = config.attribution;
-  return layer;
+  return new runtime.WebTileLayer({
+    ...properties,
+    subDomains: config.urlTemplate.includes("{subDomain}")
+      ? ["a", "b", "c", "d"]
+      : undefined,
+    urlTemplate: config.urlTemplate,
+  });
+}
+
+export async function loadCfsVisualBasemapLayer(
+  layer: CfsVisualBasemapLayer,
+  signal: AbortSignal,
+) {
+  await layer.load({ signal });
+  if (layer.type === "web-tile") {
+    await layer.fetchTile(10, 404, 282, { signal });
+  }
 }
 
 export function createCfsStandardOsmFallbackLayer(runtime: ArcGISRuntime) {

@@ -5,6 +5,7 @@ import type Layer from "@arcgis/core/layers/Layer";
 import { AlertTriangle, Loader2, MapPinned } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { loadArcGISRuntime } from "@/lib/gis/arcgisRuntime";
+import { loadCfsVisualBasemapLayer } from "@/lib/gis/basemapProvider";
 import {
   createCfsResultSceneView,
   destroyCfsResultSceneView,
@@ -77,10 +78,10 @@ export function ManagementMapPreview({
           AbortSignal.timeout(10_000),
         ]);
         try {
-          await scene.visualBasemapLayer.load({ signal: basemapSignal });
-          await scene.visualBasemapLayer.fetchTile(10, 404, 282, {
-            signal: basemapSignal,
-          });
+          await loadCfsVisualBasemapLayer(
+            scene.visualBasemapLayer,
+            basemapSignal,
+          );
           if (cancelled || basemapSignal.aborted) return;
           basemap.baseLayers.add(scene.visualBasemapLayer, 0);
           const layerView = await scene.view.whenLayerView(
@@ -168,6 +169,26 @@ export function ManagementMapPreview({
           </div>
         </div>
       ) : null}
+      <MapLegend tone={markers[0].tone} />
+    </div>
+  );
+}
+
+function MapLegend({ tone }: { tone: ManagementMapMarker["tone"] }) {
+  const hotspot = tone === "hotspot";
+  return (
+    <div
+      className="pointer-events-none absolute bottom-7 left-3 max-w-[15rem] rounded-lg border border-white/12 bg-[#07111f]/92 px-3 py-2 shadow-lg backdrop-blur-sm"
+      data-testid={`management-${tone}-legend`}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Legend</p>
+      <div className="mt-1.5 flex items-start gap-2">
+        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full border border-white/80 ${hotspot ? "bg-[#dfcf91]" : "bg-[#82c9d8]"}`} />
+        <div>
+          <p className="text-xs font-semibold text-white">{hotspot ? "Development hotspot" : "Development Signal"}</p>
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-300">{hotspot ? "Concentrated observed permit and development activity." : "Decision-support indicator, not a forecast."}</p>
+        </div>
+      </div>
     </div>
   );
 }

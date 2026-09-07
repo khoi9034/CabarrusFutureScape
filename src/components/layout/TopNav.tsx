@@ -1284,8 +1284,8 @@ function LocalRuntimeStatusPanel({ status }: { status: LocalRuntimeState }) {
         </dd>
         <dt className="text-slate-500">Map</dt>
         <dd className="text-right text-slate-200">
-          {CFS_BASEMAP_PROVIDER_CONFIG.kind === "openstreetmap"
-            ? "OpenStreetMap"
+          {CFS_BASEMAP_PROVIDER_CONFIG.kind === "vector-tile"
+            ? "OpenFreeMap"
             : "Configured tile basemap"}
         </dd>
       </dl>

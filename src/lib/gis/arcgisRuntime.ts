@@ -7,6 +7,7 @@ import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import type OpenStreetMapLayer from "@arcgis/core/layers/OpenStreetMapLayer";
 import type TileLayer from "@arcgis/core/layers/TileLayer";
+import type VectorTileLayer from "@arcgis/core/layers/VectorTileLayer";
 import type WebTileLayer from "@arcgis/core/layers/WebTileLayer";
 import type TileInfo from "@arcgis/core/layers/support/TileInfo";
 import type Point from "@arcgis/core/geometry/Point";
@@ -30,6 +31,7 @@ export interface ArcGISRuntime {
   MapImageLayer: typeof MapImageLayer;
   OpenStreetMapLayer: typeof OpenStreetMapLayer;
   TileLayer: typeof TileLayer;
+  VectorTileLayer: typeof VectorTileLayer;
   WebTileLayer: typeof WebTileLayer;
   Point: typeof Point;
   Polygon: typeof Polygon;
@@ -52,6 +54,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     { default: MapImageLayer },
     { default: OpenStreetMapLayer },
     { default: TileLayer },
+    { default: VectorTileLayer },
     { default: WebTileLayer },
     { default: Graphic },
     { default: Point },
@@ -70,6 +73,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     import("@arcgis/core/layers/MapImageLayer.js"),
     import("@arcgis/core/layers/OpenStreetMapLayer.js"),
     import("@arcgis/core/layers/TileLayer.js"),
+    import("@arcgis/core/layers/VectorTileLayer.js"),
     import("@arcgis/core/layers/WebTileLayer.js"),
     import("@arcgis/core/Graphic.js"),
     import("@arcgis/core/geometry/Point.js"),
@@ -91,6 +95,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     MapImageLayer,
     OpenStreetMapLayer,
     TileLayer,
+    VectorTileLayer,
     WebTileLayer,
     Point,
     Polygon,

@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const DARK_OSM_URL_TEMPLATE =
-  "https://{subDomain}.basemaps.cartocdn.com/dark_all/{level}/{col}/{row}.png";
+const OPENFREE_MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/dark";
 const STANDARD_OSM_URL_TEMPLATE =
   "https://{subDomain}.tile.openstreetmap.org/{level}/{col}/{row}.png";
-const DEFAULT_OSM_ATTRIBUTION = "© OpenStreetMap contributors © CARTO";
+const DEFAULT_OSM_ATTRIBUTION = "© OpenStreetMap contributors";
+const OPENFREE_MAP_ATTRIBUTION =
+  "OpenFreeMap © OpenMapTiles Data from OpenStreetMap";
 const OPTIONAL_NETWORK_ERRORS = new Set([
   "cors",
   "net::ERR_ABORTED",
@@ -24,36 +25,38 @@ export const REQUIRED_CFS_CONTEXT_LAYER_IDS = Object.freeze([
 export const REQUIRED_CFS_FALLBACK_LABEL_LAYER_ID = "cfs-local-place-labels";
 
 export function optionalPublicMapResources({
-  attribution =
-    process.env.NEXT_PUBLIC_CFS_BASEMAP_ATTRIBUTION?.trim() || DEFAULT_OSM_ATTRIBUTION,
+  attribution = process.env.NEXT_PUBLIC_CFS_BASEMAP_ATTRIBUTION?.trim(),
   urlTemplate = process.env.NEXT_PUBLIC_CFS_BASEMAP_URL_TEMPLATE?.trim(),
 } = {}) {
-  const configuredTemplate = urlTemplate
-    ? normalizeTileUrlTemplate(urlTemplate)
-    : DARK_OSM_URL_TEMPLATE;
-  const resources = [
-    {
+  if (!urlTemplate) {
+    return [{
       id: "cfs-public-reference-basemap",
       kind: "base",
-      attribution,
-      provider: "web-tile",
-      sampleUrl: new URL(expandTileUrlTemplate(configuredTemplate)).href,
-      title: "OpenStreetMap visual basemap",
-      urlTemplate: configuredTemplate,
-    },
-  ];
-  if (!urlTemplate) {
-    resources.push({
+      attribution: OPENFREE_MAP_ATTRIBUTION,
+      provider: "openfree-map",
+      sampleUrl: OPENFREE_MAP_STYLE_URL,
+      title: "OpenFreeMap dark visual basemap",
+      urlTemplate: OPENFREE_MAP_STYLE_URL,
+    }, {
       id: "cfs-public-reference-basemap-fallback",
       kind: "base",
-      attribution: "© OpenStreetMap contributors",
+      attribution: DEFAULT_OSM_ATTRIBUTION,
       provider: "openstreetmap",
       sampleUrl: new URL(expandTileUrlTemplate(STANDARD_OSM_URL_TEMPLATE)).href,
       title: "OpenStreetMap fallback basemap",
       urlTemplate: STANDARD_OSM_URL_TEMPLATE,
-    });
+    }];
   }
-  return resources;
+  const configuredTemplate = normalizeTileUrlTemplate(urlTemplate);
+  return [{
+    id: "cfs-public-reference-basemap",
+    kind: "base",
+    attribution: attribution || DEFAULT_OSM_ATTRIBUTION,
+    provider: "web-tile",
+    sampleUrl: new URL(expandTileUrlTemplate(configuredTemplate)).href,
+    title: "OpenStreetMap visual basemap",
+    urlTemplate: configuredTemplate,
+  }];
 }
 
 export function isApprovedOptionalPublicMapResource(
@@ -64,7 +67,6 @@ export function isApprovedOptionalPublicMapResource(
   if (!url) return null;
   if (
     hasAuthenticationQuery(url) ||
-    url.search ||
     url.hash ||
     url.username ||
     url.password
@@ -72,6 +74,10 @@ export function isApprovedOptionalPublicMapResource(
     return null;
   }
   for (const resource of resources) {
+    if (
+      resource.provider === "openfree-map" &&
+      matchesOpenFreeMapRequest(url)
+    ) return resource;
     if (matchesTileUrlTemplate(url, resource.urlTemplate)) return resource;
   }
   return null;
@@ -87,7 +93,6 @@ export function isApprovedPublicArcgisRequest(
     !url ||
     hasArcgisCredentialHeaders(headers) ||
     hasAuthenticationQuery(url) ||
-    url.search ||
     url.hash ||
     url.username ||
     url.password
@@ -108,7 +113,7 @@ export function isExternalArcgisRequest(
       url.origin !== appOrigin &&
       (/(?:arcgis|esri)/i.test(url.hostname) ||
         /(?:^|\.)tile\.openstreetmap\.org$/i.test(url.hostname) ||
-        /(?:^|\.)basemaps\.cartocdn\.com$/i.test(url.hostname) ||
+        url.hostname === "tiles.openfreemap.org" ||
         resources.some((resource) => templateHostname(resource.urlTemplate) === url.hostname) ||
         /\/(?:sharing\/rest|rest\/services)(?:\/|$)|\/MapServer(?:\/|$)|\/oauth2\/|\/signin(?:\/|$)/i.test(
           url.pathname,
@@ -390,7 +395,7 @@ export function classifyArcGISConsoleFailure(
     }
   }
 
-  if (/\b(?:OpenStreetMapLayer|WebTileLayer|TileLayer|Basemap)\b.*(?:#load|Failed)/i.test(text)) {
+  if (/\b(?:OpenStreetMapLayer|VectorTileLayer|WebTileLayer|TileLayer|Basemap)\b.*(?:#load|Failed)/i.test(text)) {
     return fatal(
       "unexpected_arcgis_layer_failure",
       "An ArcGIS basemap-layer failure did not match an exact approved optional identity.",
@@ -540,7 +545,9 @@ export function runClassificationSafetyMatrix() {
   const appOrigin = "http://127.0.0.1:3000";
   const apiOrigin = "http://127.0.0.1:8000";
   const resources = optionalPublicMapResources({ urlTemplate: "" });
-  const [base] = resources;
+  const [base, fallback] = resources;
+  const openFreeVectorTile =
+    "https://tiles.openfreemap.org/planet/10/282/405.pbf";
   const customResources = optionalPublicMapResources({
     attribution: "© Organization tile contributors",
     urlTemplate: "https://tiles.example.gov/osm/{z}/{x}/{y}.png",
@@ -575,22 +582,33 @@ export function runClassificationSafetyMatrix() {
   assert.equal(
     isApprovedPublicArcgisRequest(base.sampleUrl, resources),
     true,
-    "The exact public OSM tile must be approved.",
+    "The exact OpenFreeMap style must be approved.",
   );
   assert.equal(
-    isApprovedPublicArcgisRequest(base.sampleUrl.replace("a.", "c."), resources),
+    isApprovedPublicArcgisRequest(`${base.sampleUrl}?f=json`, resources),
     true,
-    "The SDK's exact a/b/c OSM subdomain contract must be approved.",
+    "The ArcGIS metadata query for the exact OpenFreeMap style must be approved.",
   );
   assert.equal(
-    isApprovedPublicArcgisRequest(base.sampleUrl.replace("a.", "d."), resources),
+    isApprovedPublicArcgisRequest(openFreeVectorTile, resources),
+    true,
+    "The exact OpenFreeMap vector tile must be approved.",
+  );
+  assert.equal(
+    isApprovedPublicArcgisRequest(
+      "https://tiles.openfreemap.org/not-approved",
+      resources,
+    ),
     false,
-    "An OSM sibling subdomain outside a/b/c must fail closed.",
+    "An OpenFreeMap path outside the exact asset contract must fail closed.",
   );
   assert.equal(
-    isMapDiagnosticRequest(base.sampleUrl.replace("a.", "d."), context),
+    isMapDiagnosticRequest(
+      "https://tiles.openfreemap.org/not-approved",
+      context,
+    ),
     true,
-    "An unapproved OSM sibling request must still reach the fatal classifier.",
+    "An unapproved OpenFreeMap request must still reach the fatal classifier.",
   );
   assert.equal(
     isApprovedPublicArcgisRequest(custom.sampleUrl, customResources),
@@ -635,13 +653,13 @@ export function runClassificationSafetyMatrix() {
       layerContext,
     );
   const nonfatal = [
-    ["public OSM a-tile ERR_FAILED", request(base, "ERR_FAILED"), "current"],
-    ["public OSM b-tile ERR_FAILED", request(base, "net::ERR_FAILED", context, base.sampleUrl.replace("a.", "b.")), "current"],
-    ["public OSM c-tile ERR_NETWORK_ACCESS_DENIED", request(base, "ERR_NETWORK_ACCESS_DENIED", context, base.sampleUrl.replace("a.", "c.")), "current"],
+    ["OpenFreeMap style metadata ERR_FAILED", request(base, "ERR_FAILED", context, `${base.sampleUrl}?f=json`), "current"],
+    ["OpenFreeMap vector tile ERR_FAILED", request(base, "net::ERR_FAILED", context, openFreeVectorTile), "current"],
+    ["public OSM fallback ERR_NETWORK_ACCESS_DENIED", request(fallback, "ERR_NETWORK_ACCESS_DENIED"), "current"],
     ["configured web tile ERR_NETWORK_ACCESS_DENIED", request(custom, "net::ERR_NETWORK_ACCESS_DENIED", customContext), "current"],
-    ["exact OpenStreetMapLayer without requestfailed", layer(base), "current"],
+    ["exact VectorTileLayer without requestfailed", layer(base, "VectorTileLayer"), "current"],
     ["exact WebTileLayer without requestfailed", layer(custom, "WebTileLayer", customContext), "current"],
-    ["exact OSM Basemap without requestfailed", layer(base, "Basemap"), "current"],
+    ["exact OpenFreeMap Basemap without requestfailed", layer(base, "Basemap"), "current"],
     [
       "exact optional HTTP 503",
       classifyArcGISHttpFailure(
@@ -842,9 +860,9 @@ export function runClassificationSafetyMatrix() {
     ["stale cancellation with unhealthy fallback", () => resolveMapDiagnostic(classifyArcGISRequestFailure({ error: "ERR_ABORTED", method: "GET", url: `${appOrigin}/demo-data/map_layers/demo_transportation_context.geojson` }, context), { health: { ...healthy, sameOriginContextReady: false }, lifecycle: "stale" })],
     ["unknown TileLayer", () => classifyArcGISConsoleFailure({ text: "[@arcgis/core/layers/TileLayer] #load() Failed to load layer (title: 'World imagery', id: 'unexpected-imagery') {error: s}" }, context)],
     ["unknown Basemap", () => classifyArcGISConsoleFailure({ text: "[@arcgis/core/Basemap] #load() Failed to load basemap (title: 'Unknown basemap', id: 'unknown-basemap') {error: s}" }, context)],
-    ["exact optional ID with wrong title", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/OpenStreetMapLayer] #load() Failed to load layer (title: 'Wrong title', id: '${base.id}') {error: s}` }, context)],
+    ["exact optional ID with wrong title", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/VectorTileLayer] #load() Failed to load layer (title: 'Wrong title', id: '${base.id}') {error: s}` }, context)],
     ["exact optional title with wrong ID", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/WebTileLayer] #load() Failed to load layer (title: '${base.title}', id: 'wrong-id') {error: s}` }, context)],
-    ["unapproved OSM sibling tile", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: base.sampleUrl.replace("a.", "d.") }, context)],
+    ["unapproved OpenFreeMap path", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: "https://tiles.openfreemap.org/not-approved" }, context)],
     ["private Portal item", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: "https://www.arcgis.com/sharing/rest/content/items/private-item?f=json" }, context)],
     ["OAuth/sign-in", () => classifyArcGISRequestFailure({ error: "net::ERR_FAILED", method: "GET", url: "https://www.arcgis.com/sharing/rest/oauth2/authorize" }, context)],
     ["public service with API key", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${base.sampleUrl}?apiKey=do-not-log-me` }, context)],
@@ -862,9 +880,9 @@ export function runClassificationSafetyMatrix() {
     ["same-origin SDK HTTP 404", () => classifyArcGISHttpFailure({ method: "GET", status: 404, url: `${appOrigin}/arcgis-assets/5.0.19/missing.js` }, context)],
     ["same-origin Demo parcel index HTTP 404", () => classifyArcGISHttpFailure({ method: "GET", status: 404, url: `${appOrigin}/intelligence/parcel-search-index.json` }, context)],
     ["configured tile host with wrong path", () => classifyArcGISRequestFailure({ error: "ERR_FAILED", method: "GET", url: `${custom.sampleUrl}/extra` }, customContext)],
-    ["exact optional identity with token-required error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/OpenStreetMapLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: token required}` }, context)],
+    ["exact optional identity with token-required error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/VectorTileLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: token required}` }, context)],
     ["arbitrary JavaScript console error", () => classifyArcGISConsoleFailure({ text: "TypeError: cannot read properties of undefined" }, context)],
-    ["exact optional identity with authorization error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/WebTileLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: 403 Forbidden}` }, context)],
+    ["exact optional identity with authorization error", () => classifyArcGISConsoleFailure({ text: `[@arcgis/core/layers/VectorTileLayer] #load() Failed to load layer (title: '${base.title}', id: '${base.id}') {error: 403 Forbidden}` }, context)],
     ["page exception", () => classifyPageError(new Error("page exploded"))],
     ["OAuth console secret redaction", () => classifyArcGISConsoleFailure({ text: "OAuth failed https://gis.example.gov/oauth2/authorize?client_id=do-not-log-me&code=do-not-log-me" }, context)],
     [
@@ -978,7 +996,7 @@ function sanitizeDiagnosticDetails(details) {
 }
 
 function parseLayerIdentity(text) {
-  const match = /\[@arcgis\/core\/(?:layers\/)?(OpenStreetMapLayer|WebTileLayer|TileLayer|Basemap)\]\s*#load\(\)\s*Failed[^\n]*?\(title:\s*['"]([^'"]+)['"],\s*id:\s*['"]([^'"]+)['"]\)/i.exec(
+  const match = /\[@arcgis\/core\/(?:layers\/)?(OpenStreetMapLayer|VectorTileLayer|WebTileLayer|TileLayer|Basemap)\]\s*#load\(\)\s*Failed[^\n]*?\(title:\s*['"]([^'"]+)['"],\s*id:\s*['"]([^'"]+)['"]\)/i.exec(
     text,
   );
   if (!match) return null;
@@ -1090,6 +1108,27 @@ function matchesTileUrlTemplate(url, template) {
     .replaceAll("\\{subDomain\\}", "(?:a|b|c)")
     .replace(/\\\{(?:z|x|y|level|col|row)\\\}/g, "\\d+");
   return new RegExp(`^${pattern}$`, "i").test(url.href);
+}
+
+function matchesOpenFreeMapRequest(url) {
+  if (url.hostname !== "tiles.openfreemap.org") return false;
+  const metadataPath = /^\/(?:styles\/dark|planet)\/?$/.test(url.pathname);
+  if (
+    url.search &&
+    !(
+      metadataPath &&
+      url.searchParams.size === 1 &&
+      url.searchParams.get("f") === "json"
+    )
+  ) return false;
+  return [
+    /^\/styles\/dark\/?$/,
+    /^\/planet\/?$/,
+    /^\/planet\/\d+\/\d+\/\d+\.pbf$/,
+    /^\/sprites\/ofm_f384\/ofm(?:@2x)?\.(?:json|png)$/,
+    /^\/fonts\/[^/]+\/\d+-\d+\.pbf$/,
+    /^\/natural_earth\/ne2sr\/\d+\/\d+\/\d+\.png$/,
+  ].some((pattern) => pattern.test(url.pathname));
 }
 
 function templateHostname(template) {
