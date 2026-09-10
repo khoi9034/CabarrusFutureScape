@@ -72,7 +72,7 @@ export function PermitIntelligenceSegmentsPanel() {
       </div>
 
       <p className="mt-3 text-xs leading-5 text-slate-400">
-        Raw permit count is no longer the only signal. CFS groups permits into
+        Raw permit count is no longer the only signal. Cabarrus Insights groups permits into
         planning-relevant segments like residential growth, commercial activity,
         redevelopment, and construction status.
       </p>

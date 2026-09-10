@@ -188,7 +188,7 @@ export function OverviewCommandCenter() {
         <div className="flex min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-              {economicsMode ? "CFS Economics Center" : "CFS Workspace Center"}
+              {economicsMode ? "Economics" : "Cabarrus Insights Workspace"}
             </p>
             <h1 className="mt-0.5 text-sm font-semibold leading-5 text-white md:text-base">
               {economicsMode
@@ -237,7 +237,7 @@ export function OverviewCommandCenter() {
             {USE_DEMO_DATA ? (
               <div
                 className="inline-flex max-w-full shrink-0 items-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#bff3ff]"
-                title="Uses cached CFS demo data. Full local version runs with PostGIS-backed county data."
+                title="Uses cached Demo data. Full local version runs with PostGIS-backed County data."
               >
                 <Gauge className="h-3.5 w-3.5 shrink-0" />
                 <span className="whitespace-nowrap">Portfolio Demo</span>

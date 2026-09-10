@@ -72,7 +72,7 @@ export const developmentModelLabSummary = {
     "Permits show what happened historically.",
     "Parcel-year features describe parcel context before development.",
     "The model studies which conditions are associated with future new construction.",
-    "CFS reviews results at an aggregate level.",
+    "Cabarrus Insights reviews results at an aggregate level.",
     "Parcel-level probabilities stay hidden until calibration and official data improve.",
   ],
   productionReady: false,

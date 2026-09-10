@@ -1828,7 +1828,7 @@
     "as_of": "2026-07-10T02:22:53Z",
     "available": true,
     "caveats": [
-      "Portfolio demo uses a cached CFS demo extract.",
+      "Portfolio demo uses a cached Cabarrus Insights demo extract.",
       "Permit activity is not the same as student generation.",
       "This is not an official enrollment forecast."
     ],

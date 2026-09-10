@@ -153,9 +153,9 @@ interface LayerInfoContent {
 const layerInfoById: Record<string, LayerInfoContent> = {
   "county-boundary": {
     caveat: "Reference boundary only; formal jurisdictional review should use official source records.",
-    interpretation: "Use this as the operating extent for the CFS prototype map.",
+    interpretation: "Use this as the operating extent for the Cabarrus Insights map.",
     reportUse: "Provides report map context when visible.",
-    source: "CFS operating extent / Cabarrus County boundary reference.",
+    source: "Cabarrus Insights operating extent / Cabarrus County boundary reference.",
     summary: "Shows the county operating extent used to frame the live map.",
   },
   "development-hotspots": {
@@ -170,14 +170,14 @@ const layerInfoById: Record<string, LayerInfoContent> = {
     interpretation:
       "Use FEMA floodplain polygons to understand source-zone context; parcel review flags are separate.",
     reportUse: "Supports flood context and FEMA caveats in Executive Summary reports.",
-    source: "FEMA NFHL source polygons served through the CFS backend.",
+    source: "FEMA NFHL source polygons served through the local data service.",
     summary: "Shows FEMA flood hazard source polygons with transparent fills.",
   },
   "flood-risk": {
     caveat: "Marker severity is a review cue, not a final regulatory determination.",
     interpretation: "Click markers to inspect high-review flood constraint parcels.",
     reportUse: "Feeds flood review status and constraints caveats when included in a snapshot.",
-    source: "FEMA NFHL parcel overlay records exposed through the CFS backend.",
+    source: "FEMA NFHL parcel overlay records exposed through the local data service.",
     summary: "Shows high-review parcel markers where FEMA flood context requires attention.",
   },
   "infrastructure-readiness": {
@@ -191,7 +191,7 @@ const layerInfoById: Record<string, LayerInfoContent> = {
     caveat: "Parcel quality flags still require source review when records are unusual.",
     interpretation: "Use this layer for parcel orientation and selected parcel focus.",
     reportUse: "Feeds parcel facts and selected parcel context in Planning Snapshot reports.",
-    source: "Parcel reference and assessor/tax enrichment used by CFS parcel intelligence.",
+    source: "Parcel reference and assessor/tax enrichment used by Cabarrus Insights parcel intelligence.",
     summary: "Shows parcel reference footprints and selected-state planning context.",
   },
   "permit-activity": {

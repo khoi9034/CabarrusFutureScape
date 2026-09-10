@@ -2,7 +2,7 @@
   "as_of": "2026-07-10T02:22:53Z",
   "caveats": [
     "Connector-ready export only; no external platform account is connected.",
-    "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
+    "Economics is screening-level context, not a formal appraisal or tax bill.",
     "Facts and dimensions exclude contact fields and credential fields."
   ],
   "decision_pack_template": {
@@ -5134,8 +5134,8 @@
         "Opportunity classes are review bands, not recommendations."
       ],
       "caveats": [
-        "Portfolio Demo uses a cached CFS demo extract.",
-        "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
+        "Portfolio Demo uses a cached Cabarrus Insights demo extract.",
+        "Economics is screening-level context, not a formal appraisal or tax bill.",
         "Opportunity classes are review bands, not approval recommendations."
       ],
       "evidence_pack": [
@@ -5531,7 +5531,7 @@
           ]
         }
       ],
-      "executive_takeaway": "CFS Economics connects parcel value, growth pressure, constraints, and service burden into a screening-level decision pack.",
+      "executive_takeaway": "Economics connects parcel value, growth pressure, constraints, and service burden into a screening-level decision pack.",
       "recommended_next_diligence": [
         "Verify parcel value and acreage fields.",
         "Compare opportunity bands with floodplain, school, utility, and transportation context.",

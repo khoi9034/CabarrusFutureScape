@@ -353,7 +353,7 @@ export function TopNav({
       if (!USE_BACKEND_API) {
         setQuickSearchResults([]);
         setQuickSearchError(
-          "Parcel search requires the configured CFS API outside demo mode.",
+          "Parcel search requires the configured local data service outside demo mode.",
         );
         setQuickSearchStatus("error");
         return;
@@ -562,7 +562,7 @@ export function TopNav({
       >
         <div className="order-1 flex shrink-0 items-center gap-2">
           <button
-            aria-label="Return to CFS Home"
+            aria-label="Return to Cabarrus Insights home"
             className="inline-flex h-12 shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75"
             onClick={goHome}
             type="button"
@@ -571,7 +571,7 @@ export function TopNav({
             <span className="hidden sm:inline">Home</span>
           </button>
           <nav
-            aria-label="CFS experience"
+            aria-label="Cabarrus Insights experience"
             className="grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-white/[0.035] p-1"
           >
             {[
@@ -604,7 +604,7 @@ export function TopNav({
 
         {managementMode ? (
           <nav
-            aria-label="CFS Management sections"
+            aria-label="Cabarrus Insights Management sections"
             className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-xl border border-white/10 bg-white/[0.035] p-1 lg:order-2 lg:w-auto lg:shrink-0"
           >
             {managementSections.map((item) => {
@@ -631,7 +631,7 @@ export function TopNav({
           </nav>
         ) : (
           <nav
-            aria-label="CFS Builder workspaces"
+            aria-label="Cabarrus Insights Builder workspaces"
             className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-3 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
           >
             {builderModes.map((mode) => {
@@ -880,7 +880,7 @@ export function TopNav({
           <button
             aria-expanded={askCfsOpen}
             aria-controls="shared-ask-cfs-panel"
-            aria-label="Open Ask CFS"
+            aria-label="Open Ask Insights"
             className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#35c98d]/28 bg-[#35c98d]/10 px-2.5 text-xs font-semibold text-[#baf5dc] transition hover:border-[#35c98d]/50 hover:bg-[#35c98d]/15 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70"
             data-testid="shared-ask-cfs-toggle"
             onClick={() => {
@@ -888,11 +888,11 @@ export function TopNav({
               setMoreOpen(false);
               onAskCfsOpenChange(!askCfsOpen);
             }}
-            title="Ask CFS without leaving this workspace"
+            title="Ask Insights without leaving this workspace"
             type="button"
           >
             <Sparkles className="h-4 w-4" />
-            <span className="hidden sm:inline">Ask CFS</span>
+            <span className="hidden sm:inline">Ask Insights</span>
           </button>
           {quickSearchEnabled ? <button
             aria-label="Open command palette"
@@ -943,10 +943,10 @@ export function TopNav({
                 <div className="grid gap-3">
                   <div className="rounded-lg border border-[#78bfd2]/20 bg-[#78bfd2]/8 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9bd1de]">
-                      CFS Management
+                      Cabarrus Insights · Management
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-300">
-                      Leadership views summarize existing CFS evidence. Detailed controls remain in Builder.
+                      Leadership views summarize available evidence. Detailed controls remain in Builder.
                     </p>
                   </div>
                   <button
@@ -1012,7 +1012,7 @@ export function TopNav({
                 <div className="grid gap-3">
                   <div className="rounded-lg border border-[#68d8ff]/20 bg-[#68d8ff]/10 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fe7ff]">
-                      CFS Master Data
+                      Cabarrus Insights · Master Data
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-300">
                       Governed Parcel and Permit previews and derived exports.
@@ -1278,7 +1278,7 @@ function LocalRuntimeStatusPanel({ status }: { status: LocalRuntimeState }) {
         <dd className="text-right text-slate-200" data-testid="local-runtime-database">
           {status.database}
         </dd>
-        <dt className="text-slate-500">Ask CFS</dt>
+        <dt className="text-slate-500">Ask Insights</dt>
         <dd className="text-right text-slate-200" data-testid="local-runtime-ask">
           {status.ask}
         </dd>

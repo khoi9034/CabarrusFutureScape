@@ -666,7 +666,7 @@ function readDemoMessages() {
     throw new ProductApiError({
       cause: error,
       code: "malformed_demo_record",
-      displayMessage: "The session-only Ask CFS message library is invalid.",
+      displayMessage: "The session-only Ask Insights message library is invalid.",
       kind: "malformed",
     });
   }

@@ -77,7 +77,7 @@ export function PrintLayoutPreview() {
         <div className="flex items-start justify-between gap-3 border-b border-[#17202c]/15 pb-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7a6330]">
-              Cabarrus FutureScape
+              Cabarrus Insights
             </p>
             <h4 className="mt-1 text-sm font-bold leading-snug">
               {activeBriefingPacket.title}

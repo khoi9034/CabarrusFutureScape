@@ -170,10 +170,10 @@ export function EconomicMissionControl() {
               Economic Dashboard
             </p>
             <h1 className="mt-1 text-2xl font-semibold text-white">
-              CFS Economics
+              Economics
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-              CFS Economics turns parcel, tax, zoning, permit, infrastructure,
+              Economics turns parcel, tax, zoning, permit, infrastructure,
               and constraint data into screening-level economic intelligence
               for growth value, public cost risk, investment readiness, and
               deeper review.
@@ -629,7 +629,7 @@ function EnterpriseExportPanel({
         title="Enterprise Export"
       />
       <p className="mt-3 text-xs leading-5 text-slate-400">
-        CFS exports connector-ready facts, dimensions, planning-model cells,
+        Cabarrus Insights exports connector-ready facts, dimensions, planning-model cells,
         and a decision pack. No external account or embedded report is connected
         in this phase.
       </p>

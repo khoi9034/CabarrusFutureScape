@@ -752,7 +752,7 @@ function PlanningIndicatorCenterWorkspace() {
           label: card.indicator.title ?? card.indicator.name,
           meaning: card.indicator.whatItMeans,
           method:
-            "Indicator Center records dashboard context from existing CFS data, endpoints, and data-gap definitions only.",
+            "Indicator Center records dashboard context from existing Cabarrus Insights data, endpoints, and data-gap definitions only.",
           recommendedAction: card.indicator.recommendedFollowUp,
           source: card.indicator.source,
           value: card.value,
@@ -1098,7 +1098,7 @@ function PlanningIndicatorCenterWorkspace() {
         <MissionSectionHeader
           eyebrow="Domain Readiness Matrix"
           icon={<ClipboardList className="h-4 w-4" />}
-          title="CFS Intelligence Domains"
+          title="Cabarrus Insights Intelligence Domains"
           value={`${visibleDomainReadinessRows.length} domains`}
         />
         <DomainReadinessMatrix
@@ -1668,7 +1668,7 @@ function buildAttentionQueue({
       caveat: "Official data needed. Do not overclaim until received.",
       category: "Data gaps",
       currentEvidence: "Official case records needed",
-      dataBasis: "CFS data request packet",
+      dataBasis: "Cabarrus Insights data request packet",
       indicator: getIndicatorByGroup("data-gaps"),
       indicatorName: "Official rezoning records missing",
       priorityLabel: "Data Needed",
@@ -1681,7 +1681,7 @@ function buildAttentionQueue({
       caveat: "Official data needed. Do not overclaim until received.",
       category: "Data gaps",
       currentEvidence: "Pipeline source needed",
-      dataBasis: "CFS data request packet",
+      dataBasis: "Cabarrus Insights data request packet",
       indicator: getIndicatorByGroup("data-gaps"),
       indicatorName: "Countywide development pipeline missing",
       priorityLabel: "Data Needed",
@@ -1974,7 +1974,7 @@ function buildDrilldownSections({
       accent: "slate",
       caveat: "Do not overclaim until official data is received.",
       chart: {
-        caveat: "Counts reflect missing-data categories from CFS governance docs.",
+        caveat: "Counts reflect missing-data categories from Cabarrus Insights governance docs.",
         data: [
           {
             label: "Utility / infrastructure",
@@ -2486,7 +2486,7 @@ function MissionHeader({
             />
           </div>
           <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white md:text-3xl">
-            CFS Mission Control
+            Management Indicator Center
           </h2>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-300">
             County growth, constraint, and readiness monitoring.
@@ -2590,12 +2590,12 @@ function AskCfsActionStrip({
     <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] px-3 py-2 text-xs text-slate-300">
       {actions.focus_domain ? (
         <span className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 font-semibold text-[#b7f0ff]">
-          Ask CFS focus: {formatAskCfsLabel(actions.focus_domain)}
+          Ask Insights focus: {formatAskCfsLabel(actions.focus_domain)}
         </span>
       ) : null}
       {filter?.domain || filter?.status ? (
         <span className="rounded border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 font-semibold text-[#f6d98e]">
-          Ask CFS filter: {[filter.domain, filter.status].filter(Boolean).join(" / ")}
+          Ask Insights filter: {[filter.domain, filter.status].filter(Boolean).join(" / ")}
         </span>
       ) : null}
       {recommendedLayers.length ? (
@@ -2609,7 +2609,7 @@ function AskCfsActionStrip({
         type="button"
       >
         <X className="h-3 w-3" />
-        Reset Ask CFS focus
+          Reset Ask Insights focus
       </button>
     </div>
   );
@@ -2695,7 +2695,7 @@ function PermitIntelligencePanel({
           title="Permit Segment Breakdown"
         />
         <MiniChartCard
-          caveat={`${detail?.top_geography_type ?? "Geography"} bucket from normalized CFS context.`}
+          caveat={`${detail?.top_geography_type ?? "Geography"} bucket from normalized Cabarrus Insights context.`}
           data={bucketRowsToChartData(detail?.top_geographies)}
           emptyLabel="Top geography breakdown is unavailable."
           title="Top Jurisdictions / Geographies"
@@ -2885,7 +2885,7 @@ function HowIndicatorsWorkPanel({
           </p>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Indicator Center is not an official scoring system. It summarizes
-            existing CFS evidence, observed activity, review indicators, and
+            existing Cabarrus Insights evidence, observed activity, review indicators, and
             data gaps so staff can choose what to review next.
           </p>
         </div>
@@ -2906,11 +2906,11 @@ function HowIndicatorsWorkPanel({
           ],
           [
             "Data Needed",
-            "An official source is missing, so CFS labels the gap instead of inventing a value.",
+            "An official source is missing, so Cabarrus Insights labels the gap instead of inventing a value.",
           ],
           [
             "Observed Activity",
-            "Historical or operational activity already exists in CFS; it is not prediction.",
+            "Historical or operational activity already exists in Cabarrus Insights; it is not prediction.",
           ],
           [
             "Internal Research",

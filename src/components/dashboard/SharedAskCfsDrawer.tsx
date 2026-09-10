@@ -81,7 +81,7 @@ export function SharedAskCfsSource(props: AskCfsPanelProps) {
       type="button"
     >
       <Sparkles className="h-4 w-4" />
-      Open Ask CFS
+      Open Ask Insights
     </button>
   );
 }
@@ -144,7 +144,7 @@ export function SharedAskCfsDrawer({
       {!open ? (
         <button
           aria-controls="shared-ask-cfs-panel"
-          aria-label="Open Ask CFS"
+          aria-label="Open Ask Insights"
           className="fixed right-0 top-1/2 z-[70] hidden -translate-y-1/2 items-center gap-2 rounded-l-xl border border-r-0 border-[#35c98d]/25 bg-[#07131f]/95 px-2 py-4 text-[#baf5dc] shadow-[-10px_0_30px_rgba(0,0,0,0.28)] transition hover:bg-[#0a1b29] xl:flex"
           data-testid="shared-ask-cfs-rail"
           onClick={onOpen}
@@ -152,12 +152,12 @@ export function SharedAskCfsDrawer({
         >
           <ChevronLeft className="h-4 w-4" />
           <Sparkles className="h-4 w-4" />
-          <span className="sr-only">Ask CFS</span>
+          <span className="sr-only">Ask Insights</span>
         </button>
       ) : null}
       <button
         aria-hidden="true"
-        aria-label="Close Ask CFS"
+        aria-label="Close Ask Insights"
         className={`fixed inset-0 z-[80] bg-[#02050a]/60 transition-opacity duration-150 xl:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -186,14 +186,14 @@ export function SharedAskCfsDrawer({
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-lg font-semibold text-white" id="shared-ask-cfs-title">
-              Ask CFS · {workspaceLabel ?? workspaceLabels[appMode]}
+              Ask Insights · {workspaceLabel ?? workspaceLabels[appMode]}
             </h2>
             <p className="truncate text-xs text-slate-400">
               Shared intelligence layer
             </p>
           </div>
           <button
-            aria-label={expanded ? "Use compact Ask CFS panel" : "Expand Ask CFS panel"}
+            aria-label={expanded ? "Use compact Ask Insights panel" : "Expand Ask Insights panel"}
             className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70 sm:flex"
             data-testid="shared-ask-cfs-expand"
             onClick={() => onExpandedChange(!expanded)}
@@ -203,7 +203,7 @@ export function SharedAskCfsDrawer({
             {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
           <button
-            aria-label="Close Ask CFS"
+            aria-label="Close Ask Insights"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70"
             data-testid="shared-ask-cfs-close"
             onClick={onClose}

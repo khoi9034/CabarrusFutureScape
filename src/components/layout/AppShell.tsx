@@ -284,7 +284,7 @@ function ProductShell() {
     },
     helperTextOverride:
       cfsAppMode === "management"
-        ? "Ask for a concise leadership briefing grounded in current CFS evidence and caveats."
+        ? "Ask for a concise leadership briefing grounded in current County evidence and caveats."
         : askCfsConfig?.helperTextOverride,
     inputPlaceholderOverride:
       cfsAppMode === "management"
@@ -342,7 +342,7 @@ function ProductShell() {
       ) : null}
       {cfsAppMode === "management" ? (
         <EnterpriseErrorBoundary
-          moduleName="CFS Management"
+          moduleName="Management"
           resetKey={`management-${managementSection}`}
         >
           <ManagementWorkspace
@@ -353,14 +353,14 @@ function ProductShell() {
         </EnterpriseErrorBoundary>
       ) : cfsAppMode === "economics" ? (
         <EnterpriseErrorBoundary
-          moduleName="CFS Economics"
+          moduleName="Economics"
           resetKey="economics"
         >
           <EconomicsShell />
         </EnterpriseErrorBoundary>
       ) : cfsAppMode === "master-data" ? (
         <EnterpriseErrorBoundary
-          moduleName="CFS Master Data"
+          moduleName="Master Data"
           resetKey="master-data"
         >
           <MasterDataWorkspace onAskContextChange={setMasterDataAskContext} />
@@ -413,7 +413,7 @@ function ProductShell() {
       )}
       </div>
         <EnterpriseErrorBoundary
-          moduleName="Ask CFS"
+          moduleName="Ask Insights"
           resetKey={`shared-ask-cfs-${cfsAppMode}`}
         >
           <SharedAskCfsDrawer
@@ -656,7 +656,7 @@ function OverviewLandingPage({
   const trustCaveats = [
     ...(economicsMode
       ? [
-          "CFS Economics is not a formal appraisal.",
+          "Economics is not a formal appraisal.",
           "Estimated tax context is screening-level only.",
           "Opportunity classes are not approval recommendations.",
           "Scenario values depend on assumptions.",
@@ -729,7 +729,7 @@ function OverviewLandingPage({
                   : "Enterprise planning intelligence"}
               </div>
               <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-[1.03] text-white md:text-6xl">
-                {economicsMode ? "CFS Economics" : "Cabarrus FutureScape"}
+                {economicsMode ? "Economics" : "Cabarrus Insights"}
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
                 {economicsMode
@@ -738,10 +738,10 @@ function OverviewLandingPage({
               </p>
               {economicsMode ? (
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-                  CFS Economics extends Cabarrus FutureScape from a
+                  Economics extends Cabarrus Insights from a
                   planning-constraints platform into a decision-support
-                  workflow. Traditional GIS can show where things are. CFS
-                  Economics helps explain what those places mean economically.
+                  workflow. Traditional GIS can show where things are. Economics
+                  helps explain what those places mean economically.
                 </p>
               ) : null}
               <div className="mt-7 flex flex-wrap gap-3">
@@ -861,7 +861,7 @@ function OverviewLandingPage({
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-                CFS Operating Model
+                Cabarrus Insights operating model
               </p>
               <h2 className="text-xl font-semibold text-white">
                 {economicsMode
@@ -906,7 +906,7 @@ function OverviewLandingPage({
               <Binoculars className="h-5 w-5 text-[#d8b86a]" />
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d8b86a]">
-                  What CFS Can Do Today
+                  What Cabarrus Insights Can Do Today
                 </p>
                 <h2 className="text-xl font-semibold text-white">
                   {economicsMode

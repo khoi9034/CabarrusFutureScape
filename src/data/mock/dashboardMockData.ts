@@ -1,8 +1,8 @@
 import type { DashboardStatus, MetricCard, ScenarioHorizon } from "@/types";
 
 export const appIdentity = {
-  productName: "Cabarrus FutureScape",
-  eyebrow: "Cabarrus County Digital Twin",
+  productName: "Cabarrus Insights",
+  eyebrow: "Cabarrus County planning intelligence",
   searchPlaceholder: "Search parcel, corridor, permit, scenario",
 };
 

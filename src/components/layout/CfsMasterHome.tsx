@@ -27,7 +27,7 @@ const productCards: ProductCard[] = [
     href: "/?app=management&section=overview",
     icon: BriefcaseBusiness,
     id: "management",
-    title: "CFS Management",
+    title: "Management",
   },
   {
     action: "Open Builder",
@@ -37,7 +37,7 @@ const productCards: ProductCard[] = [
     href: "/?app=planning",
     icon: Layers3,
     id: "builder",
-    title: "CFS Builder",
+    title: "Builder",
   },
 ];
 
@@ -66,7 +66,7 @@ export function CfsMasterHome() {
             Enterprise spatial intelligence
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-normal text-white sm:text-5xl">
-            Cabarrus FutureScape
+            Cabarrus Insights
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
             Planning intelligence for decisions and day-to-day analysis.
@@ -74,11 +74,11 @@ export function CfsMasterHome() {
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             {USE_DEMO_DATA
               ? "Portfolio demonstration using sanitized, cached public demo data; screening outputs are preliminary."
-              : "Connected to the local CFS intelligence service and governed planning data; screening outputs remain decision support."}
+              : "Connected to the local data service and governed planning data; screening outputs remain decision support."}
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:gap-5" aria-label="CFS experiences">
+        <div className="grid gap-4 md:grid-cols-2 lg:gap-5" aria-label="Cabarrus Insights experiences">
           {productCards.map((card) => {
             const Icon = card.icon;
 
@@ -127,7 +127,7 @@ export function CfsMasterHome() {
             <Sparkles className="h-4 w-4" />
           </span>
           <p>
-            <span className="font-semibold text-white">Ask CFS</span> is available throughout the platform to explain data, analysis, and results in plain language.
+            <span className="font-semibold text-white">Ask Insights</span> is available throughout the platform to explain data, analysis, and results in plain language.
           </p>
         </div>
       </section>

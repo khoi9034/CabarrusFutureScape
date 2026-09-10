@@ -136,7 +136,7 @@ export function EconomicsShell() {
           reportBucketRepository.provider === "demo"
             ? "Report Bucket is saved only for this demo session."
             : canWriteReportBucket
-              ? "Report Bucket loaded from CFS."
+              ? "Report Bucket loaded from the live data service."
               : "Report Bucket is read-only for your role.",
         );
       })
@@ -273,7 +273,7 @@ export function EconomicsShell() {
       setReportBucketStatus(
         reportBucketRepository.provider === "demo"
           ? "Saved in this demo session."
-          : "Saved to CFS Report Bucket.",
+          : "Saved to the Report Bucket.",
       );
       return true;
     } catch (caught) {
@@ -770,7 +770,7 @@ function EconomicsTutorialOverlay({
         />
       ) : null}
       <div
-        aria-label="CFS Economics tutorial"
+        aria-label="Economics tutorial"
         aria-modal="true"
         className="fixed w-[min(28.75rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-[var(--econ-gold)]/45 bg-[#111722] p-4 text-[var(--econ-text)] shadow-2xl"
         ref={cardRef}
@@ -944,9 +944,9 @@ function PowerBiToolsPage({
           Start Tutorial
         </button>
       </PageHeader>
-      <EconPanel title="Ask CFS Economics" kicker="Ask first" tourId="tools-ask-cfs">
+      <EconPanel title="Ask Insights · Economics" kicker="Ask first" tourId="tools-ask-cfs">
         <p className="mb-3 text-sm leading-6 text-[var(--econ-muted)]">
-          Ask what to build, which rows to select, or how to turn CFS Economics into a Power BI report.
+          Ask what to build, which rows to select, or how to turn Economics into a Power BI report.
         </p>
         <SharedAskCfsSource
           appMode="economics"
@@ -963,7 +963,7 @@ function PowerBiToolsPage({
             }
             type="button"
           >
-            Add Ask CFS answer to Report Bucket
+            Add Ask Insights answer to Report Bucket
           </button>
         ) : null}
       </EconPanel>
@@ -1340,7 +1340,7 @@ function EconomicDashboardPage({
             <MiniMetric label="Fallback reason" value={intelligence.fallback_reason ?? "Local economics context unavailable"} />
           </div>
           <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
-            Retry the live service when it is available. CFS will not silently swap in demo data while local live mode is selected.
+            Retry the live service when it is available. Cabarrus Insights will not silently swap in demo data while local live mode is selected.
           </p>
         </EconPanel>
       ) : null}
@@ -1349,7 +1349,7 @@ function EconomicDashboardPage({
         parcelId={selectedParcelId}
         signal={selectedParcelSignal}
       />
-      <EconPanel title="Ask CFS Economics" kicker="Ask first" tourId="ask-cfs">
+      <EconPanel title="Ask Insights · Economics" kicker="Ask first" tourId="ask-cfs">
         <SharedAskCfsSource
           appMode="economics"
           filterContext={askCfsFilterContext}
@@ -1547,7 +1547,7 @@ function EconomicDashboardPage({
               <MiniMetric label="Readiness domains" value={formatNumber(intelligence?.data_readiness?.length ?? 0)} />
             </div>
             <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
-              Keep this segment visible when discussing gaps: CFS Economics is a screening tool, not an appraisal, tax bill, or approval recommendation.
+              Keep this segment visible when discussing gaps: Economics is a screening tool, not an appraisal, tax bill, or approval recommendation.
             </p>
           </EconPanel>
         </div>
@@ -1703,7 +1703,7 @@ function EconomicsWorkspacePage({
       </section>
       {embedded ? null : (
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-          <EconPanel title="Ask CFS Economics" kicker="Analyst prompts">
+          <EconPanel title="Ask Insights · Economics" kicker="Analyst prompts">
             <SharedAskCfsSource
               appMode="economics"
               suggestedPromptsOverride={askCfsEconomicsWorkspacePrompts}
@@ -1842,7 +1842,7 @@ function EnterpriseWorkspacePage({
           />
         </div>
         {embedded ? null : (
-          <EconPanel title="Ask CFS Economics" kicker="Assistant">
+          <EconPanel title="Ask Insights · Economics" kicker="Assistant">
             <SharedAskCfsSource
               appMode="economics"
               suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
@@ -1988,18 +1988,18 @@ function EconomicsPrintPage({
     ? selectedBucketItems.map(bucketItemText).join("\n\n---\n\n")
     : "No report bucket items selected for print.";
   const evidencePackText = [
-    "CFS Economics Evidence Pack",
+    "Economics Evidence Pack",
     ...evidencePackRows.map((row) => `${row.label}: ${row.value}`),
   ].join("\n");
   const powerBiNotesText = [
-    "CFS Economics Power BI / Export Notes",
+    "Economics Power BI / Export Notes",
     ...sourceNotes.map((item) => `- ${item}`),
     "- Use economic_segment as the first slicer.",
     "- Sort opportunity_class by opportunity_class_order and bands by band_order.",
     "- Filter or isolate special_asset_flag records before value-per-acre comparisons.",
   ].join("\n");
   const executiveSummaryText = [
-    "CFS Economics Snapshot",
+    "Economics Snapshot",
     snapshotSummary,
     `Selected rows: ${snapshotRows.length || "none - using current economics summary"}`,
     `Segment mix: ${segmentRows.map((row) => `${row.label}: ${row.value}`).join("; ") || "not available"}`,
@@ -2092,7 +2092,7 @@ function EconomicsPrintPage({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Print</p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-950">CFS Economics Snapshot</h1>
+              <h1 className="mt-2 text-3xl font-semibold text-slate-950">Economics Snapshot</h1>
               <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-700">
                 Screening-level economic context for selected rows or current economics summary.
               </p>
@@ -2266,7 +2266,7 @@ function EconomicsPrintPage({
         </PrintSection>
       </article>
       <section className="no-print">
-        <EconPanel title="Ask CFS Economics" kicker="Snapshot support">
+        <EconPanel title="Ask Insights · Economics" kicker="Snapshot support">
           <SharedAskCfsSource
             appMode="economics"
             suggestedPromptsOverride={askCfsEconomicsPrintPrompts}
@@ -3011,7 +3011,7 @@ function EnterpriseScenarioConfigurePanel({
           economicScenarioRepository.provider === "demo"
             ? "Saved scenarios remain in this demo session."
             : canWriteScenario
-              ? "Saved scenarios loaded from CFS."
+              ? "Saved scenarios loaded from the live data service."
               : "Saved scenarios are read-only for your role.",
         );
       })
@@ -3116,7 +3116,7 @@ function EnterpriseScenarioConfigurePanel({
       setPersistenceStatus(
         economicScenarioRepository.provider === "demo"
           ? `Saved changes to version ${saved.current_version} in this demo session.`
-          : `Saved changes to version ${saved.current_version} in CFS.`,
+          : `Saved changes to version ${saved.current_version} in the live data service.`,
       );
     } catch (caught) {
       const failure = productErrorDetails(caught);
@@ -3135,7 +3135,7 @@ function EnterpriseScenarioConfigurePanel({
     try {
       const result = await economicScenarioRepository.version(
         activeScenario.id,
-        "Version created from the CFS Economics scenario workspace.",
+        "Version created from the Economics scenario workspace.",
       );
       scenarioAssumptionsFromRecord(result.data);
       setActiveScenario(result.data);
@@ -3671,7 +3671,7 @@ function PowerBiReportGenerator({
     const frame = requestAnimationFrame(() => {
       setPrompt(generated.generated_from_prompt);
       setPlan(generated);
-      setStatus("Ask CFS generated a report preview below.");
+      setStatus("Ask Insights generated a report preview below.");
     });
     return () => cancelAnimationFrame(frame);
   }, [askPowerBiAction, availability, payload]);
@@ -3711,7 +3711,7 @@ function PowerBiReportGenerator({
   };
   return (
     <EconPanel
-      description="Describe what you want. CFS will build a ready-to-use report preview with visuals, tables, summary text, and print-ready items."
+      description="Describe what you want. Cabarrus Insights will build a ready-to-use report preview with visuals, tables, summary text, and print-ready items."
       kicker="One-click report"
       title="Generate Power BI Report"
       tourId="powerbi-practice-pack"
@@ -4283,7 +4283,7 @@ function TopLandReviewCandidatesPanel({
             Ranks parcels for manual review using growth pressure, sewer-proximity proxy, economics, constraints, and due diligence flags.
           </p>
           <p className="mt-2 text-xs text-[#ffe6a6]">
-            CFS ranks candidates for manual review only. It does not provide financial or buy/sell guidance or future-value assurances.
+            Cabarrus Insights ranks candidates for manual review only. It does not provide financial or buy/sell guidance or future-value assurances.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -4431,7 +4431,7 @@ function ParcelDueDiligenceCard({
           { label: "Supporting signals / What supports the signal", value: ranking.supporting_signals.slice(0, 5).join("; ") || "Data needed" },
           { label: "Caution flags / What could be a problem", value: flags.slice(0, 4).join("; ") || "Monitor" },
           { label: "What to verify next", value: nextChecks.slice(0, 4).join("; ") || "Verify planning, utilities, access, and constraints." },
-          { label: "Why CFS is not making a buy recommendation", value: "CFS is ranking records for manual review only. Verify planning, utility, legal, access, and site facts before any outside decision." },
+          { label: "Why Cabarrus Insights is not making a buy recommendation", value: "Cabarrus Insights is ranking records for manual review only. Verify planning, utility, legal, access, and site facts before any outside decision." },
         ]}
       />
       <ComparableContextPanel signal={signal} />
@@ -4451,7 +4451,7 @@ function ComparableContextPanel({ signal }: { signal: EconomicsParcelSignal }) {
     <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Comparable Context</p>
       <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">
-        CFS provides assessed-value and value-per-acre screening context. CFS is not an appraisal; confirm market value with comparable sales, broker/appraiser review, and public records.
+        Cabarrus Insights provides assessed-value and value-per-acre screening context. It is not an appraisal; confirm market value with comparable sales, broker/appraiser review, and public records.
       </p>
       <Matrix
         rows={[
@@ -4573,7 +4573,7 @@ function PowerBiChartBuilder({
   const [filterField, setFilterField] = useState(aiInitialConfig?.filterField ?? "economic_segment");
   const [filterValue, setFilterValue] = useState(aiInitialConfig?.filterValue ?? "All");
   const [copyStatus, setCopyStatus] = useState<string | null>(
-    aiGeneratedPlan ? "Ask CFS configured this report from your prompt." : null,
+    aiGeneratedPlan ? "Ask Insights configured this report from your prompt." : null,
   );
   const [canvasItems, setCanvasItems] = useState<UserReportCanvasItem[]>(
     aiGeneratedPlan && aiShouldFillCanvas ? generatedPlanToCanvasItems(aiGeneratedPlan).slice(-8) : [],
@@ -4779,7 +4779,7 @@ function PowerBiChartBuilder({
     : [];
   return (
     <EconPanel
-      description="Choose a CFS Economics table, fields, and visual type to preview a Power BI-style chart."
+      description="Choose an Economics table, fields, and visual type to preview a Power BI-style chart."
       kicker="Power BI visual builder"
       title="Build Your Own Chart"
       tourId="chart-builder"
@@ -4794,7 +4794,7 @@ function PowerBiChartBuilder({
               Generate dataset, visuals, and build steps
             </h3>
             <p className="mt-1 max-w-3xl text-xs leading-5 text-[var(--econ-muted)]">
-              Describe the report you want. CFS will generate safe table choices, relationships, visuals, canvas recipes, and build steps.
+              Describe the report you want. Cabarrus Insights will generate safe table choices, relationships, visuals, canvas recipes, and build steps.
             </p>
           </div>
           <button
@@ -4826,7 +4826,7 @@ function PowerBiChartBuilder({
             </div>
           </div>
           <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3 text-xs leading-5 text-[var(--econ-muted)]">
-            <p className="font-semibold text-[var(--econ-text)]">What CFS generates</p>
+            <p className="font-semibold text-[var(--econ-text)]">What Cabarrus Insights generates</p>
             <ul className="mt-2 space-y-1">
               <li>Dataset tables and starter relationships.</li>
               <li>Visual cards ready for the Report Canvas.</li>
@@ -4940,7 +4940,7 @@ function PowerBiChartBuilder({
               AI Generated Report Plan
             </p>
             <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
-              Ask CFS to build a report, then CFS will configure the chart builder and report canvas for you.
+              Ask Insights to build a report, then the app will configure the chart builder and report canvas for you.
             </p>
           </div>
         )}
@@ -6870,7 +6870,7 @@ function topLandReviewWatchlistPacket(rows: RankedLandReviewCandidate[]): DueDil
       packetSection("Top 25 Review Watchlist", topLines),
       packetSection("Review Priority Mix", countRowsBy(rows, (row) => row.ranking.review_priority_band).map((row) => `${row.label}: ${row.value}`)),
       packetSection("Why These Candidates Surfaced", [
-        "CFS combined development-readiness bands, sewer-proximity proxy, growth pressure, economic opportunity, constraints, and due diligence flags.",
+        "Cabarrus Insights combined development-readiness bands, sewer-proximity proxy, growth pressure, economic opportunity, constraints, and due diligence flags.",
         "The list is for manual review sequencing only and should be verified with planning, utilities, access, legal/title, and site checks.",
       ]),
       packetSection("Sewer / Utility Proxy Context", [
@@ -6962,7 +6962,7 @@ function valuationContext(signal: EconomicsParcelSignal): ValuationContext {
     ]).slice(0, 4).join(" / ")
     || "Data Needed";
   const flags = uniqueStrings([
-    !recentSaleAvailable ? "Recent sale fields are not available in the current CFS Economics export" : "",
+    !recentSaleAvailable ? "Recent sale fields are not available in the current Economics export" : "",
     !valueText(signalExtraField(signal, "value_per_acre_band")) && signal.value_per_acre == null ? "Value-per-acre context needs review" : "",
     signal.assessed_value == null ? "Assessed-value field needs review" : "",
     signal.special_asset_flag ? "Special asset / compare separately" : "",
@@ -7219,9 +7219,9 @@ function economicSnapshotSummary(
   selectedSignals: EconomicsParcelSignal[],
 ) {
   if (selectedSignals.length) {
-    return "This snapshot summarizes screening-level economic signals for selected CFS Economics records. The current evidence highlights selected opportunity classes, service burden context, data confidence, and recommended next diligence for deeper review.";
+    return "This snapshot summarizes screening-level economic signals for selected Economics records. The current evidence highlights selected opportunity classes, service burden context, data confidence, and recommended next diligence for deeper review.";
   }
-  return `This snapshot summarizes the current CFS Economics context across ${formatNumber(summary?.total_parcels_analyzed)} parcels or areas. It highlights underbuilt/redevelopment candidates, tax-base opportunity bands, service burden context, and data confidence gaps for deeper review.`;
+  return `This snapshot summarizes the current Economics context across ${formatNumber(summary?.total_parcels_analyzed)} parcels or areas. It highlights underbuilt/redevelopment candidates, tax-base opportunity bands, service burden context, and data confidence gaps for deeper review.`;
 }
 
 function economicDecisionMemo({
@@ -7246,7 +7246,7 @@ function economicDecisionMemo({
   const confidenceRows = countRowsBy(snapshotRows, (signal) => signal.economic_data_confidence);
   const confidence = confidenceRows[0]?.label ?? scenario.data_confidence ?? "Data Needed";
   return [
-    "CFS Economics Decision Memo",
+    "Economics Decision Memo",
     `Selected economics records show a screening-level mix of ${topClass}, ${topSegment}, and ${confidence} data confidence.`,
     `Economic upside: tax-base lift is ${scenario.estimated_tax_base_lift_band}; revenue per acre is ${scenario.revenue_per_acre_band}.`,
     `Public burden risk: service burden is ${scenario.service_burden_band}; infrastructure burden is ${scenario.infrastructure_burden_band}.`,
@@ -7339,7 +7339,7 @@ function printEvidencePackRows({
   return [
     {
       label: "Source tables / layers",
-      value: "CFS Economics intelligence, parcel economic signals, scenario outputs, and data readiness.",
+      value: "Economics intelligence, parcel economic signals, scenario outputs, and data readiness.",
     },
     {
       label: "Rows used",
@@ -7360,7 +7360,7 @@ function printEvidencePackRows({
       value: missingData.join("; ") || "No elevated missing-data item in the current readiness summary.",
     },
     {
-      label: "Related CFS pages",
+      label: "Related Insights pages",
       value: "Power BI & Tools, Economic Dashboard, Print.",
     },
   ];
@@ -7911,7 +7911,7 @@ function scenarioEvidencePack(
       value: missing.length ? missing.join(", ") : "No selected assumptions are marked Data Needed.",
     },
     {
-      label: "Related CFS layers",
+      label: "Related Insights layers",
       value:
         "Revenue per Acre Dashboard, Constraint-Adjusted Development Potential, Public Cost Risk Flag, Economic Scenario Model.",
     },
@@ -7935,7 +7935,7 @@ const burdenBandOptions = ["Low", "Medium", "High", "Data Needed"];
 const confidenceBandOptions = ["High", "Medium", "Low", "Data Needed"];
 
 const powerBiWorkflowSteps = [
-  "Export CFS Economics tables.",
+  "Export Economics tables.",
   "Open Power BI Desktop.",
   "Import JSON or CSV tables.",
   "Build relationships.",
@@ -8749,7 +8749,7 @@ const defaultDueDiligenceQuestions = [
 ];
 
 const landDueDiligenceSafeUseText =
-  "CFS provides screening-level planning and infrastructure intelligence. It does not provide buy/sell guidance, appraisal conclusions, utility service verification, or future-value assurances.";
+  "Cabarrus Insights provides screening-level planning and infrastructure intelligence. It does not provide buy/sell guidance, appraisal conclusions, utility service verification, or future-value assurances.";
 const landDueDiligenceWsaccCaveat =
   "WSACC data supports sewer proximity and subbasin context only. Capacity, water service, and planned extensions were not provided.";
 const landDueDiligencePacketCaveats = [
@@ -8920,7 +8920,7 @@ function reportSelectionNote(
   availability: PowerBiReportDataAvailability,
 ) {
   if (!requested || requested === selected) return "";
-  return `CFS selected ${reportTypeLabel(selected)} because ${reportTypeLabel(requested)} is unavailable: ${availability.report_types.find((item) => item.type === requested)?.reason ?? "required rows are unavailable"}`;
+  return `Cabarrus Insights selected ${reportTypeLabel(selected)} because ${reportTypeLabel(requested)} is unavailable: ${availability.report_types.find((item) => item.type === requested)?.reason ?? "required rows are unavailable"}`;
 }
 
 function buildPowerBiReportPlan(
@@ -8967,8 +8967,8 @@ function buildPowerBiReportPlan(
     ].filter((visual): visual is PowerBiGeneratedVisual => Boolean(visual));
     return finalizedPowerBiReportPlan(
       prompt,
-      "Safe CFS Economics Report Plan",
-      "CFS cannot build report visuals from private contact fields, credential fields, internal model values, or probability-style outputs. This safe alternative uses sanitized economics facts and dimensions.",
+      "Safe Economics Report Plan",
+      "Cabarrus Insights cannot build report visuals from private contact fields, credential fields, internal model values, or probability-style outputs. This safe alternative uses sanitized economics facts and dimensions.",
       [
         reportPage("Safe Economics Review", "Use sanitized screening fields only.", safeVisuals),
       ],
@@ -9067,7 +9067,7 @@ function buildPowerBiReportPlan(
       [
         "Use comparison_group, economic_segment, acreage_band, geography_label, value_per_acre_band, improvement_to_land_ratio_band, and special_asset_flag.",
         "Verify recent arms-length sales, deed history, public records, constraints, usable acreage, frontage/access, and broker/appraiser context.",
-        "CFS provides screening-level valuation context only; it is not an appraisal or price conclusion.",
+        "Cabarrus Insights provides screening-level valuation context only; it is not an appraisal or price conclusion.",
         ...powerBiReportCaveats,
       ],
     );
@@ -9544,7 +9544,7 @@ function powerBiActionsToGeneratedPlan(
             powerbi_recipe: "",
             source_table: actions.chart_builder_config.table_name,
             value_field: actions.chart_builder_config.value_field,
-            visual_title: actions.chart_builder_config.title ?? actions.report_title ?? "Ask CFS chart",
+            visual_title: actions.chart_builder_config.title ?? actions.report_title ?? "Ask Insights chart",
             visual_type: actions.chart_builder_config.chart_type,
           },
         ]
@@ -9569,7 +9569,7 @@ function powerBiActionsToGeneratedPlan(
     const pageName = item.page_name || chartRecommendedPage(tableName);
     const existing = pages.get(pageName) ?? {
       page_name: pageName,
-      purpose: "Generated from Ask CFS report automation.",
+      purpose: "Generated from Ask Insights report automation.",
       visuals: [],
     };
     existing.visuals.push(visual);
@@ -9579,12 +9579,12 @@ function powerBiActionsToGeneratedPlan(
     finalizedPowerBiReportPlan(
     actions.report_title ?? "AI Generated Power BI Report",
     actions.report_title ?? "AI Generated Power BI Report",
-    actions.report_summary ?? "Ask CFS generated a Power BI-style dataset, visual, and report-canvas plan.",
+    actions.report_summary ?? "Ask Insights generated a Power BI-style dataset, visual, and report-canvas plan.",
     [...pages.values()],
     relationships,
     uniqueStrings([
       actions.chart_builder_config?.caveat ?? "",
-      "CFS generated this as a Power BI Desktop build plan only.",
+      "Cabarrus Insights generated this as a Power BI Desktop build plan only.",
       ...powerBiReportCaveats,
     ]),
     ),
@@ -9616,7 +9616,7 @@ function sanitizePowerBiReportPlan(
   return finalizedPowerBiReportPlan(
     plan.generated_from_prompt,
     plan.title,
-    `${plan.summary} CFS hid unavailable visuals from the main preview.`,
+    `${plan.summary} Cabarrus Insights hid unavailable visuals from the main preview.`,
     pages,
     plan.relationships,
     uniqueStrings([
@@ -9745,7 +9745,7 @@ function finalizedPowerBiReportPlan(
       "Import the recommended tables into Power BI Desktop.",
       "Create the starter relationships.",
       "Build the generated visuals and add a caveat text box.",
-      "Use the CFS Report Canvas recipe as the page outline.",
+      "Use the Cabarrus Insights Report Canvas recipe as the page outline.",
     ],
     pages: pages.map((page) => ({
       ...page,
@@ -9811,14 +9811,14 @@ function bucketItemFromGeneratedPlan(plan: PowerBiGeneratedReportPlan): ReportBu
 }
 
 function bucketItemFromAskResponse(response: CfsAiSearchResponse): ReportBucketItemInput {
-  const title = response.powerbi_actions?.report_title ?? "Ask CFS Economics Answer";
+  const title = response.powerbi_actions?.report_title ?? "Ask Insights Economics Answer";
   const suggestedActions = response.suggested_actions.map((action) => `- ${action}`).join("\n");
   return {
     caveats: response.caveats,
     content: [response.answer, suggestedActions ? `Suggested actions:\n${suggestedActions}` : ""].filter(Boolean).join("\n\n"),
     id: `ask-cfs-${slugifyReportTitle(title)}-${slugifyReportTitle(response.as_of ?? "session")}`,
     source_page: "Ask CFS",
-    summary: response.powerbi_actions?.report_summary ?? response.answer.split("\n").find(Boolean) ?? "Ask CFS response.",
+    summary: response.powerbi_actions?.report_summary ?? response.answer.split("\n").find(Boolean) ?? "Ask Insights response.",
     title,
     type: response.powerbi_actions ? "report_plan" : "evidence_pack",
   };
@@ -9935,7 +9935,7 @@ function buildGeneratedReportSnapshot(
       ? "This report needs parcel economic signal rows, but parcel_economic_signal_fact currently has 0 rows."
       : "",
     needsParcelRows && !parcelRows.length && signals.length
-      ? "Ask CFS summary has live economics context, but the Power BI export table is empty."
+      ? "Ask Insights summary has live economics context, but the Power BI export table is empty."
       : "",
     unavailableVisuals.length
       ? "Unavailable visuals were hidden from the main preview."
@@ -10050,7 +10050,7 @@ function generatedReportPlanInstructions(plan: PowerBiGeneratedReportPlan) {
     "1. Import tables:",
     ...plan.recommended_tables.map((table) => `- ${table}.csv`),
     "2. Create relationships:",
-    ...(relationships.length ? relationships.map((relationship) => `- ${relationship}`) : ["- Use the starter relationship notes from the CFS export pack."]),
+    ...(relationships.length ? relationships.map((relationship) => `- ${relationship}`) : ["- Use the starter relationship notes from the Insights export pack."]),
     "3. Add slicers:",
     ...plan.dataset_plan.slicers.map((slicer) => `- ${slicer}`),
     "4. Build visuals:",
@@ -10159,8 +10159,8 @@ const defaultPowerBiRelationships: EconomicsPowerBiExportResponse["relationships
 ];
 
 const powerBiReportCaveats = [
-  "CFS generates a Power BI Desktop build plan only; it does not connect to Power BI Service or embedded APIs.",
-  "CFS Economics is screening-level context, not a formal appraisal, tax bill, fiscal impact study, or approval recommendation.",
+  "Cabarrus Insights generates a Power BI Desktop build plan only; it does not connect to Power BI Service or embedded APIs.",
+  "Economics is screening-level context, not a formal appraisal, tax bill, fiscal impact study, or approval recommendation.",
   "Value per acre should be compared within economic segment, and special assets should be reviewed separately.",
 ];
 
@@ -10434,10 +10434,10 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       title: "Scenario visuals",
     },
     {
-      body: "Ask CFS can explain charts, filters, Power BI fields, and caveats.",
+      body: "Ask Insights can explain charts, filters, Power BI fields, and caveats.",
       id: "dashboard-ask",
       targetSelector: '[data-econ-tour="ask-cfs"]',
-      title: "Ask CFS",
+      title: "Ask Insights",
     },
   ],
   print: [
@@ -10480,7 +10480,7 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
   ],
   tools: [
     {
-      body: "Ask CFS or choose a quick report type to start.",
+      body: "Ask Insights or choose a quick report type to start.",
       id: "tools-purpose",
       targetSelector: '[data-econ-tour="powerbi-tools-header"]',
       title: "Choose report",

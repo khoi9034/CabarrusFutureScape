@@ -52,7 +52,7 @@ export function useDevelopmentStatistics(
             errorMessage:
               error instanceof Error
                 ? error.message
-                : "CFS demo development statistics are unavailable.",
+                : "Demo development statistics are unavailable.",
             isLoading: false,
             source: "static",
           });
@@ -89,7 +89,7 @@ export function useDevelopmentStatistics(
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API development statistics are unavailable.",
+                : "Live development statistics are unavailable.",
           isLoading: false,
           source: "fallback",
         });

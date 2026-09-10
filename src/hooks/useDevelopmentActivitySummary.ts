@@ -46,7 +46,7 @@ export function useDevelopmentActivitySummary() {
             errorMessage:
               error instanceof Error
                 ? error.message
-                : "CFS demo development activity summary is unavailable.",
+                : "Demo development activity summary is unavailable.",
             isLoading: false,
             source: "static",
           });
@@ -80,7 +80,7 @@ export function useDevelopmentActivitySummary() {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API development activity summary is unavailable.",
+              : "Live development activity summary is unavailable.",
           isLoading: false,
           source: "fallback",
         });

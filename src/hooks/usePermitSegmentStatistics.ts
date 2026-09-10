@@ -35,7 +35,7 @@ export function usePermitSegmentStatistics(): PermitSegmentStatisticsViewModel {
             errorMessage:
               error instanceof Error
                 ? error.message
-                : "CFS demo permit segment statistics are unavailable.",
+                : "Demo permit segment statistics are unavailable.",
           });
         });
       return;

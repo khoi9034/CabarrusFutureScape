@@ -72,7 +72,7 @@ export function useDevelopmentHotspots() {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API development hotspots are unavailable.",
+              : "Live development hotspots are unavailable.",
           isLoading: false,
           source: "fallback",
         });

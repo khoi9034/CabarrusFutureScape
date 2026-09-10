@@ -67,7 +67,7 @@ export class EnterpriseErrorBoundary extends Component<
             {this.props.moduleName} paused safely
           </h2>
           <p className="mt-2 text-xs leading-5 text-amber-100/75">
-            This dashboard module hit a local rendering error. Other CFS
+            This dashboard module hit a local rendering error. Other Cabarrus Insights
             modules remain available while this area is reset.
           </p>
           <button

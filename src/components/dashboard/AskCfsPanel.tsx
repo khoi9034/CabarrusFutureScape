@@ -180,12 +180,12 @@ export function AskCfsPanel({
         setPersistenceBusy(false);
         setPersistenceError(
           principalStatus === "error"
-            ? principalError ?? "Ask CFS access could not be verified."
+            ? principalError ?? "Ask Insights access could not be verified."
             : null,
         );
         setPersistenceRequestId(principalRequestId);
         setPersistenceStatus(
-          principalStatus === "loading" ? "Loading Ask CFS access..." : null,
+          principalStatus === "loading" ? "Loading Ask Insights access..." : null,
         );
       }, 0);
       return () => window.clearTimeout(timeout);
@@ -193,7 +193,7 @@ export function AskCfsPanel({
     if (!canUseAskCfs) {
       const timeout = window.setTimeout(() => {
         setPersistenceBusy(false);
-        setPersistenceError("Your role cannot use Ask CFS.");
+        setPersistenceError("Your role cannot use Ask Insights.");
         setPersistenceRequestId(principalRequestId);
         setPersistenceStatus(null);
       }, 0);
@@ -274,7 +274,7 @@ export function AskCfsPanel({
         setPersistenceStatus(
           askCfsConversationRepository.provider === "demo"
             ? "Conversation restored from this demo session."
-            : "Conversation restored from CFS.",
+              : "Conversation restored from Cabarrus Insights.",
         );
       })
       .catch((caught: unknown) => {
@@ -458,7 +458,7 @@ export function AskCfsPanel({
           setPersistenceStatus(
             askCfsConversationRepository.provider === "demo"
               ? "Conversation saved in this demo session."
-              : "Conversation saved to CFS.",
+              : "Conversation saved to Cabarrus Insights.",
           );
         }
       } catch (caught) {
@@ -545,7 +545,7 @@ export function AskCfsPanel({
       setPersistenceStatus(
         askCfsConversationRepository.provider === "demo"
           ? "Conversation saved in this demo session."
-          : "Conversation saved to CFS.",
+          : "Conversation saved to Cabarrus Insights.",
       );
     } catch (caught) {
       const failure = askCfsPersistenceFailure(caught);
@@ -583,7 +583,7 @@ export function AskCfsPanel({
       setPersistenceStatus(
         askCfsConversationRepository.provider === "demo"
           ? "Conversation reset for this demo session."
-          : "Conversation reset in CFS.",
+          : "Conversation reset in Cabarrus Insights.",
       );
     } catch (caught) {
       const failure = askCfsPersistenceFailure(caught);
@@ -651,7 +651,7 @@ export function AskCfsPanel({
       {scopedIsLoading ? (
         <div className="rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs leading-5 text-slate-300">
           <span className="font-semibold text-[#9be9ff]">
-            Preparing grounded CFS briefing...
+            Preparing grounded Insights briefing...
           </span>{" "}
           {loadingStageMessage(loadingStage)}
         </div>
@@ -661,7 +661,7 @@ export function AskCfsPanel({
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs text-slate-300">
           <span className="font-semibold text-[#9be9ff]">Follow-up mode</span>
           <span>
-            Using previous Ask CFS context:{" "}
+            Using previous Ask Insights context:{" "}
             {labelForTurn(lastTurn)}
           </span>
           <button
@@ -733,7 +733,7 @@ export function AskCfsPanel({
         onSubmit={onSubmit}
       >
         <label className="sr-only" htmlFor={inputId}>
-          Ask CFS question
+          Ask Insights question
         </label>
         <textarea
           className="block min-h-16 w-full resize-none bg-transparent px-1 py-1 text-sm leading-5 text-white outline-none placeholder:text-slate-500"
@@ -746,7 +746,7 @@ export function AskCfsPanel({
         />
         <div className="mt-1 flex items-center justify-between gap-2 border-t border-white/8 pt-2">
           <span className="text-[10px] text-slate-500">
-            {USE_DEMO_DATA ? "Demo context" : "Grounded CFS context"}
+            {USE_DEMO_DATA ? "Demo context" : "Grounded Insights context"}
           </span>
           <button
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#68d8ff]/30 bg-[#68d8ff]/12 px-3 py-2 text-xs font-semibold text-[#c6f4ff] transition hover:border-[#68d8ff]/55 hover:bg-[#68d8ff]/18 disabled:cursor-not-allowed disabled:opacity-50"
@@ -853,7 +853,7 @@ function conversationTurnsFromMessages(
     turns.push({
       answer_summary: message.safe_answer_summary,
       focused_domain: typeof focusedDomain === "string" ? focusedDomain : null,
-      query: pendingQuestion ?? "Previous Ask CFS question",
+      query: pendingQuestion ?? "Previous Ask Insights question",
       related_layers: jsonStringArray(message.entity_context.related_layers),
     });
     pendingQuestion = null;
@@ -928,28 +928,28 @@ function loadingStageMessage(stage: number) {
   if (USE_DEMO_DATA) return "Using cached demo intelligence context.";
   if (stage >= 2) return "Enhancing explanation if the provider responds in time.";
   if (stage >= 1) return "Preparing grounded local analysis.";
-  return "Loading CFS context.";
+  return "Loading Insights context.";
 }
 
 function askCfsErrorMessage(error: unknown) {
   if (error instanceof ApiClientError) {
     if (error.kind === "network") {
-      return "CFS data service is unavailable. Restart the local CFS services and retry.";
+      return "Live data service is unavailable. Restart the local services and retry.";
     }
     if (error.kind === "timeout") {
-      return "CFS data service did not respond before the presentation timeout. Retry or run the presentation check.";
+      return "Live data service did not respond before the presentation timeout. Retry or run the presentation check.";
     }
-    if (error.kind === "cancelled") return "Ask CFS request cancelled.";
+    if (error.kind === "cancelled") return "Ask Insights request cancelled.";
     if (error.status === 503) {
-      return "CFS database is unavailable. Check local services, then retry.";
+      return "Local database is unavailable. Check local services, then retry.";
     }
     if (error.status === 429) {
-      return "OpenAI enhancement is temporarily unavailable. CFS can still return grounded local analysis.";
+      return "OpenAI enhancement is temporarily unavailable. Ask Insights can still return grounded local analysis.";
     }
   }
   return getApiErrorDisplayMessage(
     error,
-    "Ask CFS is unavailable for the current session.",
+    "Ask Insights is unavailable for the current session.",
   );
 }
 
@@ -984,7 +984,7 @@ function AskCfsAnswer({
       </div>
       {liveAiFallbackActive ? (
         <p className="mb-3 rounded-lg border border-[#f6d98e]/20 bg-[#f6d98e]/10 px-3 py-2 text-xs text-[#f6d98e]">
-          Live AI explanation is temporarily unavailable; showing the grounded CFS summary.
+          Live AI explanation is temporarily unavailable; showing the grounded Insights summary.
         </p>
       ) : null}
       <div className="whitespace-pre-line text-sm leading-6 text-slate-100">
@@ -1033,7 +1033,7 @@ function AskCfsAnswer({
 }
 
 function askCfsProviderLabel(response: CfsAiSearchResponse) {
-  return response.data_mode === "demo" ? "Ask CFS demo response" : "Ask CFS response";
+  return response.data_mode === "demo" ? "Ask Insights demo response" : "Ask Insights response";
 }
 
 function evidenceSourceLabel(source: string) {
@@ -1043,7 +1043,7 @@ function evidenceSourceLabel(source: string) {
   if (normalized.includes("parcel")) return "Parcel data";
   if (normalized.includes("school")) return "School context";
   if (normalized.includes("master") || normalized.includes("dataset")) return "Master Data workspace";
-  if (normalized.includes("economic") || normalized.includes("tax")) return "CFS Economics";
+  if (normalized.includes("economic") || normalized.includes("tax")) return "Economics";
   return source.replaceAll("_", " ").replaceAll(".", " · ");
 }
 
@@ -1053,7 +1053,7 @@ function askCfsSource(response: CfsAiSearchResponse) {
       ? "Portfolio Demo · cached demo extract"
       : response.data_source === "local_live_backend"
         ? "Local live backend"
-        : response.data_source ?? "CFS context";
+        : response.data_source ?? "Insights context";
   return source;
 }
 

@@ -5,8 +5,8 @@ import { EntraAuthGate } from "@/components/auth/EntraAuthGate";
 import { DataAdministrationPanel } from "@/components/admin/DataAdministrationPanel";
 
 export const metadata: Metadata = {
-  description: "Read-only CFS source, ingestion, quality, and runtime status.",
-  title: "Data Administration | Cabarrus FutureScape",
+  description: "Read-only source, ingestion, quality, and runtime status for Cabarrus Insights.",
+  title: "Data Administration | Cabarrus Insights",
 };
 
 export default function DataAdministrationPage() {
@@ -45,7 +45,7 @@ export default function DataAdministrationPage() {
               href="/"
             >
               <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-              Return to CFS
+              Return to Cabarrus Insights
             </Link>
           </header>
 

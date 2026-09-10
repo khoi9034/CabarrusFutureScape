@@ -95,7 +95,7 @@ function createCoreMetric(
     accent: metricAccents[id] ?? "#68d8ff",
     description:
       metricDescriptions[id] ??
-      "Parcel intelligence metric from the CFS backend API.",
+      "Parcel intelligence metric from the local data service.",
     id,
     label: metricLabels[id] ?? id,
     percentage: id === "total-parcels" ? 100 : percentageOfTotal(value, totalParcels),

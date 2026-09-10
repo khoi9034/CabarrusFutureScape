@@ -1,8 +1,8 @@
 {
   "as_of": "2026-07-10T02:22:53Z",
   "caveats": [
-    "Portfolio Demo uses a cached CFS demo extract.",
-    "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
+    "Portfolio Demo uses a cached Cabarrus Insights demo extract.",
+    "Economics is screening-level context, not a formal appraisal or tax bill.",
     "Opportunity classes are review bands, not approval recommendations."
   ],
   "data_readiness": [

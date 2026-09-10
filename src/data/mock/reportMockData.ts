@@ -76,7 +76,7 @@ export const mockReportPackages: ExecutiveReportPackage[] = [
       },
     ],
     exportMetadata: {
-      author: "CFS Mock Intelligence Desk",
+      author: "Insights Mock Intelligence Desk",
       createdAt: "2026-05-25T08:00:00-04:00",
       department: "County Administration",
       disclaimer: "Mock Phase 1 report package. Not a production record.",
@@ -151,7 +151,7 @@ export const mockReportPackages: ExecutiveReportPackage[] = [
       },
     ],
     exportMetadata: {
-      author: "CFS Mock Infrastructure Desk",
+      author: "Insights Mock Infrastructure Desk",
       createdAt: "2026-05-25T08:05:00-04:00",
       department: "Infrastructure Review",
       disclaimer: "Mock Phase 1 report package. Not a production record.",
@@ -226,7 +226,7 @@ export const mockReportPackages: ExecutiveReportPackage[] = [
       },
     ],
     exportMetadata: {
-      author: "CFS Mock Risk Desk",
+      author: "Insights Mock Risk Desk",
       createdAt: "2026-05-25T08:10:00-04:00",
       department: "Risk Review",
       disclaimer: "Mock Phase 1 report package. Not a production record.",
@@ -301,7 +301,7 @@ export const mockReportPackages: ExecutiveReportPackage[] = [
       },
     ],
     exportMetadata: {
-      author: "CFS Mock Parcel Desk",
+      author: "Insights Mock Parcel Desk",
       createdAt: "2026-05-25T08:15:00-04:00",
       department: "Parcel Intelligence",
       disclaimer: "Mock Phase 1 report package. Not a production record.",
@@ -376,7 +376,7 @@ export const mockReportPackages: ExecutiveReportPackage[] = [
       },
     ],
     exportMetadata: {
-      author: "CFS Mock Scenario Desk",
+      author: "Insights Mock Scenario Desk",
       createdAt: "2026-05-25T08:20:00-04:00",
       department: "Scenario Intelligence",
       disclaimer: "Mock Phase 1 report package. Not a production record.",

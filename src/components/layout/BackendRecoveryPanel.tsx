@@ -18,15 +18,15 @@ export function BackendRecoveryPanel({
   const starting = status === "starting";
   const reconnected = status === "healthy" && Boolean(notice);
   const title = notice ?? (starting
-    ? restarting ? "Restarting CFS service..." : "Checking live data connection..."
+    ? restarting ? "Restarting local data service..." : "Checking live data connection..."
     : "Live data connection unavailable");
   const message = reconnected
     ? "Current intelligence has been refreshed."
     : CFS_RUNTIME_MODE === "enterprise"
       ? "Live data service unavailable. Please try again shortly."
       : starting
-        ? "CFS is checking the local intelligence service."
-        : "CFS Management cannot currently reach the local intelligence service.";
+        ? "The local data service is checking its connection."
+        : "Management cannot currently reach the local data service.";
 
   return (
     <section
@@ -49,7 +49,7 @@ export function BackendRecoveryPanel({
         <div className={cn("mt-4 flex flex-wrap gap-2", !compact && "justify-center")}>
           {canRestart ? (
             <button className="inline-flex items-center gap-2 rounded-lg bg-[#82c9d8] px-3.5 py-2 text-sm font-semibold text-slate-950" onClick={() => void restart()} type="button">
-              <RotateCcw className="h-4 w-4" /> Restart backend
+              <RotateCcw className="h-4 w-4" /> Restart local data service
             </button>
           ) : null}
           <button className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3.5 py-2 text-sm font-semibold text-white" onClick={() => void tryAgain()} type="button">
@@ -57,7 +57,7 @@ export function BackendRecoveryPanel({
           </button>
         </div>
       ) : null}
-      {!notice && status !== "healthy" ? <p className="mt-3 text-xs text-slate-400">Live planning intelligence will return when the CFS service reconnects.</p> : null}
+      {!notice && status !== "healthy" ? <p className="mt-3 text-xs text-slate-400">Live planning intelligence will return when the local data service reconnects.</p> : null}
     </section>
   );
 }

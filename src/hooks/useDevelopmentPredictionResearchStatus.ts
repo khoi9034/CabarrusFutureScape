@@ -107,7 +107,7 @@ export function useDevelopmentPredictionResearchStatus() {
   const [status, setStatus] = useState<DevelopmentPredictionResearchStatus>({
     errorMessage:
       !USE_BACKEND_API && !USE_DEMO_DATA
-        ? "Development prediction research status requires the configured CFS API outside demo mode."
+        ? "Development prediction research status requires the configured local data service outside demo mode."
         : null,
     featuresSummary: null,
     isLoading: USE_BACKEND_API,

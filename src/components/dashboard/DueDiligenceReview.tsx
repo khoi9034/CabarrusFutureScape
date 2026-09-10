@@ -2251,8 +2251,8 @@ function SnapshotOverviewPanel({
           </p>
           <p className="mt-2 max-w-4xl text-xs leading-5 text-slate-500">
             {isIndicatorDashboardSnapshot(planningSnapshot)
-              ? "CFS combines the dashboard capture with monitoring summaries, caveats, and explanation cards so the report has meaning."
-              : "It is not just a screenshot. CFS combines the map image with the Intelligence Brief, active layers, headline indicators, caveats, and explanation cards so the report has meaning."}
+              ? "Cabarrus Insights combines the dashboard capture with monitoring summaries, caveats, and explanation cards so the report has meaning."
+              : "It is not just a screenshot. Cabarrus Insights combines the map image with the Intelligence Brief, active layers, headline indicators, caveats, and explanation cards so the report has meaning."}
           </p>
         </div>
         <StatusBadge label="Saved Context" tone="info" />
@@ -2404,7 +2404,7 @@ function SnapshotVisualPreview({
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-400">
             {captured
-              ? `Map snapshot captured from CFS Overview at ${formatDateTime(
+              ? `Map snapshot captured from Cabarrus Insights Overview at ${formatDateTime(
                   capturedAt,
                 )}.`
               : "Map snapshot unavailable for this saved context."}
@@ -2424,7 +2424,7 @@ function SnapshotVisualPreview({
       <div className="relative mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814]">
         {captured && planningSnapshot.mapScreenshotDataUrl ? (
           <Image
-            alt="Captured CFS map snapshot"
+            alt="Captured Cabarrus Insights map snapshot"
             className="h-auto w-full"
             height={540}
             src={planningSnapshot.mapScreenshotDataUrl}
@@ -2746,7 +2746,7 @@ function SnapshotExecutiveSummary({
       <article className="print-report rounded-lg border border-white/10 bg-white/[0.035] p-5 text-slate-100 print:border-0 print:bg-white print:p-0 print:text-slate-950">
         <header className="border-b border-white/10 pb-4 print:border-slate-300">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff] print:text-slate-600">
-            Cabarrus FutureScape
+            Cabarrus Insights
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-white print:text-slate-950">
             {safeReportTitle}
@@ -2947,7 +2947,7 @@ function ReportIndicatorCenterContextSection({
             Indicator Center Context
           </h3>
           <p className="mt-1 text-sm leading-6 text-slate-300 print:text-slate-700">
-            Monitoring dashboard context from existing CFS signals. Not an
+            Monitoring dashboard context from existing Cabarrus Insights signals. Not an
             official determination.
           </p>
         </div>
@@ -2996,7 +2996,7 @@ function ReportIndicatorCenterContextSection({
         <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
           <ReportFact
             label="How to use"
-            value="Use Indicator Center to choose which existing CFS evidence or missing official datasets need follow-up review."
+            value="Use Indicator Center to choose which existing Cabarrus Insights evidence or missing official datasets need follow-up review."
           />
           <ReportFact
             label="What it is not"
@@ -3253,7 +3253,7 @@ function ReportModelResearchSection({
             />
             <ReportFact
               label="How signal is calculated"
-              value="CFS compares parcel-year context such as zoning, transportation access, and tax/value patterns against historical new construction permit outcomes, then shows relative research bands instead of exact probabilities."
+              value="Cabarrus Insights compares parcel-year context such as zoning, transportation access, and tax/value patterns against historical new construction permit outcomes, then shows relative research bands instead of exact probabilities."
             />
           </div>
           <div className="mt-3 rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
@@ -3516,12 +3516,12 @@ function buildExecutiveKeyStatistics(
         label: "Indicator caveat",
         value:
           selected?.caveat ??
-          "Attention flags and data gaps use existing CFS context only.",
+          "Attention flags and data gaps use existing Cabarrus Insights context only.",
       },
       {
         caveat: "No fake values shown.",
         label: "Data posture",
-        value: "Existing CFS data only",
+        value: "Existing Cabarrus Insights data only",
       },
     ]);
   }
@@ -3774,7 +3774,7 @@ function ReportMapSnapshotSection({
       </h3>
       <p className="mt-1 text-sm leading-6 text-slate-400 print:text-slate-700">
         {captured
-          ? `Map snapshot captured from CFS Overview at ${formatDateTime(
+          ? `Map snapshot captured from Cabarrus Insights Overview at ${formatDateTime(
               capturedAt,
             )}.`
           : "Map snapshot unavailable for this report."}
@@ -3782,7 +3782,7 @@ function ReportMapSnapshotSection({
       <div className="relative mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814] print:border-slate-300 print:bg-white">
         {captured && planningSnapshot.mapScreenshotDataUrl ? (
           <Image
-            alt="Captured CFS map snapshot for executive summary"
+            alt="Captured Cabarrus Insights map snapshot for executive summary"
             className="h-auto w-full"
             height={540}
             src={planningSnapshot.mapScreenshotDataUrl}

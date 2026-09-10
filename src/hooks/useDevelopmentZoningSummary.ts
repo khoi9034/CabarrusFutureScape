@@ -54,7 +54,7 @@ export function useDevelopmentZoningSummary() {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API development zoning summary is unavailable.",
+              : "Live development zoning summary is unavailable.",
           isLoading: false,
           source: "fallback",
         });

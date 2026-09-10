@@ -163,7 +163,7 @@ export function ParcelSearchPanel() {
     });
   const [error, setError] = useState<string | null>(() =>
     !USE_DEMO_DATA && !USE_BACKEND_API
-      ? "Parcel discovery requires the configured CFS API outside demo mode."
+      ? "Parcel discovery requires the configured local data service outside demo mode."
       : null,
   );
   const [filters, setFilters] = useState<ParcelSearchFilters>(
@@ -461,7 +461,7 @@ export function ParcelSearchPanel() {
 
       if (!USE_BACKEND_API) {
         setError(
-          "Parcel detail requires the configured CFS API outside demo mode.",
+          "Parcel detail requires the configured local data service outside demo mode.",
         );
         return;
       }
@@ -624,7 +624,7 @@ export function ParcelSearchPanel() {
         ? "Blank searches use FastAPI filters when available. Queries of three or more characters use FastAPI search."
         : USE_DEMO_DATA
           ? "Search uses cached, sanitized demo parcels."
-          : "Search requires the configured CFS API outside demo mode.";
+          : "Search requires the configured local data service outside demo mode.";
 
   function handleQueryChange(event: ChangeEvent<HTMLInputElement>) {
     setQuery(event.target.value);

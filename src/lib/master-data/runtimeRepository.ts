@@ -29,7 +29,7 @@ type DemoPermitParcelRelationship = {
 };
 
 const parcelFields: MasterDataFieldDefinition[] = [
-  field("official_parcel_id", "CFS Parcel ID", "Stable sanitized CFS parcel identifier.", "text", ["eq", "contains"], "search", true),
+  field("official_parcel_id", "Parcel ID", "Stable sanitized parcel identifier.", "text", ["eq", "contains"], "search", true),
   field("pin14", "PIN14", "Sanitized parcel business identifier.", "text", ["eq", "contains"], "search", true),
   field("subdivision", "Subdivision", "Sanitized subdivision label.", "text", ["eq", "contains"], "search", true),
   field("neighborhood", "Neighborhood", "Sanitized neighborhood label.", "text", ["eq", "contains"], "search"),
@@ -48,7 +48,7 @@ const parcelFields: MasterDataFieldDefinition[] = [
 const permitFields: MasterDataFieldDefinition[] = [
   field("permit_id", "Permit ID", "Stable sanitized permit identifier.", "text", ["eq", "contains"], "search", true),
   field("permit_number", "Permit number", "Sanitized public-facing permit number.", "text", ["eq", "contains"], "search", true),
-  field("official_parcel_id", "CFS Parcel ID", "Governed representative parcel match when available.", "text", ["eq", "contains"], "search", true),
+  field("official_parcel_id", "Parcel ID", "Governed representative parcel match when available.", "text", ["eq", "contains"], "search", true),
   field("parcel_number", "Parcel number", "Sanitized parcel number supplied by the permit sample.", "text", ["eq", "contains"], "search"),
   field("permit_date", "Permit date", "Demonstration permit activity date.", "date", ["eq", "gte", "lte"], "none", true),
   field("permit_type", "Permit type", "Normalized permit type.", "category", ["eq"], "options", true),
@@ -65,7 +65,7 @@ const permitFields: MasterDataFieldDefinition[] = [
 
 const addressFields: MasterDataFieldDefinition[] = [
   field("address_id", "Address record ID", "Stable sanitized address identifier.", "number", ["eq", "gte", "lte"], "none", true),
-  field("official_parcel_id", "CFS Parcel ID", "Governed parcel match when available.", "text", ["eq", "contains"], "search", true),
+  field("official_parcel_id", "Parcel ID", "Governed parcel match when available.", "text", ["eq", "contains"], "search", true),
   field("pin14", "PIN14", "Sanitized parcel business identifier.", "text", ["eq", "contains"], "search"),
   field("site_address", "Site address", "Sanitized demonstration site address.", "text", ["eq", "contains"], "search", true),
   field("review_type", "Review type", "Normalized address review type.", "category", ["eq"], "options", true),
@@ -348,7 +348,7 @@ function demoDataset(
     id,
     last_updated: demoMasterData.generated_at,
     name,
-    owner: "Cabarrus FutureScape Demo",
+    owner: "Cabarrus Insights Demo",
     record_count: demoRows[id].length,
     relationships,
     restricted_field_count: restrictedFieldCount,

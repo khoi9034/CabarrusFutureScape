@@ -2,7 +2,7 @@
   "as_of": "2026-07-31T06:47:19Z",
   "caveats": [
     "Power BI Desktop practice export only; no embedded report or external credential is connected.",
-    "CFS Economics is screening-level context, not a formal appraisal or billing determination.",
+    "Economics is screening-level context, not a formal appraisal or billing determination.",
     "Tables exclude contact fields, credential fields, model internals, and probability-style outputs."
   ],
   "mode": "demo",
@@ -92,7 +92,7 @@
       }
     ],
     "import_steps": [
-      "Beginner path: download the CSV files from CFS Economics -> Power BI & Tools.",
+      "Beginner path: download the CSV files from Economics -> Power BI & Tools.",
       "Open Power BI Desktop and choose Get Data -> Text/CSV for each fact and dimension table.",
       "Import economics_kpi_fact and parcel_economic_signal_fact first for Page 1.",
       "Import scenario_output_fact and scenario_dim for the Scenario Planning Model page.",

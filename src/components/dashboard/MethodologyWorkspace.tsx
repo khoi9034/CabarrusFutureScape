@@ -108,9 +108,9 @@ const explorerSections: {
   helper: string;
 }[] = [
   {
-    helper: "What CFS is and what it is not.",
+    helper: "What Cabarrus Insights is and what it is not.",
     id: "overview",
-    label: "CFS Overview",
+    label: "Insights Overview",
     shortLabel: "Overview",
   },
   {
@@ -162,21 +162,21 @@ const cfsAtAGlanceCards = [
       "Parcel-based planning intelligence prototype.",
       "Supports due diligence, constraints review, and executive reporting.",
     ],
-    title: "What CFS Is",
+    title: "What Cabarrus Insights Is",
   },
   {
     items: [
       "Parcels, zoning/current + historical, permits/new construction.",
       "FEMA flood, schools, transportation, utility proxy, and model governance.",
     ],
-    title: "What CFS Has",
+    title: "What Cabarrus Insights Has",
   },
   {
     items: [
       "Search and select a parcel, save a Planning Snapshot, and generate an Executive Summary.",
       "Inspect methodology, capability status, and aggregate model governance.",
     ],
-    title: "What CFS Can Do Today",
+    title: "What Cabarrus Insights Can Do Today",
   },
   {
     items: [
@@ -227,7 +227,7 @@ const systemFlow = [
 ];
 
 const plainEnglishLogic = [
-  "Parcels are the main unit. CFS organizes evidence around an official parcel id.",
+  "Parcels are the main unit. Cabarrus Insights organizes evidence around an official parcel id.",
   "Permits show what happened historically. They describe past development activity.",
   "Features describe parcel context: zoning, transportation, flood exposure, value, and related evidence.",
   "The model studies patterns for internal research, but it does not publish parcel predictions.",
@@ -589,56 +589,56 @@ const dataNeeds = [
 const dataNeedDetails = [
   {
     dataset: "WSACC true utility capacity / service areas / capacity constraints",
-    format: "REST/GIS/table preferred. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "REST/GIS/table preferred. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Replaces utility proxy wording with verified service-readiness context.",
     pdfLimit: "PDF maps are hard to join reliably to parcels.",
     why: "Utility capacity is one of the biggest readiness questions for development review.",
   },
   {
     dataset: "Official school enrollment and capacity by school",
-    format: "CSV/XLSX/table with school year and school identifiers. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "CSV/XLSX/table with school year and school identifiers. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Enables verified capacity status after QA.",
     pdfLimit: "Presentation maps cannot replace source enrollment/capacity records.",
-    why: "CFS currently shows assignment and presentation-derived utilization only.",
+    why: "Cabarrus Insights currently shows assignment and presentation-derived utilization only.",
   },
   {
     dataset: "Countywide future land use / small-area plan GIS",
-    format: "GIS polygons with plan name, category, adoption/effective date. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "GIS polygons with plan name, category, adoption/effective date. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Adds planning intent context and better model feature governance.",
     pdfLimit: "PDF-only plans are not parcel-joinable without manual digitizing.",
     why: "Future land use helps staff interpret whether parcel context aligns with adopted plans.",
   },
   {
     dataset: "Official rezoning case records",
-    format: "Table/GIS with case id, decision date, status, old zoning, new zoning. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "Table/GIS with case id, decision date, status, old zoning, new zoning. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Distinguishes official rezoning events from map-change detections.",
     pdfLimit: "Case PDFs are useful for review but weak for automated feature engineering.",
     why: "Dated rezoning records are essential for time-safe model features.",
   },
   {
     dataset: "Countywide development pipeline / subdivision approvals",
-    format: "GIS/table with project status, units/sqft, dates, jurisdiction, geometry. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "GIS/table with project status, units/sqft, dates, jurisdiction, geometry. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Adds forward-looking but official development context.",
     pdfLimit: "Narrative-only lists are difficult to validate or spatially join.",
     why: "Pipeline data helps explain near-term pressure beyond permit history.",
   },
   {
     dataset: "Planned local road projects with dates/status",
-    format: "GIS lines/points plus project table. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "GIS lines/points plus project table. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Makes transportation context more time-aware.",
     pdfLimit: "Plan diagrams lack consistent geometry and dates.",
     why: "Access and transportation investment can shape development feasibility.",
   },
   {
     dataset: "Planned utility extensions",
-    format: "GIS lines/polygons plus project table with status, expected year, and service area. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "GIS lines/polygons plus project table with status, expected year, and service area. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Separates existing utility proxy context from documented planned service changes.",
     pdfLimit: "Static maps rarely include enough attribution for parcel-level readiness.",
     why: "Planned service extensions can change near-term development feasibility.",
   },
   {
     dataset: "Parks/greenways/bike-ped plans",
-    format: "GIS lines/polygons plus project table with plan status, project type, and expected timing. PDF-only is useful for reference but weaker for automated CFS integration.",
+    format: "GIS lines/polygons plus project table with plan status, project type, and expected timing. PDF-only is useful for reference but weaker for automated platform integration.",
     improvement: "Adds quality-of-place and access context for parcel and corridor review.",
     pdfLimit: "PDF plan maps are harder to connect to parcels and future update cycles.",
     why: "Public realm and mobility plans help explain planning intent and contextual suitability.",
@@ -679,13 +679,13 @@ const roadmapSteps = [
 ];
 
 const guardrails = [
-  "CFS does not predict exact parcel probability.",
-  "CFS does not make entitlement decisions.",
-  "CFS does not confirm utility capacity.",
-  "CFS does not provide official school capacity scoring yet.",
-  "CFS does not replace FEMA as the authoritative flood source.",
-  "CFS does not replace official rezoning case records.",
-  "CFS does not expose parcel-level model outputs.",
+  "Cabarrus Insights does not predict exact parcel probability.",
+  "Cabarrus Insights does not make entitlement decisions.",
+  "Cabarrus Insights does not confirm utility capacity.",
+  "Cabarrus Insights does not provide official school capacity scoring yet.",
+  "Cabarrus Insights does not replace FEMA as the authoritative flood source.",
+  "Cabarrus Insights does not replace official rezoning case records.",
+  "Cabarrus Insights does not expose parcel-level model outputs.",
 ];
 
 const approvedLanguage = [
@@ -698,8 +698,8 @@ const approvedLanguage = [
 
 const faqItems = [
   {
-    answer: "CFS is a parcel-based planning intelligence prototype that organizes evidence for due diligence, constraints, reporting, and internal model governance.",
-    question: "What is CFS?",
+    answer: "Cabarrus Insights is a parcel-based planning intelligence product that organizes evidence for due diligence, constraints, reporting, and internal model governance.",
+    question: "What is Cabarrus Insights?",
   },
   {
     answer: "No. It is demo-ready as an internal prototype, but it still needs production deployment, security, governance, and support review.",
@@ -754,7 +754,7 @@ function EconomicsMethodologyWorkspace() {
     {
       title: "Value per acre",
       detail:
-        "Assessed value divided by parcel acreage. CFS uses it as a land-efficiency screen, not an appraisal conclusion.",
+        "Assessed value divided by parcel acreage. Cabarrus Insights uses it as a land-efficiency screen, not an appraisal conclusion.",
     },
     {
       title: "Improvement-to-land ratio",
@@ -769,7 +769,7 @@ function EconomicsMethodologyWorkspace() {
     {
       title: "Tax-base opportunity",
       detail:
-        "CFS compares current value context with growth pressure, constraints, and service-burden caveats to identify places worth scenario review.",
+        "Cabarrus Insights compares current value context with growth pressure, constraints, and service-burden caveats to identify places worth scenario review.",
     },
     {
       title: "Constraint-adjusted opportunity",
@@ -831,28 +831,28 @@ function EconomicsMethodologyWorkspace() {
     {
       concept: "Planning Analytics / TM1-style model",
       detail:
-        "CFS mirrors cube/model thinking: dimensions, measures, scenarios, assumptions, writeback-style planning workflow, and variance comparison. It is model-ready, not connected to an external planning system.",
+        "Cabarrus Insights mirrors cube/model thinking: dimensions, measures, scenarios, assumptions, writeback-style planning workflow, and variance comparison. It is model-ready, not connected to an external planning system.",
     },
     {
       concept: "Power BI / Tableau-style analytics",
       detail:
-        "CFS exports facts, dimensions, measures, slicer-ready fields, dashboards, and drillthrough-style evidence for a future semantic model.",
+        "Cabarrus Insights exports facts, dimensions, measures, slicer-ready fields, dashboards, and drillthrough-style evidence for a future semantic model.",
     },
     {
       concept: "GIS / location intelligence",
       detail:
-        "CFS uses spatial layers, parcel selection, overlays, spatial joins, and map-driven decision support to connect economics with place.",
+        "Cabarrus Insights uses spatial layers, parcel selection, overlays, spatial joins, and map-driven decision support to connect economics with place.",
     },
     {
       concept: "Economic deliverable",
       detail:
-        "CFS structures scorecards, evidence packs, executive memo content, recommendation caveats, and next diligence steps.",
+        "Cabarrus Insights structures scorecards, evidence packs, executive memo content, recommendation caveats, and next diligence steps.",
     },
   ];
   const caveats = [
-    "CFS Economics is not a formal appraisal.",
-    "CFS Economics is not an official fiscal impact study.",
-    "CFS Economics is not a project approval recommendation.",
+    "Economics is not a formal appraisal.",
+    "Economics is not an official fiscal impact study.",
+    "Economics is not a project approval recommendation.",
     "Estimated tax context is screening-level and must be verified.",
     "Utility, school, transportation, and scenario assumptions may be incomplete.",
   ];
@@ -862,19 +862,19 @@ function EconomicsMethodologyWorkspace() {
       <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-4">
         <section className="cfs-command-surface rounded-2xl border-[#d8b86a]/20 p-5 md:p-7">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0cd79]">
-            CFS Economics workflow notes
+            Economics workflow notes
           </p>
           <h1 className="mt-2 text-3xl font-semibold text-white">
             Screening-level parcel economic intelligence
           </h1>
           <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-300">
-            CFS Economics connects parcel/tax value, acreage, permit activity,
+            Economics connects parcel/tax value, acreage, permit activity,
             constraints, and service-burden caveats so users can screen where
             economic opportunity may need deeper review. It does not make
             approval decisions or replace official fiscal analysis.
           </p>
           <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-400">
-            Traditional GIS can show where things are. CFS Economics helps
+            Traditional GIS can show where things are. Economics helps
             explain what those places mean economically by connecting growth
             value, infrastructure burden, public cost risk, and investment
             readiness.
@@ -967,7 +967,7 @@ function EconomicsMethodologyWorkspace() {
             Enterprise Workspace Learning Map
           </p>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-400">
-            CFS Economics mirrors common enterprise planning, BI, and
+            Economics mirrors common enterprise planning, BI, and
             location-intelligence workflows. These are export-ready and
             future connector-ready patterns, not live vendor integrations.
           </p>
@@ -1218,10 +1218,10 @@ function ExplorerHero() {
           Methodology
         </p>
         <h2 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-          CFS Capability Explorer
+          Cabarrus Insights Capability Explorer
         </h2>
         <p className="mt-3 text-sm leading-6 text-slate-400">
-          A plain-English in-app guide to what Cabarrus FutureScape includes,
+          A plain-English in-app guide to what Cabarrus Insights includes,
           what it can do today, what remains internal research, and which
           official datasets would make the platform stronger.
         </p>
@@ -1291,11 +1291,11 @@ function OverviewSection() {
     <div className="space-y-4">
       <MethodCard
         icon={Sparkles}
-        kicker="CFS at a glance"
-        title="CFS at a Glance"
+        kicker="Cabarrus Insights at a glance"
+        title="Cabarrus Insights at a Glance"
       >
         <p className="max-w-4xl text-sm leading-6 text-slate-400">
-          CFS is a parcel-centered planning intelligence prototype. It brings
+          Cabarrus Insights is a parcel-centered planning intelligence product. It brings
           together real local data, documented caveats, and aggregate-only model
           governance so staff can explain parcel context without overclaiming.
         </p>
@@ -1325,7 +1325,7 @@ function OverviewSection() {
         <MethodCard
           icon={ShieldCheck}
           kicker="Decision boundary"
-          title="What CFS Is Safe To Claim"
+          title="What Cabarrus Insights Is Safe To Claim"
         >
           <div className="space-y-3">
             <BoundaryRow
@@ -1355,7 +1355,7 @@ function OverviewSection() {
 function SystemSection() {
   return (
     <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-      <MethodCard icon={Workflow} kicker="Process flow" title="How CFS Works">
+      <MethodCard icon={Workflow} kicker="Process flow" title="How Cabarrus Insights Works">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
           {systemFlow.map((step, index) => (
             <div
@@ -1391,7 +1391,7 @@ function SystemSection() {
             Core principle
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            CFS should explain what is known before it suggests what might
+            Cabarrus Insights should explain what is known before it suggests what might
             happen. The current model work stays internal because probabilities
             are not calibrated well enough for public or parcel-level use.
           </p>
@@ -1422,7 +1422,7 @@ function CapabilitiesSection({
     <div className="space-y-4">
       <MethodCard
         icon={Filter}
-        kicker="What CFS can do"
+        kicker="What Cabarrus Insights can do"
         title="Current Capabilities"
       >
         <p className="mb-4 max-w-4xl text-sm leading-6 text-slate-400">
@@ -1594,11 +1594,11 @@ function DataInventorySection({
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
       <MethodCard
         icon={Database}
-        kicker="What CFS has"
+        kicker="What Cabarrus Insights has"
         title="Data Domains Already Included"
       >
         <p className="mb-4 text-sm leading-6 text-slate-400">
-          CFS organizes evidence by domain so a selected parcel can be reviewed
+          Cabarrus Insights organizes evidence by domain so a selected parcel can be reviewed
           consistently across planning, constraints, activity, reporting, and
           model-governance context.
         </p>
@@ -1637,7 +1637,7 @@ function DataInventorySection({
                   label="Available inputs"
                   text={domain.items.join("; ")}
                 />
-                <InfoTile label="How CFS uses it" text={domain.usedFor} />
+                <InfoTile label="How Cabarrus Insights uses it" text={domain.usedFor} />
                 <InfoTile
                   label="Limitation"
                   text={domain.limitation}
@@ -1666,7 +1666,7 @@ function DataInventorySection({
         </div>
         <p className="mt-4 text-sm leading-6 text-slate-400">
           This is not a raw table dump. Each domain explains whether the data is
-          available, how CFS uses it, what limitation should be named during a
+          available, how Cabarrus Insights uses it, what limitation should be named during a
           demo, and what source would make the platform stronger.
         </p>
         <div className="mt-4 space-y-2">
@@ -1791,7 +1791,7 @@ function ModelSection() {
         title="Development Model Lab"
       >
         <p className="mb-4 rounded-lg border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] px-3 py-2 text-sm leading-6 text-slate-300">
-          CFS includes an internal development model research pipeline. It
+          Cabarrus Insights includes an internal development model research pipeline. It
           studies historical new construction permit outcomes against
           parcel-year context, but it does not publish parcel-level prediction
           scores or model probability values.
@@ -1970,7 +1970,7 @@ function DataNeedsSection({
           These are the official datasets that would most improve verified due
           diligence, internal model validation, and future scenario planning.
           REST, GIS, or structured tables are preferred. PDF-only sources are
-          useful for reference but weaker for automated CFS integration.
+            useful for reference but weaker for automated platform integration.
         </p>
       </MethodCard>
       <div className="grid gap-3 lg:grid-cols-2">
@@ -2010,7 +2010,7 @@ function DataNeedsSection({
                       tone="amber"
                     />
                     <InfoTile
-                      label="How it improves CFS"
+                      label="How it improves Cabarrus Insights"
                       text={need.improvement}
                     />
                   </div>
@@ -2096,11 +2096,11 @@ function GuardrailsSection() {
     <div className="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
       <MethodCard
         icon={AlertTriangle}
-        kicker="What CFS does not claim"
+        kicker="What Cabarrus Insights does not claim"
         title="What Not To Claim"
       >
         <p className="mb-3 text-sm font-semibold text-white">
-          What CFS Does Not Claim
+          What Cabarrus Insights Does Not Claim
         </p>
         <MethodList items={guardrails} />
       </MethodCard>
@@ -2115,7 +2115,7 @@ function GuardrailsSection() {
           ))}
         </div>
         <p className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3 text-sm leading-6 text-slate-400">
-          Use: CFS is a demo-ready internal planning intelligence prototype with
+          Use: Cabarrus Insights is a demo-ready planning intelligence product with
           parcel-based due diligence, constraint review, executive reporting,
           and aggregate-only model governance.
         </p>
@@ -2191,7 +2191,7 @@ function PlatformDiagnosticsCard() {
         ))}
       </div>
       <p className="mt-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-slate-400">
-        Prediction guardrail: CFS exposes aggregate model research status only.
+        Prediction guardrail: Cabarrus Insights exposes aggregate model research status only.
         Parcel-level probabilities and ranking classes remain unavailable in the
         frontend and public API.
       </p>

@@ -68,7 +68,7 @@ export function useTemporalQuery(filters: DevelopmentTemporalFilters) {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API temporal query is unavailable.",
+              : "Temporal query is unavailable while live data is offline.",
           requestKey,
           view: null,
         });
@@ -83,7 +83,7 @@ export function useTemporalQuery(filters: DevelopmentTemporalFilters) {
       : {
           ...getUnavailableTemporalQueryView(filters),
           errorMessage:
-            "Temporal analysis requires the configured CFS API outside demo mode.",
+            "Temporal analysis requires the configured live data service outside demo mode.",
         };
   }
 

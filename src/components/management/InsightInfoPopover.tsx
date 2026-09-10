@@ -6,8 +6,11 @@ import { useEffect, useId, useRef, useState } from "react";
 export type InsightInfo = {
   coverage?: string;
   currentThrough?: string;
+  howBuilt?: string;
   limitations?: string;
   meaning?: string;
+  whyMatters?: string;
+  statusMeaning?: string;
   methodologyLink?: { href: string; label?: string };
   sources?: string | string[];
   status?: "Current" | "Limited" | "Stale" | "Unavailable" | "Decision Support";
@@ -72,10 +75,12 @@ export function InsightInfoPopover({ info }: { info: InsightInfo }) {
   const sources = (Array.isArray(info.sources) ? info.sources : [info.sources]).filter(Boolean) as string[];
   const rows = [
     ["What this means", info.meaning],
+    ["How it is built", info.howBuilt],
+    ["Why it matters", info.whyMatters],
     [sources.length > 1 ? "Data sources" : "Data source", sources.length === 1 ? sources[0] : sources],
     ["Current through", info.currentThrough],
     ["Coverage", info.coverage],
-    ["Status", info.status],
+    ["Status", info.status ? `${info.status}${info.statusMeaning ? ` — ${info.statusMeaning}` : ""}` : undefined],
     ["Important note", info.limitations],
   ].filter(([, value]) => Array.isArray(value) ? value.length : Boolean(value));
 

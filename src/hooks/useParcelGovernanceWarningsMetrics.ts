@@ -54,7 +54,7 @@ export function useParcelGovernanceWarningsMetrics() {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API governance warnings are unavailable.",
+              : "Governance warnings are unavailable while live data is offline.",
           isLoading: false,
           source: "fallback",
         });

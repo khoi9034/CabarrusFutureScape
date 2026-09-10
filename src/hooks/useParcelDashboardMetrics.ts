@@ -52,7 +52,7 @@ export function useParcelDashboardMetrics() {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API metrics are unavailable.",
+              : "Live parcel metrics are unavailable.",
           isLoading: false,
           source: "fallback",
         });

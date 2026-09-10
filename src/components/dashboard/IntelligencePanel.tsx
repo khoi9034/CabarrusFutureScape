@@ -185,7 +185,7 @@ const modeMetadata: Record<
     label: "Methodology",
   },
   overview: {
-    description: "Cabarrus FutureScape introduction and safe-use overview.",
+    description: "Cabarrus Insights introduction and safe-use overview.",
     icon: BrainCircuit,
     label: "Overview",
   },
@@ -1085,7 +1085,7 @@ function IntelligenceBriefPanel({
             {activeLayerLabels.length ? activeLayerLabels.join(", ") : "none"}.
           </p>
           <p>
-            Internal model research is aggregate governance only. CFS does not
+            Internal model research is aggregate governance only. Cabarrus Insights does not
             show parcel probabilities, ranking classes, or public prediction
             scores.
           </p>
@@ -1107,7 +1107,7 @@ function ParcelSearchBrief() {
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-500">
               Search parcel ID, PIN, owner, address, or subdivision. Once a
-              parcel is selected, CFS will focus the map and show parcel facts,
+              parcel is selected, Cabarrus Insights will focus the map and show parcel facts,
               zoning, flood, school, development, transportation, utility proxy,
               and model-governance caveats.
             </p>
@@ -1116,7 +1116,7 @@ function ParcelSearchBrief() {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <BriefStat
-          caveat="Use the global search bar at the top of CFS."
+          caveat="Use the global search bar at the top of Cabarrus Insights."
           label="Step 1"
           value="Search"
         />
@@ -1190,7 +1190,7 @@ function SnapshotCapturePanel({
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Click Save Snapshot to capture the current map and intelligence
             context. A Planning Snapshot combines the map image with selected
-            CFS intelligence so the executive summary can explain what the
+            Cabarrus Insights intelligence so the executive summary can explain what the
             viewer is seeing.
           </p>
         </div>
@@ -1832,7 +1832,7 @@ function ModelLabPanel({
             {selectedIsCluster ? (
               <>
                 <BriefStat
-                  caveat="Label uses safe CFS context only; no area names are invented."
+                  caveat="Label uses safe Cabarrus Insights context only; no area names are invented."
                   label="Area label"
                   value={getSelectedModelResearchContextHeading(
                     selectedModelResearchContext,
@@ -2258,11 +2258,11 @@ function ModelLabExplainNumbersPanel() {
       />
       <MetricExplanation
         label="Clusters"
-        value="When the map is zoomed out, CFS fuses nearby preview records into clusters. Cluster size represents how many parcels or features are included, and cluster color represents the dominant relative research band."
+          value="When the map is zoomed out, Cabarrus Insights fuses nearby preview records into clusters. Cluster size represents how many parcels or features are included, and cluster color represents the dominant relative research band."
       />
       <MetricExplanation
         label="Why exact probabilities are hidden"
-        value="The model is not calibrated enough for official parcel probabilities. CFS shows relative research signal only."
+          value="The model is not calibrated enough for official parcel probabilities. Cabarrus Insights shows relative research signal only."
       />
       <MetricExplanation
         label="What the model uses"
@@ -2274,11 +2274,11 @@ function ModelLabExplainNumbersPanel() {
         </p>
         <ol className="mt-2 list-decimal space-y-1 pl-4 text-[11px] leading-5 text-slate-300">
           <li>
-            CFS uses historical new construction permits to identify where
+            Cabarrus Insights uses historical new construction permits to identify where
             development happened.
           </li>
           <li>
-            CFS builds parcel-year records showing parcel conditions before
+            Cabarrus Insights builds parcel-year records showing parcel conditions before
             future development.
           </li>
           <li>
@@ -2371,7 +2371,7 @@ async function loadWsaccExploreData(): Promise<WsaccExploreData> {
 
   if (!USE_DEMO_DATA) {
     throw new Error(
-      "WSACC intelligence requires the configured CFS API outside demo mode.",
+      "WSACC intelligence requires the configured local data service outside demo mode.",
     );
   }
 
@@ -3292,7 +3292,7 @@ function MethodologyModeContent() {
               Parcel-based planning intelligence
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-400">
-              CFS treats each parcel as the common planning unit. Zoning,
+              Cabarrus Insights treats each parcel as the common planning unit. Zoning,
               permits, FEMA constraints, and attendance-zone assignments are
               joined or overlaid to the parcel so planners can compare growth
               activity and constraint exposure without jumping across separate
@@ -4021,10 +4021,10 @@ function buildPlanningSnapshot({
         meaning:
           "Shows whether the snapshot was saved from a selected parcel or the broader map context.",
         method:
-          "CFS records the active Workspace context with the saved report evidence.",
+          "Cabarrus Insights records the active Workspace context with the saved report evidence.",
         recommendedAction:
           "Use this label to frame the executive summary and staff follow-up discussion.",
-        source: "CFS Workspace mode state",
+        source: "Workspace mode state",
         value: focusModeLabel,
       },
       {
@@ -4034,10 +4034,10 @@ function buildPlanningSnapshot({
         meaning:
           "Shows whether the snapshot came from parcel search, countywide intelligence, Model Lab, or snapshot workflow context.",
         method:
-          "CFS stores the active Workspace mode alongside map and intelligence context.",
+          "Cabarrus Insights stores the active Workspace mode alongside map and intelligence context.",
         recommendedAction:
           "Use the mode label to explain why the report emphasizes parcel facts, countywide indicators, or model governance.",
-        source: "CFS Workspace mode state",
+        source: "Workspace mode state",
         value: overviewModeLabel,
       },
       ...(indicatorCenterContext
@@ -4050,9 +4050,9 @@ function buildPlanningSnapshot({
             : "The snapshot was saved without a map image because capture was unavailable.",
         label: "Map Snapshot",
         meaning:
-          "Shows whether the report includes a captured image of the current CFS map view.",
+          "Shows whether the report includes a captured image of the current map view.",
         method:
-            "CFS saves the current map view, selected parcel if available, active layers, and Intelligence Brief into a report-ready Planning Snapshot.",
+            "Cabarrus Insights saves the current map view, selected parcel if available, active layers, and Intelligence Brief into a report-ready Planning Snapshot.",
         recommendedAction:
           mapSnapshot.status === "captured"
             ? "Use the image as visual context, not as an official GIS export."
@@ -4099,7 +4099,7 @@ function buildPlanningSnapshot({
         meaning:
           "Summarizes historical permit activity associated with the selected parcel.",
         method:
-          "CFS matches permit activity records to the selected parcel and summarizes counts and latest status.",
+          "Cabarrus Insights matches permit activity records to the selected parcel and summarizes counts and latest status.",
         recommendedAction:
           "Review source permit records when recent or high-value activity appears.",
         source: "Permit and development activity tables",
@@ -4123,7 +4123,7 @@ function buildPlanningSnapshot({
         meaning:
           "Shows proximity/service context only; it is not a capacity confirmation.",
         method:
-          "CFS displays available utility proxy context and names provider verification as the next step.",
+          "Cabarrus Insights displays available utility proxy context and names provider verification as the next step.",
         recommendedAction:
           "Confirm service readiness and capacity with WSACC or the relevant utility provider.",
         source: "Utility proxy and planning context layers",
@@ -4136,7 +4136,7 @@ function buildPlanningSnapshot({
         meaning:
           "Shows road, rail, STIP, and traffic context as planning evidence, not as a parcel decision score.",
         method:
-          "CFS summarizes transportation accessibility and project/traffic context from prepared transportation feature tables.",
+          "Cabarrus Insights summarizes transportation accessibility and project/traffic context from prepared transportation feature tables.",
         recommendedAction:
           "Confirm dated local transportation projects and access constraints for formal review.",
         source: "Transportation accessibility, STIP, and AADT context",
@@ -4149,10 +4149,10 @@ function buildPlanningSnapshot({
         meaning:
           "Shows aggregate model governance only so staff understand model readiness boundaries.",
         method:
-          "CFS compares internal feature groups against historical new construction outcomes for research QA.",
+          "Cabarrus Insights compares internal feature groups against historical new construction outcomes for research QA.",
         recommendedAction:
           "Use model notes as governance context only; do not use as parcel-level decision output.",
-        source: "CFS internal model QA outputs",
+        source: "Internal model QA outputs",
         value: developmentModelLabSummary.currentBestInternalVariant,
       },
       ...(overviewCommandMode === "modelLab"
@@ -4166,10 +4166,10 @@ function buildPlanningSnapshot({
               meaning:
                 "Shows that the snapshot was captured from internal development model research mode.",
               method:
-                "CFS records the relative research signal band, selected safe context if available, and safety status without storing hidden model scores.",
+                "Cabarrus Insights records the relative research signal band, selected safe context if available, and safety status without storing hidden model scores.",
               recommendedAction:
                 "Use as internal research context to guide questions; do not treat it as an official parcel output.",
-              source: "CFS internal model QA outputs",
+              source: "Internal model QA outputs",
               value: modelLabContext?.selectedResearchContext
                 ? formatRelativeDevelopmentSignalBand({
                     rankBand:
@@ -4190,10 +4190,10 @@ function buildPlanningSnapshot({
                     meaning:
                       "Explains why the selected marker was highlighted in the research overlay.",
                     method:
-                      "CFS summarizes top contextual drivers from the safe research-preview record.",
+                      "Cabarrus Insights summarizes top contextual drivers from the safe research-preview record.",
                     recommendedAction:
                       "Review zoning, transportation access, valuation context, and historical new construction patterns before using this as staff discussion context.",
-                    source: "CFS internal model QA outputs",
+                    source: "Internal model QA outputs",
                     value: getModelResearchHighlightExplanation({
                       caveat: modelLabContext.selectedResearchContext.caveat,
                       centroid: {
@@ -4560,7 +4560,7 @@ function serializeIndicatorCenterSnapshotContext(
       (indicator) => indicator.name,
     ),
     caveat:
-      "Indicator Center summarizes existing CFS attention flags, observed activity, data gaps, and review indicators. These are monitoring indicators, not official determinations.",
+      "Indicator Center summarizes existing Cabarrus Insights attention flags, observed activity, data gaps, and review indicators. These are monitoring indicators, not official determinations.",
     displayMode,
     indicatorSummaries,
     recommendedFollowUp:
@@ -4583,9 +4583,9 @@ function createIndicatorCenterSnapshotMetric(
       selected?.whatItMeans ??
       "Shows that the snapshot was saved from Indicator Center attention flags and data gaps.",
     method:
-      "CFS records the active Indicator Center display filter, enabled review groups, card summaries, selected indicator, and follow-up caveats using existing CFS data only.",
+      "Cabarrus Insights records the active Indicator Center display filter, enabled review groups, card summaries, selected indicator, and follow-up caveats using available County data only.",
     recommendedAction: context.recommendedFollowUp,
-    source: selected?.source ?? "CFS Indicator Center definitions",
+    source: selected?.source ?? "Indicator Center definitions",
     value: selected
       ? `${selected.name} / ${selected.status}`
       : `${context.selectedGroupIds.length} review groups enabled`,
@@ -4601,7 +4601,7 @@ function createDevelopmentActivitySnapshotMetric(
     meaning:
       "Summarizes the selected Development Hotspots cluster or feature from the countywide map layer.",
     method:
-      "CFS groups observed permit/development activity by map scale and records the selected safe cluster or marker context.",
+      "Cabarrus Insights groups observed permit/development activity by map scale and records the selected safe cluster or marker context.",
     recommendedAction:
       "Review underlying permit records before formal planning decisions.",
     source: "Permit and development activity tables",
@@ -4678,7 +4678,7 @@ function buildContextOnlyPlanningSnapshot({
           ]),
       ...(indicatorCenterContext
         ? [
-            "Indicator Center snapshots summarize existing CFS attention flags and data gaps. These are monitoring indicators, not official determinations.",
+            "Indicator Center snapshots summarize existing Cabarrus Insights attention flags and data gaps. These are monitoring indicators, not official determinations.",
           ]
         : []),
     ],
@@ -4691,10 +4691,10 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "Shows whether the snapshot was saved from a selected parcel or broader map context.",
         method:
-          "CFS records the active Workspace context with the saved report evidence.",
+          "Cabarrus Insights records the active Workspace context with the saved report evidence.",
         recommendedAction:
           "Use this label to frame the executive summary and staff follow-up discussion.",
-        source: "CFS Workspace mode state",
+        source: "Workspace mode state",
         value: focusModeLabel,
       },
       {
@@ -4704,10 +4704,10 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "Shows whether the snapshot came from parcel search, countywide intelligence, Model Lab, or snapshot workflow context.",
         method:
-          "CFS stores the active Workspace mode alongside map and intelligence context.",
+          "Cabarrus Insights stores the active Workspace mode alongside map and intelligence context.",
         recommendedAction:
           "Use the mode label to explain why the report emphasizes parcel facts, countywide indicators, or model governance.",
-        source: "CFS Workspace mode state",
+        source: "Workspace mode state",
         value: overviewModeLabel,
       },
       {
@@ -4717,9 +4717,9 @@ function buildContextOnlyPlanningSnapshot({
             : "The snapshot was saved without a map image because capture was unavailable.",
         label: "Map Snapshot",
         meaning:
-          "Shows whether the report includes a captured image of the current CFS map view.",
+          "Shows whether the report includes a captured image of the current map view.",
         method:
-            "CFS saves the current map view, active layers, and Intelligence Brief into a report-ready Planning Snapshot.",
+            "Cabarrus Insights saves the current map view, active layers, and Intelligence Brief into a report-ready Planning Snapshot.",
         recommendedAction:
           mapSnapshot.status === "captured"
             ? "Use the image as visual context, not as an official GIS export."
@@ -4734,7 +4734,7 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "Captures development activity as map/layer context because no parcel was selected.",
         method:
-          "CFS records active development layers without creating a parcel-level permit summary.",
+          "Cabarrus Insights records active development layers without creating a parcel-level permit summary.",
         recommendedAction:
           "Select a parcel before using permit records in formal parcel review.",
         source: "Permit and development activity tables",
@@ -4770,7 +4770,7 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "School context remains layer/scope context until a parcel is selected.",
         method:
-          "CFS records active school context and caveats without assigning schools to a map-only snapshot.",
+          "Cabarrus Insights records active school context and caveats without assigning schools to a map-only snapshot.",
         recommendedAction:
           "Select a parcel and verify capacity/enrollment when official school data is received.",
         source: "School attendance zone GIS layers",
@@ -4786,7 +4786,7 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "Shows proximity/service context only; it is not a capacity confirmation.",
         method:
-          "CFS displays available utility proxy context and names provider verification as the next step.",
+          "Cabarrus Insights displays available utility proxy context and names provider verification as the next step.",
         recommendedAction:
           "Confirm service readiness and capacity with WSACC or the relevant utility provider.",
         source: "Utility proxy and planning context layers",
@@ -4799,7 +4799,7 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "Shows road, rail, STIP, and traffic context as planning evidence, not as a parcel decision score.",
         method:
-          "CFS summarizes transportation accessibility and project/traffic context from prepared transportation feature tables.",
+          "Cabarrus Insights summarizes transportation accessibility and project/traffic context from prepared transportation feature tables.",
         recommendedAction:
           "Confirm dated local transportation projects and access constraints for formal review.",
         source: "Transportation accessibility, STIP, and AADT context",
@@ -4812,10 +4812,10 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "Shows aggregate model governance only so staff understand model readiness boundaries.",
         method:
-          "CFS compares internal feature groups against historical new construction outcomes for research QA.",
+          "Cabarrus Insights compares internal feature groups against historical new construction outcomes for research QA.",
         recommendedAction:
           "Use model notes as governance context only; do not use as parcel-level decision output.",
-        source: "CFS internal model QA outputs",
+        source: "Internal model QA outputs",
         value: developmentModelLabSummary.currentBestInternalVariant,
       },
       ...(overviewCommandMode === "modelLab"
@@ -4827,10 +4827,10 @@ function buildContextOnlyPlanningSnapshot({
               meaning:
                 "Shows whether the snapshot captured a countywide surface, clusters, or parcel-scale research markers.",
               method:
-                "CFS switches the Development Research Signal display by map scale to avoid clutter and improve performance.",
+                "Cabarrus Insights switches the Development Research Signal display by map scale to avoid clutter and improve performance.",
               recommendedAction:
                 "Use the display label to explain whether the report is strategic countywide context or parcel-scale research context.",
-              source: "CFS Model Lab map display state",
+              source: "Model Lab map display state",
               value: modelResearchMapSummary.overlayEnabled
                 ? modelResearchMapSummary.displayModeLabel
                 : "Development Research Signal off",
@@ -4848,10 +4848,10 @@ function buildContextOnlyPlanningSnapshot({
               meaning:
                 "Shows that the snapshot was captured from internal development model research mode.",
               method:
-                "CFS records the relative research signal band, selected safe context if available, and safety status without storing hidden model scores.",
+                "Cabarrus Insights records the relative research signal band, selected safe context if available, and safety status without storing hidden model scores.",
               recommendedAction:
                 "Use as internal research context to guide questions; do not treat it as an official parcel output.",
-              source: "CFS internal model QA outputs",
+              source: "Internal model QA outputs",
               value: modelLabContext?.selectedResearchContext
                 ? formatRelativeDevelopmentSignalBand({
                     rankBand:
@@ -4872,10 +4872,10 @@ function buildContextOnlyPlanningSnapshot({
                     meaning:
                       "Explains why the selected marker was highlighted in the research overlay.",
                     method:
-                      "CFS summarizes top contextual drivers from the safe research-preview record.",
+                      "Cabarrus Insights summarizes top contextual drivers from the safe research-preview record.",
                     recommendedAction:
                       "Review zoning, transportation access, valuation context, and historical new construction patterns before using this as staff discussion context.",
-                    source: "CFS internal model QA outputs",
+                    source: "Internal model QA outputs",
                     value: getModelResearchHighlightExplanation({
                       caveat: modelLabContext.selectedResearchContext.caveat,
                       centroid: {
@@ -5319,7 +5319,7 @@ function SystemStatusCard() {
           ? "The public portfolio demo uses sanitized static business fixtures."
           : USE_BACKEND_API
             ? "Parcel, development, flood, and temporal panels call the configured FastAPI backend and show unavailable states on failure."
-            : "Live business domains require the configured CFS API; demonstration metrics are not substituted."}
+            : "Live business domains require the configured local data service; demonstration metrics are not substituted."}
       </p>
     </section>
   );

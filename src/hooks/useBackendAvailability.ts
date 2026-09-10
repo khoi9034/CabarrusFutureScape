@@ -92,9 +92,9 @@ export function useBackendAvailability(): BackendAvailabilityController {
       }
       throw new Error("Local recovery timed out.");
     } catch (error) {
-      console.warn("CFS local backend recovery failed.", error);
+      console.warn("Local backend recovery failed.", error);
       updateStatus("unavailable");
-      setNotice("Unable to restart the CFS service.");
+      setNotice("Unable to restart the local data service.");
     } finally {
       recoveryInProgress.current = false;
       setRestarting(false);

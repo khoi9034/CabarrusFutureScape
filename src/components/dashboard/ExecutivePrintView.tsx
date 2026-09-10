@@ -144,7 +144,7 @@ export function ExecutivePrintView() {
       <header className="print-section flex flex-col gap-5 border-b border-white/10 pb-5 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#d8b86a]">
-            Cabarrus FutureScape
+            Cabarrus Insights
           </p>
           <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
             Planning Snapshot Executive Summary

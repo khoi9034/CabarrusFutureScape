@@ -89,8 +89,8 @@ const DEFAULT_BACKEND_BASE_URL =
 const DEFAULT_TIMEOUT_MS = 20000;
 const API_TIMEOUT_DISPLAY_MESSAGE =
   process.env.NODE_ENV === "production"
-    ? "CFS API request timed out. Confirm the deployed API base URL and backend health."
-    : "CFS API request timed out. Check that FastAPI is running on 127.0.0.1:8000.";
+    ? "Live data service request timed out. Confirm service health."
+    : "Live data service request timed out. Check that the local service is running.";
 
 const configuredApiBaseUrl = process.env.NEXT_PUBLIC_CFS_API_BASE_URL?.trim();
 if (CFS_RUNTIME_CONFIG.runtimeMode === "enterprise" && !configuredApiBaseUrl) {
@@ -299,7 +299,7 @@ export async function apiRequest<TResponse>(
       throw new ApiClientError({
         displayMessage: timedOut
           ? API_TIMEOUT_DISPLAY_MESSAGE
-          : "CFS API request was cancelled.",
+          : "Live data service request was cancelled.",
         kind,
         message: timedOut
           ? `CFS API request timed out for ${url}`
@@ -318,8 +318,8 @@ export async function apiRequest<TResponse>(
     throw new ApiClientError({
       displayMessage:
         kind === "network"
-          ? "CFS API is unreachable. Confirm the backend is running and the API base URL is correct."
-          : "CFS API request failed unexpectedly.",
+          ? "Live data service is unreachable. Check the service connection."
+          : "Live data service request failed unexpectedly.",
       kind,
       message: `CFS API request failed for ${url}`,
       payload: error,
@@ -335,7 +335,7 @@ export async function apiRequest<TResponse>(
 
 export function getApiErrorDisplayMessage(
   error: unknown,
-  fallback = "CFS API data is unavailable.",
+  fallback = "Live data is unavailable.",
 ) {
   if (error instanceof ApiClientError) {
     return error.displayMessage;
@@ -405,26 +405,26 @@ function getHttpDisplayMessage(status: number, url: string) {
   const path = getPathForDisplay(url);
 
   if (status === 404) {
-    return `No CFS API record was found for ${path}.`;
+    return `No live data record was found for ${path}.`;
   }
 
   if (status === 408 || status === 504) {
-    return `CFS API timed out while loading ${path}.`;
+    return `Live data service timed out while loading ${path}.`;
   }
 
   if (status === 429) {
-    return `CFS API is rate limiting requests for ${path}.`;
+    return `Live data service is rate limiting requests for ${path}.`;
   }
 
   if (status >= 500) {
-    return `CFS API service error while loading ${path}.`;
+    return `Live data service error while loading ${path}.`;
   }
 
   if (status === 401 || status === 403) {
-    return `CFS API rejected access to ${path}.`;
+    return `Live data service rejected access to ${path}.`;
   }
 
-  return `CFS API request failed with status ${status} for ${path}.`;
+  return `Live data service request failed with status ${status} for ${path}.`;
 }
 
 async function parseApiPayload(response: Response, url: string) {
@@ -439,7 +439,7 @@ async function parseApiPayload(response: Response, url: string) {
 
     if (response.ok) {
       throw new ApiClientError({
-        displayMessage: `CFS API returned a non-JSON response for ${getPathForDisplay(url)}.`,
+        displayMessage: `Live data service returned an unexpected response for ${getPathForDisplay(url)}.`,
         kind: "malformed",
         message: `CFS API returned non-JSON response for ${url}`,
         payload: text,
@@ -458,7 +458,7 @@ async function parseApiPayload(response: Response, url: string) {
       throw error;
     }
     throw new ApiClientError({
-      displayMessage: `CFS API returned malformed JSON for ${getPathForDisplay(url)}.`,
+      displayMessage: `Live data service returned malformed data for ${getPathForDisplay(url)}.`,
       kind: "malformed",
       message: `CFS API returned malformed JSON for ${url}`,
       payload: error,

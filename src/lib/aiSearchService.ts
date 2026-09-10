@@ -70,7 +70,7 @@ export const askCfsEconomicsSuggestedPrompts = [
   "What caveats should I include?",
   "What next diligence should I list?",
   "How should I present selected rows?",
-  "How should I walk through CFS Economics?",
+  "How should I walk through Economics?",
   "Where did Workspace go?",
   "What is Power BI & Tools?",
   "How do I use selected rows in Power BI?",
@@ -161,7 +161,7 @@ export async function searchCfsAi(
   }
 
   if (!USE_BACKEND_API) {
-    throw new Error("CFS AI Search requires the local FastAPI backend in live mode.");
+    throw new Error("Ask Insights requires the local data service in live mode.");
   }
 
   const response = await apiPost<CfsAiSearchResponse>(
@@ -250,7 +250,7 @@ async function searchDemoCfsAi(
                     : primaryDomain === "methodology"
                       ? demoSimpleAnswer(
                           "Methodology",
-                          "CFS answers from cached demo summaries and safe methodology caveats. Missing data is shown as unavailable instead of inferred.",
+                          "Ask Insights answers from cached demo summaries and safe methodology caveats. Missing data is shown as unavailable instead of inferred.",
                           "Open Methodology for source notes and limitations.",
                           context,
                           domains,
@@ -441,7 +441,7 @@ async function demoEconomicsAnswer(
     answer: briefing(
       [
         "Executive summary",
-        `Based on the cached demo extract, CFS Economics reviewed ${format(summary.total_parcels_analyzed)} parcels as a parcel-based economic intelligence system. It connects value, acreage, growth pressure, infrastructure burden, and constraint context so counties can screen where growth creates value, where it creates public cost risk, and where deeper review is needed. The extract shows ${format(summary.underbuilt_candidate_count)} underbuilt watch candidates and ${format(summary.high_opportunity_count)} tax-base opportunity signals.`,
+        `Based on the cached demo extract, Economics reviewed ${format(summary.total_parcels_analyzed)} parcels as a parcel-based economic intelligence system. It connects value, acreage, growth pressure, infrastructure burden, and constraint context so counties can screen where growth creates value, where it creates public cost risk, and where deeper review is needed. The extract shows ${format(summary.underbuilt_candidate_count)} underbuilt watch candidates and ${format(summary.high_opportunity_count)} tax-base opportunity signals.`,
       ],
       [
         "Economic signal",
@@ -492,7 +492,7 @@ async function demoEconomicsAnswer(
       ],
       [
       "Decision takeaway",
-        "Traditional GIS can show where things are. CFS Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
+        "Traditional GIS can show where things are. Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
       ],
       [
         "Enterprise tool alignment",
@@ -508,7 +508,7 @@ async function demoEconomicsAnswer(
     as_of: economics.as_of,
     caveats: [
       "Portfolio Demo uses a cached demo extract.",
-      "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
+      "Economics is screening-level context, not a formal appraisal or tax bill.",
       "Opportunity classes are review bands, not approval recommendations.",
     ],
     dashboard_actions: {
@@ -592,7 +592,7 @@ function demoEconomicsModelEvaluationAnswer(asOf: string | null): CfsAiSearchRes
       ],
       [
         "Safe use",
-        "Use CFS Economics for screening-level review, Power BI context, and report evidence; not buy/sell guidance or production-ready prediction.",
+        "Use Economics for screening-level review, Power BI context, and report evidence; not buy/sell guidance or production-ready prediction.",
       ],
     ),
     ["economics", "model_lab"],
@@ -650,7 +650,7 @@ function demoEconomicsSegmentAnswer(economics: EconomicsIntelligenceResponse): C
     answer: briefing(
       [
         "Executive takeaway",
-        "Value per acre is useful only when comparable parcels are grouped first. CFS Economics uses economic segments so residential, commercial, industrial/employment, civic, infrastructure, corridor, rural, and underbuilt rows are not treated as one peer set.",
+        "Value per acre is useful only when comparable parcels are grouped first. Economics uses economic segments so residential, commercial, industrial/employment, civic, infrastructure, corridor, rural, and underbuilt rows are not treated as one peer set.",
       ],
       [
         "Segment interpretation",
@@ -674,7 +674,7 @@ function demoEconomicsSegmentAnswer(economics: EconomicsIntelligenceResponse): C
         "Caveats",
         bullets([
           "Portfolio Demo uses a cached demo extract.",
-          "CFS Economics provides screening-level bands, not official appraisal conclusions.",
+          "Economics provides screening-level bands, not official appraisal conclusions.",
         ]),
       ],
     ),
@@ -742,7 +742,7 @@ function demoEconomicsDashboardAnswer(economics: EconomicsIntelligenceResponse):
         "Caveats",
         bullets([
           "Portfolio Demo uses a cached demo extract.",
-          "CFS Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+          "Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
         ]),
       ],
     ),
@@ -781,14 +781,14 @@ function demoEconomicsWalkthroughAnswer(asOf: string | null): CfsAiSearchRespons
     answer: briefing(
       [
         "Executive takeaway",
-        "Walk through CFS Economics in three screens: Power BI & Tools, Economic Dashboard, then Print. The portfolio demo uses a sanitized cached demo extract; local live mode uses the FastAPI backend and local PostGIS economics data.",
+        "Walk through Economics in three screens: Power BI & Tools, Economic Dashboard, then Print. The portfolio demo uses a sanitized cached demo extract; local live mode uses the FastAPI backend and local PostGIS economics data.",
       ],
       [
         "Recommended sequence",
         bullets([
-          "1. Overview - explain what CFS Economics is and how local live data differs from the portfolio demo cached demo extract.",
+          "1. Overview - explain what Economics is and how local live data differs from the portfolio demo cached demo extract.",
           "2. Power BI & Tools - review economic tables, select useful rows, download CSV/JSON exports, and open scenario, planning-model, or decision-pack workflows.",
-          "3. Economic Dashboard - monitor KPIs, watchlists, charts, data confidence, and Ask CFS Economics.",
+          "3. Economic Dashboard - monitor KPIs, watchlists, charts, data confidence, and Ask Insights Economics.",
           "4. Print - create a simple economic snapshot for presentation or review.",
         ]),
       ],
@@ -800,7 +800,7 @@ function demoEconomicsWalkthroughAnswer(asOf: string | null): CfsAiSearchRespons
         "Caveats",
         bullets([
           "Portfolio Demo uses a cached demo extract.",
-          "CFS Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+          "Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
         ]),
       ],
     ),
@@ -817,7 +817,7 @@ function demoEconomicsWalkthroughAnswer(asOf: string | null): CfsAiSearchRespons
     domains: ["economics"],
     evidence: [
       evidence(
-        "CFS Economics workflow",
+        "Economics workflow",
         "Power BI & Tools -> Economic Dashboard -> Print.",
         "public/demo-data/economics_intelligence.json",
         "available",
@@ -1112,7 +1112,7 @@ function demoEconomicsDueDiligencePacketAnswer(
         "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. Generate a due diligence packet when you want a saved summary.",
       ],
       [
-        "What CFS will include",
+        "What Ask Insights will include",
         bullets([
           "Ranked watchlist bands with plain-language reasons and caution flags.",
           "Why the row surfaced: readiness band, sewer-proximity proxy, growth pressure, economics, constraints, and flags.",
@@ -1135,7 +1135,7 @@ function demoEconomicsDueDiligencePacketAnswer(
         bullets([
           "Compare value per acre within similar segment, acreage, geography, and constraint context.",
           "Review special assets separately.",
-          "CFS is not an appraisal; verify comparable sales, deed history, public records, and broker/appraiser context.",
+          "Ask Insights is not an appraisal; verify comparable sales, deed history, public records, and broker/appraiser context.",
         ]),
       ],
       [
@@ -1146,7 +1146,7 @@ function demoEconomicsDueDiligencePacketAnswer(
     as_of: economics.as_of,
     caveats: [
       "Portfolio Demo uses a cached demo extract.",
-      "CFS packets support manual review and do not replace planning, utility, legal, or site due diligence.",
+      "Ask Insights packets support manual review and do not replace planning, utility, legal, or site due diligence.",
     ],
     context_freshness: "cached_demo_extract",
     dashboard_actions: {
@@ -1161,7 +1161,7 @@ function demoEconomicsDueDiligencePacketAnswer(
     evidence: [
       evidence(
         "Land Due Diligence Screener",
-        "CFS uses sanitized economics rows and WSACC proxy fields to build packet-ready review context.",
+        "Ask Insights uses sanitized economics rows and WSACC proxy fields to build packet-ready review context.",
         "public/demo-data/economics_powerbi_export.json",
         "available",
       ),
@@ -1294,7 +1294,7 @@ function demoEconomicsPowerBiAnswer(
       evidence: [
         evidence(
           "Power BI export pack",
-          "CFS uses sanitized Power BI-ready economics tables for generated report previews.",
+          "Ask Insights uses sanitized Power BI-ready economics tables for generated report previews.",
           "public/demo-data/economics_powerbi_export.json",
         ),
       ],
@@ -1358,7 +1358,7 @@ function demoEconomicsPowerBiAnswer(
         "AI Power BI Report Builder",
         bullets([
           "Type a request such as Build a report for underbuilt redevelopment candidates.",
-          "CFS generates recommended tables, starter relationships, visuals, canvas recipes, and copyable build steps from the cached export fields.",
+          "Ask Insights generates recommended tables, starter relationships, visuals, canvas recipes, and copyable build steps from the cached export fields.",
           "Use Add Visuals to Report Canvas when the plan looks right.",
           "Download the generated report plan JSON if you want a portable report recipe.",
         ]),
@@ -1384,7 +1384,7 @@ function demoEconomicsPowerBiAnswer(
       [
         "Report Bucket",
         bullets([
-          "Add useful chart recipes, report plans, Ask CFS answers, decision notes, or QA checklists to the Report Bucket.",
+          "Add useful chart recipes, report plans, Ask Insights answers, decision notes, or QA checklists to the Report Bucket.",
           "Toggle which bucket items should appear in Print.",
           "Use Send Bucket to Print when the draft report outline is ready for a snapshot.",
         ]),
@@ -1496,7 +1496,7 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
     };
   };
   let reportTitle = "Executive Economic Dashboard";
-  let reportSummary = "CFS configured a Power BI-style report plan from your prompt.";
+  let reportSummary = "Ask Insights configured a Power BI-style report plan from your prompt.";
   let selectedFilters: CfsAiPowerBiActions["selected_filters"] = {};
   let reportCanvasItems: NonNullable<CfsAiPowerBiActions["report_canvas_items"]>;
 
@@ -1704,7 +1704,7 @@ function demoEconomicsScenarioAnswer(
     answer: briefing(
       [
         "Executive takeaway",
-        "CFS Economics treats scenarios as a screening-level planning model: assumptions go in, output bands come out, and the decision memo explains what needs deeper review before anyone uses the result for fiscal or infrastructure decisions.",
+        "Economics treats scenarios as a screening-level planning model: assumptions go in, output bands come out, and the decision memo explains what needs deeper review before anyone uses the result for fiscal or infrastructure decisions.",
       ],
       [
         "Scenario interpretation",
@@ -1844,7 +1844,7 @@ function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
     briefing(
       [
         "Executive summary",
-        `Based on the cached demo extract, CFS analyzed ${format(detail?.total_records ?? stats.total_permits)} observed permit records across ${format(detail?.active_parcels ?? stats.parcels_with_activity)} active parcels. Permit activity remains a broad planning workload signal, with the strongest available drivers tied to new construction, residential growth, remodeling, and additions where those fields are exposed. ${recentChangeText(detail)} This is observed permit activity, not a prediction.`,
+        `Based on the cached demo extract, Ask Insights analyzed ${format(detail?.total_records ?? stats.total_permits)} observed permit records across ${format(detail?.active_parcels ?? stats.parcels_with_activity)} active parcels. Permit activity remains a broad planning workload signal, with the strongest available drivers tied to new construction, residential growth, remodeling, and additions where those fields are exposed. ${recentChangeText(detail)} This is observed permit activity, not a prediction.`,
       ],
       [
         "Key findings",
@@ -2037,7 +2037,7 @@ function demoModelAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
     briefing(
       [
         "Executive summary",
-        "The current-best internal model variant is transportation_plus_tax_value_only. It beat the tested alternatives on PR-AUC and top-5% lift, but CFS still treats Model Lab as internal research only.",
+        "The current-best internal model variant is transportation_plus_tax_value_only. It beat the tested alternatives on PR-AUC and top-5% lift, but Cabarrus Insights still treats Model Lab as internal research only.",
       ],
       [
         "Key findings",
@@ -2161,7 +2161,7 @@ function demoMasterDataAnswer(
       ],
       [
         "Governance",
-        "Ask CFS can explain approved Demo metadata and aggregate results. It cannot expose restricted fields, execute SQL, bypass permissions, or mutate authoritative data.",
+        "Ask Insights can explain approved Demo metadata and aggregate results. It cannot expose restricted fields, execute SQL, bypass permissions, or mutate authoritative data.",
       ],
       [
         "Inspect next",
@@ -2465,7 +2465,7 @@ function selectedSignalMeaning(domain: string): [string, string, string] {
   }
   if (normalized === "utility_readiness" || normalized === "utilities") {
     return [
-      "Utility readiness shows where CFS has only proxy context or where official capacity data is still needed.",
+      "Utility readiness shows where Cabarrus Insights has only proxy context or where official capacity data is still needed.",
       "Missing service, committed capacity, and update-date fields limit infrastructure readiness conclusions.",
       "Proxy proximity supports due diligence but does not confirm capacity or improve the current-best model by itself.",
     ];
@@ -2474,7 +2474,7 @@ function selectedSignalMeaning(domain: string): [string, string, string] {
     return [
       "Transportation context highlights road, traffic, or project context that can affect planning coordination.",
       "Comparing corridor context with permit activity helps identify places that need transportation follow-up.",
-      "Project status, funding, and timing can be incomplete in the current CFS context.",
+      "Project status, funding, and timing can be incomplete in the current Cabarrus Insights context.",
     ];
   }
   if (normalized === "model_lab" || normalized === "model_research") {
@@ -2487,7 +2487,7 @@ function selectedSignalMeaning(domain: string): [string, string, string] {
   return [
     "Data readiness identifies missing or incomplete source data that limits stronger analysis.",
     "These gaps tell staff what to request before turning exploratory signals into formal review support.",
-    "CFS labels missing data instead of inventing values.",
+    "Cabarrus Insights labels missing data instead of inventing values.",
   ];
 }
 
@@ -2657,7 +2657,7 @@ function sanitizeDemoResponse(
     response_time_ms: sanitized.response_time_ms ?? 0,
     suggested_follow_up_questions:
       sanitized.suggested_follow_up_questions ?? [
-        "Which CFS evidence supports this answer?",
+        "Which evidence supports this answer?",
         "What should an analyst verify next?",
       ],
   };
@@ -2686,19 +2686,19 @@ function demoSafetyAnswer(query: string): CfsAiSearchResponse {
   return {
     ...baseDemoResponse(
       asksForPrivateData
-        ? "I cannot provide credentials or private owner/contact data. Ask CFS can summarize non-private Planning or Economics evidence."
-        : "I cannot reveal system instructions or override CFS evidence and safety rules. Ask a scoped Planning or Economics question using available CFS evidence.",
+        ? "I cannot provide credentials or private owner/contact data. Ask Insights can summarize non-private Planning or Economics evidence."
+        : "I cannot reveal system instructions or override available evidence and safety rules. Ask a scoped Planning or Economics question using available evidence.",
       ["general"],
       null,
       [
         evidence(
           "Requested information",
-          "Restricted by the CFS privacy and evidence policy.",
-          "Ask CFS safety policy",
+          "Restricted by the Ask Insights privacy and evidence policy.",
+          "Ask Insights safety policy",
           "not_available",
         ),
       ],
-      ["Ask a scoped question about available CFS evidence."],
+      ["Ask a scoped question about available Cabarrus Insights evidence."],
     ),
     provider_status: asksForPrivateData
       ? "safety_sensitive_data"

@@ -91,7 +91,7 @@ export function EntraAuthGate({ children }: { children: ReactNode }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#060b12] px-4 text-slate-100">
       <section className="w-full max-w-md rounded-md border border-slate-700 bg-slate-950 p-5 shadow-xl">
-        <h1 className="text-lg font-semibold">Cabarrus FutureScape staging</h1>
+        <h1 className="text-lg font-semibold">Cabarrus Insights staging</h1>
         <p className="mt-2 text-sm text-slate-300">
           {status === "config-missing"
             ? "Vercel Preview is missing the Microsoft Entra configuration."

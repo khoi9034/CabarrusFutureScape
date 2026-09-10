@@ -1,5 +1,5 @@
 {
-  "caveat": "Portfolio demo uses cached CFS demo data, not a live production database.",
+  "caveat": "Portfolio demo uses cached Cabarrus Insights data, not a live production database.",
   "generated_at": "2026-07-30T20:58:25Z",
   "mode": "portfolio_demo",
   "record_counts": {
@@ -14,7 +14,7 @@
   },
   "required_assets": [
     { "path": "public/demo-data/sample_parcels.json", "feature": "Planning parcel search", "schema": "sample_parcels.v1", "record_count": 300, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
-    { "path": "public/demo-data/economics_intelligence.json", "feature": "CFS Economics dashboard", "schema": "economics_intelligence.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/economics_intelligence.json", "feature": "Economics dashboard", "schema": "economics_intelligence.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/economics_powerbi_export.json", "feature": "Economics exports", "schema": "economics_powerbi_export.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/indicator_intelligence.json", "feature": "Planning Indicator Center", "schema": "indicator_intelligence.v1", "record_count": 1, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/master_data_v1b.json", "feature": "Master Data V1B catalog, preview, join, map, and exports", "schema": "master_data_v1b.v1", "record_count": 60, "source_classification": "deterministic sanitized demonstration records", "sanitized": true, "required": true },
@@ -25,5 +25,5 @@
     { "path": "public/demo-data/map_layers/demo_transportation_context.geojson", "feature": "Major road map context", "schema": "geojson.feature_collection.v1", "record_count": 75, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified local transportation centerline extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/map_layers/demo_place_labels.geojson", "feature": "Major place map labels", "schema": "geojson.feature_collection.v1", "record_count": 6, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized representative points derived from TIGERweb municipalities", "sanitized": true, "required": true }
   ],
-  "source_label": "Local CFS PostGIS cached extract"
+  "source_label": "Local Cabarrus Insights cached extract"
 }

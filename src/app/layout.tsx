@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cabarrus FutureScape",
+  title: "Cabarrus Insights",
   description:
-    "Cabarrus County digital twin and growth intelligence platform shell.",
+    "Cabarrus County planning intelligence for leadership and staff analysis.",
 };
 
 export default function RootLayout({

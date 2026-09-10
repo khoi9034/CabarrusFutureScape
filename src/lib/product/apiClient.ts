@@ -562,7 +562,7 @@ export function parseReportBucketItemRecord(value: unknown): ReportBucketItemRec
 }
 
 export function parseAskCfsConversationRecord(value: unknown): AskCfsConversationRecord {
-  const item = object(value, "Ask CFS conversation");
+  const item = object(value, "Ask Insights conversation");
   return {
     archived_at: nullableTimestamp(item.archived_at, "archived_at"),
     created_at: timestamp(item.created_at, "created_at"),
@@ -579,10 +579,10 @@ export function parseAskCfsConversationRecord(value: unknown): AskCfsConversatio
 }
 
 export function parseAskCfsMessageRecord(value: unknown): AskCfsMessageRecord {
-  const item = object(value, "Ask CFS message");
+  const item = object(value, "Ask Insights message");
   const role = text(item.role, "role");
   if (role !== "assistant" && role !== "user") {
-    throw malformed("Ask CFS message role is invalid.");
+    throw malformed("Ask Insights message role is invalid.");
   }
   return {
     conversation_id: uuid(item.conversation_id, "conversation_id"),

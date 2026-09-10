@@ -44,7 +44,7 @@ export function useDevelopmentTrends() {
             errorMessage:
               error instanceof Error
                 ? error.message
-                : "CFS demo development trends are unavailable.",
+                : "Demo development trends are unavailable.",
             isLoading: false,
             source: "static",
           });
@@ -78,7 +78,7 @@ export function useDevelopmentTrends() {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API development trends are unavailable.",
+              : "Live development trends are unavailable.",
           isLoading: false,
           source: "fallback",
         });

@@ -54,7 +54,7 @@ export function useParcelZoningSummaryMetrics() {
           errorMessage:
             error instanceof Error
               ? error.message
-              : "CFS API zoning summary is unavailable.",
+              : "Live zoning summary is unavailable.",
           isLoading: false,
           source: "fallback",
         });

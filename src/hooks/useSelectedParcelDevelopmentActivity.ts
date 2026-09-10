@@ -103,7 +103,7 @@ export function useSelectedParcelDevelopmentActivity(
       : {
           activity: null,
           errorMessage:
-            "Selected parcel development activity requires the configured CFS API outside demo mode.",
+            "Selected parcel development activity requires the configured live data service outside demo mode.",
           isLoading: false,
           source: "fallback",
         };

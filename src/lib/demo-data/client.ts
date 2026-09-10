@@ -385,7 +385,7 @@ function getUnavailableDemoManifest(): DemoManifest {
     generated_at: null,
     mode: "portfolio_demo",
     record_counts: {},
-    source_label: "Static CFS demo extract",
+    source_label: "Static Cabarrus Insights demo extract",
   };
 }
 
@@ -636,7 +636,7 @@ function getUnavailableEconomicsIntelligence(): EconomicsIntelligenceResponse {
     as_of: null,
     caveats: [
       "Portfolio Demo economics extract is not available.",
-      "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
+      "Economics is screening-level context, not a formal appraisal or tax bill.",
     ],
     data_readiness: [
       {

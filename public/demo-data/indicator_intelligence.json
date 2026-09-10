@@ -1,8 +1,8 @@
 {
   "as_of": "2026-07-10T02:22:53Z",
   "caveats": [
-    "Portfolio Demo uses a cached CFS demo extract.",
-    "CFS indicators are planning review signals, not official determinations.",
+    "Portfolio Demo uses a cached Cabarrus Insights demo extract.",
+    "Cabarrus Insights indicators are planning review signals, not official determinations.",
     "Observed permit activity is not a prediction."
   ],
   "data_readiness_detail": [
@@ -543,7 +543,7 @@
         "0 areas need utilization data follow-up."
       ],
       "caveats": [
-        "Portfolio demo uses a cached CFS demo extract.",
+        "Portfolio demo uses a cached Cabarrus Insights demo extract.",
         "Permit activity is not the same as student generation.",
         "This is not an official enrollment forecast."
       ],
@@ -701,7 +701,7 @@
         "Official rezoning records"
       ],
       "caveats": [
-        "Missing official data limits how far CFS can go beyond review signals."
+        "Missing official data limits how far Cabarrus Insights can go beyond review signals."
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
@@ -763,7 +763,7 @@
         "0 areas need utilization data follow-up."
       ],
       "caveats": [
-        "Portfolio demo uses a cached CFS demo extract.",
+        "Portfolio demo uses a cached Cabarrus Insights demo extract.",
         "Permit activity is not the same as student generation.",
         "This is not an official enrollment forecast."
       ],
@@ -921,7 +921,7 @@
         "Official rezoning records"
       ],
       "caveats": [
-        "Missing official data limits how far CFS can go beyond review signals."
+        "Missing official data limits how far Cabarrus Insights can go beyond review signals."
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
@@ -981,7 +981,7 @@
         "0 areas need utilization data follow-up."
       ],
       "caveats": [
-        "Portfolio demo uses a cached CFS demo extract.",
+        "Portfolio demo uses a cached Cabarrus Insights demo extract.",
         "Permit activity is not the same as student generation.",
         "This is not an official enrollment forecast."
       ],
@@ -1037,7 +1037,7 @@
         "Official rezoning records"
       ],
       "caveats": [
-        "Missing official data limits how far CFS can go beyond review signals."
+        "Missing official data limits how far Cabarrus Insights can go beyond review signals."
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
