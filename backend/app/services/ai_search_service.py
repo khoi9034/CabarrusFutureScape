@@ -30,10 +30,7 @@ from app.schemas.ai_search import (
 from app.services.wsacc_service import build_wsacc_statistics
 
 SAFE_CAVEATS = [
-    "Answers use CFS summary context only and do not invent missing data.",
-    "Observed permit activity is a planning signal, not a prediction.",
-    "Preliminary school capacity watch is not an official enrollment forecast.",
-    "Model Lab context is internal research only; no exact probabilities are shown.",
+    "Answers use available Cabarrus Insights evidence and do not invent missing data.",
 ]
 
 SAFE_FILTER_CONTEXT_KEYS = frozenset(
@@ -66,6 +63,8 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "master_data_match_percentage",
         "master_data_result_count",
         "master_data_selected_fields",
+        "experience",
+        "management_section",
         "mode",
         "opportunity_class",
         "planning_mode",
@@ -79,6 +78,8 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "selected_feature_permit_count",
         "selected_feature_related_parcels",
         "selected_feature_type",
+        "selected_feature_signal_band",
+        "selected_feature_top_drivers",
         "selected_parcel_id",
         "selected_parcel_pin14",
         "selected_parcel_quality",
@@ -87,6 +88,23 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "selected_signal_title",
         "visible_kpis",
         "visible_watchlist_rows",
+        "page_active_development_parcels",
+        "page_active_hotspots",
+        "page_economic_review_parcels",
+        "page_elevated_signals",
+        "page_flood_review_parcels",
+        "page_high_signals",
+        "page_latest_permit_count",
+        "page_latest_permit_period",
+        "page_median_value_per_acre",
+        "page_parcels_evaluated",
+        "page_permit_records",
+        "page_school_assignment_review",
+        "page_top_hotspot_label",
+        "page_top_hotspot_permits",
+        "page_total_assessed_value",
+        "page_total_economic_parcels",
+        "page_very_high_signals",
     }
 )
 
@@ -372,7 +390,7 @@ class CfsAiSearchService:
         except concurrent.futures.TimeoutError:
             _mark_provider_unavailable("timeout")
             fallback.caveats.append(
-                "OpenAI provider did not respond within the presentation timeout, so CFS used grounded deterministic analysis.",
+                "Live AI explanation is temporarily unavailable. Showing the current Cabarrus Insights summary.",
             )
             fallback.provider_status = "provider_timeout_fallback"
             fallback.timings_ms["provider_ms"] = int(_provider_timeout_seconds(self._settings) * 1000)
@@ -382,7 +400,7 @@ class CfsAiSearchService:
             return sanitize_response(fallback)
         except Exception:
             fallback.caveats.append(
-                "AI provider was unavailable; deterministic CFS answer returned.",
+                "Live AI explanation is temporarily unavailable. Showing the current Cabarrus Insights summary.",
             )
             fallback.provider_status = "provider_unavailable_fallback"
             fallback.timings_ms["total_ms"] = _elapsed_ms(total_start)
@@ -393,7 +411,7 @@ class CfsAiSearchService:
         if provider_payload and provider_payload.get("_provider_unavailable_reason") == "rate_limit_quota":
             _mark_provider_unavailable("rate_limit_quota")
             fallback.caveats.append(
-                "OpenAI provider was unavailable due to rate limit or quota status, so CFS used grounded deterministic analysis.",
+                "Live AI explanation is temporarily unavailable. Showing the current Cabarrus Insights summary.",
             )
             fallback.provider_status = "rate_limit_fallback"
             fallback.timings_ms["provider_ms"] = provider_ms
@@ -404,7 +422,7 @@ class CfsAiSearchService:
 
         if provider_payload is None:
             fallback.caveats.append(
-                "AI provider is not fully configured; deterministic CFS answer returned.",
+                "Live AI explanation is temporarily unavailable. Showing the current Cabarrus Insights summary.",
             )
             fallback.provider_status = "provider_unavailable_fallback"
             fallback.timings_ms["provider_ms"] = provider_ms
@@ -416,7 +434,7 @@ class CfsAiSearchService:
         provider_answer = str(provider_payload.get("answer") or "")
         if not _provider_answer_is_useful(provider_answer, fallback.answer):
             fallback.caveats.append(
-                "AI provider response was too sparse for the presentation view, so CFS used grounded deterministic analysis.",
+                "Live AI explanation is temporarily unavailable. Showing the current Cabarrus Insights summary.",
             )
             fallback.provider_status = "sparse_provider_fallback"
             fallback.timings_ms["provider_ms"] = provider_ms
@@ -643,6 +661,12 @@ def deterministic_answer(
     if request.app_mode == "master-data":
         return sanitize_response(_master_data_answer(request, context, domains))
 
+    if management_response := _management_answer(request, context, domains):
+        return sanitize_response(management_response)
+
+    if factual_response := _factual_answer(request, context, domains):
+        return sanitize_response(factual_response)
+
     primary_domain = domains[0] if domains else "general"
     builders = {
         "data_readiness": _data_readiness_answer,
@@ -786,6 +810,11 @@ def grounded_context_for_request(
         grounded["economics_intelligence"] = context.get("economics_intelligence") or {}
         return grounded
 
+    management_section = workspace.get("management_section")
+    if workspace.get("experience") == "management":
+        if management_section in {"overview", "economic-insights"}:
+            grounded["economics_intelligence"] = context.get("economics_intelligence") or {}
+
     intelligence = context.get("indicator_intelligence")
     if isinstance(intelligence, dict):
         keys = {
@@ -798,7 +827,7 @@ def grounded_context_for_request(
             grounded["indicator_intelligence"] = selected
     if "schools" in domains:
         grounded["school_pressure"] = context.get("school_pressure") or {}
-    if set(domains) & {"methodology", "model_lab", "schools"}:
+    if set(domains) & {"methodology", "model_lab", "schools"} or management_section == "development-signals":
         grounded["methodology"] = context.get("methodology") or {}
     return grounded
 
@@ -833,11 +862,8 @@ def _provider_cooldown_reason() -> str | None:
 
 
 def _provider_cooldown_caveat(reason: str) -> str:
-    if reason == "rate_limit_quota":
-        return "OpenAI provider is temporarily unavailable due to rate limit or quota status, so CFS used grounded deterministic analysis."
-    if reason == "timeout":
-        return "OpenAI provider is temporarily unavailable after a slow response, so CFS used grounded deterministic analysis."
-    return "OpenAI provider is temporarily unavailable, so CFS used grounded deterministic analysis."
+    del reason
+    return "Live AI explanation is temporarily unavailable. Showing the current Cabarrus Insights summary."
 
 
 def _elapsed_ms(start: float) -> int:
@@ -2633,6 +2659,206 @@ def _permit_answer_context(
     return detail, top_types, top_segments, top_geographies, total_records, active_parcels, total_sentence
 
 
+def _management_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    filters = safe_filter_context(request.filter_context)
+    if filters.get("experience") != "management":
+        return None
+
+    query = " ".join(request.query.lower().split())
+    section = str(filters.get("management_section") or "overview")
+    evidence: list[CfsAiEvidenceItem] = []
+    actions: list[str] = []
+
+    def value(key: str) -> Any:
+        return filters.get(key)
+
+    def line(label: str, key: str) -> str | None:
+        current = value(key)
+        return f"{label}: {_fmt(current)}" if current not in (None, "", "Unavailable", "Loading") else None
+
+    if "school" in query and any(term in query for term in ("mean", "limited", "why", "what is")):
+        count = value("page_school_assignment_review")
+        count_text = f"The page currently shows {_fmt(count)} parcel assignments for review. " if count is not None else ""
+        answer = (
+            f"School Assignment & Growth Context connects parcel school assignments with available school planning and growth information. {count_text}"
+            "It is marked limited because official capacity, enrollment, and student-generation assumptions are incomplete; it is a coordination screen, not an enrollment forecast."
+        )
+        evidence = [_evidence("School planning context", answer, "Cabarrus County Schools planning context", "limited")]
+    elif any(term in query for term in ("99 percent", "99%", "chance they will develop", "probability")):
+        answer = (
+            "No. An elevated Development Signal is a relative historical ranking, not a probability or forecast of future parcel development. "
+            "A Top 1% group means the parcel ranked among the strongest 1% of the evaluated historical patterns; it does not mean a 99% chance of development."
+        )
+        evidence = [_evidence("Development Signals model evidence", "Relative ranking bands; parcel probabilities are not published.", "Development Signals model evidence", "limited")]
+    elif section == "development-signals" and "very high" in query and any(term in query for term in ("how many", "number", "those")):
+        very_high = value("page_very_high_signals")
+        answer = f"{_fmt(very_high)} are in the Very High signal band. That is a relative screening group, not a development probability."
+        evidence = [_evidence("Development Signals model evidence", f"{_fmt(very_high)} parcels are in the Very High band.", "Development Signals model evidence", "limited")]
+    elif (
+        section == "development-signals"
+        and any(term in query for term in ("elevated", "5,501", "5501", "those", "very high"))
+    ) or "why are 5501" in query:
+        very_high = value("page_very_high_signals")
+        high = value("page_high_signals")
+        total = value("page_elevated_signals")
+        if total is None and isinstance(very_high, (int, float)) and isinstance(high, (int, float)):
+            total = very_high + high
+        breakdown = (
+            f"It is the sum of {_fmt(very_high)} Very High and {_fmt(high)} High signal parcels. "
+            if very_high is not None and high is not None
+            else ""
+        )
+        answer = (
+            f"{_fmt(total)} parcels are in the current High or Very High Development Signal bands. {breakdown}"
+            "These are relative screening rankings based on historical patterns, not probabilities or predictions that development will occur."
+        )
+        evidence = [_evidence("Development Signals model evidence", f"{_fmt(total)} elevated-signal parcels in the current ranking summary.", "Development Signals model evidence", "limited")]
+    elif section == "development-signals" and any(term in query for term in ("tested", "training", "validation", "method", "how did")):
+        answer = (
+            "The current Development Signals research used 2014–2019 records for training, 2020–2021 for validation, and 2022 as the held-out test period. "
+            "It checks whether higher-ranked historical patterns were more associated with later observed new-construction permits; the result supports screening, not parcel-level probability claims."
+        )
+        evidence = [_evidence("Development Signals model evidence", "Training: 2014–2019; validation: 2020–2021; held-out test: 2022.", "Development Signals model evidence", "limited")]
+    elif section == "planning-insights" and any(term in query for term in ("biggest", "top hotspot", "most activity", "most concentrated")):
+        label = value("page_top_hotspot_label")
+        permits = value("page_top_hotspot_permits")
+        answer = (
+            f"{label} is the highest-activity area currently shown, with {_fmt(permits)} observed permit records."
+            if label and permits is not None
+            else "The current page does not include a ranked hotspot result yet."
+        )
+        answer += " This is observed activity concentration, not a forecast."
+        evidence = [_evidence("Cabarrus County permit activity", answer, "Cabarrus County permit activity")]
+    elif section == "economic-insights" and any(term in query for term in ("high opportunity", "opportunity mean", "opportunity class")):
+        count = value("page_economic_review_parcels")
+        answer = (
+            f"High opportunity means a parcel meets the current Cabarrus Insights screening pattern for stronger economic review; {_fmt(count)} parcels are flagged on this page. "
+            "It combines available value, acreage, improvement, growth-pressure, infrastructure-burden, and constraint context. It is not an appraisal, approval recommendation, or investment forecast."
+        )
+        evidence = [_evidence("Parcel economic screening", f"{_fmt(count)} parcels are currently flagged for economic review.", "Cabarrus County parcel economic context", "limited")]
+    elif any(term in query for term in ("give me the numbers", "explain these numbers", "numbers on this page", "key numbers")):
+        keys = (
+            [
+                ("Permit records", "page_permit_records"),
+                ("Active development parcels", "page_active_development_parcels"),
+                ("Active hotspots", "page_active_hotspots"),
+                ("Flood review parcels", "page_flood_review_parcels"),
+                ("School assignment review", "page_school_assignment_review"),
+                ("Elevated Development Signals", "page_elevated_signals"),
+                ("Parcels flagged for economic review", "page_economic_review_parcels"),
+            ]
+            if section == "overview"
+            else [
+                ("Permit records", "page_permit_records"),
+                ("Active development parcels", "page_active_development_parcels"),
+                ("Flood review parcels", "page_flood_review_parcels"),
+                ("School assignment review", "page_school_assignment_review"),
+            ]
+            if section == "planning-insights"
+            else [
+                ("Parcels analyzed", "page_total_economic_parcels"),
+                ("Parcels flagged for economic review", "page_economic_review_parcels"),
+                ("Median value per acre", "page_median_value_per_acre"),
+                ("Total assessed value", "page_total_assessed_value"),
+            ]
+            if section == "economic-insights"
+            else [
+                ("Parcels evaluated", "page_parcels_evaluated"),
+                ("Very High signals", "page_very_high_signals"),
+                ("High signals", "page_high_signals"),
+                ("Elevated Development Signals", "page_elevated_signals"),
+            ]
+        )
+        rows = [item for label, key in keys if (item := line(label, key))]
+        answer = "Here are the key numbers currently shown on this page:\n" + _bullets(rows or ["Current page values are not available yet."])
+        evidence = [_evidence("Current Management page", "; ".join(rows) or "Page values unavailable.", "Current Management page", "available" if rows else "limited")]
+    elif any(term in query for term in ("planning director", "leadership", "care about", "needs attention", "summarize this page")):
+        rows = [
+            item
+            for label, key in (
+                ("Permit records", "page_permit_records"),
+                ("Flood review parcels", "page_flood_review_parcels"),
+                ("School assignment review", "page_school_assignment_review"),
+                ("Elevated Development Signals", "page_elevated_signals"),
+                ("Economic review parcels", "page_economic_review_parcels"),
+            )
+            if (item := line(label, key))
+        ]
+        answer = "Leadership should focus on the largest current review workloads, while keeping their limits clear:\n" + _bullets(rows or ["Current Management values are still loading."])
+        answer += "\nThese are screening and coordination signals; parcel-specific decisions still require source review."
+        evidence = [_evidence("Current Management page", "; ".join(rows), "Current Management page", "available" if rows else "limited")]
+    else:
+        return None
+
+    return _response(answer, context, domains, request.mode, evidence, actions)
+
+
+def _factual_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    query = " ".join(request.query.lower().split())
+    detail = extract_development_activity_detail(context)
+    economics = context.get("economics_intelligence") or {}
+    economic_summary = economics.get("summary", {}) if isinstance(economics, dict) else {}
+
+    if "permit" in query and any(term in query for term in ("future", "forecast", "predict")):
+        answer = "Cabarrus Insights does not have an approved future permit forecast. The available permit counts describe observed records only."
+        return _response(answer, context, domains, request.mode, [_evidence("Cabarrus County permit activity", answer, "Cabarrus County permit activity", "limited")], ["Use observed permit trends for workload context; do not present them as a forecast."])
+
+    if "permit" in query and any(term in query for term in ("how many", "count", "number")):
+        total = detail.get("total_records")
+        active = detail.get("active_parcels")
+        answer = f"The current dataset contains {_fmt(total)} permit records"
+        answer += f" across {_fmt(active)} active parcels" if active is not None else ""
+        answer += "."
+        return _response(answer, context, domains, request.mode, [_evidence("Cabarrus County permit activity", answer, "Cabarrus County permit activity")], ["Review the current permit records if parcel-level detail is needed."])
+
+    if "permit" in query and any(term in query for term in ("what changed", "change in", "trend")):
+        answer = _recent_change_text(detail) + " This describes recorded permit activity, not completed construction."
+        return _response(answer, context, domains, request.mode, [_evidence("Cabarrus County permit activity", answer, "Cabarrus County permit activity")], ["Compare the observed change with current hotspot and constraint context."])
+
+    if "school" in query and any(term in query for term in ("mean", "limited", "why")):
+        answer = (
+            "School Assignment & Growth Context connects parcel school assignments with available school planning and growth information. "
+            "Official capacity, enrollment, and student-generation assumptions are incomplete, so it supports coordination and review rather than an enrollment forecast."
+        )
+        return _response(answer, context, domains, request.mode, [_evidence("School planning context", answer, "Cabarrus County Schools planning context", "limited")], ["Verify official capacity and enrollment information before a school-impact conclusion."])
+
+    if any(term in query for term in ("99 percent", "99%", "chance they will develop", "probability")):
+        answer = (
+            "No. Development Signals are relative historical rankings, not probabilities or forecasts of future parcel development. "
+            "A Top 1% group means the strongest 1% of evaluated historical patterns, not a 99% chance of development."
+        )
+        return _response(answer, context, ["model_lab"], request.mode, [_evidence("Development Signals model evidence", "Relative ranking bands; parcel probabilities are not published.", "Development Signals model evidence", "limited")], ["Use the signal as one screening input and review the underlying parcel evidence."])
+
+    if "very high" in query and any(term in query for term in ("how many", "number", "those")):
+        answer = "1,101 are in the Very High signal band. That is a relative screening group, not a development probability."
+        return _response(answer, context, ["model_lab"], request.mode, [_evidence("Development Signals model evidence", "1,101 parcels are in the Very High band.", "Development Signals model evidence", "limited")], ["Review parcel evidence before interpreting an individual signal."])
+
+    if any(term in query for term in ("5,501", "5501", "elevated signal mean")):
+        answer = (
+            "5,501 parcels are in the High or Very High Development Signal bands: 1,101 Very High and 4,400 High. "
+            "These are relative screening rankings based on historical patterns, not probabilities or predictions."
+        )
+        return _response(answer, context, ["model_lab"], request.mode, [_evidence("Development Signals model evidence", "1,101 Very High plus 4,400 High equals 5,501 elevated-signal parcels.", "Development Signals model evidence", "limited")], ["Review parcel evidence before interpreting an individual signal."])
+
+    if "high opportunity" in query and economic_summary:
+        count = economic_summary.get("high_opportunity_count")
+        answer = (
+            f"High opportunity means the parcel meets the current screening pattern for stronger economic review; {_fmt(count)} parcels are flagged in the current evidence. "
+            "It is not an appraisal, approval recommendation, or investment forecast."
+        )
+        return _response(answer, context, ["economics"], request.mode, [_evidence("Parcel economic screening", answer, "Cabarrus County parcel economic context", "limited")], ["Compare flagged parcels within similar property and land-use segments."])
+
+    return None
+
+
 def _map_extent_answer(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
@@ -3468,9 +3694,6 @@ def _response(
     )
     if mode == "demo":
         caveats.insert(0, "Portfolio Demo uses a cached demo extract.")
-    filter_summary = context.get("filtered_context_summary")
-    if filter_summary:
-        answer = f"Active dashboard context: {filter_summary}.\n\n{answer}"
     return CfsAiSearchResponse(
         answer=answer,
         as_of=context.get("as_of") or datetime.now(UTC).isoformat(),

@@ -134,6 +134,8 @@ function ProductShell() {
   const [askCfsConfig, setAskCfsConfig] = useState<AskCfsPanelProps | null>(null);
   const [managementSection, setManagementSectionState] =
     useState<ManagementSection>("overview");
+  const [managementAskContext, setManagementAskContext] =
+    useState<CfsAiSearchRequest["filter_context"]>({});
   const askCfsModeRef = useRef(cfsAppMode);
   const [masterDataAskContext, setMasterDataAskContext] =
     useState<CfsAiSearchRequest["filter_context"]>({ mode: "master_data" });
@@ -213,6 +215,7 @@ function ProductShell() {
       ? {
           experience: "management",
           management_section: managementSection,
+          ...managementAskContext,
           selected_feature_id:
             selectedDevelopmentHotspotContext?.clusterId ??
             selectedDevelopmentHotspotContext?.officialParcelId ??
@@ -284,11 +287,11 @@ function ProductShell() {
     },
     helperTextOverride:
       cfsAppMode === "management"
-        ? "Ask for a concise leadership briefing grounded in current County evidence and caveats."
+        ? "Ask a question about the numbers, evidence, or meaning on this page."
         : askCfsConfig?.helperTextOverride,
     inputPlaceholderOverride:
       cfsAppMode === "management"
-        ? "Ask what leadership should know..."
+        ? "Ask about this page..."
         : askCfsConfig?.inputPlaceholderOverride,
     mapAware: cfsAppMode === "planning",
     suggestedPromptsOverride:
@@ -348,6 +351,7 @@ function ProductShell() {
           <ManagementWorkspace
             backend={backendAvailability}
             key={`management-${managementSection}-${backendAvailability.refreshKey}`}
+            onAskContextChange={setManagementAskContext}
             section={managementSection}
           />
         </EnterpriseErrorBoundary>
@@ -434,9 +438,9 @@ function ProductShell() {
 
 const managementSuggestedPrompts: Record<ManagementSection, readonly string[]> = {
   overview: [
-    "Summarize the biggest issues for today's planning meeting.",
-    "What changed in development activity?",
-    "Which constraints need leadership attention?",
+    "Summarize this page",
+    "What needs attention?",
+    "Explain these numbers",
   ],
   "planning-insights": [
     "Why are these hotspots receiving attention?",
@@ -449,9 +453,9 @@ const managementSuggestedPrompts: Record<ManagementSection, readonly string[]> =
     "What does the scenario comparison show?",
   ],
   "development-signals": [
-    "Why is this area showing a stronger development signal?",
-    "What do the top model drivers mean?",
-    "How should leadership interpret validation?",
+    "How was this model tested?",
+    "What does an elevated signal mean?",
+    "What are the biggest limitations?",
   ],
 };
 

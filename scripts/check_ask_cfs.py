@@ -124,7 +124,7 @@ def validate_response(response, category: str) -> list[str]:
         errors.append("missing next actions")
     if not response.request_id:
         errors.append("missing request id")
-    if response.prompt_version != "ask-cfs-2026-08-27":
+    if response.prompt_version != "ask-insights-2026-09-10":
         errors.append("wrong prompt version")
     if response.provider != "none":
         errors.append("deterministic baseline called a provider")

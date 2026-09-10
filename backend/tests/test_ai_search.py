@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from app.dependencies.database import get_optional_read_only_db
 from app.main import app
 from app.routers import ai_search_router
-from app.schemas.ai_search import CfsAiSearchRequest
+from app.schemas.ai_search import CfsAiConversationTurn, CfsAiSearchRequest
 from app.services import ai_search_service
 from app.services.ai_search_service import (
     CfsAiSearchService,
@@ -221,17 +221,10 @@ def test_ai_search_deterministic_fallback_answers_without_provider() -> None:
     assert response.evidence
     assert response.dashboard_actions.focus_domain == "permits"
     assert "observed_development_activity" in response.dashboard_actions.highlight_kpis
-    assert "Residential additions" in response.answer
-    assert "Key findings" in response.answer
-    assert "What changed" in response.answer
-    assert "What is driving activity" in response.answer
-    assert "Why it matters" in response.answer
-    assert "What to inspect next" in response.answer
-    assert "Concord" in response.answer
-    evidence_text = " ".join(item.detail for item in response.evidence)
-    assert "18 permit records across 7 active parcels" in evidence_text
-    assert "2023: 12; 2024: 18" in evidence_text
-    assert "not available permit records" not in evidence_text
+    assert response.answer.startswith("The latest comparison is 2023 to 2024")
+    assert "completed construction" in response.answer
+    assert "Executive summary" not in response.answer
+    assert "2023 to 2024: 12 to 18 permits" in response.evidence[0].detail
 
 
 def test_ai_search_follow_up_combines_previous_permit_and_school_context() -> None:
@@ -346,8 +339,7 @@ def test_ai_search_permit_answer_uses_legacy_summary_when_detail_is_missing() ->
     )
 
     text = response.answer + " " + " ".join(item.detail for item in response.evidence)
-    assert "18 observed permit records across 7 active parcels" in text
-    assert "2023: 12; 2024: 18" in text
+    assert "2023 to 2024: 12 to 18 permits" in text
     assert "not available observed permit records" not in text
     assert response.dashboard_actions.focus_domain == "permits"
 
@@ -368,9 +360,7 @@ def test_ai_search_permit_answer_keeps_totals_when_type_fields_missing() -> None
     )
 
     text = response.answer + " " + " ".join(item.detail for item in response.evidence)
-    assert "64,426 observed permit records across 43,474 active parcels" in text
-    assert "2020: 3,821; 2025: 3,642" in text
-    assert "permit type fields are not currently exposed" in text
+    assert "2020 to 2025: 3,821 to 3,642 permits" in text
     assert "not available permit records" not in text
 
 
@@ -473,7 +463,7 @@ def test_ai_search_provider_missing_model_falls_back() -> None:
     )
 
     assert response.provider == "none"
-    assert "exact probabilities" in " ".join(response.caveats).lower()
+    assert "no exact probabilities" in response.answer.lower()
 
 
 def test_ai_search_provider_failure_falls_back(monkeypatch) -> None:
@@ -499,7 +489,7 @@ def test_ai_search_provider_failure_falls_back(monkeypatch) -> None:
     assert response.provider_status == "provider_unavailable_fallback"
     assert "total_ms" in response.timings_ms
     assert response.dashboard_actions.focus_domain == "permits"
-    assert "deterministic CFS answer returned" in " ".join(response.caveats)
+    assert "Live AI explanation is temporarily unavailable" in " ".join(response.caveats)
 
 
 def test_ai_search_provider_uses_configured_timeout(monkeypatch) -> None:
@@ -610,7 +600,9 @@ def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
 
     text = " ".join(response.caveats).lower()
     assert response.provider == "none"
-    assert "rate limit or quota" in text
+    assert "live ai explanation is temporarily unavailable" in text
+    assert "rate limit" not in text
+    assert "quota" not in text
     assert "raw" not in text
     assert response.dashboard_actions.focus_domain == "schools"
 
@@ -650,8 +642,8 @@ def test_ai_search_provider_timeout_returns_detailed_fallback(monkeypatch) -> No
     assert response.provider == "none"
     assert response.provider_status == "provider_timeout_fallback"
     assert response.timings_ms["provider_ms"] == 50
-    assert "Key findings" in response.answer
-    assert "presentation timeout" in " ".join(response.caveats)
+    assert response.answer.startswith("The latest comparison")
+    assert "Live AI explanation is temporarily unavailable" in " ".join(response.caveats)
     assert response.dashboard_actions.focus_domain == "permits"
 
     second = service.search(
@@ -684,8 +676,8 @@ def test_ai_search_sparse_provider_answer_keeps_detailed_fallback(monkeypatch) -
     )
 
     assert response.provider == "none"
-    assert "Key findings" in response.answer
-    assert "too sparse" in " ".join(response.caveats)
+    assert response.answer.startswith("The latest comparison")
+    assert "Live AI explanation is temporarily unavailable" in " ".join(response.caveats)
 
 
 def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
@@ -852,7 +844,127 @@ def test_ai_search_filter_context_metadata_is_returned() -> None:
     assert response.data_source == "local_live_backend"
     assert response.context_freshness == "current_session"
     assert "active tab=Schools" in response.filtered_context_summary
-    assert "Active dashboard context" in response.answer
+    assert "Active dashboard context" not in response.answer
+
+
+def _management_request(query: str, section: str = "overview") -> CfsAiSearchRequest:
+    return CfsAiSearchRequest(
+        filter_context={
+            "experience": "management",
+            "management_section": section,
+            "page_active_development_parcels": 43474,
+            "page_economic_review_parcels": 14328,
+            "page_elevated_signals": 5501,
+            "page_flood_review_parcels": "7,989",
+            "page_high_signals": 4400,
+            "page_parcels_evaluated": 110017,
+            "page_permit_records": 64426,
+            "page_school_assignment_review": "75,143",
+            "page_top_hotspot_label": "Concord activity area",
+            "page_top_hotspot_permits": 132,
+            "page_very_high_signals": 1101,
+        },
+        interaction_mode="freeform",
+        query=query,
+    )
+
+
+def test_ai_search_management_numbers_answer_current_page_directly() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        _management_request("give me the numbers"),
+        _context(),
+    )
+
+    assert response.answer.startswith("Here are the key numbers currently shown on this page:")
+    assert "Permit records: 64,426" in response.answer
+    assert "Active development parcels: 43,474" in response.answer
+    assert "School assignment review: 75,143" in response.answer
+    assert "Elevated Development Signals: 5,501" in response.answer
+    assert "Executive summary" not in response.answer
+    assert "Priority order" not in response.answer
+
+
+def test_ai_search_management_school_language_is_plain_and_grounded() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        _management_request("what does school assignment and growth context mean"),
+        _context(),
+    )
+
+    assert "75,143 parcel assignments" in response.answer
+    assert "official capacity, enrollment, and student-generation assumptions are incomplete" in response.answer
+    assert "indicator_summary" not in response.answer
+
+
+def test_ai_search_development_signal_follow_up_is_not_a_probability() -> None:
+    request = _management_request("is that a 99 percent chance they will develop", "development-signals")
+    request.conversation_context = [CfsAiConversationTurn(
+        answer_summary="5,501 parcels are elevated.",
+        focused_domain="model_lab",
+        query="why are 5501 parcels elevated",
+    )]
+    response = CfsAiSearchService(_settings()).search(request, _context())
+
+    assert response.answer.startswith("No.")
+    assert "not a probability" in response.answer
+    assert "99% chance" in response.answer
+    assert "Executive summary" not in response.answer
+
+    follow_up = _management_request("How many of those are Very High?", "development-signals")
+    follow_up.conversation_context = [CfsAiConversationTurn(
+        answer_summary="5,501 parcels are elevated.",
+        focused_domain="model_lab",
+        query="why are 5501 parcels elevated",
+    )]
+    follow_up_response = CfsAiSearchService(_settings()).search(follow_up, _context())
+    assert follow_up_response.answer.startswith("1,101 are in the Very High signal band.")
+    assert "4,400" not in follow_up_response.answer
+
+
+def test_ai_search_management_planning_uses_current_top_hotspot() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        _management_request("What's the biggest development area?", "planning-insights"),
+        _context(),
+    )
+
+    assert "Concord activity area" in response.answer
+    assert "132 observed permit records" in response.answer
+
+
+def test_ai_search_management_economics_explains_current_screening_definition() -> None:
+    request = _management_request("What does high opportunity mean?", "economic-insights")
+    request.filter_context["page_economic_review_parcels"] = 14328
+    response = CfsAiSearchService(_settings()).search(request, _context())
+
+    assert "14,328 parcels are flagged on this page" in response.answer
+    assert "screening pattern" in response.answer
+    assert "not an appraisal" in response.answer
+
+
+def test_ai_search_management_provider_gets_page_and_relevant_evidence(monkeypatch) -> None:
+    captured: dict = {}
+
+    def provider_call(_url, payload, *_args, **_kwargs):
+        captured.update(payload)
+        return {"answer": "The page shows 64,426 permit records and the other current Management values supplied by Cabarrus Insights."}
+
+    monkeypatch.setattr(ai_search_service, "_post_provider_json", provider_call)
+    request = _management_request("give me the numbers")
+    response = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="configured-model",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    ).search(request, _context())
+
+    provider_request = json.loads(captured["messages"][1]["content"])
+    assert response.provider == "openai"
+    assert provider_request["interaction_mode"] == "freeform"
+    assert provider_request["filter_context"]["management_section"] == "overview"
+    assert provider_request["filter_context"]["page_permit_records"] == 64426
+    assert "economics_intelligence" in provider_request["cfs_context"]
+    assert "development_activity_detail" in provider_request["cfs_context"]["indicator_intelligence"]
 
 
 def test_ai_search_master_data_mode_uses_approved_workspace_context() -> None:

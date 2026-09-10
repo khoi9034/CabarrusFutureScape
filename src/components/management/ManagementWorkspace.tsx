@@ -20,14 +20,16 @@ import { useEconomicsIntelligence } from "@/hooks/useEconomicsIntelligence";
 import { useFloodConstraintSummary } from "@/hooks/useFloodConstraintSummary";
 import { useModelResearchPreviewLayer } from "@/hooks/useModelResearchPreviewLayer";
 import { useSchoolConstraintSummary } from "@/hooks/useSchoolConstraintSummary";
+import { USE_DEMO_DATA } from "@/lib/api/client";
 import type { ManagementSection } from "@/types";
 import type { DevelopmentHotspotMapMarker, SelectedDevelopmentHotspotContext } from "@/types/map/developmentHotspots";
 import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
+import type { CfsAiSearchRequest } from "@/types/api";
 
 const number = new Intl.NumberFormat("en-US");
 const money = new Intl.NumberFormat("en-US", { notation: "compact", style: "currency", currency: "USD", maximumFractionDigits: 1 });
 
-export function ManagementWorkspace({ backend, section }: { backend: BackendAvailabilityController; section: ManagementSection }) {
+export function ManagementWorkspace({ backend, onAskContextChange, section }: { backend: BackendAvailabilityController; onAskContextChange?: (context: CfsAiSearchRequest["filter_context"]) => void; section: ManagementSection }) {
   if (backend.status !== "healthy") {
     return (
       <main className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8" data-management-section={section} data-testid="cfs-management-workspace">
@@ -42,10 +44,10 @@ export function ManagementWorkspace({ backend, section }: { backend: BackendAvai
       </main>
     );
   }
-  return <ManagementDataWorkspace section={section} />;
+  return <ManagementDataWorkspace onAskContextChange={onAskContextChange} section={section} />;
 }
 
-function ManagementDataWorkspace({ section }: { section: ManagementSection }) {
+function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContextChange?: (context: CfsAiSearchRequest["filter_context"]) => void; section: ManagementSection }) {
   const dashboard = useDashboardState();
   const development = useDevelopmentActivitySummary();
   const trends = useDevelopmentTrends();
@@ -76,6 +78,31 @@ function ManagementDataWorkspace({ section }: { section: ManagementSection }) {
   }), [hotspots.hotspots, hotspots.markers]);
   const hotspotMarkers = useMemo(() => hotspots.markers.map(toHotspotMapMarker), [hotspots.markers]);
   const signalMarkers = useMemo(() => modelPreview.markers.map(toSignalMapMarker), [modelPreview.markers]);
+  const elevatedSignals = model.rankingSummary.class_distribution
+    .filter((row) => ["very_high_development_signal", "high_development_signal"].includes(row.development_signal_class))
+    .reduce((sum, row) => sum + row.row_count, 0);
+  const managementAskContext = useMemo<CfsAiSearchRequest["filter_context"]>(() => ({
+    ...(USE_DEMO_DATA
+      ? { page_active_hotspots: hotspots.totalCount || null }
+      : { page_active_development_parcels: hotspots.totalCount || null }),
+    page_economic_review_parcels: economics.data?.summary.high_opportunity_count ?? null,
+    page_elevated_signals: sourceAvailable(model.source) ? elevatedSignals : null,
+    page_flood_review_parcels: sourceAvailable(flood.source) ? metric(flood.metrics, "review-required-parcels") : null,
+    page_high_signals: sourceAvailable(model.source) ? model.rankingSummary.class_distribution.find((row) => row.development_signal_class === "high_development_signal")?.row_count ?? null : null,
+    page_latest_permit_count: trendRows.at(-1)?.value ?? null,
+    page_latest_permit_period: trendRows.at(-1)?.label ?? null,
+    page_median_value_per_acre: economics.data?.summary.median_value_per_acre ?? null,
+    page_parcels_evaluated: sourceAvailable(model.source) ? model.rankingSummary.unique_parcel_count : null,
+    page_permit_records: development.totalPermits || null,
+    page_school_assignment_review: sourceAvailable(schools.source) ? metric(schools.metrics, "assignment-review") : null,
+    page_top_hotspot_label: hotspotRows.at(0)?.label ?? null,
+    page_top_hotspot_permits: hotspotRows.at(0)?.value ?? null,
+    page_total_assessed_value: economics.data?.summary.total_assessed_value ?? null,
+    page_total_economic_parcels: economics.data?.summary.total_parcels_analyzed ?? null,
+    page_very_high_signals: sourceAvailable(model.source) ? model.rankingSummary.class_distribution.find((row) => row.development_signal_class === "very_high_development_signal")?.row_count ?? null : null,
+  }), [development.source, development.totalPermits, economics.data, elevatedSignals, flood.metrics, flood.source, hotspotRows, hotspots.source, hotspots.totalCount, model.rankingSummary, model.source, schools.metrics, schools.source, trendRows]);
+
+  useEffect(() => onAskContextChange?.(managementAskContext), [managementAskContext, onAskContextChange]);
 
   const openPlanningBuilder = (parcelId?: string, signal?: ModelResearchPreviewMarker) => {
     window.history.pushState(null, "", "/?app=planning");

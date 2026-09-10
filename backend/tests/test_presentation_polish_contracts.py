@@ -14,12 +14,12 @@ def _read(path: str) -> str:
 def test_ask_cfs_panel_has_presentation_error_states() -> None:
     source = _read("src/components/dashboard/AskCfsPanel.tsx")
 
-    assert "CFS data service is unavailable" in source
+    assert "Live data service is unavailable" in source
     assert "presentation timeout" in source
-    assert "OpenAI enhancement is temporarily unavailable" in source
+    assert "Live AI explanation is temporarily unavailable" in source
     assert "latestRequestId" in source
     assert "Sources &amp; evidence" in source
-    assert "Technical details" in source
+    assert "Technical details" not in source
 
 
 def test_economics_dashboard_and_powerbi_are_segmented_for_presentation() -> None:

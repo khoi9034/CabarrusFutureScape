@@ -182,7 +182,7 @@ class CfsAiSearchResponse(BaseModel):
     limitations: list[str] = Field(default_factory=list)
     official_data_still_needed: list[str] = Field(default_factory=list)
     powerbi_actions: dict[str, Any] | None = None
-    prompt_version: str = "ask-cfs-2026-08-27"
+    prompt_version: str = "ask-insights-2026-09-10"
     provider: CfsAiProvider = "none"
     provider_status: str | None = None
     provenance: dict[str, Any] = Field(default_factory=dict)

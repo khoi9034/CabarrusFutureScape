@@ -241,8 +241,15 @@ def ai_status() -> dict[str, Any]:
 
 
 def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | None = None) -> CfsAiContext:
-    cache_key = f"payload_{request.app_mode if request else 'planning'}"
-    expires_key = f"expires_at_{request.app_mode if request else 'planning'}"
+    context_kind = (
+        "management"
+        if request and request.filter_context.get("experience") == "management"
+        else request.app_mode
+        if request
+        else "planning"
+    )
+    cache_key = f"payload_{context_kind}"
+    expires_key = f"expires_at_{context_kind}"
     cached = _ASK_CFS_CONTEXT_CACHE.get(cache_key)
     expires_at = _ASK_CFS_CONTEXT_CACHE.get(expires_key)
     if (
@@ -290,7 +297,15 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
         )
     context["indicator_summary"] = {}
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
-    if request and request.app_mode == "economics":
+    management_section = (
+        request.filter_context.get("management_section")
+        if request and request.filter_context.get("experience") == "management"
+        else None
+    )
+    if request and (
+        request.app_mode == "economics"
+        or management_section in {"overview", "economic-insights"}
+    ):
         if _db is None:
             context["context_freshness"] = "fallback_partial"
             context["caveats"].append("Economics context is unavailable, so CFS used data-needed economics guidance.")

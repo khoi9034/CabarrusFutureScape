@@ -200,6 +200,8 @@ async function searchDemoCfsAi(
   }
 
   const context = await buildDemoAiContext();
+  const managementResponse = demoManagementAnswer(request, context);
+  if (managementResponse) return sanitizeDemoResponse(managementResponse);
   if (isDemoMapContextQuery(request)) {
     return sanitizeDemoResponse(await demoMapExtentAnswer(request));
   }
@@ -1830,6 +1832,96 @@ function demoSelectedSignalAnswer(
   return response;
 }
 
+function demoManagementAnswer(
+  request: CfsAiSearchRequest,
+  context: DemoAiContext,
+): CfsAiSearchResponse | null {
+  const filters = request.filter_context ?? {};
+  if (filters.experience !== "management") return null;
+  const query = request.query.toLowerCase();
+  const section = typeof filters.management_section === "string" ? filters.management_section : "overview";
+  const display = (key: string) => {
+    const value = filters[key];
+    return typeof value === "number" ? value.toLocaleString("en-US") : typeof value === "string" ? value : null;
+  };
+  const answer = (text: string, title: string, detail = text) => baseDemoResponse(
+    text,
+    resolveDemoDomains(request),
+    context.manifest.generated_at,
+    [evidence(title, detail, title, "limited")],
+    [],
+  );
+
+  if (/school/.test(query) && /(mean|limited|why|what is)/.test(query)) {
+    const count = display("page_school_assignment_review");
+    return answer(
+      `School Assignment & Growth Context connects parcel school assignments with available school planning and growth information. ${count ? `The page currently shows ${count} parcel assignments for review. ` : ""}It is marked limited because official capacity, enrollment, and student-generation assumptions are incomplete; it is a coordination screen, not an enrollment forecast.`,
+      "Cabarrus County Schools planning context",
+    );
+  }
+  if (/(99 percent|99%|chance they will develop|probability)/.test(query)) {
+    return answer(
+      "No. An elevated Development Signal is a relative historical ranking, not a probability or forecast of future parcel development. A Top 1% group means the parcel ranked among the strongest 1% of evaluated historical patterns; it does not mean a 99% chance of development.",
+      "Development Signals model evidence",
+    );
+  }
+  if (section === "development-signals" && /very high/.test(query) && /(how many|number|those)/.test(query)) {
+    const veryHigh = display("page_very_high_signals") ?? "1,101";
+    return answer(`${veryHigh} are in the Very High signal band. That is a relative screening group, not a development probability.`, "Development Signals model evidence");
+  }
+  if (section === "development-signals" && /(elevated|5,501|5501|very high|those)/.test(query)) {
+    const total = display("page_elevated_signals") ?? "5,501";
+    const veryHigh = display("page_very_high_signals") ?? "1,101";
+    const high = display("page_high_signals") ?? "4,400";
+    return answer(
+      `${total} parcels are in the current High or Very High Development Signal bands: ${veryHigh} Very High and ${high} High. These are relative screening rankings based on historical patterns, not probabilities or predictions that development will occur.`,
+      "Development Signals model evidence",
+    );
+  }
+  if (section === "development-signals" && /(tested|training|validation|method|how did)/.test(query)) {
+    return answer(
+      "The current Development Signals research used 2014–2019 records for training, 2020–2021 for validation, and 2022 as the held-out test period. It checks whether higher-ranked historical patterns were more associated with later observed new-construction permits; the result supports screening, not parcel-level probability claims.",
+      "Development Signals model evidence",
+    );
+  }
+  if (section === "planning-insights" && /(biggest|top hotspot|most activity|most concentrated)/.test(query)) {
+    const label = display("page_top_hotspot_label");
+    const permits = display("page_top_hotspot_permits");
+    return answer(
+      label && permits ? `${label} is the highest-activity area currently shown, with ${permits} observed permit records. This is observed activity concentration, not a forecast.` : "The current page does not include a ranked hotspot result yet.",
+      "Cabarrus County permit activity",
+    );
+  }
+  if (section === "economic-insights" && /(high opportunity|opportunity mean|opportunity class)/.test(query)) {
+    const count = display("page_economic_review_parcels") ?? "an unavailable number of";
+    return answer(
+      `High opportunity means a parcel meets the current Cabarrus Insights screening pattern for stronger economic review; ${count} parcels are flagged on this page. It is not an appraisal, approval recommendation, or investment forecast.`,
+      "Cabarrus County parcel economic context",
+    );
+  }
+  if (/(give me the numbers|explain these numbers|numbers on this page|key numbers)/.test(query)) {
+    const keySets: Record<string, Array<[string, string]>> = {
+      overview: [["Permit records", "page_permit_records"], ["Active development parcels", "page_active_development_parcels"], ["Active hotspots", "page_active_hotspots"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"], ["Elevated Development Signals", "page_elevated_signals"], ["Parcels flagged for economic review", "page_economic_review_parcels"]],
+      "planning-insights": [["Permit records", "page_permit_records"], ["Active development parcels", "page_active_development_parcels"], ["Active hotspots", "page_active_hotspots"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"]],
+      "economic-insights": [["Parcels analyzed", "page_total_economic_parcels"], ["Parcels flagged for economic review", "page_economic_review_parcels"], ["Median value per acre", "page_median_value_per_acre"], ["Total assessed value", "page_total_assessed_value"]],
+      "development-signals": [["Parcels evaluated", "page_parcels_evaluated"], ["Very High signals", "page_very_high_signals"], ["High signals", "page_high_signals"], ["Elevated Development Signals", "page_elevated_signals"]],
+    };
+    const rows = (keySets[section] ?? keySets.overview).flatMap(([label, key]) => {
+      const value = display(key);
+      return value ? [`${label}: ${value}`] : [];
+    });
+    return answer(`Here are the key numbers currently shown on this page:\n${bullets(rows.length ? rows : ["Current page values are not available yet."])}`, "Current Management page", rows.join("; "));
+  }
+  if (/(planning director|leadership|care about|needs attention|summarize this page)/.test(query)) {
+    const rows = [["Permit records", "page_permit_records"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"], ["Elevated Development Signals", "page_elevated_signals"], ["Economic review parcels", "page_economic_review_parcels"]].flatMap(([label, key]) => {
+      const value = display(key);
+      return value ? [`${label}: ${value}`] : [];
+    });
+    return answer(`Leadership should focus on the largest current review workloads, while keeping their limits clear:\n${bullets(rows.length ? rows : ["Current Management values are still loading."])}\nThese are screening and coordination signals; parcel-specific decisions still require source review.`, "Current Management page", rows.join("; "));
+  }
+  return null;
+}
+
 function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
   const permitSignal = firstDemoSignal(context, "development_activity");
   const annual = context.trends.trends.annual_trends ?? [];
@@ -2282,15 +2374,16 @@ function baseDemoResponse(
   evidenceItems: CfsAiEvidenceItem[],
   actions: string[],
 ): CfsAiSearchResponse {
+  const caveats = [
+    "Portfolio Demo uses a cached demo extract.",
+    ...(domains.includes("permits") ? ["Observed permit activity is a planning signal, not a prediction."] : []),
+    ...(domains.includes("schools") ? ["School planning context is not an official enrollment forecast."] : []),
+    ...(domains.includes("model_lab") ? ["Development Signals are relative research rankings, not probabilities."] : []),
+  ];
   return {
     answer,
     as_of: asOf,
-    caveats: [
-      "Portfolio Demo uses a cached demo extract.",
-      "Observed permit activity is a planning signal, not a prediction.",
-      "Preliminary school capacity watch is not an official enrollment forecast.",
-      "Model Lab is internal research only; no exact probabilities are shown.",
-    ],
+    caveats,
     dashboard_actions: dashboardActionsForDomains(domains),
     data_mode: "demo",
     domains,
@@ -2644,7 +2737,7 @@ function sanitizeDemoResponse(
       sanitized.caveats
         .filter((item) => /official|missing|not available/i.test(item))
         .slice(0, 4),
-    prompt_version: sanitized.prompt_version ?? "ask-cfs-2026-08-27",
+    prompt_version: sanitized.prompt_version ?? "ask-insights-2026-09-10",
     provenance: sanitized.provenance ?? {
       as_of: sanitized.as_of,
       data_origin: "sanitized_demo_extract",

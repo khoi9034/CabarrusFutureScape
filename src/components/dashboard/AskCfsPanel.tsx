@@ -140,6 +140,7 @@ export function AskCfsPanel({
     filterContext?.selected_feature_related_parcels,
     filterContext?.selected_feature_permit_count,
     filterContext?.selected_feature_analysis_period,
+    filterContext?.management_section,
     filterContext?.master_data_dataset_id,
     filterContext?.master_data_selected_fields,
     filterContext?.master_data_filters,
@@ -651,7 +652,7 @@ export function AskCfsPanel({
       {scopedIsLoading ? (
         <div className="rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs leading-5 text-slate-300">
           <span className="font-semibold text-[#9be9ff]">
-            Preparing grounded Insights briefing...
+            Preparing a grounded answer...
           </span>{" "}
           {loadingStageMessage(loadingStage)}
         </div>
@@ -862,6 +863,8 @@ function conversationTurnsFromMessages(
 }
 
 const safeAskCfsFilterKeys = [
+  "experience",
+  "management_section",
   "active_parcel_id",
   "active_project",
   "active_scenario",
@@ -944,7 +947,7 @@ function askCfsErrorMessage(error: unknown) {
       return "Local database is unavailable. Check local services, then retry.";
     }
     if (error.status === 429) {
-      return "OpenAI enhancement is temporarily unavailable. Ask Insights can still return grounded local analysis.";
+      return "Live AI explanation is temporarily unavailable. Showing the current Cabarrus Insights summary.";
     }
   }
   return getApiErrorDisplayMessage(
@@ -1027,7 +1030,6 @@ function AskCfsAnswer({
           </div>
         ) : null}
       </details>
-      <DataContext response={response} />
     </article>
   );
 }
@@ -1044,47 +1046,5 @@ function evidenceSourceLabel(source: string) {
   if (normalized.includes("school")) return "School context";
   if (normalized.includes("master") || normalized.includes("dataset")) return "Master Data workspace";
   if (normalized.includes("economic") || normalized.includes("tax")) return "Economics";
-  return source.replaceAll("_", " ").replaceAll(".", " · ");
-}
-
-function askCfsSource(response: CfsAiSearchResponse) {
-  const source =
-    response.data_source === "portfolio_demo_extract" || response.data_mode === "demo"
-      ? "Portfolio Demo · cached demo extract"
-      : response.data_source === "local_live_backend"
-        ? "Local live backend"
-        : response.data_source ?? "Insights context";
-  return source;
-}
-
-function formatAskCfsDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
-}
-
-function DataContext({ response }: { response: CfsAiSearchResponse }) {
-  const rows = [
-    ["Source", askCfsSource(response)],
-    ["Updated", response.as_of ? formatAskCfsDate(response.as_of) : "Not recorded"],
-    ["Freshness", response.context_freshness?.replaceAll("_", " ") ?? "Not recorded"],
-    ["Filters", response.filtered_context_summary ?? "Current workspace context"],
-    ["Provider", `${response.provider ?? "none"} · ${response.provider_status ?? "grounded"}`],
-    ["Request", response.request_id ?? "Not recorded"],
-    ["Prompt", response.prompt_version ?? "Not recorded"],
-  ];
-  return (
-    <details className="mt-4 border-t border-white/10 pt-4 text-xs">
-      <summary className="cursor-pointer font-semibold text-slate-300">
-        Technical details
-      </summary>
-      <dl className="mt-3 space-y-2 rounded-lg bg-white/[0.025] p-3">
-        {rows.map(([label, value]) => (
-          <div className="grid grid-cols-[4.25rem_minmax(0,1fr)] gap-2" key={label}>
-            <dt className="text-slate-500">{label}</dt>
-            <dd className="min-w-0 break-words text-slate-300">{value}</dd>
-          </div>
-        ))}
-      </dl>
-    </details>
-  );
+  return "Cabarrus Insights evidence";
 }
