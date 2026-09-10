@@ -622,7 +622,7 @@ async function goto(page, baseUrl, query) {
 }
 
 async function demoAliasChecks(page, baseUrl) {
-  await check("Home", "/demo redirects to the active three-workspace Demo Home", ["/demo", "workspace cards", "shared Ask CFS"], async () => {
+  await check("Home", "/demo redirects to the active two-experience Demo Home", ["/demo", "experience cards", "shared Ask CFS"], async () => {
     await acceptedNavigation(
       page,
       "goto",
@@ -632,9 +632,8 @@ async function demoAliasChecks(page, baseUrl) {
         const home = page.getByTestId("cfs-master-home");
         await home.waitFor();
         const expected = [
-          ["planning", "CFS Planning", "Open Planning", "/?app=planning"],
-          ["economics", "CFS Economics", "Open Economics", "/?app=economics"],
-          ["master-data", "CFS Master Data", "Open Master Data", "/?app=master-data"],
+          ["management", "CFS Management", "Open Management", "/?app=management&section=overview"],
+          ["builder", "CFS Builder", "Open Builder", "/?app=planning"],
         ];
         assert.equal(await home.locator('[data-testid^="cfs-home-card-"]').count(), expected.length);
         for (const [mode, title, action, href] of expected) {
@@ -1540,13 +1539,13 @@ async function assertSharedAskCfsDrawer(page, { appMode, label, question = null 
     await page.waitForFunction(
       () => getComputedStyle(
         document.querySelector('[data-testid="cfs-workspace-frame"]'),
-      ).paddingRight === "400px",
+      ).paddingRight === "368px",
     );
     assert.equal(
       await page.getByTestId("cfs-workspace-frame").evaluate(
         (element) => getComputedStyle(element).paddingRight,
       ),
-      "400px",
+      "368px",
       "Desktop Ask CFS did not reserve its docked workspace width.",
     );
   }

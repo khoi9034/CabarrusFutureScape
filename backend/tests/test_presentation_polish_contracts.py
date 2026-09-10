@@ -18,8 +18,8 @@ def test_ask_cfs_panel_has_presentation_error_states() -> None:
     assert "presentation timeout" in source
     assert "OpenAI enhancement is temporarily unavailable" in source
     assert "latestRequestId" in source
-    assert "Evidence used" in source
-    assert "OpenAI enhanced" in source
+    assert "Sources &amp; evidence" in source
+    assert "Technical details" in source
 
 
 def test_economics_dashboard_and_powerbi_are_segmented_for_presentation() -> None:

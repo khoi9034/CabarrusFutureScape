@@ -1001,20 +1001,19 @@ async function askQuestions(page, questions, { expectPersistence = true } = {}) 
     assert(body.answer?.trim().length > 20, "Ask CFS answer was empty.");
     assert(body.evidence?.length > 0, "Ask CFS answer had no evidence.");
     assert(body.caveats?.length > 0, "Ask CFS answer had no caveats.");
-    await panel.getByText("Grounded CFS analysis", { exact: true }).waitFor();
-    await panel.getByText(/^Evidence \([1-9]\d*\)$/).waitFor();
+    await panel.getByText("Ask CFS response", { exact: true }).waitFor();
+    await panel.getByText(/^Sources & evidence \([1-9]\d*\)$/).waitFor();
     await panel.getByText("Limitations", { exact: true }).waitFor();
   }
   return conversationId;
 }
 
-async function assertThreeWorkspaceHome(page) {
+async function assertTwoExperienceHome(page) {
   const home = page.getByTestId("cfs-master-home");
   await home.waitFor({ timeout: 45_000 });
   const expected = [
-    ["planning", "CFS Planning", "/?app=planning"],
-    ["economics", "CFS Economics", "/?app=economics"],
-    ["master-data", "CFS Master Data", "/?app=master-data"],
+    ["management", "CFS Management", "/?app=management&section=overview"],
+    ["builder", "CFS Builder", "/?app=planning"],
   ];
   assert.equal(await home.locator('[data-testid^="cfs-home-card-"]').count(), expected.length);
   for (const [mode, title, href] of expected) {
@@ -1052,13 +1051,13 @@ async function openSharedAskCfsDrawer(page, { appMode, label }) {
     await page.waitForFunction(
       () => getComputedStyle(
         document.querySelector('[data-testid="cfs-workspace-frame"]'),
-      ).paddingRight === "400px",
+      ).paddingRight === "368px",
     );
     assert.equal(
       await page.getByTestId("cfs-workspace-frame").evaluate(
         (element) => getComputedStyle(element).paddingRight,
       ),
-      "400px",
+      "368px",
       "Desktop Ask CFS did not reserve its docked workspace width.",
     );
   }
@@ -1231,7 +1230,7 @@ async function planningWorkflow(page) {
     assert.equal(reset.status(), 200, "Owned Ask CFS reset failed.");
     assert.equal((await reset.json()).data?.id, conversationId, "Ask CFS reset targeted a different conversation.");
     await askPanel
-      .getByText("Grounded CFS analysis", { exact: true })
+      .getByText("Ask CFS response", { exact: true })
       .waitFor({ state: "hidden" });
     await closeSharedAskCfsDrawer(page, drawer, "planning");
   });
@@ -1488,8 +1487,8 @@ async function navigationChecks(page) {
 }
 
 async function activeProductRouteChecks(page) {
-  await runCase("Home", "exactly three workspace cards and shared Ask CFS guidance", async () => {
-    await assertThreeWorkspaceHome(page);
+  await runCase("Home", "exactly two experience cards and shared Ask CFS guidance", async () => {
+    await assertTwoExperienceHome(page);
   });
 
   await runCase("Navigation", "legacy standalone Ask CFS route redirects to clean Home", async () => {
@@ -1497,7 +1496,7 @@ async function activeProductRouteChecks(page) {
     const generation = beginAcceptanceTransition(page);
     await page.goto(`${BASE_URL}/?app=ask-cfs`, { waitUntil: "domcontentloaded" });
     await page.waitForURL((url) => url.pathname === "/" && url.search === "", { timeout: 45_000 });
-    await assertThreeWorkspaceHome(page);
+    await assertTwoExperienceHome(page);
     await assertHealthyPage(page);
     completeAcceptanceTransition(page, generation);
     await resolveMapDiagnosticsForPage(page);
@@ -1533,7 +1532,7 @@ async function offlineChecks(browser) {
   await runCase("Home", "renders with loopback traffic only", async () => {
     const generation = beginAcceptanceTransition(page);
     await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-    await assertThreeWorkspaceHome(page);
+    await assertTwoExperienceHome(page);
     await assertHealthyPage(page);
     completeAcceptanceTransition(page, generation);
     await resolveMapDiagnosticsForPage(page);

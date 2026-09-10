@@ -6,6 +6,7 @@ import {
   Layers3,
   Sparkles,
 } from "lucide-react";
+import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 type ProductCard = {
   action: string;
@@ -71,7 +72,9 @@ export function CfsMasterHome() {
             Planning intelligence for decisions and day-to-day analysis.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            Portfolio demonstration using sanitized, cached public demo data where applicable; screening outputs are preliminary.
+            {USE_DEMO_DATA
+              ? "Portfolio demonstration using sanitized, cached public demo data; screening outputs are preliminary."
+              : "Connected to the local CFS intelligence service and governed planning data; screening outputs remain decision support."}
           </p>
         </div>
 

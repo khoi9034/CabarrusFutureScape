@@ -130,6 +130,7 @@ function ProductShell() {
     setProductMode,
   } = useDashboardState();
   const [askCfsOpen, setAskCfsOpen] = useState(false);
+  const [askCfsExpanded, setAskCfsExpanded] = useState(false);
   const [askCfsConfig, setAskCfsConfig] = useState<AskCfsPanelProps | null>(null);
   const [managementSection, setManagementSectionState] =
     useState<ManagementSection>("overview");
@@ -186,7 +187,7 @@ function ProductShell() {
       window.dispatchEvent(new Event("resize")),
     );
     return () => window.cancelAnimationFrame(frame);
-  }, [askCfsOpen]);
+  }, [askCfsExpanded, askCfsOpen]);
 
   useEffect(() => {
     const syncManagementSection = () => {
@@ -269,6 +270,14 @@ function ProductShell() {
   const sharedAskCfsProps: AskCfsPanelProps = {
     ...askCfsConfig,
     appMode: cfsAppMode === "management" ? "planning" : cfsAppMode,
+    contextLabel:
+      cfsAppMode === "management"
+        ? `Management · ${managementSectionLabels[managementSection]}`
+        : cfsAppMode === "economics"
+          ? "Economics workspace"
+          : cfsAppMode === "master-data"
+            ? "Master Data workspace"
+            : undefined,
     filterContext: {
       ...(askCfsConfig?.filterContext ?? {}),
       ...sharedAskCfsContext,
@@ -286,7 +295,7 @@ function ProductShell() {
       cfsAppMode === "management"
         ? managementSuggestedPrompts[managementSection]
         : askCfsConfig?.suggestedPromptsOverride,
-    visiblePromptCount: askCfsConfig?.visiblePromptCount ?? 4,
+    visiblePromptCount: Math.min(askCfsConfig?.visiblePromptCount ?? 3, 3),
   };
 
   return (
@@ -319,7 +328,10 @@ function ProductShell() {
       <div
         className={cn(
           "relative z-10 flex min-h-0 flex-1 flex-col transition-[padding-right] duration-200 ease-out",
-          askCfsOpen && "min-[1400px]:pr-[25rem]",
+          askCfsOpen &&
+            (askCfsExpanded
+              ? "min-[1400px]:pr-[34rem]"
+              : "min-[1400px]:pr-[23rem]"),
         )}
         data-testid="cfs-workspace-frame"
       >
@@ -407,7 +419,10 @@ function ProductShell() {
           <SharedAskCfsDrawer
             {...sharedAskCfsProps}
             appMode={cfsAppMode === "management" ? "planning" : cfsAppMode}
+            expanded={askCfsExpanded}
             onClose={() => setAskCfsOpen(false)}
+            onExpandedChange={setAskCfsExpanded}
+            onOpen={openAskCfs}
             open={askCfsOpen}
             workspaceLabel={cfsAppMode === "management" ? "Management" : undefined}
           />
@@ -422,26 +437,29 @@ const managementSuggestedPrompts: Record<ManagementSection, readonly string[]> =
     "Summarize the biggest issues for today's planning meeting.",
     "What changed in development activity?",
     "Which constraints need leadership attention?",
-    "Which data limitations should leadership understand?",
   ],
   "planning-insights": [
     "Why are these hotspots receiving attention?",
     "Which observed activity is most concentrated?",
     "Which constraints overlap current activity?",
-    "What should staff investigate in Builder?",
   ],
   "economic-insights": [
     "What are the major economic tradeoffs?",
     "Which opportunity classes are most common?",
     "What does the scenario comparison show?",
-    "Which economic data limitations matter?",
   ],
   "development-signals": [
     "Why is this area showing a stronger development signal?",
     "What do the top model drivers mean?",
     "How should leadership interpret validation?",
-    "Which model limitations require caution?",
   ],
+};
+
+const managementSectionLabels: Record<ManagementSection, string> = {
+  overview: "Overview",
+  "planning-insights": "Planning Insights",
+  "economic-insights": "Economic Insights",
+  "development-signals": "Development Signals",
 };
 
 function isManagementSection(value: string | null): value is ManagementSection {

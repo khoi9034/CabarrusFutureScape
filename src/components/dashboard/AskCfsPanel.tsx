@@ -30,6 +30,7 @@ export interface AskCfsExternalRequest {
 
 export interface AskCfsPanelProps {
   appMode?: AskCfsAppMode;
+  contextLabel?: string;
   externalRequest?: AskCfsExternalRequest | null;
   filterContext?: CfsAiSearchRequest["filter_context"];
   helperTextOverride?: string;
@@ -62,6 +63,7 @@ interface PendingAskPersistence {
 
 export function AskCfsPanel({
   appMode = "planning",
+  contextLabel,
   externalRequest,
   filterContext,
   helperTextOverride,
@@ -124,9 +126,6 @@ export function AskCfsPanel({
   const visiblePrompts = visiblePromptCount
     ? suggestedPrompts.slice(0, visiblePromptCount)
     : suggestedPrompts;
-  const hiddenPrompts = visiblePromptCount
-    ? suggestedPrompts.slice(visiblePromptCount)
-    : [];
   const contextScopeKey = [
     appMode,
     filterContext?.selected_parcel_id,
@@ -156,6 +155,7 @@ export function AskCfsPanel({
   const scopedIsLoading =
     loadingScope === contextScopeKey && isLoading;
   const lastTurn = scopedTurns.at(-1);
+  const historyTurns = scopedAnswer ? scopedTurns.slice(0, -1) : scopedTurns;
 
   useEffect(() => {
     if (activeScopeRef.current !== contextScopeKey) {
@@ -421,6 +421,7 @@ export function AskCfsPanel({
           ? activeFilterContext
           : undefined,
         mode: USE_DEMO_DATA ? "demo" : "live",
+        interaction_mode: requestOverrides.interaction_mode ?? "freeform",
         map_context: mapContext,
         query: trimmedQuery,
       });
@@ -601,57 +602,22 @@ export function AskCfsPanel({
 
   return (
     <section
-      className="min-w-0"
+      className="flex h-full min-w-0 flex-col"
       data-conversation-id={conversationId ?? undefined}
       data-provider={askCfsConversationRepository.provider}
     >
-      <div className="sticky top-0 z-10 -mx-1 bg-[#06101c] px-1 pb-3">
+      <div className="shrink-0 -mx-1 bg-[#06101c] px-1 pb-3">
         <p className="mb-2 text-xs leading-5 text-slate-400">{helperText}</p>
-        {mapAware ? (
+        {mapAware || contextLabel ? (
           <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9be9ff]" data-testid="ask-cfs-map-context">
-            <span className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/8 px-2 py-1">Context: Current Planning map</span>
+            <span className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/8 px-2 py-1">Context: {contextLabel ?? "Current Planning map"}</span>
             {lastMapContext ? <span className="rounded-full border border-white/10 px-2 py-1">{lastMapContext.visible_layers.filter((layer) => layer.visible).length} active layers</span> : null}
             {lastMapContext?.selected_parcel_id ? <span className="rounded-full border border-white/10 px-2 py-1">Parcel selected</span> : null}
           </div>
         ) : null}
-        <form
-          className="rounded-xl border border-white/12 bg-black/25 p-2 transition focus-within:border-[#68d8ff]/45 focus-within:ring-2 focus-within:ring-[#68d8ff]/10"
-          onSubmit={onSubmit}
-        >
-          <label className="sr-only" htmlFor={inputId}>
-            Ask CFS question
-          </label>
-          <textarea
-            className="block min-h-16 w-full resize-none bg-transparent px-1 py-1 text-sm leading-5 text-white outline-none placeholder:text-slate-500"
-            data-testid="ask-cfs-query"
-            id={inputId}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={inputPlaceholder}
-            rows={2}
-            value={query}
-          />
-          <div className="mt-1 flex items-center justify-between gap-2 border-t border-white/8 pt-2">
-            <span className="text-[10px] text-slate-500">
-              {USE_DEMO_DATA ? "Demo context" : "Grounded CFS context"}
-            </span>
-            <button
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#68d8ff]/30 bg-[#68d8ff]/12 px-3 py-2 text-xs font-semibold text-[#c6f4ff] transition hover:border-[#68d8ff]/55 hover:bg-[#68d8ff]/18 disabled:cursor-not-allowed disabled:opacity-50"
-              data-testid="ask-cfs-submit"
-              disabled={
-                scopedIsLoading ||
-                persistenceBusy ||
-                !query.trim() ||
-                !productAccessReady ||
-                !canUseAskCfs
-              }
-              type="submit"
-            >
-              {scopedIsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Ask
-            </button>
-          </div>
-        </form>
       </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
 
       {persistenceError || persistenceStatus ? (
         <div
@@ -711,6 +677,23 @@ export function AskCfsPanel({
         </div>
       ) : null}
 
+      {historyTurns.length ? (
+        <div className="mt-3 space-y-3" data-testid="ask-cfs-conversation-history">
+          {historyTurns.map((turn, index) => (
+            <div className="space-y-2" key={`${turn.query}-${index}`}>
+              <p className="ml-auto max-w-[90%] rounded-xl rounded-br-sm bg-[#5e8d83]/20 px-3 py-2 text-sm leading-5 text-slate-100">
+                {turn.query}
+              </p>
+              {turn.answer_summary ? (
+                <p className="rounded-xl rounded-bl-sm border border-white/8 bg-white/[0.035] px-3 py-2 text-sm leading-5 text-slate-300">
+                  {turn.answer_summary}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <div className="mt-3 flex flex-wrap gap-2">
         {visiblePrompts.map((prompt) => (
           <button
@@ -718,7 +701,7 @@ export function AskCfsPanel({
             key={prompt}
             onClick={() => {
               setQuery(prompt);
-              void submit(prompt);
+              void submit(prompt, { interaction_mode: "preset" });
             }}
             type="button"
           >
@@ -726,29 +709,6 @@ export function AskCfsPanel({
           </button>
         ))}
       </div>
-      {hiddenPrompts.length ? (
-        <details className="mt-2 rounded-lg border border-white/10 bg-white/[0.025] p-3">
-          <summary className="cursor-pointer text-xs font-semibold text-slate-300">
-            More prompts
-          </summary>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {hiddenPrompts.map((prompt) => (
-              <button
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
-                key={prompt}
-                onClick={() => {
-                  setQuery(prompt);
-                  void submit(prompt);
-                }}
-                type="button"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        </details>
-      ) : null}
-
       {scopedError ? (
         <div className="mt-4 flex flex-col gap-3 rounded-lg border border-[#f87171]/25 bg-[#f87171]/10 p-3 text-xs text-[#fecaca] sm:flex-row sm:items-center">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -763,7 +723,48 @@ export function AskCfsPanel({
         </div>
       ) : null}
 
-      {scopedAnswer ? <AskCfsAnswer response={scopedAnswer} /> : null}
+      {scopedAnswer ? (
+        <AskCfsAnswer question={lastTurn?.query ?? ""} response={scopedAnswer} />
+      ) : null}
+      </div>
+
+      <form
+        className="mt-3 shrink-0 rounded-xl border border-white/12 bg-black/25 p-2 transition focus-within:border-[#68d8ff]/45 focus-within:ring-2 focus-within:ring-[#68d8ff]/10"
+        onSubmit={onSubmit}
+      >
+        <label className="sr-only" htmlFor={inputId}>
+          Ask CFS question
+        </label>
+        <textarea
+          className="block min-h-16 w-full resize-none bg-transparent px-1 py-1 text-sm leading-5 text-white outline-none placeholder:text-slate-500"
+          data-testid="ask-cfs-query"
+          id={inputId}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={inputPlaceholder}
+          rows={2}
+          value={query}
+        />
+        <div className="mt-1 flex items-center justify-between gap-2 border-t border-white/8 pt-2">
+          <span className="text-[10px] text-slate-500">
+            {USE_DEMO_DATA ? "Demo context" : "Grounded CFS context"}
+          </span>
+          <button
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#68d8ff]/30 bg-[#68d8ff]/12 px-3 py-2 text-xs font-semibold text-[#c6f4ff] transition hover:border-[#68d8ff]/55 hover:bg-[#68d8ff]/18 disabled:cursor-not-allowed disabled:opacity-50"
+            data-testid="ask-cfs-submit"
+            disabled={
+              scopedIsLoading ||
+              persistenceBusy ||
+              !query.trim() ||
+              !productAccessReady ||
+              !canUseAskCfs
+            }
+            type="submit"
+          >
+            {scopedIsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            Ask
+          </button>
+        </div>
+      </form>
     </section>
   );
 }
@@ -958,33 +959,41 @@ function labelForTurn(turn: CfsAiConversationTurn) {
     : `"${turn.query}"`;
 }
 
-function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
-  const openAiFallbackActive =
+function AskCfsAnswer({
+  question,
+  response,
+}: {
+  question: string;
+  response: CfsAiSearchResponse;
+}) {
+  const liveAiFallbackActive =
     response.data_mode === "live" &&
     response.provider === "none" &&
-    response.caveats.some((caveat) =>
-      caveat.toLowerCase().includes("rate limit or quota"),
-    );
+    response.fallback_used;
 
   return (
     <article className="mt-4 border-t border-white/10 pt-4">
+      {question ? (
+        <div className="mb-3 ml-auto max-w-[90%] rounded-xl rounded-br-sm bg-[#5e8d83]/20 px-3 py-2 text-sm leading-5 text-slate-100">
+          {question}
+        </div>
+      ) : null}
       <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-[#9be9ff]">
           <FileSearch className="h-3.5 w-3.5" />
           {askCfsProviderLabel(response)}
       </div>
-      {openAiFallbackActive ? (
+      {liveAiFallbackActive ? (
         <p className="mb-3 rounded-lg border border-[#f6d98e]/20 bg-[#f6d98e]/10 px-3 py-2 text-xs text-[#f6d98e]">
-          OpenAI enhancement is unavailable due to rate limits; grounded CFS analysis remains active.
+          Live AI explanation is temporarily unavailable; showing the grounded CFS summary.
         </p>
       ) : null}
       <div className="whitespace-pre-line text-sm leading-6 text-slate-100">
         {response.answer}
       </div>
-      <InlineList title="Key findings" values={response.key_findings ?? []} />
-      <section className="mt-4 border-t border-white/10 pt-4">
-        <h3 className="text-xs font-semibold text-slate-300">
-          Evidence ({response.evidence.length})
-        </h3>
+      <details className="mt-4 border-t border-white/10 pt-4">
+        <summary className="cursor-pointer text-xs font-semibold text-slate-300">
+          Sources &amp; evidence ({response.evidence.length})
+        </summary>
         <div className="mt-3 space-y-3">
           {response.evidence.map((item) => (
             <div
@@ -999,85 +1008,43 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
               </div>
               <p className="mt-1.5 text-xs leading-5 text-slate-300">{item.detail}</p>
               <p className="mt-1 break-words text-[10px] leading-4 text-slate-500">
-                {item.source}
+                {evidenceSourceLabel(item.source)}
               </p>
             </div>
           ))}
         </div>
-      </section>
-      {response.interpretation ? (
-        <section className="mt-4 border-t border-white/10 pt-4">
-          <h3 className="text-xs font-semibold text-[#9be9ff]">Interpretation</h3>
-          <p className="mt-2 text-xs leading-5 text-slate-300">
-            {response.interpretation}
-          </p>
-        </section>
-      ) : null}
-      <InlineList
-        title="Limitations"
-        tone="amber"
-        values={response.limitations ?? response.caveats}
-      />
-      <InlineList
-        title="Recommended next look"
-        values={response.recommended_next_actions ?? response.suggested_actions}
-      />
-      <InlineList
-        title="Related context"
-        values={[...new Set([
-          ...response.related_layers,
-          ...(response.dashboard_actions?.recommended_layers ?? []),
-        ])]}
-      />
-      <InlineList
-        title="Follow-up questions"
-        values={response.suggested_follow_up_questions ?? []}
-      />
+        {response.caveats.length ? (
+          <div className="mt-4 border-t border-white/10 pt-3">
+            <h3 className="text-xs font-semibold text-[#f6d98e]">Limitations</h3>
+            <ul className="mt-2 space-y-1.5 text-xs leading-5 text-slate-300">
+              {response.caveats.map((caveat) => (
+                <li className="flex gap-2" key={caveat}>
+                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-current opacity-70" />
+                  <span>{caveat}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </details>
       <DataContext response={response} />
     </article>
   );
 }
 
-function InlineList({
-  title,
-  tone = "cyan",
-  values,
-}: {
-  title: string;
-  tone?: "amber" | "cyan";
-  values: string[];
-}) {
-  return (
-    <section className="mt-4 border-t border-white/10 pt-4">
-      <h3
-        className={
-          tone === "amber"
-            ? "text-xs font-semibold text-[#f6d98e]"
-            : "text-xs font-semibold text-[#9be9ff]"
-        }
-      >
-        {title}
-      </h3>
-      <ul className="mt-2 space-y-1.5 text-xs leading-5 text-slate-300">
-        {(values.length ? values : ["Not available from current context."]).map(
-          (value) => (
-            <li className="flex gap-2" key={value}>
-              <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-current opacity-70" />
-              <span>{value}</span>
-            </li>
-          ),
-        )}
-      </ul>
-    </section>
-  );
+function askCfsProviderLabel(response: CfsAiSearchResponse) {
+  return response.data_mode === "demo" ? "Ask CFS demo response" : "Ask CFS response";
 }
 
-function askCfsProviderLabel(response: CfsAiSearchResponse) {
-  if (response.data_mode === "demo") return "Cached demo analysis";
-  if (response.provider_status === "openai_enhanced" || response.provider === "openai") {
-    return "OpenAI enhanced";
-  }
-  return "Grounded CFS analysis";
+function evidenceSourceLabel(source: string) {
+  const normalized = source.toLowerCase();
+  if (normalized.includes("fema") || normalized.includes("flood")) return "FEMA Floodplain Review";
+  if (normalized.includes("permit") || normalized.includes("development")) return "Cabarrus permit activity";
+  if (normalized.includes("parcel")) return "Parcel data";
+  if (normalized.includes("school")) return "School context";
+  if (normalized.includes("master") || normalized.includes("dataset")) return "Master Data workspace";
+  if (normalized.includes("economic") || normalized.includes("tax")) return "CFS Economics";
+  return source.replaceAll("_", " ").replaceAll(".", " · ");
 }
 
 function askCfsSource(response: CfsAiSearchResponse) {
@@ -1108,7 +1075,7 @@ function DataContext({ response }: { response: CfsAiSearchResponse }) {
   return (
     <details className="mt-4 border-t border-white/10 pt-4 text-xs">
       <summary className="cursor-pointer font-semibold text-slate-300">
-        Data context
+        Technical details
       </summary>
       <dl className="mt-3 space-y-2 rounded-lg bg-white/[0.025] p-3">
         {rows.map(([label, value]) => (

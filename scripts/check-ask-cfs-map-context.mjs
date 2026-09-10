@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [panel, shell, scene, service, router, schema, types] = await Promise.all([
+const [panel, drawer, shell, scene, service, router, schema, types] = await Promise.all([
   readFile("src/components/dashboard/AskCfsPanel.tsx", "utf8"),
+  readFile("src/components/dashboard/SharedAskCfsDrawer.tsx", "utf8"),
   readFile("src/components/layout/AppShell.tsx", "utf8"),
   readFile("src/components/gis/SceneViewContainer.tsx", "utf8"),
   readFile("src/lib/aiSearchService.ts", "utf8"),
@@ -14,7 +15,13 @@ const [panel, shell, scene, service, router, schema, types] = await Promise.all(
 assert.match(shell, /mapAware: cfsAppMode === "planning"/);
 assert.match(panel, /captureAskCfsMapContext/);
 assert.match(panel, /map_context: mapContext/);
-assert.match(panel, /Context: Current Planning map/);
+assert.match(panel, /contextLabel \?\? "Current Planning map"/);
+assert.match(panel, /ask-cfs-conversation-history/);
+assert.match(drawer, /shared-ask-cfs-rail/);
+assert.match(drawer, /shared-ask-cfs-expand/);
+assert.match(drawer, /sm:w-\[23rem\]/);
+assert.match(drawer, /sm:w-\[34rem\]/);
+assert.match(shell, /Math\.min\(askCfsConfig\?\.visiblePromptCount \?\? 3, 3\)/);
 assert.match(scene, /title: layer\.title \|\| layer\.id/);
 assert.match(types, /interface CfsAiMapContext/);
 assert.match(schema, /class CfsAiMapContext/);

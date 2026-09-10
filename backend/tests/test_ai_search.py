@@ -530,6 +530,59 @@ def test_ai_search_provider_uses_configured_timeout(monkeypatch) -> None:
     assert response.timings_ms["provider_ms"] >= 0
 
 
+def test_ai_search_freeform_economics_guidance_uses_provider(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    def provider_call(*_args, **_kwargs):
+        calls["count"] += 1
+        return {"answer": "Start with the visible economic signals, then compare the active scenario assumptions against the supplied CFS evidence before drawing a planning conclusion."}
+
+    monkeypatch.setattr(ai_search_service, "_post_provider_json", provider_call)
+    response = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="configured-model",
+            cfs_ai_provider="openai",
+            cfs_ai_provider_timeout_seconds=6.0,
+            openai_api_key="test-key",
+        ),
+    ).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            interaction_mode="freeform",
+            query="What should I inspect first?",
+        ),
+        _context(),
+    )
+
+    assert calls["count"] == 1
+    assert response.provider == "openai"
+    assert response.answer_mode == "provider_enhanced"
+
+
+def test_ai_search_accepts_concise_provider_explanation(monkeypatch) -> None:
+    concise = (
+        "SFHA means Special Flood Hazard Area. In CFS it is screening context; "
+        "confirm parcel-specific requirements with the official FEMA and local sources."
+    )
+    monkeypatch.setattr(
+        ai_search_service,
+        "_post_provider_json",
+        lambda *_args, **_kwargs: {"answer": concise},
+    )
+    response = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="configured-model",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    ).search(CfsAiSearchRequest(query="What does SFHA mean?"), _context())
+
+    assert response.provider == "openai"
+    assert response.answer == concise
+
+
 def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
     calls = {"count": 0}
 
@@ -1118,6 +1171,7 @@ def test_ai_search_economics_product_guidance_prompt_returns_walkthrough() -> No
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
             app_mode="economics",
+            interaction_mode="preset",
             query="How should I use CFS Economics?",
         ),
         _context(),
@@ -1147,6 +1201,7 @@ def test_ai_search_economics_guidance_skips_provider(monkeypatch) -> None:
     ).search(
         CfsAiSearchRequest(
             app_mode="economics",
+            interaction_mode="preset",
             query="How should I use CFS Economics?",
         ),
         _context(),

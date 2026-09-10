@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, X } from "lucide-react";
+import { ChevronLeft, Maximize2, Minimize2, Sparkles, X } from "lucide-react";
 import {
   createContext,
   useContext,
@@ -57,6 +57,7 @@ export function SharedAskCfsSource(props: AskCfsPanelProps) {
   }, [
     context,
     props.appMode,
+    props.contextLabel,
     props.externalRequest,
     props.filterContext,
     props.helperTextOverride,
@@ -86,13 +87,19 @@ export function SharedAskCfsSource(props: AskCfsPanelProps) {
 }
 
 export function SharedAskCfsDrawer({
+  expanded,
   onClose,
+  onExpandedChange,
+  onOpen,
   open,
   workspaceLabel,
   ...panelProps
 }: AskCfsPanelProps & {
   onClose: () => void;
+  onExpandedChange: (expanded: boolean) => void;
+  onOpen: () => void;
   open: boolean;
+  expanded: boolean;
   workspaceLabel?: string;
 }) {
   const panelRef = useRef<HTMLElement | null>(null);
@@ -134,6 +141,20 @@ export function SharedAskCfsDrawer({
 
   return (
     <>
+      {!open ? (
+        <button
+          aria-controls="shared-ask-cfs-panel"
+          aria-label="Open Ask CFS"
+          className="fixed right-0 top-1/2 z-[70] hidden -translate-y-1/2 items-center gap-2 rounded-l-xl border border-r-0 border-[#35c98d]/25 bg-[#07131f]/95 px-2 py-4 text-[#baf5dc] shadow-[-10px_0_30px_rgba(0,0,0,0.28)] transition hover:bg-[#0a1b29] xl:flex"
+          data-testid="shared-ask-cfs-rail"
+          onClick={onOpen}
+          type="button"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <Sparkles className="h-4 w-4" />
+          <span className="sr-only">Ask CFS</span>
+        </button>
+      ) : null}
       <button
         aria-hidden="true"
         aria-label="Close Ask CFS"
@@ -148,10 +169,12 @@ export function SharedAskCfsDrawer({
       <aside
         aria-hidden={!open}
         aria-labelledby="shared-ask-cfs-title"
-        className={`fixed inset-y-0 right-0 z-[90] flex w-full flex-col overflow-hidden border-l border-[#35c98d]/24 bg-[#06101c]/98 text-slate-100 shadow-[-20px_0_55px_rgba(0,0,0,0.42)] transition-[transform,visibility] duration-200 ease-out sm:w-[25rem] xl:top-[var(--cfs-top-nav-height)] xl:h-[calc(100dvh-var(--cfs-top-nav-height))] min-[1400px]:shadow-none ${
+        className={`fixed inset-x-0 bottom-0 z-[90] flex h-[92dvh] flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[#35c98d]/24 bg-[#06101c]/98 text-slate-100 shadow-[-20px_0_55px_rgba(0,0,0,0.42)] transition-[width,transform,visibility] duration-200 ease-out sm:inset-y-0 sm:left-auto sm:h-auto sm:rounded-none sm:border-b sm:border-r-0 sm:w-[23rem] xl:top-[var(--cfs-top-nav-height)] xl:h-[calc(100dvh-var(--cfs-top-nav-height))] min-[1400px]:shadow-none ${
+          expanded ? "sm:w-[34rem]" : "sm:w-[23rem]"
+        } ${
           open
-            ? "visible translate-x-0"
-            : "invisible pointer-events-none translate-x-full"
+            ? "visible translate-x-0 translate-y-0"
+            : "invisible pointer-events-none translate-y-full sm:translate-x-full sm:translate-y-0"
         }`}
         data-testid="shared-ask-cfs-drawer"
         id="shared-ask-cfs-panel"
@@ -170,6 +193,16 @@ export function SharedAskCfsDrawer({
             </p>
           </div>
           <button
+            aria-label={expanded ? "Use compact Ask CFS panel" : "Expand Ask CFS panel"}
+            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70 sm:flex"
+            data-testid="shared-ask-cfs-expand"
+            onClick={() => onExpandedChange(!expanded)}
+            title={expanded ? "Use compact panel" : "Expand panel"}
+            type="button"
+          >
+            {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </button>
+          <button
             aria-label="Close Ask CFS"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70"
             data-testid="shared-ask-cfs-close"
@@ -179,7 +212,7 @@ export function SharedAskCfsDrawer({
             <X className="h-4 w-4" />
           </button>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5 pt-3 sm:px-5">
+        <div className="min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-3 sm:px-5">
           <AskCfsPanel
             {...panelProps}
             appMode={appMode}

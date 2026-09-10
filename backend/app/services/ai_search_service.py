@@ -340,7 +340,11 @@ class CfsAiSearchService:
         if request.app_mode == "economics" and request.request_type == "powerbi_report_plan":
             _log_ai_timing("deterministic_powerbi", fallback.timings_ms)
             return fallback
-        if request.app_mode == "economics" and _is_fast_economics_guidance_query(request.query):
+        if (
+            request.interaction_mode == "preset"
+            and request.app_mode == "economics"
+            and _is_fast_economics_guidance_query(request.query)
+        ):
             _log_ai_timing("deterministic_fast_guidance", fallback.timings_ms)
             return fallback
         provider = self._settings.cfs_ai_provider
@@ -500,6 +504,7 @@ class CfsAiSearchService:
                         {
                             "domains": domains,
                             "query": request.query,
+                            "interaction_mode": request.interaction_mode,
                             "filter_context": safe_filter_context(request.filter_context),
                             "conversation_context": [
                                 turn.model_dump(exclude_none=True)
@@ -3442,7 +3447,8 @@ def _school_area_list(rows: list[dict[str, Any]]) -> str:
 
 
 def _provider_answer_is_useful(provider_answer: str, fallback_answer: str) -> bool:
-    return len(provider_answer.strip()) >= min(500, max(240, len(fallback_answer) // 3))
+    del fallback_answer
+    return len(provider_answer.strip()) >= 80
 
 
 def _response(

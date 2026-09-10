@@ -113,6 +113,7 @@ class CfsAiSearchRequest(BaseModel):
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
     filter_context: dict[str, Any] = Field(default_factory=dict)
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)
+    interaction_mode: Literal["freeform", "preset"] = "freeform"
     map_context: CfsAiMapContext | None = None
     mode: Literal["demo", "live"] = "live"
     query: str = Field(min_length=1, max_length=500)
@@ -181,7 +182,7 @@ class CfsAiSearchResponse(BaseModel):
     limitations: list[str] = Field(default_factory=list)
     official_data_still_needed: list[str] = Field(default_factory=list)
     powerbi_actions: dict[str, Any] | None = None
-    prompt_version: str = "ask-cfs-2026-07-31"
+    prompt_version: str = "ask-cfs-2026-08-27"
     provider: CfsAiProvider = "none"
     provider_status: str | None = None
     provenance: dict[str, Any] = Field(default_factory=dict)

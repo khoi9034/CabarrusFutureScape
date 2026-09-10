@@ -432,8 +432,7 @@ export function EconomicsShell() {
         />
         {error ? (
           <div className="rounded-xl border border-[var(--econ-risk)]/30 bg-[var(--econ-risk)]/10 px-4 py-3 text-sm text-[#ffd1c2]">
-            Local economics data is unavailable. Confirm FastAPI is running at
-            http://127.0.0.1:8000 and /economics/intelligence is returning.
+            Economic intelligence is unavailable while the live data service is offline.
             {" "}
             <button
               className="font-semibold underline underline-offset-4"
@@ -1337,11 +1336,11 @@ function EconomicDashboardPage({
           <div className="grid gap-2 text-sm leading-6 text-[var(--econ-muted)] md:grid-cols-2">
             <MiniMetric label="Source mode" value={intelligence.source_mode ?? intelligence.mode} />
             <MiniMetric label="Context freshness" value={intelligence.context_freshness} />
-            <MiniMetric label="Endpoint checked" value="/economics/intelligence" />
+            <MiniMetric label="Service checked" value="Local economics service" />
             <MiniMetric label="Fallback reason" value={intelligence.fallback_reason ?? "Local economics context unavailable"} />
           </div>
           <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
-            Confirm FastAPI is running and /economics/intelligence returns parcel_economic_signals. CFS will not silently swap in demo data while local live mode is selected.
+            Retry the live service when it is available. CFS will not silently swap in demo data while local live mode is selected.
           </p>
         </EconPanel>
       ) : null}

@@ -565,7 +565,7 @@ async function seedRestartRecords(context) {
       const conversationId = productId(conversationCreated, "Restart Ask CFS conversation");
       remember("ask_cfs", "/api/v1/ask-cfs/conversations", conversationId);
       await stopAskIsolation();
-      await page.getByText("Grounded CFS analysis", { exact: true }).first().waitFor({ timeout: 90_000 });
+      await page.getByText("Ask CFS response", { exact: true }).first().waitFor({ timeout: 90_000 });
       await waitForProductTraffic(
         askTrafficStart,
         (entry) => entry.method === "POST" && entry.path === `/api/v1/ask-cfs/conversations/${conversationId}/messages`,
@@ -1355,7 +1355,7 @@ async function localAskCfs(context) {
       assert.equal(created.data.title.includes("<redacted>"), true);
       assert.equal(JSON.stringify(created.data).includes(secretMarker), false);
       expectPersistedFields(id, { title: created.data.title });
-      await page.getByText("Grounded CFS analysis", { exact: true }).first().waitFor({ timeout: 90_000 });
+      await page.getByText("Ask CFS response", { exact: true }).first().waitFor({ timeout: 90_000 });
       await page.getByTestId("ask-cfs-persistence-status").first().waitFor({ timeout: 30_000 });
 
       await query.fill("What should be reviewed next?");
@@ -2325,7 +2325,7 @@ async function demoChecks() {
       const query = page.getByTestId("ask-cfs-query").first();
       await query.fill("What should a demo reviewer inspect first?");
       await page.getByTestId("ask-cfs-submit").first().click();
-      await page.getByText("Cached demo analysis", { exact: true }).first().waitFor({ timeout: 90_000 });
+      await page.getByText("Ask CFS demo response", { exact: true }).first().waitFor({ timeout: 90_000 });
       await page.getByTestId("ask-cfs-reset").first().click();
 
       report.demo.session_keys = await page.evaluate(() => Object.keys(sessionStorage).sort());

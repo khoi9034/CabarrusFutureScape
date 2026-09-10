@@ -4,6 +4,10 @@
 
 Cabarrus FutureScape Demo-Ready Release Candidate
 
+Management is feature-frozen pending Planning Director feedback. This pass is
+limited to release-candidate reliability, clear evidence and provenance,
+Management-to-Builder handoffs, and presentation polish.
+
 Date: June 15, 2026
 
 ## Current Capabilities

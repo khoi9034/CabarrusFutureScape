@@ -20,6 +20,7 @@ export interface CfsAiSearchRequest {
     year_end?: number | null;
     year_start?: number | null;
   };
+  interaction_mode?: "freeform" | "preset";
   map_context?: CfsAiMapContext | null;
   mode?: "demo" | "live";
   query: string;

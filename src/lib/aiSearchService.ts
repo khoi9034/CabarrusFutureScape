@@ -2644,7 +2644,7 @@ function sanitizeDemoResponse(
       sanitized.caveats
         .filter((item) => /official|missing|not available/i.test(item))
         .slice(0, 4),
-    prompt_version: sanitized.prompt_version ?? "ask-cfs-2026-07-31",
+    prompt_version: sanitized.prompt_version ?? "ask-cfs-2026-08-27",
     provenance: sanitized.provenance ?? {
       as_of: sanitized.as_of,
       data_origin: "sanitized_demo_extract",

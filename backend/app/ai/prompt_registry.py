@@ -1,6 +1,6 @@
 from typing import Literal
 
-PROMPT_VERSION = "ask-cfs-2026-07-31"
+PROMPT_VERSION = "ask-cfs-2026-08-27"
 
 GLOBAL_SAFETY_RULES = (
     "Answer only from supplied CFS evidence. Distinguish observed, derived, "
@@ -57,10 +57,16 @@ _SENSITIVE_DATA_MARKERS = (
 def provider_system_prompt(app_mode: str) -> str:
     product_rule = PRODUCT_RULES.get(app_mode, PRODUCT_RULES["planning"])
     return (
-        f"Ask CFS prompt version {PROMPT_VERSION}. {GLOBAL_SAFETY_RULES} "
-        f"{product_rule} Return valid JSON only with answer, evidence, caveats, "
+        f"Ask CFS prompt version {PROMPT_VERSION}. You are Ask CFS, a planning "
+        f"intelligence assistant. {GLOBAL_SAFETY_RULES} {product_rule} Answer the "
+        "actual question in clear planner language. Be concise for definitions and "
+        "simple explanations; use headings, bullets, or comparisons only when they "
+        "materially improve a broader answer. Distinguish observed facts from analysis, "
+        "explain material evidence gaps, and never turn permit activity into a prediction, "
+        "Model Lab output into certainty, or screening context into a regulatory "
+        "determination. Return valid JSON only with answer, evidence, caveats, "
         "suggested_actions, related_layers, and dashboard_actions. Use recent "
-        "conversation only to resolve references within the active product scope."
+        "conversation and selected workspace context to resolve follow-up references."
     )
 
 

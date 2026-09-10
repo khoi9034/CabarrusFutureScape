@@ -159,13 +159,13 @@ const shell = read("src/components/economics/EconomicsShell.tsx");
 assertIncludes("src/components/economics/EconomicsShell.tsx", shell, "Land Due Diligence Screener");
 
 const home = read("src/components/layout/CfsMasterHome.tsx");
-const homeWorkspaceRoutes = [...home.matchAll(/href: "\/\?app=([^\"]+)"/g)].map((match) => match[1]);
+const homeWorkspaceRoutes = [...home.matchAll(/href: "([^\"]+)"/g)].map((match) => match[1]);
 assert(
-  homeWorkspaceRoutes.join(",") === "planning,economics,master-data",
-  "Demo Home must expose exactly three primary workspace cards",
+  homeWorkspaceRoutes.join(",") === "/?app=management&section=overview,/?app=planning",
+  "Demo Home must expose exactly Management and Builder",
 );
 assertIncludes("src/components/layout/CfsMasterHome.tsx", home, 'data-testid="cfs-home-shared-ask-cfs"');
-assertIncludes("src/components/layout/CfsMasterHome.tsx", home, "lg:grid-cols-3");
+assertIncludes("src/components/layout/CfsMasterHome.tsx", home, "md:grid-cols-2");
 assert(!home.includes("cfs-home-card-ask-cfs"), "Demo Home still exposes Ask CFS as a primary card");
 assert(!home.includes("xl:grid-cols-4"), "Demo Home still reserves a fourth card column");
 
