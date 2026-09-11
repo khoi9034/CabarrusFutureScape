@@ -73,17 +73,7 @@ export function SharedAskCfsSource(props: AskCfsPanelProps) {
     if (externalRequestId !== undefined) context?.onOpen();
   }, [context, externalRequestId]);
 
-  return (
-    <button
-      className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#35c98d]/30 bg-[#35c98d]/10 px-4 py-3 text-sm font-semibold text-[#baf5dc] transition hover:border-[#35c98d]/55 hover:bg-[#35c98d]/16 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70"
-      data-testid="shared-ask-cfs-inline-open"
-      onClick={context?.onOpen}
-      type="button"
-    >
-      <Sparkles className="h-4 w-4" />
-      Open Ask Insights
-    </button>
-  );
+  return null;
 }
 
 export function SharedAskCfsDrawer({

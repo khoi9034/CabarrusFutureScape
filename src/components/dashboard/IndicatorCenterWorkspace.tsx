@@ -931,14 +931,12 @@ function PlanningIndicatorCenterWorkspace() {
         snapshotSaving={snapshotSaving}
       />
 
-      <div className="mt-4">
-        <SharedAskCfsSource
-          appMode="planning"
-          externalRequest={askCfsExternalRequest}
-          filterContext={askCfsFilterContext}
-          onResponse={handleAskCfsResponse}
-        />
-      </div>
+      <SharedAskCfsSource
+        appMode="planning"
+        externalRequest={askCfsExternalRequest}
+        filterContext={askCfsFilterContext}
+        onResponse={handleAskCfsResponse}
+      />
 
       {indicatorIntelligenceError ? (
         <div className="mt-3 rounded-lg border border-[#f6d98e]/25 bg-[#f6d98e]/10 px-3 py-2 text-xs leading-5 text-[#f6d98e]">

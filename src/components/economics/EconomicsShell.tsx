@@ -944,19 +944,16 @@ function PowerBiToolsPage({
           Start Tutorial
         </button>
       </PageHeader>
-      <EconPanel title="Ask Insights · Economics" kicker="Ask first" tourId="tools-ask-cfs">
-        <p className="mb-3 text-sm leading-6 text-[var(--econ-muted)]">
-          Ask what to build, which rows to select, or how to turn Economics into a Power BI report.
-        </p>
-        <SharedAskCfsSource
-          appMode="economics"
-          onResponse={handleAskCfsResponse}
-          suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
-          visiblePromptCount={6}
-        />
-        {lastAskResponse ? (
+      <SharedAskCfsSource
+        appMode="economics"
+        onResponse={handleAskCfsResponse}
+        suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
+        visiblePromptCount={6}
+      />
+      {lastAskResponse ? (
+        <EconPanel title="Ask Insights · Economics" kicker="Report handoff" tourId="tools-ask-cfs">
           <button
-            className="mt-3 rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+            className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
             disabled={reportBucketMutationsDisabled}
             onClick={() =>
               onAddReportBucketItem(bucketItemFromAskResponse(lastAskResponse))
@@ -965,8 +962,8 @@ function PowerBiToolsPage({
           >
             Add Ask Insights answer to Report Bucket
           </button>
-        ) : null}
-      </EconPanel>
+        </EconPanel>
+      ) : null}
       <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
         <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
         <span>Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.</span>
@@ -1349,13 +1346,11 @@ function EconomicDashboardPage({
         parcelId={selectedParcelId}
         signal={selectedParcelSignal}
       />
-      <EconPanel title="Ask Insights · Economics" kicker="Ask first" tourId="ask-cfs">
-        <SharedAskCfsSource
-          appMode="economics"
-          filterContext={askCfsFilterContext}
-          visiblePromptCount={6}
-        />
-      </EconPanel>
+      <SharedAskCfsSource
+        appMode="economics"
+        filterContext={askCfsFilterContext}
+        visiblePromptCount={6}
+      />
       <section className="rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
         <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
           Presentation view
@@ -1702,20 +1697,20 @@ function EconomicsWorkspacePage({
         />
       </section>
       {embedded ? null : (
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-          <EconPanel title="Ask Insights · Economics" kicker="Analyst prompts">
-            <SharedAskCfsSource
-              appMode="economics"
-              suggestedPromptsOverride={askCfsEconomicsWorkspacePrompts}
-              visiblePromptCount={6}
-            />
-          </EconPanel>
-          <EconPanel title="Power BI / model handoff" kicker="Selection note">
-            <p className="text-sm leading-6 text-[var(--econ-muted)]">
-              Selected rows can become Power BI table filters, scenario model context, or decision-pack evidence.
-            </p>
-          </EconPanel>
-        </section>
+        <>
+          <SharedAskCfsSource
+            appMode="economics"
+            suggestedPromptsOverride={askCfsEconomicsWorkspacePrompts}
+            visiblePromptCount={6}
+          />
+          <section>
+            <EconPanel title="Power BI / model handoff" kicker="Selection note">
+              <p className="text-sm leading-6 text-[var(--econ-muted)]">
+                Selected rows can become Power BI table filters, scenario model context, or decision-pack evidence.
+              </p>
+            </EconPanel>
+          </section>
+        </>
       )}
     </>
   );
@@ -1842,13 +1837,11 @@ function EnterpriseWorkspacePage({
           />
         </div>
         {embedded ? null : (
-          <EconPanel title="Ask Insights · Economics" kicker="Assistant">
-            <SharedAskCfsSource
-              appMode="economics"
-              suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
-              visiblePromptCount={6}
-            />
-          </EconPanel>
+          <SharedAskCfsSource
+            appMode="economics"
+            suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
+            visiblePromptCount={6}
+          />
         )}
       </section>
     </>
@@ -2265,15 +2258,11 @@ function EconomicsPrintPage({
           </ul>
         </PrintSection>
       </article>
-      <section className="no-print">
-        <EconPanel title="Ask Insights · Economics" kicker="Snapshot support">
-          <SharedAskCfsSource
-            appMode="economics"
-            suggestedPromptsOverride={askCfsEconomicsPrintPrompts}
-            visiblePromptCount={6}
-          />
-        </EconPanel>
-      </section>
+      <SharedAskCfsSource
+        appMode="economics"
+        suggestedPromptsOverride={askCfsEconomicsPrintPrompts}
+        visiblePromptCount={6}
+      />
     </>
   );
 }

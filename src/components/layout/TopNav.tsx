@@ -881,7 +881,7 @@ export function TopNav({
             aria-expanded={askCfsOpen}
             aria-controls="shared-ask-cfs-panel"
             aria-label="Open Ask Insights"
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#35c98d]/28 bg-[#35c98d]/10 px-2.5 text-xs font-semibold text-[#baf5dc] transition hover:border-[#35c98d]/50 hover:bg-[#35c98d]/15 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70"
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#35c98d]/28 bg-[#35c98d]/10 px-2.5 text-xs font-semibold text-[#baf5dc] transition hover:border-[#35c98d]/50 hover:bg-[#35c98d]/15 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35c98d]/70 xl:hidden"
             data-testid="shared-ask-cfs-toggle"
             onClick={() => {
               setCommandPaletteOpen(false);
