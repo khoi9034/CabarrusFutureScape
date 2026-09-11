@@ -202,9 +202,14 @@ function ProductShell() {
   }, []);
 
   const setManagementSection = useCallback((section: ManagementSection) => {
+    setManagementAskContext({});
     setManagementSectionState(section);
     window.history.pushState(null, "", `/?app=management&section=${section}`);
   }, []);
+
+  useEffect(() => {
+    if (backendAvailability.status !== "healthy") setManagementAskContext({});
+  }, [backendAvailability.status]);
 
   if (!cfsAppMode) {
     return <CfsMasterHome />;
@@ -273,6 +278,7 @@ function ProductShell() {
   const sharedAskCfsProps: AskCfsPanelProps = {
     ...askCfsConfig,
     appMode: cfsAppMode === "management" ? "planning" : cfsAppMode,
+    backend: backendAvailability,
     contextLabel:
       cfsAppMode === "management"
         ? `Management · ${managementSectionLabels[managementSection]}`
@@ -560,7 +566,7 @@ function OverviewLandingPage({
     {
       icon: Gauge,
       purpose: "Monitoring dashboard for attention items.",
-      status: "Mission Control",
+      status: "Monitoring",
       title: "Indicator Center",
     },
     {

@@ -1899,7 +1899,7 @@ function demoManagementAnswer(
       "Cabarrus County parcel economic context",
     );
   }
-  if (/(give me the numbers|explain these numbers|numbers on this page|key numbers)/.test(query)) {
+  if (/(give me the numbers|give actual numbers|explain these numbers|numbers on this page|key numbers|main numbers|what does this page show)/.test(query)) {
     const keySets: Record<string, Array<[string, string]>> = {
       overview: [["Permit records", "page_permit_records"], ["Active development parcels", "page_active_development_parcels"], ["Active hotspots", "page_active_hotspots"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"], ["Elevated Development Signals", "page_elevated_signals"], ["Parcels flagged for economic review", "page_economic_review_parcels"]],
       "planning-insights": [["Permit records", "page_permit_records"], ["Active development parcels", "page_active_development_parcels"], ["Active hotspots", "page_active_hotspots"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"]],
@@ -2326,44 +2326,18 @@ function demoSelectedFeatureAnswer(
 }
 
 function demoGeneralAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
-  const watchlist = context.intelligence.watchlist ?? [];
   return baseDemoResponse(
-    briefing(
-      [
-        "Executive summary",
-        "Inspect the highest-priority watchlist items first, then move to data-needed blockers that limit confidence.",
-      ],
-      [
-        "Priority order",
-        bullets(
-          watchlist.length
-            ? watchlist
-                .slice(0, 5)
-                .map((signal) => `${signal.title} (${signal.status_band.replaceAll("_", " ")})`)
-            : [
-                "Development Activity.",
-                "School Utilization + Permit Pressure.",
-                "Floodplain Review.",
-                "Data Still Needed.",
-              ],
-        ),
-      ],
-      [
-        "Planning interpretation",
-        "This order puts elevated review and review signals ahead of lower-intensity monitoring, while keeping missing official data visible.",
-      ],
-      ["Inspect next", bullets(["Operational Watchlist.", "Development Hotspots.", "School Utilization + Permit Pressure.", "Floodplain Review.", "Data Still Needed."])],
-    ),
+    "I don't have enough approved evidence in the current page context to answer that question directly. Ask about a visible number, development activity, floodplain review, school planning context, economic screening, or Development Signals.",
     domains,
     context.manifest.generated_at,
     [
       evidence(
-        "Portfolio Demo",
-        context.manifest.caveat,
-        "public/demo-data/demo_manifest.json",
+        "Cabarrus Insights Demo evidence",
+        "The current Demo page context does not contain enough approved evidence for a direct answer.",
+        "Cabarrus Insights Demo evidence",
       ),
     ],
-    ["Inspect the Operational Watchlist, then open related Explore Countywide layers."],
+    ["Ask a more specific question about the information visible on this page."],
   );
 }
 

@@ -2,6 +2,8 @@
 
 import { AlertTriangle, FileSearch, Loader2, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { BackendRecoveryPanel } from "@/components/layout/BackendRecoveryPanel";
+import type { BackendAvailabilityController } from "@/hooks/useBackendAvailability";
 import {
   askCfsEconomicsSuggestedPrompts,
   askCfsMasterDataSuggestedPrompts,
@@ -30,6 +32,7 @@ export interface AskCfsExternalRequest {
 
 export interface AskCfsPanelProps {
   appMode?: AskCfsAppMode;
+  backend?: BackendAvailabilityController;
   contextLabel?: string;
   externalRequest?: AskCfsExternalRequest | null;
   filterContext?: CfsAiSearchRequest["filter_context"];
@@ -63,6 +66,7 @@ interface PendingAskPersistence {
 
 export function AskCfsPanel({
   appMode = "planning",
+  backend,
   contextLabel,
   externalRequest,
   filterContext,
@@ -105,6 +109,7 @@ export function AskCfsPanel({
     askCfsConversationRepository.provider === "demo" || can("ask_cfs:use");
   const productAccessReady =
     askCfsConversationRepository.provider === "demo" || principalStatus === "ready";
+  const liveDataBlocked = !USE_DEMO_DATA && Boolean(backend && backend.status !== "healthy");
   const suggestedPrompts = suggestedPromptsOverride ??
     (appMode === "economics"
       ? askCfsEconomicsSuggestedPrompts
@@ -159,6 +164,19 @@ export function AskCfsPanel({
   const historyTurns = scopedAnswer ? scopedTurns.slice(0, -1) : scopedTurns;
 
   useEffect(() => {
+    if (!liveDataBlocked) return;
+    latestRequestId.current += 1;
+    setAnswer(null);
+    setError(null);
+    setIsLoading(false);
+    setLoadingScope("");
+    setLastMapContext(null);
+    setPersistenceBusy(false);
+    setPersistenceError(null);
+    setPersistenceStatus(null);
+  }, [liveDataBlocked]);
+
+  useEffect(() => {
     if (activeScopeRef.current !== contextScopeKey) {
       activeScopeRef.current = contextScopeKey;
       latestRequestId.current += 1;
@@ -176,6 +194,7 @@ export function AskCfsPanel({
   }, [contextScopeKey]);
 
   useEffect(() => {
+    if (liveDataBlocked) return;
     if (!productAccessReady) {
       const timeout = window.setTimeout(() => {
         setPersistenceBusy(false);
@@ -292,6 +311,7 @@ export function AskCfsPanel({
   }, [
     canUseAskCfs,
     contextScopeKey,
+    liveDataBlocked,
     persistenceAttempt,
     principalError,
     principalRequestId,
@@ -395,7 +415,15 @@ export function AskCfsPanel({
     requestOverrides: Partial<CfsAiSearchRequest> = {},
   ) => {
     const trimmedQuery = nextQuery.trim();
-    if (!trimmedQuery || scopedIsLoading || persistenceBusy || !canUseAskCfs) return;
+    if (!trimmedQuery || scopedIsLoading || persistenceBusy) return;
+
+    if (liveDataBlocked) {
+      setContentScope(contextScopeKey);
+      setAnswer(null);
+      setError("Live County data is currently unavailable, so I can't verify the current information. Reconnect the local data service and I can answer from this page.");
+      return;
+    }
+    if (!canUseAskCfs) return;
 
     const requestId = latestRequestId.current + 1;
     const requestScope = contextScopeKey;
@@ -488,6 +516,7 @@ export function AskCfsPanel({
     canUseAskCfs,
     contextScopeKey,
     filterContext,
+    liveDataBlocked,
     onResponse,
     persistSafeTurn,
     persistenceBusy,
@@ -612,6 +641,7 @@ export function AskCfsPanel({
         {mapAware || contextLabel ? (
           <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9be9ff]" data-testid="ask-cfs-map-context">
             <span className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/8 px-2 py-1">Context: {contextLabel ?? "Current Planning map"}</span>
+            {liveDataBlocked ? <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-amber-200">Live data unavailable</span> : null}
             {lastMapContext ? <span className="rounded-full border border-white/10 px-2 py-1">{lastMapContext.visible_layers.filter((layer) => layer.visible).length} active layers</span> : null}
             {lastMapContext?.selected_parcel_id ? <span className="rounded-full border border-white/10 px-2 py-1">Parcel selected</span> : null}
           </div>
@@ -619,6 +649,12 @@ export function AskCfsPanel({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+
+      {liveDataBlocked && backend ? (
+        <div className="mt-3">
+          <BackendRecoveryPanel compact controller={backend} />
+        </div>
+      ) : null}
 
       {persistenceError || persistenceStatus ? (
         <div
@@ -658,7 +694,7 @@ export function AskCfsPanel({
         </div>
       ) : null}
 
-      {lastTurn ? (
+      {lastTurn && !liveDataBlocked ? (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs text-slate-300">
           <span className="font-semibold text-[#9be9ff]">Follow-up mode</span>
           <span>
@@ -680,6 +716,11 @@ export function AskCfsPanel({
 
       {historyTurns.length ? (
         <div className="mt-3 space-y-3" data-testid="ask-cfs-conversation-history">
+          {liveDataBlocked ? (
+            <p className="rounded-lg border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs leading-5 text-amber-100">
+              Historical conversation — these answers were generated before the outage and are not current evidence.
+            </p>
+          ) : null}
           {historyTurns.map((turn, index) => (
             <div className="space-y-2" key={`${turn.query}-${index}`}>
               <p className="ml-auto max-w-[90%] rounded-xl rounded-br-sm bg-[#5e8d83]/20 px-3 py-2 text-sm leading-5 text-slate-100">
@@ -716,10 +757,10 @@ export function AskCfsPanel({
           <span className="min-w-0 flex-1">{scopedError}</span>
           <button
             className="w-fit rounded border border-[#fecaca]/30 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#fee2e2] transition hover:border-[#fee2e2]/60"
-            onClick={() => void submit()}
+            onClick={() => liveDataBlocked ? void backend?.tryAgain() : void submit()}
             type="button"
           >
-            Retry
+            {liveDataBlocked ? "Try again" : "Retry"}
           </button>
         </div>
       ) : null}
@@ -756,8 +797,7 @@ export function AskCfsPanel({
               scopedIsLoading ||
               persistenceBusy ||
               !query.trim() ||
-              !productAccessReady ||
-              !canUseAskCfs
+              (!liveDataBlocked && (!productAccessReady || !canUseAskCfs))
             }
             type="submit"
           >

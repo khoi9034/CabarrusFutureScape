@@ -1728,7 +1728,7 @@ def _economics_walkthrough_answer(
                 [
                     "1. Overview - explain what CFS Economics is and how local live data differs from the portfolio demo cached demo extract.",
                     "2. Power BI & Tools - review economic tables, select useful rows, download CSV/JSON exports, and open scenario, planning-model, or decision-pack workflows.",
-                    "3. Economic Dashboard - monitor KPIs, watchlists, charts, data confidence, and Ask CFS Economics.",
+                    "3. Economic Dashboard - monitor KPIs, watchlists, charts, data confidence, and Ask Insights Economics.",
                     "4. Print - create a simple economic snapshot for presentation or review.",
                 ]
             ),
@@ -2133,7 +2133,7 @@ def _economics_powerbi_answer(
             "Report Bucket",
             _bullets(
                 [
-                    "Add useful chart recipes, report plans, Ask CFS answers, decision notes, or QA checklists to the Report Bucket.",
+                    "Add useful chart recipes, report plans, Ask Insights answers, decision notes, or QA checklists to the Report Bucket.",
                     "Toggle which bucket items should appear in Print.",
                     "Use Send Bucket to Print when the draft report outline is ready for a snapshot.",
                 ]
@@ -2740,7 +2740,7 @@ def _management_answer(
             "It combines available value, acreage, improvement, growth-pressure, infrastructure-burden, and constraint context. It is not an appraisal, approval recommendation, or investment forecast."
         )
         evidence = [_evidence("Parcel economic screening", f"{_fmt(count)} parcels are currently flagged for economic review.", "Cabarrus County parcel economic context", "limited")]
-    elif any(term in query for term in ("give me the numbers", "explain these numbers", "numbers on this page", "key numbers")):
+    elif any(term in query for term in ("give me the numbers", "give actual numbers", "explain these numbers", "numbers on this page", "key numbers", "main numbers", "what does this page show")):
         keys = (
             [
                 ("Permit records", "page_permit_records"),
@@ -3231,7 +3231,7 @@ def _flood_answer(
             _evidence(
                 "Floodplain Review",
                 f"{_fmt(constraint.get('high_severe_impact'))} high/severe review attention parcels if available.",
-                "indicator_summary.constraint_monitor",
+                "FEMA floodplain context",
             ),
         ],
         [
@@ -3322,7 +3322,7 @@ def _master_data_answer(
         ),
         (
             "Lineage and governance",
-            f"Lineage is reported from {lineage}. Ask CFS can explain approved metadata and aggregate results, but it cannot expose restricted fields, execute SQL, bypass permissions, or mutate authoritative data.",
+            f"Lineage is reported from {lineage}. Ask Insights can explain approved metadata and aggregate results, but it cannot expose restricted fields, execute SQL, bypass permissions, or mutate authoritative data.",
         ),
         (
             "Inspect next",
@@ -3355,7 +3355,7 @@ def _master_data_answer(
         ],
     )
     response.caveats.append(
-        "Master Data counts and selections are current UI session context, not independently re-queried evidence from Ask CFS."
+        "Master Data counts and selections are current UI session context, not independently re-queried evidence from Ask Insights."
     )
     return response
 
@@ -3412,7 +3412,7 @@ def _data_readiness_answer(
             _evidence(
                 "Data Still Needed",
                 f"{len(readiness)} priority missing datasets are tracked.",
-                "indicator_summary.data_readiness",
+                "Cabarrus Insights data readiness",
                 "available" if readiness else "not_available",
             ),
         ],
@@ -3521,37 +3521,9 @@ def _general_answer(
     context: CfsAiContext,
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
-    intelligence = context.get("indicator_intelligence", {})
-    watchlist = intelligence.get("watchlist", []) if isinstance(intelligence, dict) else []
-    top = [
-        f"{item.get('title', 'review signal')} ({str(item.get('status_band', 'review')).replace('_', ' ')})"
-        for item in watchlist[:5]
-    ]
-    answer = _briefing(
-        (
-            "Executive summary",
-            "Inspect the highest-priority watchlist items first, then move to data-needed blockers that limit confidence.",
-        ),
-        (
-            "Priority order",
-            _bullets(
-                top
-                or [
-                    "Development Activity.",
-                    "School Utilization + Permit Pressure.",
-                    "Floodplain Review.",
-                    "Data Still Needed.",
-                ]
-            ),
-        ),
-        (
-            "Planning interpretation",
-            "This order puts elevated review and review signals ahead of lower-intensity monitoring, while keeping missing official data visible.",
-        ),
-        (
-            "Inspect next",
-            _bullets(["Operational Watchlist.", "Development Hotspots.", "School Utilization + Permit Pressure.", "Floodplain Review.", "Data Still Needed."]),
-        ),
+    answer = (
+        "I don't have enough approved evidence in the current page context to answer that question directly. "
+        "Ask about a visible number, development activity, floodplain review, school planning context, economic screening, or Development Signals."
     )
     return _response(
         answer,
@@ -3560,14 +3532,13 @@ def _general_answer(
         request.mode,
         [
             _evidence(
-                "Mission Control",
-                "CFS summarizes countywide monitoring signals from existing CFS intelligence.",
-                "indicator_center",
+                "Cabarrus Insights evidence",
+                "The current page context does not contain enough approved evidence for a direct answer.",
+                "Cabarrus Insights evidence",
             ),
         ],
         [
-            "Inspect the Operational Watchlist first.",
-            "Open related Explore Countywide layers for map context.",
+            "Ask a more specific question about the information visible on this page.",
         ],
     )
 
@@ -3734,7 +3705,7 @@ def _safety_answer(
         "override CFS evidence and safety rules. I can answer a scoped Planning "
         "or Economics question using the available CFS evidence."
         if safety_kind == "prompt_injection"
-        else "I cannot provide credentials or private owner/contact data. Ask CFS "
+        else "I cannot provide credentials or private owner/contact data. Ask Insights "
         "can summarize non-private Planning or Economics evidence and identify "
         "the official source that should verify it."
     )
@@ -3747,7 +3718,7 @@ def _safety_answer(
             _evidence(
                 "Requested information",
                 "Restricted by the CFS privacy and evidence policy.",
-                "Ask CFS safety policy",
+                "Ask Insights safety policy",
                 "not_available",
             ),
         ],

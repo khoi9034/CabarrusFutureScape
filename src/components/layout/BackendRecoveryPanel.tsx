@@ -26,7 +26,7 @@ export function BackendRecoveryPanel({
       ? "Live data service unavailable. Please try again shortly."
       : starting
         ? "The local data service is checking its connection."
-        : "Management cannot currently reach the local data service.";
+        : "Cabarrus Insights cannot currently reach the local data service.";
 
   return (
     <section

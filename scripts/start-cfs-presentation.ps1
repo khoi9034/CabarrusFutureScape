@@ -357,8 +357,10 @@ try {
   }
   Write-Cfs "Frontend ready: HTTP $($frontendReady.StatusCode)."
 
-  Invoke-Checked -FailureMessage "Complete local API preflight failed." -Command {
-    node $ApiCheck
+  if (!$BackendOnly) {
+    Invoke-Checked -FailureMessage "Complete local API preflight failed." -Command {
+      node $ApiCheck
+    }
   }
 
   $aiStatus = Invoke-RestMethod -Uri "$ApiBaseUrl/ai/status" -TimeoutSec 15

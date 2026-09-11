@@ -8121,7 +8121,7 @@ type ReportBucketItem = {
   report_plan?: PowerBiGeneratedReportPlan;
   selected_for_print: boolean;
   server_id?: string;
-  source_page: "Ask CFS" | "CFS Investments" | "Economic Dashboard" | "Power BI & Tools" | "Print";
+  source_page: "Ask Insights" | "CFS Investments" | "Economic Dashboard" | "Power BI & Tools" | "Print";
   summary: string;
   title: string;
   type: ReportBucketItemType;
@@ -8221,6 +8221,8 @@ function reportBucketItemType(value: string): ReportBucketItemType {
 function reportBucketSourcePage(value: JsonValue | undefined): ReportBucketItem["source_page"] {
   switch (value) {
     case "Ask CFS":
+      return "Ask Insights";
+    case "Ask Insights":
     case "CFS Investments":
     case "Economic Dashboard":
     case "Power BI & Tools":
@@ -9817,7 +9819,7 @@ function bucketItemFromAskResponse(response: CfsAiSearchResponse): ReportBucketI
     caveats: response.caveats,
     content: [response.answer, suggestedActions ? `Suggested actions:\n${suggestedActions}` : ""].filter(Boolean).join("\n\n"),
     id: `ask-cfs-${slugifyReportTitle(title)}-${slugifyReportTitle(response.as_of ?? "session")}`,
-    source_page: "Ask CFS",
+    source_page: "Ask Insights",
     summary: response.powerbi_actions?.report_summary ?? response.answer.split("\n").find(Boolean) ?? "Ask Insights response.",
     title,
     type: response.powerbi_actions ? "report_plan" : "evidence_pack",

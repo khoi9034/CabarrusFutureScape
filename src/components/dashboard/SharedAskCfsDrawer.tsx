@@ -189,7 +189,11 @@ export function SharedAskCfsDrawer({
               Ask Insights · {workspaceLabel ?? workspaceLabels[appMode]}
             </h2>
             <p className="truncate text-xs text-slate-400">
-              Shared intelligence layer
+              {panelProps.backend?.status === "unavailable"
+                ? "Live data unavailable"
+                : panelProps.backend?.status === "starting"
+                  ? "Checking live data"
+                  : "Shared intelligence layer"}
             </p>
           </div>
           <button

@@ -401,8 +401,9 @@ def test_ai_search_inspect_first_prioritizes_watchlist() -> None:
         _context(),
     )
 
-    assert "Priority order" in response.answer
-    assert "Demo ES Capacity + Permit Context" in response.answer
+    assert response.answer.startswith("I don't have enough approved evidence")
+    assert "Executive summary" not in response.answer
+    assert response.evidence[0].title == "Cabarrus Insights evidence"
 
 
 def test_ai_search_dashboard_action_mappings() -> None:
@@ -882,6 +883,23 @@ def test_ai_search_management_numbers_answer_current_page_directly() -> None:
     assert "Elevated Development Signals: 5,501" in response.answer
     assert "Executive summary" not in response.answer
     assert "Priority order" not in response.answer
+
+
+def test_ai_search_management_navigation_questions_use_the_current_section() -> None:
+    signals = CfsAiSearchService(_settings()).search(
+        _management_request("what does this page show?", "development-signals"),
+        _context(),
+    )
+    economics = CfsAiSearchService(_settings()).search(
+        _management_request("what are the main numbers?", "economic-insights"),
+        _context(),
+    )
+
+    assert "Parcels evaluated: 110,017" in signals.answer
+    assert "Very High signals: 1,101" in signals.answer
+    assert "Permit records" not in signals.answer
+    assert "Parcels flagged for economic review: 14,328" in economics.answer
+    assert "Elevated Development Signals" not in economics.answer
 
 
 def test_ai_search_management_school_language_is_plain_and_grounded() -> None:
