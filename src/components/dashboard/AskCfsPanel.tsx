@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, FileSearch, Loader2, Send } from "lucide-react";
+import { AlertTriangle, FileSearch, Send, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { BackendRecoveryPanel } from "@/components/layout/BackendRecoveryPanel";
 import type { BackendAvailabilityController } from "@/hooks/useBackendAvailability";
@@ -40,6 +40,7 @@ export interface AskCfsPanelProps {
   inputId?: string;
   inputPlaceholderOverride?: string;
   mapAware?: boolean;
+  onWorkingChange?: (working: boolean) => void;
   onResponse?: (response: CfsAiSearchResponse) => void;
   suggestedPromptsOverride?: readonly string[];
   visiblePromptCount?: number;
@@ -74,6 +75,7 @@ export function AskCfsPanel({
   inputId = "ask-cfs-query",
   inputPlaceholderOverride,
   mapAware = false,
+  onWorkingChange,
   onResponse,
   suggestedPromptsOverride,
   visiblePromptCount,
@@ -124,10 +126,10 @@ export function AskCfsPanel({
         : "Search across indicators, layers, methodology, and cached planning signals.");
   const inputPlaceholder = inputPlaceholderOverride ??
     (appMode === "economics"
-      ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
+      ? "Ask about this economic view..."
       : appMode === "master-data"
-        ? "Ask about this dataset, approved fields, filters, joins, lineage, or exports..."
-        : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness...");
+        ? "Ask about this dataset..."
+        : "Ask about this view...");
   const visiblePrompts = visiblePromptCount
     ? suggestedPrompts.slice(0, visiblePromptCount)
     : suggestedPrompts;
@@ -162,6 +164,8 @@ export function AskCfsPanel({
     loadingScope === contextScopeKey && isLoading;
   const lastTurn = scopedTurns.at(-1);
   const historyTurns = scopedAnswer ? scopedTurns.slice(0, -1) : scopedTurns;
+
+  useEffect(() => onWorkingChange?.(scopedIsLoading), [onWorkingChange, scopedIsLoading]);
 
   useEffect(() => {
     if (!liveDataBlocked) return;
@@ -636,14 +640,14 @@ export function AskCfsPanel({
       data-conversation-id={conversationId ?? undefined}
       data-provider={askCfsConversationRepository.provider}
     >
-      <div className="shrink-0 -mx-1 bg-[#06101c] px-1 pb-3">
+      <div className="cfs-ask-context shrink-0 pb-3">
         <p className="mb-2 text-xs leading-5 text-slate-400">{helperText}</p>
         {mapAware || contextLabel ? (
-          <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9be9ff]" data-testid="ask-cfs-map-context">
-            <span className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/8 px-2 py-1">Context: {contextLabel ?? "Current Planning map"}</span>
+          <div className="mb-3 flex flex-wrap gap-1.5 text-[10px] font-semibold tracking-[0.04em] text-[#b7e6f1]" data-testid="ask-cfs-map-context">
+            <span className="cfs-ask-context-chip">{contextLabel ?? "Current map view"}</span>
             {liveDataBlocked ? <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-amber-200">Live data unavailable</span> : null}
-            {lastMapContext ? <span className="rounded-full border border-white/10 px-2 py-1">{lastMapContext.visible_layers.filter((layer) => layer.visible).length} active layers</span> : null}
-            {lastMapContext?.selected_parcel_id ? <span className="rounded-full border border-white/10 px-2 py-1">Parcel selected</span> : null}
+            {lastMapContext ? <span className="cfs-ask-context-chip">{lastMapContext.visible_layers.filter((layer) => layer.visible).length} active layers</span> : null}
+            {lastMapContext?.selected_parcel_id ? <span className="cfs-ask-context-chip">Parcel selected</span> : null}
           </div>
         ) : null}
       </div>
@@ -686,11 +690,22 @@ export function AskCfsPanel({
       ) : null}
 
       {scopedIsLoading ? (
-        <div className="rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs leading-5 text-slate-300">
-          <span className="font-semibold text-[#9be9ff]">
-            Preparing a grounded answer...
-          </span>{" "}
-          {loadingStageMessage(loadingStage)}
+        <div
+          aria-live="polite"
+          className="cfs-ask-loading rounded-xl border border-[#68d8ff]/15 bg-[#68d8ff]/[0.07] px-3 py-3 text-xs leading-5 text-slate-300"
+          data-testid="ask-cfs-working"
+          role="status"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="cfs-ask-insight-mark cfs-ask-insight-mark--working" aria-hidden="true">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            <span className="font-semibold text-[#b7edf8]">{loadingStageMessage(loadingStage, appMode, mapAware)}</span>
+          </div>
+          <div className="mt-3 space-y-1.5" aria-hidden="true">
+            <span className="cfs-ask-skeleton block h-1.5 w-[88%] rounded-full" />
+            <span className="cfs-ask-skeleton block h-1.5 w-[68%] rounded-full" />
+          </div>
         </div>
       ) : null}
 
@@ -723,11 +738,11 @@ export function AskCfsPanel({
           ) : null}
           {historyTurns.map((turn, index) => (
             <div className="space-y-2" key={`${turn.query}-${index}`}>
-              <p className="ml-auto max-w-[90%] rounded-xl rounded-br-sm bg-[#5e8d83]/20 px-3 py-2 text-sm leading-5 text-slate-100">
+              <p className="cfs-ask-user-bubble ml-auto max-w-[88%] rounded-xl rounded-br-sm px-3 py-2 text-sm leading-5 text-slate-100">
                 {turn.query}
               </p>
               {turn.answer_summary ? (
-                <p className="rounded-xl rounded-bl-sm border border-white/8 bg-white/[0.035] px-3 py-2 text-sm leading-5 text-slate-300">
+                <p className="border-l-2 border-[#68d8ff]/20 py-1 pl-3 text-sm leading-6 text-slate-300">
                   {turn.answer_summary}
                 </p>
               ) : null}
@@ -771,7 +786,7 @@ export function AskCfsPanel({
       </div>
 
       <form
-        className="mt-3 shrink-0 rounded-xl border border-white/12 bg-black/25 p-2 transition focus-within:border-[#68d8ff]/45 focus-within:ring-2 focus-within:ring-[#68d8ff]/10"
+        className="cfs-ask-composer mt-3 shrink-0 rounded-xl border border-white/12 p-2 transition focus-within:border-[#68d8ff]/45 focus-within:ring-2 focus-within:ring-[#68d8ff]/10"
         onSubmit={onSubmit}
       >
         <label className="sr-only" htmlFor={inputId}>
@@ -801,7 +816,7 @@ export function AskCfsPanel({
             }
             type="submit"
           >
-            {scopedIsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {scopedIsLoading ? <Sparkles className="cfs-ask-submit-working h-4 w-4" /> : <Send className="h-4 w-4" />}
             Ask
           </button>
         </div>
@@ -967,11 +982,14 @@ function askCfsPersistenceFailure(caught: unknown) {
   return { message: error.displayMessage, requestId: error.requestId };
 }
 
-function loadingStageMessage(stage: number) {
-  if (USE_DEMO_DATA) return "Using cached demo intelligence context.";
-  if (stage >= 2) return "Enhancing explanation if the provider responds in time.";
-  if (stage >= 1) return "Preparing grounded local analysis.";
-  return "Loading Insights context.";
+function loadingStageMessage(stage: number, appMode: AskCfsAppMode, mapAware: boolean) {
+  if (stage >= 2) return "Preparing response...";
+  if (USE_DEMO_DATA) return "Reviewing demo evidence...";
+  if (stage >= 1) return "Checking planning evidence...";
+  if (mapAware) return "Reviewing current map...";
+  if (appMode === "economics") return "Analyzing economic context...";
+  if (appMode === "master-data") return "Reviewing governed data...";
+  return "Analyzing current page...";
 }
 
 function askCfsErrorMessage(error: unknown) {
@@ -1017,7 +1035,7 @@ function AskCfsAnswer({
   return (
     <article className="mt-4 border-t border-white/10 pt-4">
       {question ? (
-        <div className="mb-3 ml-auto max-w-[90%] rounded-xl rounded-br-sm bg-[#5e8d83]/20 px-3 py-2 text-sm leading-5 text-slate-100">
+        <div className="cfs-ask-user-bubble mb-3 ml-auto max-w-[88%] rounded-xl rounded-br-sm px-3 py-2 text-sm leading-5 text-slate-100">
           {question}
         </div>
       ) : null}

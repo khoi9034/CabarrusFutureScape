@@ -3,10 +3,12 @@
 import { ChevronLeft, Maximize2, Minimize2, Sparkles, X } from "lucide-react";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import {
@@ -93,7 +95,32 @@ export function SharedAskCfsDrawer({
   workspaceLabel?: string;
 }) {
   const panelRef = useRef<HTMLElement | null>(null);
+  const completionTimerRef = useRef<number | null>(null);
+  const wasWorkingRef = useRef(false);
+  const [working, setWorking] = useState(false);
+  const [justCompleted, setJustCompleted] = useState(false);
   const appMode = panelProps.appMode ?? "planning";
+  const statusText = working
+    ? workingStatus(appMode, panelProps.mapAware)
+    : panelProps.backend?.status === "unavailable"
+      ? "Live data unavailable"
+      : panelProps.backend?.status === "starting"
+        ? "Checking live data"
+        : "Ready for this view";
+
+  const handleWorkingChange = useCallback((nextWorking: boolean) => {
+    setWorking(nextWorking);
+    if (wasWorkingRef.current && !nextWorking) {
+      setJustCompleted(true);
+      if (completionTimerRef.current) window.clearTimeout(completionTimerRef.current);
+      completionTimerRef.current = window.setTimeout(() => setJustCompleted(false), 1600);
+    }
+    wasWorkingRef.current = nextWorking;
+  }, []);
+
+  useEffect(() => () => {
+    if (completionTimerRef.current) window.clearTimeout(completionTimerRef.current);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -135,14 +162,16 @@ export function SharedAskCfsDrawer({
         <button
           aria-controls="shared-ask-cfs-panel"
           aria-label="Open Ask Insights"
-          className="fixed right-0 top-1/2 z-[70] hidden -translate-y-1/2 items-center gap-2 rounded-l-xl border border-r-0 border-[#35c98d]/25 bg-[#07131f]/95 px-2 py-4 text-[#baf5dc] shadow-[-10px_0_30px_rgba(0,0,0,0.28)] transition hover:bg-[#0a1b29] xl:flex"
+          className={`cfs-ask-rail fixed right-0 top-1/2 z-[70] hidden -translate-y-1/2 flex-col items-center gap-2 rounded-l-xl border border-r-0 px-2 py-4 transition xl:flex ${working ? "cfs-ask-rail--working" : ""} ${justCompleted ? "cfs-ask-rail--complete" : ""}`}
           data-testid="shared-ask-cfs-rail"
           onClick={onOpen}
           type="button"
         >
-          <ChevronLeft className="h-4 w-4" />
-          <Sparkles className="h-4 w-4" />
-          <span className="sr-only">Ask Insights</span>
+          <ChevronLeft className="h-3.5 w-3.5" />
+          <span className={`cfs-ask-insight-mark ${working ? "cfs-ask-insight-mark--working" : ""}`} aria-hidden="true">
+            <Sparkles className="h-3.5 w-3.5" />
+          </span>
+          <span className="text-[10px] font-semibold tracking-[0.08em] [writing-mode:vertical-rl] rotate-180">Ask Insights</span>
         </button>
       ) : null}
       <button
@@ -170,20 +199,16 @@ export function SharedAskCfsDrawer({
         id="shared-ask-cfs-panel"
         ref={panelRef}
       >
-        <header className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-white/[0.035] px-4 py-3 sm:px-5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#35c98d]/30 bg-[#35c98d]/12 text-[#7ae6b8]">
+        <header className="cfs-ask-header flex shrink-0 items-center gap-3 border-b px-4 py-3 sm:px-5">
+          <span className={`cfs-ask-insight-mark h-9 w-9 ${working ? "cfs-ask-insight-mark--working" : ""}`} aria-hidden="true">
             <Sparkles className="h-4 w-4" />
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-lg font-semibold text-white" id="shared-ask-cfs-title">
               Ask Insights · {workspaceLabel ?? workspaceLabels[appMode]}
             </h2>
-            <p className="truncate text-xs text-slate-400">
-              {panelProps.backend?.status === "unavailable"
-                ? "Live data unavailable"
-                : panelProps.backend?.status === "starting"
-                  ? "Checking live data"
-                  : "Shared intelligence layer"}
+            <p aria-live="polite" className="truncate text-xs text-slate-400" role="status">
+              {statusText}
             </p>
           </div>
           <button
@@ -211,9 +236,17 @@ export function SharedAskCfsDrawer({
             {...panelProps}
             appMode={appMode}
             inputId="shared-ask-cfs-query"
+            onWorkingChange={handleWorkingChange}
           />
         </div>
       </aside>
     </>
   );
+}
+
+function workingStatus(appMode: NonNullable<AskCfsPanelProps["appMode"]>, mapAware?: boolean) {
+  if (mapAware) return "Reviewing current map...";
+  if (appMode === "economics") return "Checking economic evidence...";
+  if (appMode === "master-data") return "Reviewing governed data...";
+  return "Analyzing current page...";
 }
