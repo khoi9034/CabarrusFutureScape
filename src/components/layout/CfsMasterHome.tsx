@@ -23,21 +23,21 @@ const productCards: ProductCard[] = [
     action: "Open Management",
     accent: "cyan",
     description:
-      "Countywide insights, planning trends, economic conditions, development signals, and executive decision support.",
+      "See key planning and development information in one place instead of across separate reports and systems.",
     href: "/?app=management&section=overview",
     icon: BriefcaseBusiness,
     id: "management",
     title: "Management",
   },
   {
-    action: "Open Builder",
+    action: "Open Analyst View",
     accent: "gold",
     description:
-      "Explore maps, investigate parcels, analyze planning conditions, build datasets, run scenarios, and perform detailed staff analysis.",
+      "Explore County GIS data, investigate specific areas and parcels, and perform deeper analysis without manually pulling data each time.",
     href: "/?app=planning",
     icon: Layers3,
     id: "builder",
-    title: "Builder",
+    title: "Analyst",
   },
 ];
 
@@ -63,20 +63,31 @@ export function CfsMasterHome() {
       <section className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col justify-center gap-8">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-            Enterprise spatial intelligence
+            County planning intelligence
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-normal text-white sm:text-5xl">
             Cabarrus Insights
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            Planning intelligence for decisions and day-to-day analysis.
+            County planning and GIS intelligence in one place.
+          </p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            Cabarrus Insights brings together current County GIS, parcel, permit,
+            economic, and planning information into two connected experiences.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             {USE_DEMO_DATA
-              ? "Portfolio demonstration using sanitized, cached public demo data; screening outputs are preliminary."
-              : "Connected to the local data service and governed planning data; screening outputs remain decision support."}
+              ? "This demonstration uses sanitized County planning context; screening outputs are preliminary."
+              : "Permit activity includes Accela-derived permit records where available. Accela is one input among several County data sources."}
           </p>
         </div>
+
+        <p className="max-w-3xl text-sm leading-6 text-slate-300">
+          Bring planning information together. See the big picture in Management,
+          then investigate the details in Analyst View.
+          The Analyst View provides the detailed map, filters, parcel tools,
+          scenarios, data previews, and exports used for deeper staff analysis.
+        </p>
 
         <div className="grid gap-4 md:grid-cols-2 lg:gap-5" aria-label="Cabarrus Insights experiences">
           {productCards.map((card) => {
@@ -127,7 +138,7 @@ export function CfsMasterHome() {
             <Sparkles className="h-4 w-4" />
           </span>
           <p>
-            <span className="font-semibold text-white">Ask Insights</span> is available throughout the platform to explain data, analysis, and results in plain language.
+            <span className="font-semibold text-white">Ask Insights</span> helps explain the current leadership view or the map, parcel, dataset, and analysis in plain language.
           </p>
         </div>
       </section>

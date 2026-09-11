@@ -40,7 +40,7 @@ const commandWorkflows = [
     icon: FlaskConical,
     id: "model-lab",
     helper:
-      "Explore internal development model research and relative research signals.",
+      "Review how historical County patterns support the Development Signals screening bands.",
   },
 ];
 
@@ -188,12 +188,12 @@ export function OverviewCommandCenter() {
         <div className="flex min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-              {economicsMode ? "Economics" : "Cabarrus Insights Workspace"}
+              {economicsMode ? "Economics" : "Planning Analysis"}
             </p>
             <h1 className="mt-0.5 text-sm font-semibold leading-5 text-white md:text-base">
               {economicsMode
                 ? "Review economic layers, monitor fiscal opportunity, or compare scenario tradeoffs."
-                : "Explore countywide, review indicators, or open internal research."}
+                : "Explore County GIS layers, search parcels, review planning context, inspect development activity, and analyze specific areas."}
             </h1>
             {selectedParcelId ? (
               <p className="mt-0.5 text-[11px] leading-4 text-slate-500">
@@ -325,8 +325,8 @@ export function OverviewCommandCenter() {
               <p className="font-semibold text-[#d7ffe4]">
                 {planningSnapshot?.mapScreenshotStatus === "failed" ||
                 planningSnapshot?.mapScreenshotStatus === "unavailable"
-                  ? "Planning snapshot saved, but map image was unavailable."
-                  : "Planning snapshot saved."}
+                  ? "Saved Analysis created, but the map image was unavailable."
+                  : "Saved Analysis created."}
               </p>
               <p className="mt-1 text-[#9ff0bd]/80">
                 {overviewCommandMode === "indicatorCenter" ||
@@ -341,7 +341,7 @@ export function OverviewCommandCenter() {
                 onClick={openPlanningSnapshot}
                 type="button"
               >
-                Open Snapshot
+                Open Saved Analysis
                 <ArrowRight className="h-3 w-3" />
               </button>
               <button
@@ -354,7 +354,7 @@ export function OverviewCommandCenter() {
                 onClick={saveSnapshotForReport}
                 type="button"
               >
-                Save Another Snapshot
+                Save Another
               </button>
             </div>
           </div>
@@ -369,7 +369,7 @@ export function OverviewCommandCenter() {
         <p className="mt-2 text-[11px] leading-5 text-slate-600">
           {economicsMode
             ? "Use the global search bar for parcel lookup. Planning Snapshot can capture screening-level economic, fiscal/service, and scenario context."
-            : "Use the global search bar for parcel search. Planning Snapshot remains the top-level report builder."}
+            : "Use the global search bar for parcel search. Save a Snapshot when you want to keep the current analysis."}
         </p>
       )}
     </section>

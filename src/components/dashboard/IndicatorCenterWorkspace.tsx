@@ -2199,7 +2199,7 @@ function relatedLayersForGroup(groupId: IndicatorCenterGroupId, label = "") {
     "data-gaps": ["Data Still Needed", "Methodology"],
     "development-activity": ["Development Hotspots"],
     "flood-review": ["Floodplain Review"],
-    "model-research": ["Model Lab Research Signals"],
+    "model-research": ["Development Signals"],
     "school-context": ["School Utilization + Permit Pressure", "Development Hotspots"],
     "utility-infrastructure": ["Utility Readiness", "Transportation Context"],
   };

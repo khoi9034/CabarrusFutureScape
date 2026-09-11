@@ -3442,7 +3442,7 @@ function buildExecutiveKeyStatistics(
     return trimReportStats([
       {
         label: "Snapshot type",
-        value: "Model Lab Research Snapshot",
+        value: "Development Signals analysis",
       },
       {
         caveat: "Relative research context only.",

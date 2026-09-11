@@ -162,7 +162,7 @@ const home = read("src/components/layout/CfsMasterHome.tsx");
 const homeWorkspaceRoutes = [...home.matchAll(/href: "([^\"]+)"/g)].map((match) => match[1]);
 assert(
   homeWorkspaceRoutes.join(",") === "/?app=management&section=overview,/?app=planning",
-  "Demo Home must expose exactly Management and Builder",
+  "Demo Home must expose exactly Management and Analyst",
 );
 assertIncludes("src/components/layout/CfsMasterHome.tsx", home, 'data-testid="cfs-home-shared-ask-cfs"');
 assertIncludes("src/components/layout/CfsMasterHome.tsx", home, "md:grid-cols-2");

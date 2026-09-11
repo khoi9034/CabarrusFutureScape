@@ -165,7 +165,7 @@ export function ManagementMapPreview({
             <p className="mt-2 text-sm font-semibold text-white">
               {state === "loading" ? "Loading county context…" : "Map unavailable"}
             </p>
-            {state === "error" ? <p className="mt-1 text-xs leading-5 text-slate-400">Open in Builder to continue the geographic review.</p> : null}
+            {state === "error" ? <p className="mt-1 text-xs leading-5 text-slate-400">Open in Analyst View to continue the geographic review.</p> : null}
           </div>
         </div>
       ) : null}

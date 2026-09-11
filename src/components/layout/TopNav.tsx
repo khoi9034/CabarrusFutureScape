@@ -72,12 +72,12 @@ const productModes: Array<{
   icon: typeof LayoutDashboard;
 }> = [
   {
-    description: "Countywide work area",
+    description: "County GIS and planning analysis",
     icon: Map,
     id: "workspace",
-    label: "Workspace",
+    label: "Planning",
     shortLabel: "Work",
-    title: "Live map workspace for countywide exploration and Model Lab",
+    title: "Explore County GIS layers, parcels, planning context, and development activity",
   },
   {
     description: "Executive reports",
@@ -136,15 +136,15 @@ const QUICK_SEARCH_MIN_LENGTH = 3;
 const DEMO_QUICK_SEARCH_SUGGESTION_LIMIT = 5;
 const builderModes = [
   {
-    description: "Growth pressure, permits, constraints, schools, and Model Lab.",
+    description: "County GIS layers, parcel tools, development activity, constraints, and schools.",
     id: "planning",
-    label: "Planning Intelligence",
+    label: "Planning",
     shortLabel: "Planning",
   },
   {
-    description: "Parcel economics, tax-base opportunity, public cost risk, and scenarios.",
+    description: "Parcel and assessed-value context, economic review, and scenarios.",
     id: "economics",
-    label: "Economic Intelligence",
+    label: "Economics",
     shortLabel: "Economics",
   },
   {
@@ -576,7 +576,7 @@ export function TopNav({
           >
             {[
               { icon: BriefcaseBusiness, id: "management" as const, label: "Management" },
-              { icon: Layers3, id: "builder" as const, label: "Builder" },
+              { icon: Layers3, id: "builder" as const, label: "Analyst" },
             ].map((experience) => {
               const Icon = experience.icon;
               const active = experience.id === "management" ? managementMode : builderMode;
@@ -631,7 +631,7 @@ export function TopNav({
           </nav>
         ) : (
           <nav
-            aria-label="Cabarrus Insights Builder workspaces"
+            aria-label="Cabarrus Insights Analyst workspaces"
             className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-3 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
           >
             {builderModes.map((mode) => {
@@ -946,7 +946,7 @@ export function TopNav({
                       Cabarrus Insights · Management
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-300">
-                      Leadership views summarize available evidence. Detailed controls remain in Builder.
+                      Leadership views summarize available evidence. Detailed controls remain in Analyst View.
                     </p>
                   </div>
                   <button

@@ -33,4 +33,4 @@ assert.equal(
   null,
 );
 
-console.log("PASS Management-to-Builder handoff contract");
+console.log("PASS Management-to-Analyst handoff contract");

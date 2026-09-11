@@ -718,7 +718,7 @@ function SnapshotModeControlsPanel({
     <div className="space-y-3">
       <section className="rounded-lg border border-white/10 bg-black/20 p-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-          Snapshot Builder
+          Saved Analysis
         </p>
         <h3 className="mt-1 text-sm font-semibold text-white">
           Choose what to capture
@@ -864,7 +864,7 @@ function formatRailModeLabel(mode: OverviewCommandMode) {
   }
 
   if (mode === "snapshot") {
-    return "Snapshot Builder";
+    return "Saved Analysis";
   }
 
   if (mode === "indicatorCenter") {
@@ -904,7 +904,7 @@ function getExpandedRailTitle(mode: OverviewCommandMode, economicsMode = false) 
   }
 
   if (mode === "snapshot") {
-    return "Snapshot Builder";
+    return "Saved Analysis";
   }
 
   if (mode === "indicatorCenter") {

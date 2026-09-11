@@ -454,7 +454,7 @@ export function MasterDataWorkspace({
         </button>
         <div className="mt-3 flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fe7ff]">Master Data extract builder</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fe7ff]">Master Data analysis</p>
             <h1 className="mt-1 text-3xl font-semibold text-white">{selectedDataset.name}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">{selectedDataset.description}</p>
           </div>
@@ -883,7 +883,7 @@ function WorkspaceHeader() {
     <header>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">Governed extracts</p>
       <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Master Data</h1>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">Select a controlled dataset, choose approved fields and filters, preview paginated records, and download a derived extract without changing the authoritative source.</p>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">Preview, filter, combine, and export governed County datasets without manually assembling the same information each time.</p>
     </header>
   );
 }

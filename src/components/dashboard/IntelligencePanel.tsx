@@ -468,7 +468,7 @@ function OverviewModeContent({
           ? "School Utilization Seed"
           : null,
         includeModelLabMapContext && modelResearchOverlayEnabled
-          ? `Model Lab Research Preview (${formatMapOverlayViewMode(
+          ? `Development Signals Preview (${formatMapOverlayViewMode(
               modelResearchViewMode,
             )})`
           : null,
@@ -1182,10 +1182,10 @@ function SnapshotCapturePanel({
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f0cd79]">
-            Snapshot Builder
+            Saved Analysis
           </p>
           <h3 className="mt-1 text-base font-semibold text-white">
-            Snapshot Builder mode active
+            Saved Analysis mode active
           </h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Click Save Snapshot to capture the current map and intelligence
@@ -2579,7 +2579,7 @@ function CountywideBrief({
           </span>
         </div>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Current best internal model research remains aggregate-only. No
+          Development Signals remain aggregate decision-support evidence. No
           parcel probability or ranking class is shown in Overview.
         </p>
       </div>
@@ -3792,7 +3792,7 @@ function getSnapshotFocusLabelForOverviewMode(
   }
 
   if (mode === "modelLab") {
-    return "Model Lab Research Snapshot";
+    return "Development Signals analysis";
   }
 
   if (mode === "countywide") {

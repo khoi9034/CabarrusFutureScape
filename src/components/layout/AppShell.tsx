@@ -325,8 +325,8 @@ function ProductShell() {
     },
     helperTextOverride:
       cfsAppMode === "management"
-        ? "Ask a question about the numbers, evidence, or meaning on this page."
-        : askCfsConfig?.helperTextOverride,
+        ? "Ask about the current leadership view."
+        : "Ask about the current map, parcel, dataset, or analysis.",
     inputPlaceholderOverride:
       cfsAppMode === "management"
         ? "Ask about this page..."
