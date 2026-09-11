@@ -375,6 +375,7 @@ function ProductShell() {
               : "min-[1400px]:pr-[23rem]"),
         )}
         data-testid="cfs-workspace-frame"
+        key={`cfs-workspace-data-${backendAvailability.refreshKey}`}
       >
       {cfsAppMode !== "management" || backendAvailability.status === "healthy" ? (
         <div className="px-4 pt-4 sm:px-6 lg:px-8">

@@ -82,12 +82,18 @@ export function useBackendAvailability(): BackendAvailabilityController {
       if (!response.ok) throw new Error("Local recovery request was rejected.");
 
       const deadline = Date.now() + restartTimeoutMs;
+      let consecutiveReadyChecks = 0;
       while (Date.now() < deadline) {
         await new Promise((resolve) => window.setTimeout(resolve, 1_000));
         if (await probe()) {
-          reconnect();
-          setNotice("Live data reconnected.");
-          return;
+          consecutiveReadyChecks += 1;
+          if (consecutiveReadyChecks >= 2) {
+            reconnect();
+            setNotice("Live data reconnected.");
+            return;
+          }
+        } else {
+          consecutiveReadyChecks = 0;
         }
       }
       throw new Error("Local recovery timed out.");

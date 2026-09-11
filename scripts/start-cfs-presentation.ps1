@@ -14,7 +14,6 @@ $Logs = Join-Path $Root "logs"
 $FrontendEnv = Join-Path $Root ".env.local"
 $StopScript = Join-Path $PSScriptRoot "stop-cfs-local.ps1"
 $DataCheck = Join-Path $PSScriptRoot "check_cfs_local_data.py"
-$ApiCheck = Join-Path $PSScriptRoot "check-local-apis.mjs"
 $VenvPython = Join-Path $Root ".venv\Scripts\python.exe"
 $Python = if ($env:CFS_PYTHON) {
   $env:CFS_PYTHON
@@ -23,6 +22,8 @@ $Python = if ($env:CFS_PYTHON) {
 } else {
   "python"
 }
+$Node = (Get-Command node -ErrorAction SilentlyContinue).Source
+$FrontendServer = Join-Path $Root ".next\standalone\server.js"
 $BuildMarker = Join-Path $Logs "cfs-presentation-build.json"
 $BuildLog = Join-Path $Logs "cfs-presentation-build.log"
 $BackendLog = Join-Path $Logs "cfs-presentation-backend.log"
@@ -155,6 +156,11 @@ function Test-PresentationBuildCurrent {
   if (!(Test-Path -LiteralPath $buildId) -or !(Test-Path -LiteralPath $BuildMarker)) {
     return $false
   }
+  if (!(Test-Path -LiteralPath (Join-Path $Root ".next\standalone\server.js")) -or
+      !(Test-Path -LiteralPath (Join-Path $Root ".next\standalone\.next\static")) -or
+      !(Test-Path -LiteralPath (Join-Path $Root ".next\standalone\public"))) {
+    return $false
+  }
 
   try {
     $marker = Get-Content -Raw -LiteralPath $BuildMarker | ConvertFrom-Json
@@ -210,6 +216,11 @@ function Build-Frontend {
     Pop-Location
   }
 
+  $standalone = Join-Path $Root ".next\standalone"
+  New-Item -ItemType Directory -Path (Join-Path $standalone ".next") -Force | Out-Null
+  Copy-Item -LiteralPath (Join-Path $Root ".next\static") -Destination (Join-Path $standalone ".next\static") -Recurse -Force
+  Copy-Item -LiteralPath (Join-Path $Root "public") -Destination (Join-Path $standalone "public") -Recurse -Force
+
   @{
     build_id = (Get-Content -Raw -LiteralPath (Join-Path $Root ".next\BUILD_ID")).Trim()
     built_at = (Get-Date).ToUniversalTime().ToString("o")
@@ -238,6 +249,25 @@ function Wait-Http {
   throw "Timed out waiting for $Url."
 }
 
+function Start-CfsDetachedProcess {
+  param(
+    [string]$Command,
+    [string]$WorkingDirectory
+  )
+
+  $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($Command))
+  $startup = New-CimInstance -ClassName Win32_ProcessStartup -ClientOnly -Property @{ ShowWindow = [uint16]0 }
+  $result = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{
+    CommandLine = "powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand $encoded"
+    CurrentDirectory = $WorkingDirectory
+    ProcessStartupInformation = $startup
+  }
+  if ($result.ReturnValue -ne 0 -or !$result.ProcessId) {
+    throw "Windows could not start the detached CFS process (code $($result.ReturnValue))."
+  }
+  return [pscustomobject]@{ Id = [int]$result.ProcessId }
+}
+
 function Start-Backend {
   $enabled = if ($EnableOpenAI) { "true" } else { "false" }
   $provider = if ($EnableOpenAI) { "openai" } else { "none" }
@@ -261,17 +291,19 @@ Set-Location -LiteralPath '$Backend'
 & '$Python' -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'
 "@
   Write-Cfs "Starting FastAPI in $(if ($EnableOpenAI) { 'optional OpenAI' } else { 'deterministic local' }) mode."
-  return Start-Process -FilePath "powershell.exe" -ArgumentList @(
-    "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", $command
-  ) -WindowStyle Hidden -PassThru
+  return Start-CfsDetachedProcess -Command $command -WorkingDirectory $Backend
 }
 
 function Start-Frontend {
-  $command = "Set-Location -LiteralPath '$Root'; npm.cmd run start -- -H 127.0.0.1 -p $FrontendPort *> '$FrontendLog'"
+  $command = @"
+Set-Location -LiteralPath '$Root'
+`$env:HOSTNAME='127.0.0.1'
+`$env:PORT='$FrontendPort'
+`$env:CFS_PROJECT_ROOT='$Root'
+& '$Node' '$FrontendServer' *> '$FrontendLog'
+"@
   Write-Cfs "Starting Next.js production server."
-  return Start-Process -FilePath "powershell.exe" -ArgumentList @(
-    "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", $command
-  ) -WindowStyle Hidden -PassThru
+  return Start-CfsDetachedProcess -Command $command -WorkingDirectory $Root
 }
 
 New-Item -ItemType Directory -Path $Logs -Force | Out-Null
@@ -319,8 +351,6 @@ try {
     } else {
       & $StopScript -CheckOnly
     }
-    if (!$BackendOnly) { Build-Frontend }
-
     if ($FrontendOnly) {
       & $StopScript -FrontendOnly
     } elseif ($BackendOnly) {
@@ -328,6 +358,8 @@ try {
     } else {
       & $StopScript
     }
+
+    if (!$BackendOnly) { Build-Frontend }
 
     if (!$FrontendOnly) {
       $backendStartedAt = Get-Date
@@ -349,18 +381,16 @@ try {
   }
   Write-Cfs "Backend ready: HTTP $($backendReady.StatusCode)."
 
-  $frontendReady = Wait-Http -Url $FrontendUrl -TimeoutSeconds 180
-  $frontendReadyMs = if ($frontendStartedAt) {
-    [math]::Round(((Get-Date) - $frontendStartedAt).TotalMilliseconds, 1)
-  } else {
-    0
-  }
-  Write-Cfs "Frontend ready: HTTP $($frontendReady.StatusCode)."
-
   if (!$BackendOnly) {
-    Invoke-Checked -FailureMessage "Complete local API preflight failed." -Command {
-      node $ApiCheck
+    $frontendReady = Wait-Http -Url $FrontendUrl -TimeoutSeconds 180
+    $frontendReadyMs = if ($frontendStartedAt) {
+      [math]::Round(((Get-Date) - $frontendStartedAt).TotalMilliseconds, 1)
+    } else {
+      0
     }
+    Write-Cfs "Frontend ready: HTTP $($frontendReady.StatusCode)."
+  } else {
+    $frontendReadyMs = 0
   }
 
   $aiStatus = Invoke-RestMethod -Uri "$ApiBaseUrl/ai/status" -TimeoutSec 15
