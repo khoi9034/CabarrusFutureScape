@@ -60,6 +60,10 @@ import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState"
 import { useBackendAvailability } from "@/hooks/useBackendAvailability";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import type { ParcelImageryAskContext } from "@/lib/api/imagery";
+import {
+  readManagementHandoff,
+  type ManagementHandoffContext,
+} from "@/lib/managementHandoff";
 import { cn } from "@/lib/utils";
 import type {
   CfsAppMode,
@@ -132,6 +136,8 @@ function ProductShell() {
   const [askCfsOpen, setAskCfsOpen] = useState(false);
   const [askCfsExpanded, setAskCfsExpanded] = useState(false);
   const [askCfsConfig, setAskCfsConfig] = useState<AskCfsPanelProps | null>(null);
+  const [managementHandoff, setManagementHandoff] =
+    useState<ManagementHandoffContext | null>(null);
   const [managementSection, setManagementSectionState] =
     useState<ManagementSection>("overview");
   const [managementAskContext, setManagementAskContext] =
@@ -190,6 +196,16 @@ function ProductShell() {
     );
     return () => window.cancelAnimationFrame(frame);
   }, [askCfsExpanded, askCfsOpen]);
+
+  useEffect(() => {
+    const syncManagementHandoff = () =>
+      setManagementHandoff(
+        readManagementHandoff(window.history.state, window.location.search),
+      );
+    syncManagementHandoff();
+    window.addEventListener("popstate", syncManagementHandoff);
+    return () => window.removeEventListener("popstate", syncManagementHandoff);
+  }, []);
 
   useEffect(() => {
     const syncManagementSection = () => {
@@ -260,17 +276,33 @@ function ProductShell() {
             selected_feature_id:
               selectedDevelopmentHotspotContext?.clusterId ??
               selectedDevelopmentHotspotContext?.officialParcelId ??
+              selectedModelResearchContext?.clusterId ??
+              selectedModelResearchContext?.officialParcelId ??
               null,
             selected_feature_label:
-              selectedDevelopmentHotspotContext?.areaLabel ?? null,
+              selectedDevelopmentHotspotContext?.areaLabel ??
+              selectedModelResearchContext?.approximateAreaLabel ??
+              null,
             selected_feature_permit_count:
               selectedDevelopmentHotspotContext?.totalPermitCount ?? null,
             selected_feature_related_parcels:
-              selectedDevelopmentHotspotContext?.parcelsRepresented ?? null,
+              selectedDevelopmentHotspotContext?.parcelsRepresented ??
+              selectedModelResearchContext?.representedFeatureCount ??
+              null,
             selected_feature_type: selectedDevelopmentHotspotContext
               ? "development_hotspot"
-              : null,
+              : selectedModelResearchContext
+                ? "development_signal"
+                : null,
+            selected_feature_signal_band:
+              selectedModelResearchContext?.researchRankBand ?? null,
+            selected_feature_top_drivers:
+              selectedModelResearchContext?.topDrivers.join(", ") ?? null,
             selected_parcel_id: selectedParcelId ?? null,
+            management_source_page:
+              managementHandoff?.sourceManagementPage ?? null,
+            management_source_insight:
+              managementHandoff?.sourceInsightType ?? null,
             imagery_available: parcelImageryAskContext?.imagery_available,
             imagery_capture_date: parcelImageryAskContext?.imagery_capture_date,
             imagery_directions: parcelImageryAskContext?.imagery_directions,

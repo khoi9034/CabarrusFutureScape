@@ -28,6 +28,7 @@
     "check:local-data": "python scripts/check_cfs_local_data.py",
     "check:local-apis": "node scripts/check-local-apis.mjs",
     "check:local-interactions": "node scripts/check-local-interactions.mjs",
+    "check:management-handoff": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-management-handoff.mjs",
     "check:local-presentation": "node scripts/check-local-presentation.mjs",
     "check:master-data-v1b": "node scripts/check-master-data-v1b.mjs",
     "check:master-data-v1b-local": "node scripts/check-master-data-v1b.mjs --local",

@@ -21,6 +21,10 @@ import { useFloodConstraintSummary } from "@/hooks/useFloodConstraintSummary";
 import { useModelResearchPreviewLayer } from "@/hooks/useModelResearchPreviewLayer";
 import { useSchoolConstraintSummary } from "@/hooks/useSchoolConstraintSummary";
 import { USE_DEMO_DATA } from "@/lib/api/client";
+import {
+  navigateManagementHandoff,
+  type ManagementHandoffContext,
+} from "@/lib/managementHandoff";
 import type { ManagementSection } from "@/types";
 import type { DevelopmentHotspotMapMarker, SelectedDevelopmentHotspotContext } from "@/types/map/developmentHotspots";
 import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
@@ -104,18 +108,13 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
 
   useEffect(() => onAskContextChange?.(managementAskContext), [managementAskContext, onAskContextChange]);
 
-  const openPlanningBuilder = (parcelId?: string, signal?: ModelResearchPreviewMarker) => {
-    window.history.pushState(null, "", "/?app=planning");
-    dashboard.setCfsAppMode("planning");
-    dashboard.setOverviewCommandMode(signal ? "modelLab" : "countywide");
-    if (parcelId) dashboard.selectParcel(parcelId, { source: "dashboard" });
-    if (signal) dashboard.setSelectedModelResearchContext(signal);
-  };
-  const openEconomicsBuilder = () => {
-    window.history.pushState(null, "", "/?app=economics");
-    dashboard.setCfsAppMode("economics");
-    dashboard.setEconomicsSection("dashboard");
-  };
+  const openPlanningBuilder = (
+    context: Omit<ManagementHandoffContext, "sourceManagementPage" | "targetWorkspace">,
+  ) => navigateManagementHandoff({ ...context, sourceManagementPage: section, targetWorkspace: "planning" });
+  const openEconomicsBuilder = (
+    sourceInsightType: "economic-insights" | "overview-economics",
+    economicScenarioId?: string,
+  ) => navigateManagementHandoff({ economicScenarioId, sourceInsightType, sourceManagementPage: section, targetWorkspace: "economics" });
 
   return (
     <main className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8" data-management-section={section} data-testid="cfs-management-workspace">
@@ -134,7 +133,7 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
           </div>
         </header>
 
-        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={trends.source} openEconomicsBuilder={openEconomicsBuilder} /> : null}
+        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={trends.source} openEconomicsBuilder={openEconomicsBuilder} openPlanningBuilder={openPlanningBuilder} /> : null}
         {section === "planning-insights" ? <Planning development={development} flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} trendSource={trends.source} openBuilder={openPlanningBuilder} /> : null}
         {section === "economic-insights" ? <Economics development={development} economics={economics} openBuilder={openEconomicsBuilder} trendDirection={trends.trendDirection} trendRows={trendRows} /> : null}
         {section === "development-signals" ? <Signals model={model} preview={modelPreview} markers={signalMarkers} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
@@ -145,7 +144,7 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
   );
 }
 
-function Overview({ development, economics, flood, hotspots, hotspotRows, model, schools, trendRows, trendSource, openEconomicsBuilder }: any) {
+function Overview({ development, economics, flood, hotspots, hotspotRows, model, schools, trendRows, trendSource, openEconomicsBuilder, openPlanningBuilder }: any) {
   const strongest = model.rankingSummary.class_distribution.slice(0, 2).reduce((sum: number, row: any) => sum + row.row_count, 0);
   const permits = permitTrust(development);
   const hotspotData = hotspotTrust(hotspots);
@@ -164,12 +163,12 @@ function Overview({ development, economics, flood, hotspots, hotspotRows, model,
     ]} />
     <TwoColumns>
       <Panel eyebrow="Development activity" info={insight("permitTrend", permits)} title="Recent permit trend"><CfsTrendChart ariaLabel="Recent development permit activity" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
-      <Panel eyebrow="Highest-activity areas" info={insight("planningAttention", hotspotData)} title="Highest-activity areas"><Watchlist emptyMessage={unavailableMessage(hotspots.source, "No high-activity areas were identified.")} rows={hotspotRows.slice(0, 5).map((item: CfsChartRow) => [item.label, `${number.format(item.value)} permits`])} /></Panel>
+      <Panel eyebrow="Highest-activity areas" info={insight("planningAttention", hotspotData)} title="Highest-activity areas"><Watchlist emptyMessage={unavailableMessage(hotspots.source, "No high-activity areas were identified.")} rows={hotspotRows.slice(0, 5).map((item: CfsChartRow) => [item.label, `${number.format(item.value)} permits`])} /><Action onClick={() => openPlanningBuilder({ activeLayerIds: ["permit-activity"], planningMode: "countywide", sourceInsightType: "overview-planning-attention" })}>Open in Builder</Action></Panel>
     </TwoColumns>
     <ThreeColumns>
-      <Panel eyebrow="Flood and school review context" info={insight("constraintPosture", combineTrust("Planning constraints", [floodData, schoolData]))} title="Review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")]]} /></Panel>
-      <Panel eyebrow="Economic snapshot" info={insight("economicSnapshot", economicData)} title="County portfolio"><StatusRows rows={economics.data ? [["Parcels analyzed", number.format(economics.data.summary.total_parcels_analyzed)], ["Flagged for economic review", number.format(economics.data.summary.high_opportunity_count)], ["Assessed value", formatMoney(economics.data.summary.total_assessed_value)]] : []} /><Action onClick={openEconomicsBuilder}>Open in Builder Economics</Action></Panel>
-      <Panel eyebrow="Development signals" info={insight("developmentSummary", signalData)} title="Development signal summary"><StatusRows rows={sourceAvailable(model.source) ? [["Parcels evaluated", number.format(model.rankingSummary.unique_parcel_count)], ["Elevated development signals", number.format(strongest)], ["Validation", "Limited — use as supporting evidence only"]] : []} /></Panel>
+      <Panel eyebrow="Flood and school review context" info={insight("constraintPosture", combineTrust("Planning constraints", [floodData, schoolData]))} title="Review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")]]} /><Action onClick={() => openPlanningBuilder({ activeLayerIds: ["flood-risk", "fema-flood-zones", "school-pressure"], planningMode: "countywide", sourceInsightType: "overview-constraints" })}>Open in Builder</Action></Panel>
+      <Panel eyebrow="Economic snapshot" info={insight("economicSnapshot", economicData)} title="County portfolio"><StatusRows rows={economics.data ? [["Parcels analyzed", number.format(economics.data.summary.total_parcels_analyzed)], ["Flagged for economic review", number.format(economics.data.summary.high_opportunity_count)], ["Assessed value", formatMoney(economics.data.summary.total_assessed_value)]] : []} /><Action onClick={() => openEconomicsBuilder("overview-economics", economics.data?.scenario_outputs?.[0]?.scenario_id)}>Open in Builder Economics</Action></Panel>
+      <Panel eyebrow="Development signals" info={insight("developmentSummary", signalData)} title="Development signal summary"><StatusRows rows={sourceAvailable(model.source) ? [["Parcels evaluated", number.format(model.rankingSummary.unique_parcel_count)], ["Elevated development signals", number.format(strongest)], ["Validation", "Limited — use as supporting evidence only"]] : []} /><Action onClick={() => openPlanningBuilder({ planningMode: "modelLab", sourceInsightType: "overview-development-signals" })}>Investigate in Builder</Action></Panel>
     </ThreeColumns>
     <DataTrust items={[permits, floodData, schoolData, economicData, signalData]} />
   </>;
@@ -190,11 +189,11 @@ function Planning({ development, flood, hotspots, hotspotMarkers, hotspotRows, s
       <Panel eyebrow="Geographic context" info={insight("hotspotMap", hotspotData)} title="Development hotspots"><ManagementMapPreview ariaLabel="Development hotspot map" markers={hotspotMarkers} onSelect={(marker) => setSelected(hotspots.markers.find((item: DevelopmentHotspotMapMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-hotspot-map" /></Panel>
       <Panel eyebrow="Selected hotspot" info={insight("selectedHotspot", hotspotData)} title={selected ? selected.managementLabel || selected.zoningJurisdictionName || "Selected development hotspot" : "Select a hotspot on the map"}>
         {selected ? <StatusRows rows={[["Permit activity", number.format(selected.totalPermitCount)], ["Recent 3 years", number.format(selected.recentPermitCount3yr)], ["Signal", clean(selected.developmentActivityClass)], ["Period", dateRange(selected.firstPermitDate, selected.latestPermitDate)]]} /> : <CompactEmpty>Click a hotspot to review its current observed evidence.</CompactEmpty>}
-        <Action disabled={!selected} onClick={() => openBuilder(selected?.officialParcelId)}>Open in Builder</Action>
+        <Action disabled={!selected} onClick={() => selected && openBuilder({ planningMode: "countywide", selectedHotspotContext: toHotspotContext(selected), selectedHotspotId: selected.officialParcelId, selectedParcelId: selected.officialParcelId, sourceInsightType: "planning-hotspot" })} testId="management-hotspot-builder-handoff">Open in Builder</Action>
       </Panel>
     </TwoColumns>
     <TwoColumns>
-      <Panel eyebrow="Flood and school review context" info={insight("planningConstraints", constraintData)} title="Current review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe flood impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")], ["School assignment & growth context", metric(schools.metrics, "assignment-review")]]} /></Panel>
+      <Panel eyebrow="Flood and school review context" info={insight("planningConstraints", constraintData)} title="Current review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe flood impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")], ["School assignment & growth context", metric(schools.metrics, "assignment-review")]]} /><Action onClick={() => openBuilder({ activeLayerIds: ["flood-risk", "fema-flood-zones", "school-pressure"], planningMode: "countywide", sourceInsightType: "planning-constraints" })}>Open in Builder</Action></Panel>
       <Panel eyebrow="Planning watchlist" info={insight("planningWatchlist", planningWatchlistTrust())} title="Indicators needing review"><Watchlist rows={indicatorCenterDefinitions.filter((item) => ["High Attention", "Review Needed"].includes(item.priorityLabel)).slice(0, 5).map((item) => [item.name, item.priorityLabel])} /></Panel>
     </TwoColumns>
     <DataTrust items={[hotspotData, floodData, schoolData]} />
@@ -224,7 +223,7 @@ function Economics({ development, economics, openBuilder, trendDirection, trendR
     </TwoColumns>
     <Panel eyebrow="Scenario results" info={insight("scenarioResults", economicData)} title="Comparison without Builder controls">
       {data?.scenario_outputs?.length ? <div className="grid gap-3 md:grid-cols-2">{data.scenario_outputs.slice(0, 4).map((scenario: any) => <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4" key={scenario.scenario_id}><p className="font-semibold text-white">{scenario.title}</p><StatusRows rows={[["Revenue per acre", clean(scenario.revenue_per_acre_band)], ["Public service demand", clean(scenario.service_burden_band)], ["Infrastructure demand", clean(scenario.infrastructure_burden_band)], ["Overall screening result", scenarioBandLabel(scenario.constraint_adjusted_opportunity_band)]]} /></article>)}</div> : <CompactEmpty>Economic intelligence is temporarily unavailable.</CompactEmpty>}
-      <Action onClick={openBuilder}>Open in Builder Economics</Action>
+      <Action onClick={() => openBuilder("economic-insights", currentScenario?.scenario_id)}>Open in Builder Economics</Action>
     </Panel>
     <DataTrust items={[economicData]} />
   </>;
@@ -267,7 +266,7 @@ function Signals({ model, preview, markers, selected, setSelected, openBuilder }
       <Panel eyebrow="Geographic context" info={insight("signalMap", signalData)} title="Strongest development signals"><ManagementMapPreview ariaLabel="Development signal map" markers={markers} onSelect={(marker) => setSelected(preview.markers.find((item: ModelResearchPreviewMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-signal-map" /></Panel>
       <Panel eyebrow="Historical signal watchlist" info={insight("signalWatchlist", signalData)} title={selected ? selected.approximateAreaLabel || "Selected development signal" : "Highest-signal areas"}>
         {selected ? <><StatusRows rows={[["Historical signal band", signalLabel(selected.researchRankBand)], ["Observed pattern", signalLabel(selected.researchSignalLabel)]]} /><p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Main contributing context</p><ul className="mt-2 space-y-2 text-sm text-slate-300">{selected.topDrivers.map((driver: string) => <li key={driver}>• {clean(driver)}</li>)}</ul><p className="mt-4 text-xs leading-5 text-amber-100/80">Decision support only. Review the underlying evidence in Builder before drawing conclusions.</p></> : <><Watchlist emptyMessage={preview.status === "empty" ? "No elevated signals were identified." : "Development signal geography is unavailable."} rows={preview.markers.slice(0, 5).map((marker: ModelResearchPreviewMarker) => [marker.approximateAreaLabel || "County parcel area", signalLabel(marker.researchRankBand)])} /><p className="mt-3 text-xs leading-5 text-slate-400">Select a map signal for its supporting evidence and limitations.</p></>}
-        <Action disabled={!selected} onClick={() => openBuilder(selected?.officialParcelId, selected ?? undefined)}>Investigate in Builder</Action>
+        <Action disabled={!selected} onClick={() => selected && openBuilder({ planningMode: "modelLab", selectedParcelId: selected.officialParcelId, selectedSignalContext: selected, selectedSignalId: selected.officialParcelId, sourceInsightType: "development-signal" })} testId="management-signal-builder-handoff">Investigate in Builder</Action>
       </Panel>
     </TwoColumns>
     <DataTrust items={[signalData]} />
@@ -295,7 +294,7 @@ type KpiItem = { info: InsightInfo; label: string; status: string; value: string
 function KpiGrid({ items }: { items: KpiItem[] }) { return items.length ? <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{items.map(({ info, label, status, value }) => <article className="cfs-command-surface relative rounded-xl p-4 pr-12" key={label}><div className="absolute right-3 top-3"><InsightInfoPopover info={info} /></div><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p><p className="mt-2 break-words text-2xl font-semibold text-white">{value}</p><p className="mt-2 text-xs text-[#9bd1de]">{status}</p></article>)}</section> : <CompactEmpty>Current summary data is unavailable.</CompactEmpty>; }
 function StatusRows({ rows }: { rows: string[][] }) { return rows.length ? <dl className="space-y-3">{rows.map(([label, value]) => <div className="flex items-start justify-between gap-4 border-b border-white/8 pb-3 last:border-0" key={label}><dt className="text-sm text-slate-400">{label}</dt><dd className="max-w-[60%] text-right text-sm font-semibold text-white">{value}</dd></div>)}</dl> : <CompactEmpty>This information is currently unavailable.</CompactEmpty>; }
 function Watchlist({ emptyMessage = "No high-attention records are present in the current data.", rows }: { emptyMessage?: string; rows: string[][] }) { return rows.length ? <ol className="space-y-3">{rows.map(([label, value], index) => <li className="flex items-center gap-3 rounded-lg border border-white/8 bg-white/[0.025] p-3" key={`${label}-${index}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#82c9d8]/12 text-xs font-bold text-[#9bd1de]">{index + 1}</span><span className="min-w-0 flex-1 text-sm font-medium text-white">{label}</span><span className="text-xs text-slate-400">{value}</span></li>)}</ol> : <CompactEmpty>{emptyMessage}</CompactEmpty>; }
-function Action({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick: () => void }) { return <button className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#82c9d8]/30 bg-[#82c9d8]/10 px-3.5 py-2 text-sm font-semibold text-[#bce3eb] transition hover:bg-[#82c9d8]/15 disabled:cursor-not-allowed disabled:opacity-40" disabled={disabled} onClick={onClick}>{children}<ArrowRight className="h-4 w-4" /></button>; }
+function Action({ children, disabled, onClick, testId }: { children: ReactNode; disabled?: boolean; onClick: () => void; testId?: string }) { return <button className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#82c9d8]/30 bg-[#82c9d8]/10 px-3.5 py-2 text-sm font-semibold text-[#bce3eb] transition hover:bg-[#82c9d8]/15 disabled:cursor-not-allowed disabled:opacity-40" data-testid={testId} disabled={disabled} onClick={onClick}>{children}<ArrowRight className="h-4 w-4" /></button>; }
 function CompactEmpty({ children }: { children: ReactNode }) { return <p className="rounded-lg border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-400">{children}</p>; }
 
 type TrustStatus = "Current" | "Limited" | "Stale" | "Unavailable";

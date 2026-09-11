@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
   deserializeDashboardUrlState,
   mergeDashboardUrlState,
   serializeDashboardUrlState,
 } from "@/lib/dashboard/urlState";
+import {
+  hasUnresolvedManagementTarget,
+  readManagementHandoff,
+} from "@/lib/managementHandoff";
 
 export function DashboardUrlSync() {
   const {
@@ -26,7 +30,12 @@ export function DashboardUrlSync() {
     setScenarioId,
     setSimulationIntensity,
     setSimulationYear,
+    setEconomicsSection,
+    setOverviewCommandMode,
+    setSelectedDevelopmentHotspotContext,
+    setSelectedModelResearchContext,
   } = useDashboardState();
+  const [handoffError, setHandoffError] = useState(false);
   const initialStateSearchRef = useRef(
     serializeDashboardUrlState(dashboardUrlState),
   );
@@ -47,6 +56,8 @@ export function DashboardUrlSync() {
       // Invalid share URLs fall back to the current mock-safe state instead of
       // throwing or reaching for production county services.
       const nextState = deserializeDashboardUrlState(currentSearch);
+      const handoff = readManagementHandoff(window.history.state, currentSearch);
+      setHandoffError(hasUnresolvedManagementTarget(currentSearch) && !handoff);
       const appMode = new URLSearchParams(currentSearch).get("app");
       if (
         appMode === "management" ||
@@ -62,6 +73,20 @@ export function DashboardUrlSync() {
 
       if (appMode === "management" || appMode === "master-data") {
         return;
+      }
+
+      if (handoff) {
+        if (handoff.targetWorkspace === "economics") {
+          setEconomicsSection("dashboard");
+        } else {
+          setOverviewCommandMode(handoff.planningMode ?? "countywide");
+          if (handoff.selectedHotspotContext) {
+            setSelectedDevelopmentHotspotContext(handoff.selectedHotspotContext);
+          }
+          if (handoff.selectedSignalContext) {
+            setSelectedModelResearchContext(handoff.selectedSignalContext);
+          }
+        }
       }
 
       if (nextState.roleId) {
@@ -136,6 +161,10 @@ export function DashboardUrlSync() {
     setPrintableViewMode,
     setReportIntent,
     setScenarioId,
+    setEconomicsSection,
+    setOverviewCommandMode,
+    setSelectedDevelopmentHotspotContext,
+    setSelectedModelResearchContext,
     setSimulationIntensity,
     setSimulationYear,
   ]);
@@ -183,7 +212,11 @@ export function DashboardUrlSync() {
     lastHydratedSearchRef.current = nextSearch;
   }, [cfsAppMode, dashboardUrlState]);
 
-  return null;
+  return handoffError ? (
+    <div className="fixed left-1/2 top-3 z-[120] -translate-x-1/2 rounded-lg border border-amber-300/25 bg-[#17130a]/95 px-4 py-2 text-sm text-amber-100 shadow-xl" role="status">
+      The selected Management item is no longer available.
+    </div>
+  ) : null;
 }
 
 function getCurrentSearchString() {
