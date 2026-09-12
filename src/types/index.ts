@@ -335,6 +335,11 @@ export interface PlanningSnapshot {
     extentSummary?: string;
   };
   mapRenderer?: string;
+  managementAnalysisPeriod?: {
+    endYear: number | null;
+    label: string;
+    startYear: number | null;
+  };
   developmentActivityContext?: PlanningSnapshotDevelopmentActivityContext | null;
   indicatorCenterContext?: PlanningSnapshotIndicatorCenterContext | null;
   mapScreenshotCapturedAt?: string | null;

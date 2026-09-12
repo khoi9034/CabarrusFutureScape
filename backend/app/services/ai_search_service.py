@@ -65,6 +65,7 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "master_data_selected_fields",
         "experience",
         "management_section",
+        "management_analysis_period",
         "mode",
         "opportunity_class",
         "planning_mode",
@@ -105,6 +106,8 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "page_total_assessed_value",
         "page_total_economic_parcels",
         "page_very_high_signals",
+        "permit_year_end",
+        "permit_year_start",
     }
 )
 
@@ -2740,6 +2743,11 @@ def _management_answer(
             "It combines available value, acreage, improvement, growth-pressure, infrastructure-burden, and constraint context. It is not an appraisal, approval recommendation, or investment forecast."
         )
         evidence = [_evidence("Parcel economic screening", f"{_fmt(count)} parcels are currently flagged for economic review.", "Cabarrus County parcel economic context", "limited")]
+    elif "permit" in query and any(term in query for term in ("how many", "count", "number")):
+        count = value("page_permit_records")
+        period = value("management_analysis_period") or "the current Management period"
+        answer = f"The current Management view contains {_fmt(count)} permit records for {period}."
+        evidence = [_evidence("Cabarrus County permit activity", answer, "Cabarrus County permit activity")]
     elif any(term in query for term in ("give me the numbers", "give actual numbers", "explain these numbers", "numbers on this page", "key numbers", "main numbers", "what does this page show")):
         keys = (
             [
@@ -2774,7 +2782,8 @@ def _management_answer(
             ]
         )
         rows = [item for label, key in keys if (item := line(label, key))]
-        answer = "Here are the key numbers currently shown on this page:\n" + _bullets(rows or ["Current page values are not available yet."])
+        period = value("management_analysis_period")
+        answer = f"Here are the key numbers currently shown on this page{f' for {period}' if period else ''}:\n" + _bullets(rows or ["Current page values are not available yet."])
         evidence = [_evidence("Current Management page", "; ".join(rows) or "Page values unavailable.", "Current Management page", "available" if rows else "limited")]
     elif any(term in query for term in ("planning director", "leadership", "care about", "needs attention", "summarize this page")):
         rows = [

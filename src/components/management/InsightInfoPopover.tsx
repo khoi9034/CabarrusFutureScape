@@ -4,8 +4,10 @@ import { Info, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 export type InsightInfo = {
+  analysisPeriod?: string;
   coverage?: string;
   currentThrough?: string;
+  detailPage?: string;
   howBuilt?: string;
   limitations?: string;
   meaning?: string;
@@ -77,6 +79,8 @@ export function InsightInfoPopover({ info }: { info: InsightInfo }) {
     ["What this means", info.meaning],
     ["How it is built", info.howBuilt],
     ["Why it matters", info.whyMatters],
+    ["Detail page", info.detailPage],
+    ["Analysis period", info.analysisPeriod],
     [sources.length > 1 ? "Data sources" : "Data source", sources.length === 1 ? sources[0] : sources],
     ["Current through", info.currentThrough],
     ["Coverage", info.coverage],

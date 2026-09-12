@@ -853,6 +853,7 @@ def _management_request(query: str, section: str = "overview") -> CfsAiSearchReq
         filter_context={
             "experience": "management",
             "management_section": section,
+            "management_analysis_period": "All available (1986–2025)",
             "page_active_development_parcels": 43474,
             "page_economic_review_parcels": 14328,
             "page_elevated_signals": 5501,
@@ -876,13 +877,28 @@ def test_ai_search_management_numbers_answer_current_page_directly() -> None:
         _context(),
     )
 
-    assert response.answer.startswith("Here are the key numbers currently shown on this page:")
+    assert response.answer.startswith("Here are the key numbers currently shown on this page for All available (1986–2025):")
     assert "Permit records: 64,426" in response.answer
     assert "Active development parcels: 43,474" in response.answer
     assert "School assignment review: 75,143" in response.answer
     assert "Elevated Development Signals: 5,501" in response.answer
     assert "Executive summary" not in response.answer
     assert "Priority order" not in response.answer
+
+
+def test_ai_search_management_permit_number_uses_selected_period() -> None:
+    request = _management_request("give me the permit number")
+    request.filter_context.update({
+        "management_analysis_period": "Last 3 years (2023–2025)",
+        "page_active_development_parcels": 9388,
+        "page_permit_records": 11854,
+        "permit_year_end": 2025,
+        "permit_year_start": 2023,
+    })
+
+    response = CfsAiSearchService(_settings()).search(request, _context())
+
+    assert response.answer == "The current Management view contains 11,854 permit records for Last 3 years (2023–2025)."
 
 
 def test_ai_search_management_navigation_questions_use_the_current_section() -> None:

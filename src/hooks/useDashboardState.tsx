@@ -8,7 +8,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 import {
   useExecutiveBriefing,
@@ -297,9 +299,7 @@ interface DashboardContextValue {
   setSimulationIntensity: (intensity: number) => void;
   setDashboardRoleId: (roleId: DashboardRoleId) => void;
   setDashboardViewMode: (viewMode: DashboardViewMode) => void;
-  setDevelopmentHotspotControls: (
-    controls: DevelopmentHotspotControls,
-  ) => void;
+  setDevelopmentHotspotControls: Dispatch<SetStateAction<DevelopmentHotspotControls>>;
   setDevelopmentHotspotsEnabled: (enabled: boolean) => void;
   setFloodConstraintsEnabled: (enabled: boolean) => void;
   setFloodZoneControls: (controls: FloodZoneControls) => void;
@@ -532,6 +532,13 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     setPlanningSnapshotNotes,
     setPlanningSnapshotSectionIncluded,
   } = usePlanningSnapshotLibrary();
+  useEffect(() => {
+    const period = planningSnapshot?.managementAnalysisPeriod;
+    if (!period) return;
+    setDevelopmentHotspotControls((current) => current.permitYearStart === period.startYear && current.permitYearEnd === period.endYear
+      ? current
+      : { ...current, permitYearEnd: period.endYear, permitYearStart: period.startYear });
+  }, [planningSnapshot?.snapshotId, planningSnapshot?.managementAnalysisPeriod]);
   const [planningSnapshotView, setPlanningSnapshotView] =
     useState<PlanningSnapshotView>("overview");
   const [planningReviewFocusMode, setPlanningReviewFocusMode] =

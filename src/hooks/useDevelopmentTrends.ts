@@ -11,7 +11,7 @@ import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentTrends } from "@/lib/api/development";
 import { getDemoDevelopmentTrendsResponse } from "@/lib/demo-data/client";
 
-export function useDevelopmentTrends() {
+export function useDevelopmentTrends({ yearEnd = null, yearStart = null }: { yearEnd?: number | null; yearStart?: number | null } = {}) {
   const [trends, setTrends] = useState<DevelopmentTrendsViewModel>(() => {
     const staticTrends = USE_DEMO_DATA
       ? getStaticDevelopmentTrends()
@@ -28,7 +28,7 @@ export function useDevelopmentTrends() {
 
   useEffect(() => {
     if (USE_DEMO_DATA) {
-      getDemoDevelopmentTrendsResponse()
+      getDemoDevelopmentTrendsResponse({ yearEnd, yearStart })
         .then((developmentTrends) => {
           setTrends({
             ...normalizeDevelopmentTrends(developmentTrends),
@@ -58,7 +58,10 @@ export function useDevelopmentTrends() {
 
     const controller = new AbortController();
 
-    getDevelopmentTrends({}, { signal: controller.signal })
+    getDevelopmentTrends(
+      { end_year: yearEnd ?? undefined, start_year: yearStart ?? undefined },
+      { signal: controller.signal },
+    )
       .then((developmentTrends) => {
         setTrends({
           ...normalizeDevelopmentTrends(developmentTrends),
@@ -85,7 +88,7 @@ export function useDevelopmentTrends() {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [yearEnd, yearStart]);
 
   return trends;
 }

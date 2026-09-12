@@ -1899,6 +1899,11 @@ function demoManagementAnswer(
       "Cabarrus County parcel economic context",
     );
   }
+  if (/permit/.test(query) && /(how many|count|number)/.test(query)) {
+    const count = display("page_permit_records") ?? "an unavailable number of";
+    const period = display("management_analysis_period") ?? "the current Management period";
+    return answer(`The current Management view contains ${count} permit records for ${period}.`, "Cabarrus County permit activity");
+  }
   if (/(give me the numbers|give actual numbers|explain these numbers|numbers on this page|key numbers|main numbers|what does this page show)/.test(query)) {
     const keySets: Record<string, Array<[string, string]>> = {
       overview: [["Permit records", "page_permit_records"], ["Active development parcels", "page_active_development_parcels"], ["Active hotspots", "page_active_hotspots"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"], ["Elevated Development Signals", "page_elevated_signals"], ["Parcels flagged for economic review", "page_economic_review_parcels"]],
@@ -1910,7 +1915,8 @@ function demoManagementAnswer(
       const value = display(key);
       return value ? [`${label}: ${value}`] : [];
     });
-    return answer(`Here are the key numbers currently shown on this page:\n${bullets(rows.length ? rows : ["Current page values are not available yet."])}`, "Current Management page", rows.join("; "));
+    const period = display("management_analysis_period");
+    return answer(`Here are the key numbers currently shown on this page${period ? ` for ${period}` : ""}:\n${bullets(rows.length ? rows : ["Current page values are not available yet."])}`, "Current Management page", rows.join("; "));
   }
   if (/(planning director|leadership|care about|needs attention|summarize this page)/.test(query)) {
     const rows = [["Permit records", "page_permit_records"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"], ["Elevated Development Signals", "page_elevated_signals"], ["Economic review parcels", "page_economic_review_parcels"]].flatMap(([label, key]) => {

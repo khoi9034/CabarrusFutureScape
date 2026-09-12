@@ -25,6 +25,15 @@ import {
   navigateManagementHandoff,
   type ManagementHandoffContext,
 } from "@/lib/managementHandoff";
+import {
+  getManagementPeriod,
+  managementDetailUrl,
+  managementKpis,
+  managementPeriodId,
+  managementPeriods,
+  type ManagementFocus,
+  type ManagementPeriodId,
+} from "@/lib/managementAnalysis";
 import type { ManagementSection } from "@/types";
 import type { DevelopmentHotspotMapMarker, SelectedDevelopmentHotspotContext } from "@/types/map/developmentHotspots";
 import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
@@ -53,9 +62,11 @@ export function ManagementWorkspace({ backend, onAskContextChange, section }: { 
 
 function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContextChange?: (context: CfsAiSearchRequest["filter_context"]) => void; section: ManagementSection }) {
   const dashboard = useDashboardState();
-  const development = useDevelopmentActivitySummary();
-  const trends = useDevelopmentTrends();
-  const hotspots = useDevelopmentHotspots();
+  const periodId = managementPeriodId(dashboard.developmentHotspotControls.permitYearStart, dashboard.developmentHotspotControls.permitYearEnd);
+  const period = getManagementPeriod(periodId);
+  const development = useDevelopmentActivitySummary({ yearEnd: period.endYear, yearStart: period.startYear });
+  const trends = useDevelopmentTrends({ yearEnd: period.endYear, yearStart: period.startYear });
+  const hotspots = useDevelopmentHotspots({ yearEnd: period.endYear, yearStart: period.startYear });
   const flood = useFloodConstraintSummary();
   const schools = useSchoolConstraintSummary();
   const model = useDevelopmentPredictionResearchStatus();
@@ -63,6 +74,14 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
   const economics = useEconomicsIntelligence();
   const [selectedHotspot, setSelectedHotspot] = useState<DevelopmentHotspotMapMarker | null>(null);
   const [selectedSignal, setSelectedSignal] = useState<ModelResearchPreviewMarker | null>(null);
+
+  useEffect(() => {
+    const focus = new URLSearchParams(window.location.search).get("focus");
+    if (!focus) return;
+    const target = document.getElementById(`management-focus-${focus}`);
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    target?.focus({ preventScroll: true });
+  }, [section]);
 
   useEffect(() => {
     if (section === "economic-insights") dashboard.setEconomicsSection("dashboard");
@@ -86,9 +105,8 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
     .filter((row) => ["very_high_development_signal", "high_development_signal"].includes(row.development_signal_class))
     .reduce((sum, row) => sum + row.row_count, 0);
   const managementAskContext = useMemo<CfsAiSearchRequest["filter_context"]>(() => ({
-    ...(USE_DEMO_DATA
-      ? { page_active_hotspots: hotspots.totalCount || null }
-      : { page_active_development_parcels: hotspots.totalCount || null }),
+    page_active_development_parcels: development.activeParcelCount || null,
+    ...(USE_DEMO_DATA ? { page_active_hotspots: hotspots.markers.length || null } : {}),
     page_economic_review_parcels: economics.data?.summary.high_opportunity_count ?? null,
     page_elevated_signals: sourceAvailable(model.source) ? elevatedSignals : null,
     page_flood_review_parcels: sourceAvailable(flood.source) ? metric(flood.metrics, "review-required-parcels") : null,
@@ -98,13 +116,16 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
     page_median_value_per_acre: economics.data?.summary.median_value_per_acre ?? null,
     page_parcels_evaluated: sourceAvailable(model.source) ? model.rankingSummary.unique_parcel_count : null,
     page_permit_records: development.totalPermits || null,
+    management_analysis_period: period.label,
+    permit_year_end: period.endYear,
+    permit_year_start: period.startYear,
     page_school_assignment_review: sourceAvailable(schools.source) ? metric(schools.metrics, "assignment-review") : null,
     page_top_hotspot_label: hotspotRows.at(0)?.label ?? null,
     page_top_hotspot_permits: hotspotRows.at(0)?.value ?? null,
     page_total_assessed_value: economics.data?.summary.total_assessed_value ?? null,
     page_total_economic_parcels: economics.data?.summary.total_parcels_analyzed ?? null,
     page_very_high_signals: sourceAvailable(model.source) ? model.rankingSummary.class_distribution.find((row) => row.development_signal_class === "very_high_development_signal")?.row_count ?? null : null,
-  }), [development.source, development.totalPermits, economics.data, elevatedSignals, flood.metrics, flood.source, hotspotRows, hotspots.source, hotspots.totalCount, model.rankingSummary, model.source, schools.metrics, schools.source, trendRows]);
+  }), [development.activeParcelCount, development.source, development.totalPermits, economics.data, elevatedSignals, flood.metrics, flood.source, hotspotRows, hotspots.markers.length, model.rankingSummary, model.source, period.endYear, period.label, period.startYear, schools.metrics, schools.source, trendRows]);
 
   useEffect(() => onAskContextChange?.(managementAskContext), [managementAskContext, onAskContextChange]);
 
@@ -115,6 +136,24 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
     sourceInsightType: "economic-insights" | "overview-economics",
     economicScenarioId?: string,
   ) => navigateManagementHandoff({ economicScenarioId, sourceInsightType, sourceManagementPage: section, targetWorkspace: "economics" });
+  const openManagementDetail = (targetSection: ManagementSection, focus: ManagementFocus) => {
+    window.history.pushState(null, "", managementDetailUrl(targetSection, focus, periodId));
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+  const setPeriod = (nextPeriodId: ManagementPeriodId) => {
+    const next = getManagementPeriod(nextPeriodId);
+    dashboard.setDevelopmentHotspotControls({
+      ...dashboard.developmentHotspotControls,
+      permitYearEnd: next.endYear,
+      permitYearStart: next.startYear,
+    });
+    const params = new URLSearchParams(window.location.search);
+    params.set("app", "management");
+    params.set("section", section);
+    params.set("period", next.id);
+    params.delete("focus");
+    window.history.pushState(null, "", `/?${params.toString()}`);
+  };
 
   return (
     <main className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8" data-management-section={section} data-testid="cfs-management-workspace">
@@ -131,12 +170,18 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
               <Save className="h-4 w-4" /> Save snapshot
             </button>
           </div>
+          <label className="mt-5 flex w-fit flex-col gap-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Analysis period
+            <select className="rounded-lg border border-white/15 bg-[#0b1726] px-3 py-2 text-sm font-medium normal-case tracking-normal text-white" data-testid="management-period" onChange={(event) => setPeriod(event.target.value as ManagementPeriodId)} value={periodId}>
+              {managementPeriods.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+            </select>
+          </label>
         </header>
 
-        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={trends.source} openEconomicsBuilder={openEconomicsBuilder} openPlanningBuilder={openPlanningBuilder} /> : null}
-        {section === "planning-insights" ? <Planning development={development} flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} trendSource={trends.source} openBuilder={openPlanningBuilder} /> : null}
-        {section === "economic-insights" ? <Economics development={development} economics={economics} openBuilder={openEconomicsBuilder} trendDirection={trends.trendDirection} trendRows={trendRows} /> : null}
-        {section === "development-signals" ? <Signals model={model} preview={modelPreview} markers={signalMarkers} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
+        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={trends.source} openEconomicsBuilder={openEconomicsBuilder} openManagementDetail={openManagementDetail} openPlanningBuilder={openPlanningBuilder} period={period} /> : null}
+        {section === "planning-insights" ? <Planning development={development} flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} trendSource={trends.source} openBuilder={openPlanningBuilder} period={period} /> : null}
+        {section === "economic-insights" ? <Economics development={development} economics={economics} openBuilder={openEconomicsBuilder} period={period} trendDirection={trends.trendDirection} trendRows={trendRows} /> : null}
+        {section === "development-signals" ? <Signals model={model} preview={modelPreview} markers={signalMarkers} period={period} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
 
       <footer className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-slate-400"><ShieldCheck className="h-4 w-4 text-[#77c99b]" /> Insights are based on available County data and documented analytical methods. Detailed controls, sources, and methodology remain in Analyst View.</footer>
       </div>
@@ -144,7 +189,7 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
   );
 }
 
-function Overview({ development, economics, flood, hotspots, hotspotRows, model, schools, trendRows, trendSource, openEconomicsBuilder, openPlanningBuilder }: any) {
+function Overview({ development, economics, flood, hotspots, hotspotRows, model, schools, trendRows, trendSource, openEconomicsBuilder, openManagementDetail, openPlanningBuilder, period }: any) {
   const strongest = model.rankingSummary.class_distribution.slice(0, 2).reduce((sum: number, row: any) => sum + row.row_count, 0);
   const permits = permitTrust(development);
   const hotspotData = hotspotTrust(hotspots);
@@ -154,16 +199,16 @@ function Overview({ development, economics, flood, hotspots, hotspotRows, model,
   const signalData = modelTrust(model);
   return <>
     <KpiGrid items={[
-      { label: "Permit activity", value: countValue(development.source, development.isLoading, development.totalPermits), status: datedStatus(development.source, development.activityDateMax), info: insight("permitActivity", permits) },
-      { label: "Parcel activity", value: countValue(hotspots.source, hotspots.isLoading, hotspots.totalCount), status: datedStatus(hotspots.source, latestHotspotDate(hotspots)), info: insight("activeHotspots", hotspotData) },
-      { label: "Planning constraints", value: metric(flood.metrics, "review-required-parcels"), status: freshness(flood.source), info: insight("floodReview", floodData) },
-      { label: "School / growth context", value: schools.isLoading ? "Loading" : sourceAvailable(schools.source) ? metric(schools.metrics, "assignment-review") : "Unavailable", status: sourceAvailable(schools.source) ? "Limited" : "Unavailable", info: insight("schoolPosture", schoolData) },
-      { label: "Development signals", value: countValue(model.source, model.isLoading, strongest), status: sourceAvailable(model.source) ? "Limited" : "Unavailable", info: insight("elevatedSignals", signalData) },
-      { label: "Economic review", value: economics.data ? number.format(economics.data.summary.high_opportunity_count) : economics.error ? "Unavailable" : "Loading", status: economics.data ? freshness(economics.data.context_freshness ?? "current") : freshness(economics.error ? "unavailable" : "loading"), info: insight("economicPosture", economicData) },
+      { actionLabel: "View in Planning Insights", label: managementKpis.permitActivity.label, value: countValue(development.source, development.isLoading, development.totalPermits), status: `${period.label} · ${datedStatus(development.source, development.activityDateMax)}`, info: insight("permitActivity", permits, managementKpis.permitActivity, period.label), onAction: () => openManagementDetail(managementKpis.permitActivity.section, managementKpis.permitActivity.focus) },
+      { actionLabel: "View in Planning Insights", label: managementKpis.activeParcels.label, value: countValue(development.source, development.isLoading, development.activeParcelCount), status: `${period.label} · ${datedStatus(development.source, development.activityDateMax)}`, info: insight("activeHotspots", permits, managementKpis.activeParcels, period.label), onAction: () => openManagementDetail(managementKpis.activeParcels.section, managementKpis.activeParcels.focus) },
+      { actionLabel: "View in Planning Insights", label: managementKpis.floodReview.label, value: metric(flood.metrics, "review-required-parcels"), status: `Current parcel context · ${freshness(flood.source)}`, info: insight("floodReview", floodData, managementKpis.floodReview, period.label), onAction: () => openManagementDetail(managementKpis.floodReview.section, managementKpis.floodReview.focus) },
+      { actionLabel: "View in Planning Insights", label: managementKpis.schoolGrowth.label, value: schools.isLoading ? "Loading" : sourceAvailable(schools.source) ? metric(schools.metrics, "assignment-review") : "Unavailable", status: sourceAvailable(schools.source) ? "Current assignment context · Limited" : "Unavailable", info: insight("schoolPosture", schoolData, managementKpis.schoolGrowth, period.label), onAction: () => openManagementDetail(managementKpis.schoolGrowth.section, managementKpis.schoolGrowth.focus) },
+      { actionLabel: "View Development Signals", label: managementKpis.elevatedSignals.label, value: countValue(model.source, model.isLoading, strongest), status: sourceAvailable(model.source) ? "Model evidence: 2014–2022 · Limited" : "Unavailable", info: insight("elevatedSignals", signalData, managementKpis.elevatedSignals, period.label), onAction: () => openManagementDetail(managementKpis.elevatedSignals.section, managementKpis.elevatedSignals.focus) },
+      { actionLabel: "View Economic Insights", label: managementKpis.economicReview.label, value: economics.data ? number.format(economics.data.summary.high_opportunity_count) : economics.error ? "Unavailable" : "Loading", status: economics.data ? `Current parcel value context · ${freshness(economics.data.context_freshness ?? "current")}` : freshness(economics.error ? "unavailable" : "loading"), info: insight("economicPosture", economicData, managementKpis.economicReview, period.label), onAction: () => openManagementDetail(managementKpis.economicReview.section, managementKpis.economicReview.focus) },
     ]} />
     <TwoColumns>
-      <Panel eyebrow="Development activity" info={insight("permitTrend", permits)} title="Recent permit trend"><CfsTrendChart ariaLabel="Recent development permit activity" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
-      <Panel eyebrow="Highest-activity areas" info={insight("planningAttention", hotspotData)} title="Highest-activity areas"><Watchlist emptyMessage={unavailableMessage(hotspots.source, "No high-activity areas were identified.")} rows={hotspotRows.slice(0, 5).map((item: CfsChartRow) => [item.label, `${number.format(item.value)} permits`])} /><Action onClick={() => openPlanningBuilder({ activeLayerIds: ["permit-activity"], planningMode: "countywide", sourceInsightType: "overview-planning-attention" })}>Open in Analyst View</Action></Panel>
+      <Panel eyebrow={period.label} info={insight("permitTrend", permits)} title="Permit Activity"><CfsTrendChart ariaLabel="Recent development permit activity" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
+      <Panel eyebrow={`Observed activity · ${period.label}`} info={insight("planningAttention", hotspotData)} title="Highest-activity areas"><Watchlist emptyMessage={unavailableMessage(hotspots.source, "No high-activity areas were identified.")} rows={hotspotRows.slice(0, 5).map((item: CfsChartRow) => [item.label, `${number.format(item.value)} permits`])} /><Action onClick={() => openManagementDetail("planning-insights", "active-development-parcels")}>View in Planning Insights</Action></Panel>
     </TwoColumns>
     <ThreeColumns>
       <Panel eyebrow="Flood and school review context" info={insight("constraintPosture", combineTrust("Planning constraints", [floodData, schoolData]))} title="Review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")]]} /><Action onClick={() => openPlanningBuilder({ activeLayerIds: ["flood-risk", "fema-flood-zones", "school-pressure"], planningMode: "countywide", sourceInsightType: "overview-constraints" })}>Open in Analyst View</Action></Panel>
@@ -174,33 +219,37 @@ function Overview({ development, economics, flood, hotspots, hotspotRows, model,
   </>;
 }
 
-function Planning({ development, flood, hotspots, hotspotMarkers, hotspotRows, schools, selected, setSelected, trendRows, trendSource, openBuilder }: any) {
+function Planning({ development, flood, hotspots, hotspotMarkers, hotspotRows, schools, selected, setSelected, trendRows, trendSource, openBuilder, period }: any) {
   const permits = permitTrust(development);
   const hotspotData = hotspotTrust(hotspots);
   const floodData = floodTrust(flood);
   const schoolData = schoolTrust(schools);
-  const constraintData = combineTrust("Planning constraints", [floodData, schoolData]);
   return <>
+    <KpiGrid items={[
+      { label: managementKpis.permitActivity.label, value: countValue(development.source, development.isLoading, development.totalPermits), status: period.label, info: insight("permitActivity", permits, managementKpis.permitActivity, period.label) },
+      { label: managementKpis.activeParcels.label, value: countValue(development.source, development.isLoading, development.activeParcelCount), status: period.label, info: insight("activeHotspots", permits, managementKpis.activeParcels, period.label) },
+    ]} />
     <TwoColumns>
-      <Panel eyebrow="Development activity" info={insight("permitTrend", permits)} title="Recent permit trend"><CfsTrendChart ariaLabel="Planning development activity trend" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
-      <Panel eyebrow="Development hotspots" info={insight("hotspotRanking", hotspotData)} title="Ranked permit activity"><CfsRankedBarChart ariaLabel="Ranked development hotspots" emptyMessage={unavailableMessage(hotspots.source, "No development hotspots were identified.")} rows={hotspotRows} /></Panel>
+      <Panel eyebrow={period.label} focus="permit-activity" info={insight("permitTrend", permits)} title="Permit Activity"><CfsTrendChart ariaLabel="Planning development activity trend" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
+      <Panel eyebrow={`Observed activity · ${period.label}`} focus="active-development-parcels" info={insight("hotspotRanking", hotspotData)} title="Active Development Parcels"><p className="mb-4 text-sm leading-6 text-slate-300">Unique parcels with observed permit activity in the selected period. The ranking below shows the strongest geographic concentrations without treating multiple permits as multiple parcels.</p><CfsRankedBarChart ariaLabel="Ranked development hotspots" emptyMessage={unavailableMessage(hotspots.source, "No development hotspots were identified.")} rows={hotspotRows} /></Panel>
     </TwoColumns>
     <TwoColumns>
-      <Panel eyebrow="Geographic context" info={insight("hotspotMap", hotspotData)} title="Development hotspots"><ManagementMapPreview ariaLabel="Development hotspot map" markers={hotspotMarkers} onSelect={(marker) => setSelected(hotspots.markers.find((item: DevelopmentHotspotMapMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-hotspot-map" /></Panel>
+      <Panel eyebrow={`Geographic context · ${period.label}`} info={insight("hotspotMap", hotspotData)} title="Development hotspots"><ManagementMapPreview ariaLabel="Development hotspot map" markers={hotspotMarkers} onSelect={(marker) => setSelected(hotspots.markers.find((item: DevelopmentHotspotMapMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-hotspot-map" /></Panel>
       <Panel eyebrow="Selected hotspot" info={insight("selectedHotspot", hotspotData)} title={selected ? selected.managementLabel || selected.zoningJurisdictionName || "Selected development hotspot" : "Select a hotspot on the map"}>
         {selected ? <StatusRows rows={[["Permit activity", number.format(selected.totalPermitCount)], ["Recent 3 years", number.format(selected.recentPermitCount3yr)], ["Signal", clean(selected.developmentActivityClass)], ["Period", dateRange(selected.firstPermitDate, selected.latestPermitDate)]]} /> : <CompactEmpty>Click a hotspot to review its current observed evidence.</CompactEmpty>}
         <Action disabled={!selected} onClick={() => selected && openBuilder({ planningMode: "countywide", selectedHotspotContext: toHotspotContext(selected), selectedHotspotId: selected.officialParcelId, selectedParcelId: selected.officialParcelId, sourceInsightType: "planning-hotspot" })} testId="management-hotspot-builder-handoff">Open in Analyst View</Action>
       </Panel>
     </TwoColumns>
     <TwoColumns>
-      <Panel eyebrow="Flood and school review context" info={insight("planningConstraints", constraintData)} title="Current review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe flood impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")], ["School assignment & growth context", metric(schools.metrics, "assignment-review")]]} /><Action onClick={() => openBuilder({ activeLayerIds: ["flood-risk", "fema-flood-zones", "school-pressure"], planningMode: "countywide", sourceInsightType: "planning-constraints" })}>Open in Analyst View</Action></Panel>
-      <Panel eyebrow="Planning watchlist" info={insight("planningWatchlist", planningWatchlistTrust())} title="Indicators needing review"><Watchlist rows={indicatorCenterDefinitions.filter((item) => ["High Attention", "Review Needed"].includes(item.priorityLabel)).slice(0, 5).map((item) => [item.name, item.priorityLabel])} /></Panel>
+      <Panel eyebrow="Current FEMA and parcel context" focus="flood-review" info={insight("floodReview", floodData, managementKpis.floodReview, period.label)} title="Flood Review"><StatusRows rows={[["Parcels requiring review", metric(flood.metrics, "review-required-parcels")], ["High/severe flood impact", metric(flood.metrics, "high-severe-buildability")]]} /><Action onClick={() => openBuilder({ activeLayerIds: ["flood-risk", "fema-flood-zones"], planningMode: "countywide", sourceInsightType: "planning-constraints" })}>Open in Analyst View</Action></Panel>
+      <Panel eyebrow="Current assignment context" focus="school-growth" info={insight("schoolPosture", schoolData, managementKpis.schoolGrowth, period.label)} title="School Assignment & Growth Context"><StatusRows rows={[["Assignment review", metric(schools.metrics, "assignment-review")], ["Development pressure period", period.label], ["Capacity status", "Official capacity information is incomplete"]]} /><Action onClick={() => openBuilder({ activeLayerIds: ["school-pressure", "permit-activity"], planningMode: "countywide", sourceInsightType: "planning-constraints" })}>Open in Analyst View</Action></Panel>
     </TwoColumns>
+    <Panel eyebrow={`Based on current Management period · ${period.label}`} info={insight("planningWatchlist", planningWatchlistTrust())} title="Planning Watchlist"><Watchlist rows={indicatorCenterDefinitions.filter((item) => ["High Attention", "Review Needed"].includes(item.priorityLabel)).slice(0, 5).map((item) => [item.name, item.priorityLabel])} /></Panel>
     <DataTrust items={[hotspotData, floodData, schoolData]} />
   </>;
 }
 
-function Economics({ development, economics, openBuilder, trendDirection, trendRows }: any) {
+function Economics({ development, economics, openBuilder, period, trendDirection, trendRows }: any) {
   const data = economics.data;
   const currentScenario = data?.scenario_outputs?.[0];
   const economicData = economicsTrust(economics);
@@ -208,14 +257,14 @@ function Economics({ development, economics, openBuilder, trendDirection, trendR
   return <>
     <KpiGrid items={data ? [
       { label: "Parcels analyzed", value: number.format(data.summary.total_parcels_analyzed), status: freshness(data.context_freshness ?? "current"), info: insight("parcelsAnalyzed", economicData) },
-      { label: "Parcels flagged for economic review", value: number.format(data.summary.high_opportunity_count), status: "Current", info: insight("highOpportunity", economicData) },
+      { label: managementKpis.economicReview.label, value: number.format(data.summary.high_opportunity_count), status: `${((data.summary.high_opportunity_count / data.summary.total_parcels_analyzed) * 100).toFixed(1)}% of parcels analyzed · Current parcel value context`, info: insight("highOpportunity", economicData, managementKpis.economicReview, period.label) },
       { label: "Parcels with lower development intensity", value: number.format(data.summary.underbuilt_candidate_count), status: "Limited", info: insight("underbuiltWatch", economicData) },
       { label: "Median value / acre", value: formatMoney(data.summary.median_value_per_acre), status: "Current", info: insight("medianValue", economicData) },
       { label: "Total assessed value", value: formatMoney(data.summary.total_assessed_value), status: "Current", info: insight("totalAssessedValue", economicData) },
     ] : []} />
     <TwoColumns>
-      <Panel eyebrow="Development activity over time" info={insight("economicTrend", permits)} title="Development activity over time"><CfsTrendChart ariaLabel="Development activity over time" emptyMessage="Development activity is unavailable for this comparison." rows={trendRows} /></Panel>
-      <Panel eyebrow="Current economic conditions" info={insight("currentEconomicPosture", economicData)} title="What the portfolio indicates now"><StatusRows rows={data ? [["Development activity", trendLabel(trendDirection)], ["Revenue vs. service demand", currentScenario ? scenarioBandLabel(currentScenario.constraint_adjusted_opportunity_band) : "Unavailable"], ["Median assessed value per acre", formatMoney(data.summary.median_value_per_acre)], ["Planning implication", data.summary.high_opportunity_count ? `${number.format(data.summary.high_opportunity_count)} parcels warrant deeper economic review in Analyst View.` : "Continue portfolio screening as current evidence changes."]] : []} /></Panel>
+      <Panel eyebrow={`Permit-dependent context · ${period.label}`} info={insight("economicTrend", permits)} title="Development activity over time"><CfsTrendChart ariaLabel="Development activity over time" emptyMessage="Development activity is unavailable for this comparison." rows={trendRows} /></Panel>
+      <Panel eyebrow="Current parcel value context" focus="economic-review" info={insight("currentEconomicPosture", economicData)} title="Economic Review"><StatusRows rows={data ? [["Screening definition", "Parcels in the current high-opportunity screening class"], ["Flagged parcels", number.format(data.summary.high_opportunity_count)], ["Share of parcels analyzed", `${((data.summary.high_opportunity_count / data.summary.total_parcels_analyzed) * 100).toFixed(1)}%`], ["Development activity", `${trendLabel(trendDirection)} · ${period.label}`], ["Median assessed value per acre", formatMoney(data.summary.median_value_per_acre)]] : []} /></Panel>
     </TwoColumns>
     <TwoColumns>
       <Panel eyebrow="Opportunity mix" info={insight("opportunityMix", economicData)} title="Economic review classifications"><CfsRankedBarChart ariaLabel="Economic opportunity classes" rows={(data?.opportunity_class_breakdown ?? []).map((row: any) => ({ label: clean(row.opportunity_class), value: row.count }))} /></Panel>
@@ -229,7 +278,7 @@ function Economics({ development, economics, openBuilder, trendDirection, trendR
   </>;
 }
 
-function Signals({ model, preview, markers, selected, setSelected, openBuilder }: any) {
+function Signals({ model, preview, markers, period, selected, setSelected, openBuilder }: any) {
   const strongest = model.rankingSummary.class_distribution.slice(0, 2).reduce((sum: number, row: any) => sum + row.row_count, 0);
   const modelIsAvailable = sourceAvailable(model.source);
   const previewIsAvailable = preview.status === "ready" && ["api", "demo"].includes(preview.source);
@@ -241,14 +290,17 @@ function Signals({ model, preview, markers, selected, setSelected, openBuilder }
   const validationRows = modelIsAvailable ? developmentModelLabSummary.evaluationRows.map((row) => ({ label: row.variant, value: Number(row.liftTop5) })) : [];
   const lift = developmentModelLabSummary.aggregateMetrics.find((item) => item.label === "Lift@top 5%")?.value;
   const precision = developmentModelLabSummary.aggregateMetrics.find((item) => item.label === "Precision@top 5%")?.value;
+  const veryHigh = model.rankingSummary.class_distribution.find((row: any) => row.development_signal_class === "very_high_development_signal")?.row_count ?? 0;
+  const high = model.rankingSummary.class_distribution.find((row: any) => row.development_signal_class === "high_development_signal")?.row_count ?? 0;
   return <>
     <Panel eyebrow="Development signals" info={insight("developmentSignals", signalData)} title="Observed patterns associated with later activity"><p className="max-w-4xl text-sm leading-6 text-slate-300">These relative bands identify parcel conditions that were more common among historical parcels with later observed new-construction permit activity. They help staff prioritize evidence review; they are not a forecast, approval prediction, or exact probability.</p></Panel>
     <KpiGrid items={[
       { label: "Parcels evaluated", value: countValue(model.source, model.isLoading, model.rankingSummary.unique_parcel_count), status: modelIsAvailable ? "Limited" : "Unavailable", info: insight("parcelsEvaluated", signalData) },
-      { label: "Parcels with elevated historical signals", value: elevatedCount === null ? "Unavailable" : number.format(elevatedCount), status: elevatedCount === null ? "Unavailable" : "Limited", info: insight("elevatedCount", signalData) },
+      { label: managementKpis.elevatedSignals.label, value: elevatedCount === null ? "Unavailable" : number.format(elevatedCount), status: elevatedCount === null ? "Unavailable" : "Model evidence: 2014–2022 · Limited", info: insight("elevatedCount", signalData, managementKpis.elevatedSignals, period.label) },
       { label: "Evidence period", value: modelIsAvailable || previewIsAvailable ? snapshotRange : "Unavailable", status: modelIsAvailable || previewIsAvailable ? "Limited" : "Unavailable", info: insight("evidencePeriod", signalData) },
       { label: "Validation", value: modelIsAvailable ? "Useful for ranking; not forecasting" : "Unavailable", status: modelIsAvailable ? "Limited" : "Unavailable", info: insight("validationStatus", signalData) },
     ]} />
+    <Panel eyebrow="Fixed model bands · not permit-period filtered" focus="elevated-signals" info={insight("elevatedCount", signalData, managementKpis.elevatedSignals, period.label)} title="Parcels With Elevated Historical Signals"><StatusRows rows={modelIsAvailable ? [["Very High", number.format(veryHigh)], ["High", number.format(high)], ["Total elevated", number.format(veryHigh + high)], ["Current Management permit period", period.label], ["Development Signal model evidence", "2014–2022"]] : []} /><p className="mt-4 text-sm leading-6 text-slate-300">The signal bands are relative historical rankings, not probabilities. Changing the Management permit period does not retrain or recompute this model.</p></Panel>
     <Panel eyebrow="Model trust" info={insight("modelTrust", signalData)} title="How to use these signals"><StatusRows rows={modelIsAvailable || previewIsAvailable ? [["Training period", "2014–2019"], ["Validation period", "2020–2021"], ["Held-out test", "2022"], ["Latest model run", "Not published"], ["Documented inputs", "Permit labels, parcel-year context, zoning, transportation, and tax/value data"]] : []} /><p className="mt-4 text-sm leading-6 text-slate-300">Use these patterns as supporting evidence only. They are not an approval forecast or certainty, and observed relationships can change.</p></Panel>
     <Panel eyebrow="Method" info={insight("modelTimeline", signalData)} title="How the Development Signals Model Learns"><ModelTimeline /></Panel>
     <TwoColumns>
@@ -287,11 +339,11 @@ function MetricCallout({ label, value }: { label: string; value: string }) { ret
 function FeatureGroup({ items, title }: { items: string[]; title: string }) { return <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4"><h3 className="text-sm font-semibold text-white">{title}</h3><ul className="mt-3 space-y-2 text-xs leading-5 text-slate-400">{items.map((item) => <li key={item}>• {item}</li>)}</ul></article>; }
 function EvidenceCard({ text, title }: { text: string; title: string }) { return <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4"><h3 className="text-sm font-semibold text-white">{title}</h3><p className="mt-2 text-xs leading-5 text-slate-400">{text}</p></article>; }
 
-function Panel({ children, eyebrow, info, title }: { children: ReactNode; eyebrow: string; info?: InsightInfo; title: string }) { return <section className="cfs-command-surface relative rounded-2xl p-5 sm:p-6"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9bd1de]">{eyebrow}</p><h2 className="mt-1 text-lg font-semibold text-white">{title}</h2></div>{info ? <InsightInfoPopover info={info} /> : null}</div><div className="mt-5">{children}</div></section>; }
+function Panel({ children, eyebrow, focus, info, title }: { children: ReactNode; eyebrow: string; focus?: ManagementFocus; info?: InsightInfo; title: string }) { return <section className="cfs-command-surface relative scroll-mt-24 rounded-2xl p-5 focus:outline-none focus:ring-2 focus:ring-[#82c9d8] sm:p-6" id={focus ? `management-focus-${focus}` : undefined} tabIndex={focus ? -1 : undefined}><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9bd1de]">{eyebrow}</p><h2 className="mt-1 text-lg font-semibold text-white">{title}</h2></div>{info ? <InsightInfoPopover info={info} /> : null}</div><div className="mt-5">{children}</div></section>; }
 function TwoColumns({ children }: { children: ReactNode }) { return <div className="grid gap-5 xl:grid-cols-2">{children}</div>; }
 function ThreeColumns({ children }: { children: ReactNode }) { return <div className="grid gap-5 lg:grid-cols-3">{children}</div>; }
-type KpiItem = { info: InsightInfo; label: string; status: string; value: string };
-function KpiGrid({ items }: { items: KpiItem[] }) { return items.length ? <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{items.map(({ info, label, status, value }) => <article className="cfs-command-surface relative rounded-xl p-4 pr-12" key={label}><div className="absolute right-3 top-3"><InsightInfoPopover info={info} /></div><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p><p className="mt-2 break-words text-2xl font-semibold text-white">{value}</p><p className="mt-2 text-xs text-[#9bd1de]">{status}</p></article>)}</section> : <CompactEmpty>Current summary data is unavailable.</CompactEmpty>; }
+type KpiItem = { actionLabel?: string; focus?: ManagementFocus; info: InsightInfo; label: string; onAction?: () => void; status: string; value: string };
+function KpiGrid({ items }: { items: KpiItem[] }) { return items.length ? <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{items.map(({ actionLabel, focus, info, label, onAction, status, value }) => <article className="cfs-command-surface relative flex min-h-44 scroll-mt-24 flex-col rounded-xl p-4 pr-12 focus:outline-none focus:ring-2 focus:ring-[#82c9d8]" id={focus ? `management-focus-${focus}` : undefined} key={label} tabIndex={focus ? -1 : undefined}><div className="absolute right-3 top-3"><InsightInfoPopover info={info} /></div><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p><p className="mt-2 break-words text-2xl font-semibold text-white">{value}</p><p className="mt-2 text-xs text-[#9bd1de]">{status}</p>{onAction ? <button className="mt-auto inline-flex items-center gap-1 pt-4 text-left text-xs font-semibold text-[#9bd1de] hover:text-white" onClick={onAction} type="button">{actionLabel ?? "View details"} <ArrowRight className="h-3.5 w-3.5" /></button> : null}</article>)}</section> : <CompactEmpty>Current summary data is unavailable.</CompactEmpty>; }
 function StatusRows({ rows }: { rows: string[][] }) { return rows.length ? <dl className="space-y-3">{rows.map(([label, value]) => <div className="flex items-start justify-between gap-4 border-b border-white/8 pb-3 last:border-0" key={label}><dt className="text-sm text-slate-400">{label}</dt><dd className="max-w-[60%] text-right text-sm font-semibold text-white">{value}</dd></div>)}</dl> : <CompactEmpty>This information is currently unavailable.</CompactEmpty>; }
 function Watchlist({ emptyMessage = "No high-attention records are present in the current data.", rows }: { emptyMessage?: string; rows: string[][] }) { return rows.length ? <ol className="space-y-3">{rows.map(([label, value], index) => <li className="flex items-center gap-3 rounded-lg border border-white/8 bg-white/[0.025] p-3" key={`${label}-${index}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#82c9d8]/12 text-xs font-bold text-[#9bd1de]">{index + 1}</span><span className="min-w-0 flex-1 text-sm font-medium text-white">{label}</span><span className="text-xs text-slate-400">{value}</span></li>)}</ol> : <CompactEmpty>{emptyMessage}</CompactEmpty>; }
 function Action({ children, disabled, onClick, testId }: { children: ReactNode; disabled?: boolean; onClick: () => void; testId?: string }) { return <button className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#82c9d8]/30 bg-[#82c9d8]/10 px-3.5 py-2 text-sm font-semibold text-[#bce3eb] transition hover:bg-[#82c9d8]/15 disabled:cursor-not-allowed disabled:opacity-40" data-testid={testId} disabled={disabled} onClick={onClick}>{children}<ArrowRight className="h-4 w-4" /></button>; }
@@ -348,7 +400,7 @@ const insightCopy = {
 } as const;
 
 type InsightKey = keyof typeof insightCopy;
-function insight(key: InsightKey, trust: TrustItem): InsightInfo { const copy = insightCopy[key]; const howBuilt = "howBuilt" in copy ? copy.howBuilt : "Summarizes available County records and the documented analytical result for this view."; return { coverage: known(trust.coverage), currentThrough: known(trust.currentThrough), howBuilt, limitations: copy.limitations, meaning: copy.meaning, whyMatters: copy.whyMatters, sources: trust.source, status: trust.status, statusMeaning: statusMeaning(trust.status), title: copy.title }; }
+function insight(key: InsightKey, trust: TrustItem, kpi?: (typeof managementKpis)[keyof typeof managementKpis], periodLabel?: string): InsightInfo { const copy = insightCopy[key]; const howBuilt = "howBuilt" in copy ? copy.howBuilt : "Summarizes available County records and the documented analytical result for this view."; return { analysisPeriod: kpi ? kpi.periodSensitive ? periodLabel : "This measure does not change with the permit analysis period." : undefined, coverage: known(trust.coverage), currentThrough: known(trust.currentThrough), detailPage: kpi ? title(kpi.section) : undefined, howBuilt, limitations: copy.limitations, meaning: copy.meaning, whyMatters: copy.whyMatters, sources: trust.source, status: trust.status, statusMeaning: statusMeaning(trust.status), title: copy.title }; }
 function statusMeaning(status: TrustStatus) { return { Current: "source is available and within the expected update period", Limited: "source is available but incomplete or missing an important component", Stale: "source is available but older than the expected update period", Unavailable: "required source or result is not currently available" }[status]; }
 function known(value: string) { return value === "Unavailable" ? undefined : value; }
 function sourceText(source: string | string[]) { return Array.isArray(source) ? source.join("; ") : source; }

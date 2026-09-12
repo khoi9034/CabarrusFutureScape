@@ -11,7 +11,7 @@ import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentActivitySummary } from "@/lib/api/development";
 import { getDemoDevelopmentActivitySummaryResponse } from "@/lib/demo-data/client";
 
-export function useDevelopmentActivitySummary() {
+export function useDevelopmentActivitySummary({ yearEnd = null, yearStart = null }: { yearEnd?: number | null; yearStart?: number | null } = {}) {
   const [summary, setSummary] = useState<DevelopmentActivitySummaryViewModel>(
     () => {
       const staticSummary = USE_DEMO_DATA
@@ -30,7 +30,7 @@ export function useDevelopmentActivitySummary() {
 
   useEffect(() => {
     if (USE_DEMO_DATA) {
-      getDemoDevelopmentActivitySummaryResponse()
+      getDemoDevelopmentActivitySummaryResponse({ yearEnd, yearStart })
         .then((activitySummary) => {
           setSummary({
             ...normalizeDevelopmentActivitySummary(activitySummary),
@@ -60,7 +60,13 @@ export function useDevelopmentActivitySummary() {
 
     const controller = new AbortController();
 
-    getDevelopmentActivitySummary({}, { signal: controller.signal })
+    getDevelopmentActivitySummary(
+      {
+        date_end: yearEnd ? `${yearEnd}-12-31` : undefined,
+        date_start: yearStart ? `${yearStart}-01-01` : undefined,
+      },
+      { signal: controller.signal },
+    )
       .then((activitySummary) => {
         setSummary({
           ...normalizeDevelopmentActivitySummary(activitySummary),
@@ -87,7 +93,7 @@ export function useDevelopmentActivitySummary() {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [yearEnd, yearStart]);
 
   return summary;
 }

@@ -7,6 +7,7 @@ import type { DevelopmentActivitySummaryResponse } from "@/types/api";
 export type DevelopmentPanelSource = "api" | "fallback" | "loading" | "static";
 
 export interface DevelopmentActivitySummaryViewModel {
+  activeParcelCount: number;
   activityDateMax: string | null;
   activityDateMin: string | null;
   avgPermitAmount: number | null;
@@ -26,6 +27,7 @@ export function getStaticDevelopmentActivitySummary(): DevelopmentActivitySummar
       ?.relationship_row_permit_amount_total ?? null;
 
   return {
+    activeParcelCount: developmentActivitySummary.parcelSummary.parcels_with_permits,
     activityDateMax: developmentActivitySummary.dateRange.latest_permit_date,
     activityDateMin: developmentActivitySummary.dateRange.first_permit_date,
     avgPermitAmount: null,
@@ -44,6 +46,7 @@ export function getStaticDevelopmentActivitySummary(): DevelopmentActivitySummar
 
 export function getUnavailableDevelopmentActivitySummary(): DevelopmentActivitySummaryViewModel {
   return {
+    activeParcelCount: 0,
     activityDateMax: null,
     activityDateMin: null,
     avgPermitAmount: null,
@@ -66,6 +69,7 @@ export function normalizeDevelopmentActivitySummary(
   }
 
   return {
+    activeParcelCount: response.active_parcel_count,
     activityDateMax: response.date_range.activity_date_max,
     activityDateMin: response.date_range.activity_date_min,
     avgPermitAmount: response.avg_permit_amount,

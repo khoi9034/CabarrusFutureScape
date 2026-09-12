@@ -11,7 +11,7 @@ import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentHotspots } from "@/lib/api/development";
 import { getDemoManagementDevelopmentHotspots } from "@/lib/demo-data/mapLayerClient";
 
-export function useDevelopmentHotspots() {
+export function useDevelopmentHotspots({ yearEnd = null, yearStart = null }: { yearEnd?: number | null; yearStart?: number | null } = {}) {
   const [hotspots, setHotspots] = useState<DevelopmentHotspotsViewModel>(() => {
     const staticHotspots = USE_DEMO_DATA
       ? getStaticDevelopmentHotspots()
@@ -29,7 +29,7 @@ export function useDevelopmentHotspots() {
   useEffect(() => {
     if (USE_DEMO_DATA) {
       let active = true;
-      void getDemoManagementDevelopmentHotspots()
+      void getDemoManagementDevelopmentHotspots(40, { yearEnd, yearStart })
         .then((markers) => {
           if (!active) return;
           setHotspots((current) => ({ ...current, markers }));
@@ -49,7 +49,9 @@ export function useDevelopmentHotspots() {
     getDevelopmentHotspots(
       {
         limit: 10,
+        end_year: yearEnd ?? undefined,
         sort_by: "development_activity_score",
+        start_year: yearStart ?? undefined,
       },
       { signal: controller.signal },
     )
@@ -79,7 +81,7 @@ export function useDevelopmentHotspots() {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [yearEnd, yearStart]);
 
   return hotspots;
 }

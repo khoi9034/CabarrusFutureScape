@@ -3936,6 +3936,13 @@ function buildPlanningSnapshot({
           selectedIndicator: selectedIndicatorCenterContext,
         })
       : undefined;
+  const managementAnalysisPeriod = {
+    endYear: developmentHotspotControls.permitYearEnd,
+    label: developmentHotspotControls.permitYearStart && developmentHotspotControls.permitYearEnd
+      ? `${developmentHotspotControls.permitYearStart}–${developmentHotspotControls.permitYearEnd}`
+      : "All available (1986–2025)",
+    startYear: developmentHotspotControls.permitYearStart,
+  };
 
   if (!parcel) {
     return buildContextOnlyPlanningSnapshot({
@@ -3945,6 +3952,7 @@ function buildPlanningSnapshot({
       focusMode,
       focusModeLabel,
       mapSnapshot,
+      managementAnalysisPeriod,
       developmentActivityContext,
       indicatorCenterContext,
       modelLabContext,
@@ -3981,6 +3989,7 @@ function buildPlanningSnapshot({
     activeLayers: activeLayerLabels.length
       ? activeLayerLabels
       : ["No optional overlays active at capture time"],
+    managementAnalysisPeriod,
     caveats: [
       "Snapshot is a saved front-end review context, not a new official record.",
       "Workspace context organizes report evidence; it does not create a public model layer.",
@@ -4620,6 +4629,7 @@ function buildContextOnlyPlanningSnapshot({
   focusModeLabel,
   indicatorCenterContext,
   mapSnapshot,
+  managementAnalysisPeriod,
   modelLabContext,
   modelResearchMapSummary,
   overviewCommandMode,
@@ -4634,6 +4644,7 @@ function buildContextOnlyPlanningSnapshot({
   focusModeLabel: string;
   indicatorCenterContext?: PlanningSnapshot["indicatorCenterContext"];
   mapSnapshot: PlanningMapSnapshotCapture;
+  managementAnalysisPeriod: NonNullable<PlanningSnapshot["managementAnalysisPeriod"]>;
   modelLabContext?: PlanningSnapshot["modelLabContext"];
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;
@@ -4655,6 +4666,7 @@ function buildContextOnlyPlanningSnapshot({
     activeLayers: activeLayerLabels.length
       ? activeLayerLabels
       : ["No optional overlays active at capture time"],
+    managementAnalysisPeriod,
     caveats: [
       "Snapshot is a saved front-end review context, not a new official record.",
       "No selected parcel was captured; parcel-specific facts require selecting a parcel in Workspace.",

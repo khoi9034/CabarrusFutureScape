@@ -64,6 +64,7 @@ import {
   readManagementHandoff,
   type ManagementHandoffContext,
 } from "@/lib/managementHandoff";
+import { getManagementPeriod } from "@/lib/managementAnalysis";
 import { cn } from "@/lib/utils";
 import type {
   CfsAppMode,
@@ -126,6 +127,7 @@ function ProductShell() {
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
     setMapFocusMode,
+    setDevelopmentHotspotControls,
     setOverviewCommandMode,
     setOverviewLayoutCommandCenter,
     setOverviewLayoutPanel,
@@ -209,8 +211,13 @@ function ProductShell() {
 
   useEffect(() => {
     const syncManagementSection = () => {
-      const section = new URLSearchParams(window.location.search).get("section");
+      const params = new URLSearchParams(window.location.search);
+      const section = params.get("section");
       setManagementSectionState(isManagementSection(section) ? section : "overview");
+      const period = getManagementPeriod(params.get("period"));
+      setDevelopmentHotspotControls((current) => current.permitYearStart === period.startYear && current.permitYearEnd === period.endYear
+        ? current
+        : { ...current, permitYearEnd: period.endYear, permitYearStart: period.startYear });
     };
     syncManagementSection();
     window.addEventListener("popstate", syncManagementSection);
@@ -220,7 +227,11 @@ function ProductShell() {
   const setManagementSection = useCallback((section: ManagementSection) => {
     setManagementAskContext({});
     setManagementSectionState(section);
-    window.history.pushState(null, "", `/?app=management&section=${section}`);
+    const params = new URLSearchParams(window.location.search);
+    params.set("app", "management");
+    params.set("section", section);
+    params.delete("focus");
+    window.history.pushState(null, "", `/?${params.toString()}`);
   }, []);
 
   useEffect(() => {

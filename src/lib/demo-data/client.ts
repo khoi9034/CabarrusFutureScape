@@ -242,9 +242,38 @@ export async function getDemoDevelopmentStatisticsResponse() {
   return summary.development_activity.statistics;
 }
 
-export async function getDemoDevelopmentActivitySummaryResponse() {
+export async function getDemoDevelopmentActivitySummaryResponse(options: { yearEnd?: number | null; yearStart?: number | null } = {}) {
   const summary = await getDemoIndicatorSummary();
-  return summary.development_activity.activity_summary;
+  const activity = summary.development_activity.activity_summary;
+  if (!options.yearStart && !options.yearEnd) return activity;
+  const byYear = activity.by_year.filter((row) => (!options.yearStart || row.year >= options.yearStart) && (!options.yearEnd || row.year <= options.yearEnd));
+  const byMonth = activity.by_month.filter((row) => (!options.yearStart || row.year >= options.yearStart) && (!options.yearEnd || row.year <= options.yearEnd));
+  const totalPermits = byYear.reduce((sum, row) => sum + row.permit_count, 0);
+  const totalPermitAmount = byYear.reduce((sum, row) => sum + (row.total_permit_amount ?? 0), 0);
+  // ponytail: Demo exposes an exact distinct-parcel count only for its documented three-year window.
+  const activeParcelCount = options.yearStart === 2023 && options.yearEnd === 2025
+    ? activity.recent_activity.recent_3yr_parcels
+    : activity.active_parcel_count;
+  return {
+    ...activity,
+    active_parcel_count: activeParcelCount,
+    avg_permit_amount: totalPermits ? totalPermitAmount / totalPermits : null,
+    by_activity_class: [],
+    by_month: byMonth,
+    by_permit_type: [],
+    by_status: [],
+    by_work_type: [],
+    by_year: byYear,
+    by_zoning_category: [],
+    by_zoning_jurisdiction: [],
+    date_range: {
+      activity_date_max: options.yearEnd ? `${options.yearEnd}-12-31` : activity.date_range.activity_date_max,
+      activity_date_min: options.yearStart ? `${options.yearStart}-01-01` : activity.date_range.activity_date_min,
+    },
+    filters_applied: { ...(options.yearEnd ? { end_year: options.yearEnd } : {}), ...(options.yearStart ? { start_year: options.yearStart } : {}) },
+    total_permit_amount: totalPermitAmount || null,
+    total_permits: totalPermits,
+  };
 }
 
 export async function getDemoPermitSegmentStatisticsResponse() {
@@ -252,9 +281,29 @@ export async function getDemoPermitSegmentStatisticsResponse() {
   return summary.development_activity.permit_segments;
 }
 
-export async function getDemoDevelopmentTrendsResponse() {
+export async function getDemoDevelopmentTrendsResponse(options: { yearEnd?: number | null; yearStart?: number | null } = {}) {
   const trends = await getDemoDevelopmentTrends();
-  return trends.trends;
+  if (!options.yearStart && !options.yearEnd) return trends.trends;
+  const withinPeriod = (row: { year: number | null }) => row.year !== null && (!options.yearStart || row.year >= options.yearStart) && (!options.yearEnd || row.year <= options.yearEnd);
+  const annualTrends = trends.trends.annual_trends.filter(withinPeriod);
+  const monthlyTrends = trends.trends.monthly_trends.filter(withinPeriod);
+  const previous = annualTrends.at(-2)?.permit_count;
+  const latest = annualTrends.at(-1)?.permit_count;
+  return {
+    ...trends.trends,
+    annual_trends: annualTrends,
+    date_range: {
+      activity_date_max: options.yearEnd ? `${options.yearEnd}-12-31` : trends.trends.date_range.activity_date_max,
+      activity_date_min: options.yearStart ? `${options.yearStart}-01-01` : trends.trends.date_range.activity_date_min,
+      end_year: options.yearEnd ?? trends.trends.date_range.end_year,
+      start_year: options.yearStart ?? trends.trends.date_range.start_year,
+    },
+    filters_applied: { ...(options.yearEnd ? { end_year: options.yearEnd } : {}), ...(options.yearStart ? { start_year: options.yearStart } : {}) },
+    monthly_trends: monthlyTrends,
+    peak_year: annualTrends.reduce((peak, row) => row.permit_count > (peak?.permit_count ?? -1) ? row : peak, annualTrends[0])?.year ?? null,
+    total_permits: annualTrends.reduce((sum, row) => sum + row.permit_count, 0),
+    trend_direction: latest === undefined || previous === undefined ? "Unavailable" : latest > previous ? "Increasing" : latest < previous ? "Decreasing" : "Stable",
+  };
 }
 
 export async function getDemoFloodSummaryResponse() {

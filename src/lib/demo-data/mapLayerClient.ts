@@ -346,7 +346,10 @@ export async function getDemoDevelopmentHotspotsBySegment(
     .filter((marker): marker is DevelopmentHotspotMapMarker => Boolean(marker));
 }
 
-export async function getDemoManagementDevelopmentHotspots(limit = 40) {
+export async function getDemoManagementDevelopmentHotspots(
+  limit = 40,
+  options: { yearEnd?: number | null; yearStart?: number | null } = {},
+) {
   const layer = await getDemoGeoJsonLayer("development_hotspots");
   return layer.features
     .map((feature) => {
@@ -355,7 +358,7 @@ export async function getDemoManagementDevelopmentHotspots(limit = 40) {
         asString(properties.permit_segment) ??
         asString(properties.dominant_permit_segment);
       const marker = isDevelopmentHotspotSegment(segment)
-        ? toDemoDevelopmentHotspotMarker(feature, segment, {})
+        ? toDemoDevelopmentHotspotMarker(feature, segment, options)
         : null;
       if (marker) {
         marker.managementLabel = asString(properties.label) ?? undefined;
