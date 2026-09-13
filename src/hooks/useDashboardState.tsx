@@ -49,6 +49,10 @@ import {
   createDashboardUrlState,
   type DashboardUrlState,
 } from "@/lib/dashboard/urlState";
+import {
+  emptyManagementAnalysisPeriod,
+  type ManagementAnalysisPeriod,
+} from "@/lib/managementAnalysis";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { isExploreCountywideMode } from "@/lib/gis/layerModeOwnership";
 import { dispatchParcelMapRefocusRequest } from "@/lib/map/parcelMapFocus";
@@ -151,6 +155,7 @@ interface DashboardContextValue {
   comparisonPair: ScenarioComparisonPair;
   dashboardUrlState: DashboardUrlState;
   developmentHotspotControls: DevelopmentHotspotControls;
+  managementAnalysisPeriod: ManagementAnalysisPeriod;
   developmentHotspotLayer: DevelopmentHotspotLayerState;
   developmentHotspotsEnabled: boolean;
   floodConstraintLayer: FloodConstraintLayerState;
@@ -300,6 +305,7 @@ interface DashboardContextValue {
   setDashboardRoleId: (roleId: DashboardRoleId) => void;
   setDashboardViewMode: (viewMode: DashboardViewMode) => void;
   setDevelopmentHotspotControls: Dispatch<SetStateAction<DevelopmentHotspotControls>>;
+  setManagementAnalysisPeriod: Dispatch<SetStateAction<ManagementAnalysisPeriod>>;
   setDevelopmentHotspotsEnabled: (enabled: boolean) => void;
   setFloodConstraintsEnabled: (enabled: boolean) => void;
   setFloodZoneControls: (controls: FloodZoneControls) => void;
@@ -321,6 +327,7 @@ interface DashboardContextValue {
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
 const CFS_APP_MODE_STORAGE_KEY = "cfs.appMode.v1";
+const MANAGEMENT_PERIOD_STORAGE_KEY = "cfs.management.analysisPeriod.v1";
 const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
   "cfs.overview.layout.v2",
   "cfs.overview.layout.v1",
@@ -441,6 +448,20 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
   } = useMapInteractionState();
   const [developmentHotspotControls, setDevelopmentHotspotControls] =
     useState<DevelopmentHotspotControls>(defaultDevelopmentHotspotControls);
+  const [managementAnalysisPeriod, setManagementAnalysisPeriod] = useState<ManagementAnalysisPeriod>(() => {
+    if (typeof window === "undefined") return emptyManagementAnalysisPeriod;
+    try {
+      const stored = JSON.parse(window.sessionStorage.getItem(MANAGEMENT_PERIOD_STORAGE_KEY) ?? "null") as ManagementAnalysisPeriod | null;
+      return stored?.initialized ? stored : emptyManagementAnalysisPeriod;
+    } catch {
+      return emptyManagementAnalysisPeriod;
+    }
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (managementAnalysisPeriod.initialized) window.sessionStorage.setItem(MANAGEMENT_PERIOD_STORAGE_KEY, JSON.stringify(managementAnalysisPeriod));
+    else window.sessionStorage.removeItem(MANAGEMENT_PERIOD_STORAGE_KEY);
+  }, [managementAnalysisPeriod]);
   const [developmentHotspotsEnabled, setDevelopmentHotspotsEnabled] =
     useState(false);
   const [floodConstraintsEnabled, setFloodConstraintsEnabled] = useState(false);
@@ -535,9 +556,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
   useEffect(() => {
     const period = planningSnapshot?.managementAnalysisPeriod;
     if (!period) return;
-    setDevelopmentHotspotControls((current) => current.permitYearStart === period.startYear && current.permitYearEnd === period.endYear
-      ? current
-      : { ...current, permitYearEnd: period.endYear, permitYearStart: period.startYear });
+    setManagementAnalysisPeriod({ ...period, initialized: true });
   }, [planningSnapshot?.snapshotId, planningSnapshot?.managementAnalysisPeriod]);
   const [planningSnapshotView, setPlanningSnapshotView] =
     useState<PlanningSnapshotView>("overview");
@@ -921,6 +940,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       comparisonPair,
       dashboardUrlState,
       developmentHotspotControls,
+      managementAnalysisPeriod,
       developmentHotspotLayer,
       developmentHotspotsEnabled,
       executiveBriefing,
@@ -991,6 +1011,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       setDashboardRoleId,
       setDashboardViewMode,
       setDevelopmentHotspotControls,
+      setManagementAnalysisPeriod,
       setDevelopmentHotspotsEnabled,
       setFloodConstraintsEnabled,
       setFloodZoneControls,
@@ -1073,6 +1094,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       comparisonPair,
       dashboardUrlState,
       developmentHotspotControls,
+      managementAnalysisPeriod,
       developmentHotspotLayer,
       developmentHotspotsEnabled,
       executiveBriefing,
@@ -1143,6 +1165,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       setDashboardRoleId,
       setDashboardViewMode,
       setDevelopmentHotspotControls,
+      setManagementAnalysisPeriod,
       setDevelopmentHotspotsEnabled,
       setFloodConstraintsEnabled,
       setFloodZoneControls,

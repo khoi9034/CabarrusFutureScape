@@ -11,9 +11,14 @@ import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentActivitySummary } from "@/lib/api/development";
 import { getDemoDevelopmentActivitySummaryResponse } from "@/lib/demo-data/client";
 
-export function useDevelopmentActivitySummary({ yearEnd = null, yearStart = null }: { yearEnd?: number | null; yearStart?: number | null } = {}) {
-  const [summary, setSummary] = useState<DevelopmentActivitySummaryViewModel>(
+const summaryCache = new Map<string, DevelopmentActivitySummaryViewModel>();
+
+export function useDevelopmentActivitySummary({ dateEnd = null, dateStart = null, enabled = true }: { dateEnd?: string | null; dateStart?: string | null; enabled?: boolean } = {}) {
+  const queryKey = `${dateStart ?? ""}|${dateEnd ?? ""}`;
+  const [summary, setSummary] = useState<DevelopmentActivitySummaryViewModel & { queryKey: string }>(
     () => {
+      const cached = summaryCache.get(queryKey);
+      if (cached) return { ...cached, queryKey };
       const staticSummary = USE_DEMO_DATA
         ? getStaticDevelopmentActivitySummary()
         : getUnavailableDevelopmentActivitySummary();
@@ -22,24 +27,32 @@ export function useDevelopmentActivitySummary({ yearEnd = null, yearStart = null
         ? {
             ...staticSummary,
             isLoading: true,
+            queryKey,
             source: "loading",
           }
-        : staticSummary;
+        : { ...staticSummary, queryKey };
     },
   );
 
   useEffect(() => {
+    if (!enabled) return;
+    if (summaryCache.has(queryKey)) return;
     if (USE_DEMO_DATA) {
-      getDemoDevelopmentActivitySummaryResponse({ yearEnd, yearStart })
+      let active = true;
+      getDemoDevelopmentActivitySummaryResponse({ dateEnd, dateStart })
         .then((activitySummary) => {
-          setSummary({
+          if (!active) return;
+          const next = {
             ...normalizeDevelopmentActivitySummary(activitySummary),
             errorMessage: null,
             isLoading: false,
             source: "static",
-          });
+          } as DevelopmentActivitySummaryViewModel;
+          summaryCache.set(queryKey, next);
+          setSummary({ ...next, queryKey });
         })
         .catch((error: unknown) => {
+          if (!active) return;
           const fallbackSummary = getStaticDevelopmentActivitySummary();
           setSummary({
             ...fallbackSummary,
@@ -48,10 +61,11 @@ export function useDevelopmentActivitySummary({ yearEnd = null, yearStart = null
                 ? error.message
                 : "Demo development activity summary is unavailable.",
             isLoading: false,
+            queryKey,
             source: "static",
           });
         });
-      return;
+      return () => { active = false; };
     }
 
     if (!USE_BACKEND_API) {
@@ -62,18 +76,20 @@ export function useDevelopmentActivitySummary({ yearEnd = null, yearStart = null
 
     getDevelopmentActivitySummary(
       {
-        date_end: yearEnd ? `${yearEnd}-12-31` : undefined,
-        date_start: yearStart ? `${yearStart}-01-01` : undefined,
+        date_end: dateEnd ?? undefined,
+        date_start: dateStart ?? undefined,
       },
       { signal: controller.signal },
     )
       .then((activitySummary) => {
-        setSummary({
+        const next = {
           ...normalizeDevelopmentActivitySummary(activitySummary),
           errorMessage: null,
           isLoading: false,
           source: "api",
-        });
+        } as DevelopmentActivitySummaryViewModel;
+        summaryCache.set(queryKey, next);
+        setSummary({ ...next, queryKey });
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) {
@@ -88,12 +104,13 @@ export function useDevelopmentActivitySummary({ yearEnd = null, yearStart = null
               ? error.message
               : "Live development activity summary is unavailable.",
           isLoading: false,
+          queryKey,
           source: "fallback",
         });
       });
 
     return () => controller.abort();
-  }, [yearEnd, yearStart]);
+  }, [dateEnd, dateStart, enabled, queryKey]);
 
   return summary;
 }

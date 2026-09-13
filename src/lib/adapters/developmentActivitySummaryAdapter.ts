@@ -5,12 +5,15 @@ import {
 import type { DevelopmentActivitySummaryResponse } from "@/types/api";
 
 export type DevelopmentPanelSource = "api" | "fallback" | "loading" | "static";
+type DevelopmentActivitySummaryInput = Omit<DevelopmentActivitySummaryResponse, "active_parcel_count"> & { active_parcel_count: number | null };
 
 export interface DevelopmentActivitySummaryViewModel {
-  activeParcelCount: number;
+  activeParcelCount: number | null;
   activityDateMax: string | null;
   activityDateMin: string | null;
   avgPermitAmount: number | null;
+  byMonth: DevelopmentActivitySummaryResponse["by_month"];
+  byYear: DevelopmentActivitySummaryResponse["by_year"];
   errorMessage: string | null;
   isLoading: boolean;
   recentActivityParcels1Yr: number;
@@ -31,6 +34,8 @@ export function getStaticDevelopmentActivitySummary(): DevelopmentActivitySummar
     activityDateMax: developmentActivitySummary.dateRange.latest_permit_date,
     activityDateMin: developmentActivitySummary.dateRange.first_permit_date,
     avgPermitAmount: null,
+    byMonth: [],
+    byYear: [],
     errorMessage: null,
     isLoading: false,
     recentActivityParcels1Yr:
@@ -50,6 +55,8 @@ export function getUnavailableDevelopmentActivitySummary(): DevelopmentActivityS
     activityDateMax: null,
     activityDateMin: null,
     avgPermitAmount: null,
+    byMonth: [],
+    byYear: [],
     errorMessage: null,
     isLoading: false,
     recentActivityParcels1Yr: 0,
@@ -62,7 +69,7 @@ export function getUnavailableDevelopmentActivitySummary(): DevelopmentActivityS
 }
 
 export function normalizeDevelopmentActivitySummary(
-  response: DevelopmentActivitySummaryResponse,
+  response: DevelopmentActivitySummaryInput,
 ): Omit<DevelopmentActivitySummaryViewModel, "errorMessage" | "isLoading" | "source"> {
   if (!response || typeof response.total_permits !== "number") {
     throw new Error("Development activity summary API returned an invalid shape.");
@@ -73,6 +80,8 @@ export function normalizeDevelopmentActivitySummary(
     activityDateMax: response.date_range.activity_date_max,
     activityDateMin: response.date_range.activity_date_min,
     avgPermitAmount: response.avg_permit_amount,
+    byMonth: response.by_month,
+    byYear: response.by_year,
     recentActivityParcels1Yr: response.recent_activity.recent_1yr_parcels,
     recentActivityParcels3Yr: response.recent_activity.recent_3yr_parcels,
     totalPermitAmount: response.total_permit_amount,

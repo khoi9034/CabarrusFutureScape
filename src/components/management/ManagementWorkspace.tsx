@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Save, ShieldCheck } from "lucide-react";
+import { ArrowRight, CalendarRange, Save, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { CfsRankedBarChart, CfsTrendChart, type CfsChartRow } from "@/components/management/CfsManagementCharts";
 import { InsightInfoPopover, type InsightInfo } from "@/components/management/InsightInfoPopover";
@@ -15,7 +15,6 @@ import type { BackendAvailabilityController } from "@/hooks/useBackendAvailabili
 import { useDevelopmentActivitySummary } from "@/hooks/useDevelopmentActivitySummary";
 import { useDevelopmentHotspots } from "@/hooks/useDevelopmentHotspots";
 import { useDevelopmentPredictionResearchStatus } from "@/hooks/useDevelopmentPredictionResearchStatus";
-import { useDevelopmentTrends } from "@/hooks/useDevelopmentTrends";
 import { useEconomicsIntelligence } from "@/hooks/useEconomicsIntelligence";
 import { useFloodConstraintSummary } from "@/hooks/useFloodConstraintSummary";
 import { useModelResearchPreviewLayer } from "@/hooks/useModelResearchPreviewLayer";
@@ -26,13 +25,15 @@ import {
   type ManagementHandoffContext,
 } from "@/lib/managementHandoff";
 import {
-  getManagementPeriod,
+  createManagementPeriod,
+  isManagementPeriodWithinCoverage,
   managementDetailUrl,
   managementKpis,
-  managementPeriodId,
-  managementPeriods,
+  managementPeriodQuery,
   type ManagementFocus,
-  type ManagementPeriodId,
+  type ManagementAnalysisPeriod,
+  type ManagementDataCoverage,
+  type ManagementPeriodPreset,
 } from "@/lib/managementAnalysis";
 import type { ManagementSection } from "@/types";
 import type { DevelopmentHotspotMapMarker, SelectedDevelopmentHotspotContext } from "@/types/map/developmentHotspots";
@@ -62,11 +63,17 @@ export function ManagementWorkspace({ backend, onAskContextChange, section }: { 
 
 function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContextChange?: (context: CfsAiSearchRequest["filter_context"]) => void; section: ManagementSection }) {
   const dashboard = useDashboardState();
-  const periodId = managementPeriodId(dashboard.developmentHotspotControls.permitYearStart, dashboard.developmentHotspotControls.permitYearEnd);
-  const period = getManagementPeriod(periodId);
-  const development = useDevelopmentActivitySummary({ yearEnd: period.endYear, yearStart: period.startYear });
-  const trends = useDevelopmentTrends({ yearEnd: period.endYear, yearStart: period.startYear });
-  const hotspots = useDevelopmentHotspots({ yearEnd: period.endYear, yearStart: period.startYear });
+  const period = dashboard.managementAnalysisPeriod;
+  const coverageSummary = useDevelopmentActivitySummary();
+  const coverage = useMemo<ManagementDataCoverage | null>(() => coverageSummary.activityDateMin && coverageSummary.activityDateMax
+    ? { endDate: coverageSummary.activityDateMax, startDate: coverageSummary.activityDateMin }
+    : null, [coverageSummary.activityDateMax, coverageSummary.activityDateMin]);
+  const availableYears = useMemo(() => coverageSummary.byYear.map((row) => row.year), [coverageSummary.byYear]);
+  const periodValid = Boolean(coverage && isManagementPeriodWithinCoverage(period, coverage));
+  const development = useDevelopmentActivitySummary({ dateEnd: period.endDate, dateStart: period.startDate, enabled: periodValid });
+  const hotspots = useDevelopmentHotspots({ dateEnd: period.endDate, dateStart: period.startDate, enabled: periodValid });
+  const selectedQueryKey = `${period.startDate ?? ""}|${period.endDate ?? ""}`;
+  const periodDataReady = periodValid && development.queryKey === selectedQueryKey && hotspots.queryKey === selectedQueryKey;
   const flood = useFloodConstraintSummary();
   const schools = useSchoolConstraintSummary();
   const model = useDevelopmentPredictionResearchStatus();
@@ -74,6 +81,11 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
   const economics = useEconomicsIntelligence();
   const [selectedHotspot, setSelectedHotspot] = useState<DevelopmentHotspotMapMarker | null>(null);
   const [selectedSignal, setSelectedSignal] = useState<ModelResearchPreviewMarker | null>(null);
+  const [changingPeriod, setChangingPeriod] = useState(false);
+
+  useEffect(() => {
+    if (coverage && period.initialized && !periodValid) dashboard.setManagementAnalysisPeriod((current) => current.initialized ? { endDate: null, initialized: false, label: "Choose an analysis period", preset: null, startDate: null } : current);
+  }, [coverage, dashboard, period.initialized, periodValid]);
 
   useEffect(() => {
     const focus = new URLSearchParams(window.location.search).get("focus");
@@ -88,10 +100,11 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
   }, [dashboard, section]);
 
   const trendRows = useMemo<CfsChartRow[]>(() =>
-    (trends.monthlyTrend.length ? trends.monthlyTrend : trends.annualTrend).slice(-12).map((row) => ({
-      label: row.activity_month ? `${String(row.activity_month).padStart(2, "0")}/${String(row.activity_year).slice(-2)}` : String(row.activity_year),
+    (development.byMonth.length ? development.byMonth : development.byYear).slice(-12).map((row) => ({
+      label: "month" in row ? `${String(row.month).padStart(2, "0")}/${String(row.year).slice(-2)}` : String(row.year),
       value: row.permit_count,
-    })), [trends]);
+    })), [development.byMonth, development.byYear]);
+  const trendDirection = trendRows.length < 2 ? null : trendRows.at(-1)!.value > trendRows.at(-2)!.value ? "up" : trendRows.at(-1)!.value < trendRows.at(-2)!.value ? "down" : "flat";
   const hotspotRows = useMemo<CfsChartRow[]>(() => hotspots.markers.slice(0, 8).map((marker) => {
     const record = hotspots.hotspots.find((item) => item.official_parcel_id === marker.officialParcelId);
     return {
@@ -104,7 +117,7 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
   const elevatedSignals = model.rankingSummary.class_distribution
     .filter((row) => ["very_high_development_signal", "high_development_signal"].includes(row.development_signal_class))
     .reduce((sum, row) => sum + row.row_count, 0);
-  const managementAskContext = useMemo<CfsAiSearchRequest["filter_context"]>(() => ({
+  const managementAskContext = useMemo<CfsAiSearchRequest["filter_context"]>(() => periodValid ? ({
     page_active_development_parcels: development.activeParcelCount || null,
     ...(USE_DEMO_DATA ? { page_active_hotspots: hotspots.markers.length || null } : {}),
     page_economic_review_parcels: economics.data?.summary.high_opportunity_count ?? null,
@@ -117,15 +130,15 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
     page_parcels_evaluated: sourceAvailable(model.source) ? model.rankingSummary.unique_parcel_count : null,
     page_permit_records: development.totalPermits || null,
     management_analysis_period: period.label,
-    permit_year_end: period.endYear,
-    permit_year_start: period.startYear,
+    permit_date_end: period.endDate,
+    permit_date_start: period.startDate,
     page_school_assignment_review: sourceAvailable(schools.source) ? metric(schools.metrics, "assignment-review") : null,
     page_top_hotspot_label: hotspotRows.at(0)?.label ?? null,
     page_top_hotspot_permits: hotspotRows.at(0)?.value ?? null,
     page_total_assessed_value: economics.data?.summary.total_assessed_value ?? null,
     page_total_economic_parcels: economics.data?.summary.total_parcels_analyzed ?? null,
     page_very_high_signals: sourceAvailable(model.source) ? model.rankingSummary.class_distribution.find((row) => row.development_signal_class === "very_high_development_signal")?.row_count ?? null : null,
-  }), [development.activeParcelCount, development.source, development.totalPermits, economics.data, elevatedSignals, flood.metrics, flood.source, hotspotRows, hotspots.markers.length, model.rankingSummary, model.source, period.endYear, period.label, period.startYear, schools.metrics, schools.source, trendRows]);
+  }) : ({}), [development.activeParcelCount, development.source, development.totalPermits, economics.data, elevatedSignals, flood.metrics, flood.source, hotspotRows, hotspots.markers.length, model.rankingSummary, model.source, period.endDate, period.label, period.startDate, periodValid, schools.metrics, schools.source, trendRows]);
 
   useEffect(() => onAskContextChange?.(managementAskContext), [managementAskContext, onAskContextChange]);
 
@@ -137,22 +150,21 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
     economicScenarioId?: string,
   ) => navigateManagementHandoff({ economicScenarioId, sourceInsightType, sourceManagementPage: section, targetWorkspace: "economics" });
   const openManagementDetail = (targetSection: ManagementSection, focus: ManagementFocus) => {
-    window.history.pushState(null, "", managementDetailUrl(targetSection, focus, periodId));
+    window.history.pushState(null, "", managementDetailUrl(targetSection, focus, period));
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
-  const setPeriod = (nextPeriodId: ManagementPeriodId) => {
-    const next = getManagementPeriod(nextPeriodId);
-    dashboard.setDevelopmentHotspotControls({
-      ...dashboard.developmentHotspotControls,
-      permitYearEnd: next.endYear,
-      permitYearStart: next.startYear,
-    });
+  const setPeriod = (next: ManagementAnalysisPeriod) => {
+    dashboard.setManagementAnalysisPeriod(next);
+    setSelectedHotspot(null);
+    dashboard.setSelectedDevelopmentHotspotContext(null);
     const params = new URLSearchParams(window.location.search);
     params.set("app", "management");
     params.set("section", section);
-    params.set("period", next.id);
+    params.delete("period"); params.delete("from"); params.delete("to"); params.delete("range");
+    managementPeriodQuery(next).forEach((value, key) => params.set(key, value));
     params.delete("focus");
     window.history.pushState(null, "", `/?${params.toString()}`);
+    setChangingPeriod(false);
   };
 
   return (
@@ -166,27 +178,63 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
               <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{title(section)}</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">{description(section)}</p>
             </div>
-            <button className="inline-flex w-fit items-center gap-2 rounded-lg border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2.5 text-sm font-semibold text-[#c9ead0] disabled:opacity-50" disabled={!dashboard.planningSnapshotCanWrite} onClick={() => window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT))}>
+            <button className="inline-flex w-fit items-center gap-2 rounded-lg border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2.5 text-sm font-semibold text-[#c9ead0] disabled:opacity-50" disabled={!dashboard.planningSnapshotCanWrite || !periodValid} onClick={() => window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT))}>
               <Save className="h-4 w-4" /> Save snapshot
             </button>
           </div>
-          <label className="mt-5 flex w-fit flex-col gap-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Analysis period
-            <select className="rounded-lg border border-white/15 bg-[#0b1726] px-3 py-2 text-sm font-medium normal-case tracking-normal text-white" data-testid="management-period" onChange={(event) => setPeriod(event.target.value as ManagementPeriodId)} value={periodId}>
-              {managementPeriods.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-            </select>
-          </label>
+          {periodValid ? <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-200" data-testid="management-period"><CalendarRange className="h-4 w-4 text-[#9bd1de]" /><span><strong>Analysis period:</strong> {period.label}</span><button className="rounded-lg border border-white/15 px-3 py-1.5 font-semibold text-white" onClick={() => setChangingPeriod((value) => !value)}>Change</button></div> : null}
         </header>
 
-        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={trends.source} openEconomicsBuilder={openEconomicsBuilder} openManagementDetail={openManagementDetail} openPlanningBuilder={openPlanningBuilder} period={period} /> : null}
-        {section === "planning-insights" ? <Planning development={development} flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} trendSource={trends.source} openBuilder={openPlanningBuilder} period={period} /> : null}
-        {section === "economic-insights" ? <Economics development={development} economics={economics} openBuilder={openEconomicsBuilder} period={period} trendDirection={trends.trendDirection} trendRows={trendRows} /> : null}
+        {!coverage || coverageSummary.isLoading ? <CompactEmpty>Loading available permit dates…</CompactEmpty> : !periodValid || changingPeriod ? <ManagementPeriodSetup availableYears={availableYears} coverage={coverage} current={periodValid ? period : null} onAnalyze={setPeriod} /> : null}
+
+        {periodValid && !periodDataReady ? <CompactEmpty>Updating Management insights for {period.label}…</CompactEmpty> : null}
+        {!periodDataReady ? null : <>
+
+        {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={development.source} openEconomicsBuilder={openEconomicsBuilder} openManagementDetail={openManagementDetail} openPlanningBuilder={openPlanningBuilder} period={period} /> : null}
+        {section === "planning-insights" ? <Planning development={development} flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} trendSource={development.source} openBuilder={openPlanningBuilder} period={period} /> : null}
+        {section === "economic-insights" ? <Economics development={development} economics={economics} openBuilder={openEconomicsBuilder} period={period} trendDirection={trendDirection} trendRows={trendRows} /> : null}
         {section === "development-signals" ? <Signals model={model} preview={modelPreview} markers={signalMarkers} period={period} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
 
-      <footer className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-slate-400"><ShieldCheck className="h-4 w-4 text-[#77c99b]" /> Insights are based on available County data and documented analytical methods. Detailed controls, sources, and methodology remain in Analyst View.</footer>
+      <footer className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-slate-400"><ShieldCheck className="h-4 w-4 text-[#77c99b]" /> Insights are based on available County data and documented analytical methods. Detailed controls, sources, and methodology remain in Analyst View.</footer></>}
       </div>
     </main>
   );
+}
+
+function ManagementPeriodSetup({ availableYears, coverage, current, onAnalyze }: {
+  availableYears: number[];
+  coverage: ManagementDataCoverage;
+  current: ManagementAnalysisPeriod | null;
+  onAnalyze: (period: ManagementAnalysisPeriod) => void;
+}) {
+  const [preset, setPreset] = useState<ManagementPeriodPreset>(current?.preset ?? "past-12-months");
+  const [startYear, setStartYear] = useState(current?.startDate ? Number(current.startDate.slice(0, 4)) : availableYears.at(-1) ?? Number(coverage.endDate.slice(0, 4)));
+  const [endYear, setEndYear] = useState(current?.endDate ? Number(current.endDate.slice(0, 4)) : availableYears.at(-1) ?? Number(coverage.endDate.slice(0, 4)));
+  const validCustom = preset !== "custom" || startYear <= endYear;
+  const analyze = () => validCustom && onAnalyze(createManagementPeriod(preset, coverage, preset === "custom" ? { endYear, startYear } : undefined));
+
+  return <section className="rounded-2xl border border-[#9bd1de]/25 bg-[#0b1726] p-6 shadow-xl shadow-black/10" data-testid="management-period-setup">
+    <div className="max-w-3xl">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9bd1de]">Analysis setup</p>
+      <h2 className="mt-2 text-2xl font-semibold text-white">Choose an analysis period</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-300">Permit-based Management insights are calculated only after you choose a range. Available records run from {coverage.startDate} through {coverage.endDate}.</p>
+    </div>
+    <div className="mt-5 flex flex-wrap gap-2">
+      {([
+        ["past-3-months", "Past 3 months"], ["past-12-months", "Past 12 months"], ["past-3-years", "Past 3 years"], ["past-5-years", "Past 5 years"], ["all", "All available"], ["custom", "Custom years"],
+      ] as Array<[ManagementPeriodPreset, string]>).map(([id, label]) => <button className={`rounded-lg border px-3 py-2 text-sm font-semibold ${preset === id ? "border-[#55d38f] bg-[#55d38f]/15 text-[#c9ead0]" : "border-white/15 text-slate-200"}`} key={id} onClick={() => setPreset(id)}>{label}</button>)}
+    </div>
+    {preset === "custom" ? <div className="mt-5 flex flex-wrap items-end gap-3">
+      <YearSelect label="From year" value={startYear} years={availableYears} onChange={setStartYear} />
+      <YearSelect label="To year" value={endYear} years={availableYears} onChange={setEndYear} />
+      {!validCustom ? <p className="w-full text-sm text-amber-200">The start year must not be later than the end year.</p> : null}
+    </div> : null}
+    <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#55d38f] px-5 py-2.5 text-sm font-bold text-[#07131f] disabled:opacity-50" data-testid="management-analyze" disabled={!validCustom} onClick={analyze}>Analyze <ArrowRight className="h-4 w-4" /></button>
+  </section>;
+}
+
+function YearSelect({ label, onChange, value, years }: { label: string; onChange: (year: number) => void; value: number; years: number[] }) {
+  return <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-wider text-slate-400">{label}<select className="rounded-lg border border-white/15 bg-[#07131f] px-3 py-2 text-sm font-medium normal-case tracking-normal text-white" onChange={(event) => onChange(Number(event.target.value))} value={value}>{years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>;
 }
 
 function Overview({ development, economics, flood, hotspots, hotspotRows, model, schools, trendRows, trendSource, openEconomicsBuilder, openManagementDetail, openPlanningBuilder, period }: any) {
@@ -236,7 +284,7 @@ function Planning({ development, flood, hotspots, hotspotMarkers, hotspotRows, s
     <TwoColumns>
       <Panel eyebrow={`Geographic context · ${period.label}`} info={insight("hotspotMap", hotspotData)} title="Development hotspots"><ManagementMapPreview ariaLabel="Development hotspot map" markers={hotspotMarkers} onSelect={(marker) => setSelected(hotspots.markers.find((item: DevelopmentHotspotMapMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-hotspot-map" /></Panel>
       <Panel eyebrow="Selected hotspot" info={insight("selectedHotspot", hotspotData)} title={selected ? selected.managementLabel || selected.zoningJurisdictionName || "Selected development hotspot" : "Select a hotspot on the map"}>
-        {selected ? <StatusRows rows={[["Permit activity", number.format(selected.totalPermitCount)], ["Recent 3 years", number.format(selected.recentPermitCount3yr)], ["Signal", clean(selected.developmentActivityClass)], ["Period", dateRange(selected.firstPermitDate, selected.latestPermitDate)]]} /> : <CompactEmpty>Click a hotspot to review its current observed evidence.</CompactEmpty>}
+        {selected ? <StatusRows rows={[["Permit activity", number.format(selected.totalPermitCount)], ["Analysis period", period.label], ["Signal", clean(selected.developmentActivityClass)], ["Observed dates", dateRange(selected.firstPermitDate, selected.latestPermitDate)]]} /> : <CompactEmpty>Click a hotspot to review its current observed evidence.</CompactEmpty>}
         <Action disabled={!selected} onClick={() => selected && openBuilder({ planningMode: "countywide", selectedHotspotContext: toHotspotContext(selected), selectedHotspotId: selected.officialParcelId, selectedParcelId: selected.officialParcelId, sourceInsightType: "planning-hotspot" })} testId="management-hotspot-builder-handoff">Open in Analyst View</Action>
       </Panel>
     </TwoColumns>
@@ -451,7 +499,7 @@ function metric(items: { id: string; value: string }[], id: string) { return ite
 function clean(value: string) { return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); }
 function freshness(source: string) { return source === "api" || source === "current" || source === "current_session" || source === "static" || source === "demo" ? "Current" : source === "documented" || source === "fallback_partial" ? "Limited" : "Unavailable"; }
 function sourceAvailable(source: string) { return !["fallback", "loading", "none", "unavailable"].includes(source); }
-function countValue(source: string, isLoading: boolean, value: number) { return isLoading ? "Loading" : sourceAvailable(source) ? number.format(value) : "Unavailable"; }
+function countValue(source: string, isLoading: boolean, value: number | null) { return isLoading ? "Loading" : sourceAvailable(source) && value !== null ? number.format(value) : "Unavailable"; }
 function unavailableMessage(source: string, emptyMessage: string) { return sourceAvailable(source) ? emptyMessage : "This information is currently unavailable."; }
 function permitTrust(development: any): TrustItem { const available = sourceAvailable(development.source); return { coverage: available ? `${number.format(development.totalPermits)} permit records` : "Unavailable", currentThrough: available && development.activityDateMax ? formatDate(development.activityDateMax) : "Unavailable", label: "Permit activity", source: development.source === "static" ? "Sanitized Demo extract" : "Cabarrus County permit records", status: datedStatus(development.source, development.activityDateMax) }; }
 function hotspotTrust(hotspots: any): TrustItem { const available = sourceAvailable(hotspots.source); const latest = latestHotspotDate(hotspots); return { coverage: available ? `${number.format(hotspots.totalCount)} ranked areas` : "Unavailable", currentThrough: latest ? formatDate(latest) : available ? "Permit record period" : "Unavailable", label: "Development hotspots", source: hotspots.source === "static" ? "Sanitized Demo extract" : "Cabarrus County permit records", status: datedStatus(hotspots.source, latest) }; }

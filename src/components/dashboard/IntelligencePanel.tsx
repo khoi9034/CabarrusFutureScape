@@ -208,6 +208,7 @@ export function IntelligencePanel({
   const {
     activeLayers,
     developmentHotspotControls,
+    managementAnalysisPeriod,
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
     floodZonesEnabled,
@@ -254,6 +255,7 @@ export function IntelligencePanel({
         clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
         controllerOnly={controllerOnly}
         developmentHotspotControls={developmentHotspotControls}
+        managementAnalysisPeriod={managementAnalysisPeriod}
         developmentHotspotsEnabled={developmentHotspotsEnabled}
         floodConstraintsEnabled={floodConstraintsEnabled}
         floodZonesEnabled={floodZonesEnabled}
@@ -346,6 +348,7 @@ function OverviewModeContent({
   clearSelectedSchoolUtilizationZone,
   controllerOnly,
   developmentHotspotControls,
+  managementAnalysisPeriod,
   developmentHotspotsEnabled,
   floodConstraintsEnabled,
   floodZonesEnabled,
@@ -377,6 +380,7 @@ function OverviewModeContent({
   clearSelectedSchoolUtilizationZone: () => void;
   controllerOnly: boolean;
   developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
+  managementAnalysisPeriod: ReturnType<typeof useDashboardState>["managementAnalysisPeriod"];
   developmentHotspotsEnabled: boolean;
   floodConstraintsEnabled: boolean;
   floodZonesEnabled: boolean;
@@ -523,6 +527,7 @@ function OverviewModeContent({
         parcel: selectedParcelForSnapshot,
         schoolConstraint,
         developmentHotspotControls,
+        managementAnalysisPeriod,
         selectedDevelopmentHotspotContext,
         selectedIndicatorCenterContext,
         selectedIndicatorCenterDisplayMode: indicatorCenterDisplayMode,
@@ -560,6 +565,7 @@ function OverviewModeContent({
     activeLayerLabels,
     developmentActivity,
     developmentHotspotControls,
+    managementAnalysisPeriod,
     floodConstraint,
     indicatorCenterCards,
     indicatorCenterDisplayMode,
@@ -3861,6 +3867,7 @@ function buildPlanningSnapshot({
   activeLayerIds,
   activeLayerLabels,
   developmentHotspotControls,
+  managementAnalysisPeriod,
   developmentActivity,
   focusMode,
   focusModeLabel,
@@ -3882,6 +3889,7 @@ function buildPlanningSnapshot({
   activeLayerIds: string[];
   activeLayerLabels: string[];
   developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
+  managementAnalysisPeriod: ReturnType<typeof useDashboardState>["managementAnalysisPeriod"];
   developmentActivity: SnapshotDevelopmentActivity;
   focusMode: PlanningReviewFocusMode;
   focusModeLabel: string;
@@ -3936,13 +3944,9 @@ function buildPlanningSnapshot({
           selectedIndicator: selectedIndicatorCenterContext,
         })
       : undefined;
-  const managementAnalysisPeriod = {
-    endYear: developmentHotspotControls.permitYearEnd,
-    label: developmentHotspotControls.permitYearStart && developmentHotspotControls.permitYearEnd
-      ? `${developmentHotspotControls.permitYearStart}–${developmentHotspotControls.permitYearEnd}`
-      : "All available (1986–2025)",
-    startYear: developmentHotspotControls.permitYearStart,
-  };
+  const savedManagementAnalysisPeriod = managementAnalysisPeriod.initialized && managementAnalysisPeriod.startDate && managementAnalysisPeriod.endDate && managementAnalysisPeriod.preset
+    ? { endDate: managementAnalysisPeriod.endDate, label: managementAnalysisPeriod.label, preset: managementAnalysisPeriod.preset, startDate: managementAnalysisPeriod.startDate }
+    : undefined;
 
   if (!parcel) {
     return buildContextOnlyPlanningSnapshot({
@@ -3952,7 +3956,7 @@ function buildPlanningSnapshot({
       focusMode,
       focusModeLabel,
       mapSnapshot,
-      managementAnalysisPeriod,
+      managementAnalysisPeriod: savedManagementAnalysisPeriod,
       developmentActivityContext,
       indicatorCenterContext,
       modelLabContext,
@@ -3989,7 +3993,7 @@ function buildPlanningSnapshot({
     activeLayers: activeLayerLabels.length
       ? activeLayerLabels
       : ["No optional overlays active at capture time"],
-    managementAnalysisPeriod,
+    managementAnalysisPeriod: savedManagementAnalysisPeriod,
     caveats: [
       "Snapshot is a saved front-end review context, not a new official record.",
       "Workspace context organizes report evidence; it does not create a public model layer.",
@@ -4644,7 +4648,7 @@ function buildContextOnlyPlanningSnapshot({
   focusModeLabel: string;
   indicatorCenterContext?: PlanningSnapshot["indicatorCenterContext"];
   mapSnapshot: PlanningMapSnapshotCapture;
-  managementAnalysisPeriod: NonNullable<PlanningSnapshot["managementAnalysisPeriod"]>;
+  managementAnalysisPeriod: PlanningSnapshot["managementAnalysisPeriod"];
   modelLabContext?: PlanningSnapshot["modelLabContext"];
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;

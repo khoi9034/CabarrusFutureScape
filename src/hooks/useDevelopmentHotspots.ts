@@ -11,8 +11,13 @@ import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentHotspots } from "@/lib/api/development";
 import { getDemoManagementDevelopmentHotspots } from "@/lib/demo-data/mapLayerClient";
 
-export function useDevelopmentHotspots({ yearEnd = null, yearStart = null }: { yearEnd?: number | null; yearStart?: number | null } = {}) {
-  const [hotspots, setHotspots] = useState<DevelopmentHotspotsViewModel>(() => {
+const hotspotCache = new Map<string, DevelopmentHotspotsViewModel>();
+
+export function useDevelopmentHotspots({ dateEnd = null, dateStart = null, enabled = true }: { dateEnd?: string | null; dateStart?: string | null; enabled?: boolean } = {}) {
+  const queryKey = `${dateStart ?? ""}|${dateEnd ?? ""}`;
+  const [hotspots, setHotspots] = useState<DevelopmentHotspotsViewModel & { queryKey: string }>(() => {
+    const cached = hotspotCache.get(queryKey);
+    if (cached) return { ...cached, queryKey };
     const staticHotspots = USE_DEMO_DATA
       ? getStaticDevelopmentHotspots()
       : getUnavailableDevelopmentHotspots();
@@ -21,18 +26,28 @@ export function useDevelopmentHotspots({ yearEnd = null, yearStart = null }: { y
       ? {
           ...staticHotspots,
           isLoading: true,
+          queryKey,
           source: "loading",
         }
-      : staticHotspots;
+      : { ...staticHotspots, queryKey };
   });
 
   useEffect(() => {
+    if (!enabled) return;
+    if (hotspotCache.has(queryKey)) return;
     if (USE_DEMO_DATA) {
       let active = true;
-      void getDemoManagementDevelopmentHotspots(40, { yearEnd, yearStart })
+      const wholeYears = Boolean(dateStart?.endsWith("-01-01") && dateEnd?.endsWith("-12-31"));
+      void (wholeYears
+        ? getDemoManagementDevelopmentHotspots(40, { yearEnd: Number(dateEnd?.slice(0, 4)), yearStart: Number(dateStart?.slice(0, 4)) })
+        : Promise.resolve([]))
         .then((markers) => {
           if (!active) return;
-          setHotspots((current) => ({ ...current, markers }));
+          setHotspots((current) => {
+            const next = { ...current, markers, queryKey, totalCount: markers.length };
+            hotspotCache.set(queryKey, next);
+            return next;
+          });
         })
         .catch(() => undefined);
       return () => {
@@ -49,19 +64,21 @@ export function useDevelopmentHotspots({ yearEnd = null, yearStart = null }: { y
     getDevelopmentHotspots(
       {
         limit: 10,
-        end_year: yearEnd ?? undefined,
+        date_end: dateEnd ?? undefined,
         sort_by: "development_activity_score",
-        start_year: yearStart ?? undefined,
+        date_start: dateStart ?? undefined,
       },
       { signal: controller.signal },
     )
       .then((developmentHotspots) => {
-        setHotspots({
+        const next = {
           ...normalizeDevelopmentHotspots(developmentHotspots),
           errorMessage: null,
           isLoading: false,
           source: "api",
-        });
+        } as DevelopmentHotspotsViewModel;
+        hotspotCache.set(queryKey, next);
+        setHotspots({ ...next, queryKey });
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) {
@@ -76,12 +93,13 @@ export function useDevelopmentHotspots({ yearEnd = null, yearStart = null }: { y
               ? error.message
               : "Live development hotspots are unavailable.",
           isLoading: false,
+          queryKey,
           source: "fallback",
         });
       });
 
     return () => controller.abort();
-  }, [yearEnd, yearStart]);
+  }, [dateEnd, dateStart, enabled, queryKey]);
 
   return hotspots;
 }

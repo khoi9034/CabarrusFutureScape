@@ -64,7 +64,7 @@ import {
   readManagementHandoff,
   type ManagementHandoffContext,
 } from "@/lib/managementHandoff";
-import { getManagementPeriod } from "@/lib/managementAnalysis";
+import { emptyManagementAnalysisPeriod, readManagementPeriodFromSearch } from "@/lib/managementAnalysis";
 import { cn } from "@/lib/utils";
 import type {
   CfsAppMode,
@@ -128,6 +128,7 @@ function ProductShell() {
     selectedParcelIntelligenceSource,
     setMapFocusMode,
     setDevelopmentHotspotControls,
+    setManagementAnalysisPeriod,
     setOverviewCommandMode,
     setOverviewLayoutCommandCenter,
     setOverviewLayoutPanel,
@@ -210,18 +211,18 @@ function ProductShell() {
   }, []);
 
   useEffect(() => {
-    const syncManagementSection = () => {
+    const syncManagementSection = (clearMissingPeriod = false) => {
       const params = new URLSearchParams(window.location.search);
       const section = params.get("section");
       setManagementSectionState(isManagementSection(section) ? section : "overview");
-      const period = getManagementPeriod(params.get("period"));
-      setDevelopmentHotspotControls((current) => current.permitYearStart === period.startYear && current.permitYearEnd === period.endYear
-        ? current
-        : { ...current, permitYearEnd: period.endYear, permitYearStart: period.startYear });
+      const period = readManagementPeriodFromSearch(window.location.search);
+      if (period) setManagementAnalysisPeriod(period);
+      else if (clearMissingPeriod) setManagementAnalysisPeriod(emptyManagementAnalysisPeriod);
     };
     syncManagementSection();
-    window.addEventListener("popstate", syncManagementSection);
-    return () => window.removeEventListener("popstate", syncManagementSection);
+    const onPopState = () => syncManagementSection(true);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   const setManagementSection = useCallback((section: ManagementSection) => {

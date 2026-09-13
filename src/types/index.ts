@@ -336,9 +336,10 @@ export interface PlanningSnapshot {
   };
   mapRenderer?: string;
   managementAnalysisPeriod?: {
-    endYear: number | null;
+    endDate: string;
     label: string;
-    startYear: number | null;
+    preset: "past-3-months" | "past-12-months" | "past-3-years" | "past-5-years" | "all" | "custom";
+    startDate: string;
   };
   developmentActivityContext?: PlanningSnapshotDevelopmentActivityContext | null;
   indicatorCenterContext?: PlanningSnapshotIndicatorCenterContext | null;

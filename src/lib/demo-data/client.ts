@@ -242,18 +242,24 @@ export async function getDemoDevelopmentStatisticsResponse() {
   return summary.development_activity.statistics;
 }
 
-export async function getDemoDevelopmentActivitySummaryResponse(options: { yearEnd?: number | null; yearStart?: number | null } = {}) {
+export async function getDemoDevelopmentActivitySummaryResponse(options: { dateEnd?: string | null; dateStart?: string | null } = {}) {
   const summary = await getDemoIndicatorSummary();
   const activity = summary.development_activity.activity_summary;
-  if (!options.yearStart && !options.yearEnd) return activity;
-  const byYear = activity.by_year.filter((row) => (!options.yearStart || row.year >= options.yearStart) && (!options.yearEnd || row.year <= options.yearEnd));
-  const byMonth = activity.by_month.filter((row) => (!options.yearStart || row.year >= options.yearStart) && (!options.yearEnd || row.year <= options.yearEnd));
-  const totalPermits = byYear.reduce((sum, row) => sum + row.permit_count, 0);
-  const totalPermitAmount = byYear.reduce((sum, row) => sum + (row.total_permit_amount ?? 0), 0);
-  // ponytail: Demo exposes an exact distinct-parcel count only for its documented three-year window.
-  const activeParcelCount = options.yearStart === 2023 && options.yearEnd === 2025
-    ? activity.recent_activity.recent_3yr_parcels
-    : activity.active_parcel_count;
+  if (!options.dateStart && !options.dateEnd) return activity;
+  const start = options.dateStart ?? activity.date_range.activity_date_min ?? "0000-01-01";
+  const end = options.dateEnd ?? activity.date_range.activity_date_max ?? "9999-12-31";
+  const byMonth = activity.by_month.filter((row) => `${row.year}-${String(row.month).padStart(2, "0")}-01` >= start.slice(0, 7) + "-01" && `${row.year}-${String(row.month).padStart(2, "0")}-01` <= end.slice(0, 7) + "-01");
+  const wholeYears = start.endsWith("-01-01") && end.endsWith("-12-31");
+  const byYear = activity.by_year.filter((row) => row.year >= Number(start.slice(0, 4)) && row.year <= Number(end.slice(0, 4)));
+  const buckets = wholeYears ? byYear : byMonth;
+  const totalPermits = buckets.reduce((sum, row) => sum + row.permit_count, 0);
+  const totalPermitAmount = buckets.reduce((sum, row) => sum + (row.total_permit_amount ?? 0), 0);
+  // ponytail: Demo only publishes exact distinct-parcel counts for all, one-year, and three-year periods.
+  const activeParcelCount = start === "2023-01-01" && end === "2025-12-31"
+      ? activity.recent_activity.recent_3yr_parcels
+      : start === activity.date_range.activity_date_min && end === activity.date_range.activity_date_max
+        ? activity.active_parcel_count
+        : null;
   return {
     ...activity,
     active_parcel_count: activeParcelCount,
@@ -267,10 +273,10 @@ export async function getDemoDevelopmentActivitySummaryResponse(options: { yearE
     by_zoning_category: [],
     by_zoning_jurisdiction: [],
     date_range: {
-      activity_date_max: options.yearEnd ? `${options.yearEnd}-12-31` : activity.date_range.activity_date_max,
-      activity_date_min: options.yearStart ? `${options.yearStart}-01-01` : activity.date_range.activity_date_min,
+      activity_date_max: end,
+      activity_date_min: start,
     },
-    filters_applied: { ...(options.yearEnd ? { end_year: options.yearEnd } : {}), ...(options.yearStart ? { start_year: options.yearStart } : {}) },
+    filters_applied: { date_end: end, date_start: start },
     total_permit_amount: totalPermitAmount || null,
     total_permits: totalPermits,
   };

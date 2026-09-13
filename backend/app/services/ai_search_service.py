@@ -108,6 +108,8 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "page_very_high_signals",
         "permit_year_end",
         "permit_year_start",
+        "permit_date_end",
+        "permit_date_start",
     }
 )
 
