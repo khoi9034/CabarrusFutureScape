@@ -57,8 +57,8 @@ export function usePlanningSnapshotLibrary() {
   const [persistence, setPersistence] =
     useState<PlanningSnapshotPersistenceState>({
       message: IS_DEMO_MODE
-        ? "Loading session-only Planning Snapshots."
-        : "Loading Planning Snapshots from the Product V1 API.",
+        ? "Loading session-only snapshots."
+        : "Loading snapshots.",
       requestId: null,
       sessionOnly: IS_DEMO_MODE,
       status: "loading",
@@ -130,8 +130,8 @@ export function usePlanningSnapshotLibrary() {
         setHasUnsavedChanges(false);
         setPersistence({
           message: IS_DEMO_MODE
-            ? "Planning Snapshots are stored for this browser session only."
-            : "Planning Snapshot library is current.",
+            ? "Snapshots are stored for this browser session only."
+            : "Snapshot Library is current.",
           requestId: result.requestId,
           sessionOnly: IS_DEMO_MODE,
           status: "ready",
@@ -139,7 +139,7 @@ export function usePlanningSnapshotLibrary() {
       })
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
-          setFailure(error, "Planning Snapshot library could not be loaded.");
+          setFailure(error, "Snapshot Library could not be loaded.");
         }
       });
     return () => controller.abort();
@@ -153,7 +153,7 @@ export function usePlanningSnapshotLibrary() {
       );
       setLegacyNotice(
         hasLegacySnapshots
-          ? "Older browser-only Planning Snapshots remain on this device. They were not uploaded or deleted."
+          ? "Older browser-only snapshots remain on this device. They were not uploaded or deleted."
           : null,
       );
     }, 0);
@@ -164,7 +164,7 @@ export function usePlanningSnapshotLibrary() {
     async (snapshot: PlanningSnapshot) => {
       if (!canWrite) {
         setPersistence({
-          message: "Your role can view Planning Snapshots but cannot create them.",
+          message: "Your role can view snapshots but cannot create them.",
           requestId: null,
           sessionOnly: IS_DEMO_MODE,
           status: "permission_denied",
@@ -177,7 +177,7 @@ export function usePlanningSnapshotLibrary() {
       pendingSave.current = snapshot;
       setHasUnsavedChanges(true);
       setPersistence({
-        message: "Saving Planning Snapshot…",
+        message: "Saving snapshot…",
         requestId: null,
         sessionOnly: IS_DEMO_MODE,
         status: "saving",
@@ -195,15 +195,15 @@ export function usePlanningSnapshotLibrary() {
         setActivePlanningSnapshotId(saved.snapshotId);
         setPersistence({
           message: IS_DEMO_MODE
-            ? "Planning Snapshot saved for this browser session."
-            : "Planning Snapshot saved to the Product V1 API.",
+            ? "Snapshot saved for this browser session."
+            : "Snapshot saved.",
           requestId: result.requestId,
           sessionOnly: IS_DEMO_MODE,
           status: "saved",
         });
         return saved;
       } catch (error) {
-        setFailure(error, "Planning Snapshot could not be saved.");
+        setFailure(error, "Snapshot could not be saved.");
         return null;
       } finally {
         mutationInFlight.current = false;
@@ -216,7 +216,7 @@ export function usePlanningSnapshotLibrary() {
     if (!planningSnapshot || !canWrite || mutationInFlight.current) {
       if (!canWrite) {
         setPersistence({
-          message: "Your role cannot update Planning Snapshots.",
+          message: "Your role cannot update snapshots.",
           requestId: null,
           sessionOnly: IS_DEMO_MODE,
           status: "permission_denied",
@@ -229,7 +229,7 @@ export function usePlanningSnapshotLibrary() {
     pendingSave.current = planningSnapshot;
     setHasUnsavedChanges(true);
     setPersistence({
-      message: "Saving Planning Snapshot changes…",
+      message: "Saving snapshot changes…",
       requestId: null,
       sessionOnly: IS_DEMO_MODE,
       status: "saving",
@@ -250,14 +250,14 @@ export function usePlanningSnapshotLibrary() {
         ),
       );
       setPersistence({
-        message: "Planning Snapshot changes saved.",
+        message: "Snapshot changes saved.",
         requestId: result.requestId,
         sessionOnly: IS_DEMO_MODE,
         status: "saved",
       });
       return saved;
     } catch (error) {
-      setFailure(error, "Planning Snapshot changes could not be saved.");
+      setFailure(error, "Snapshot changes could not be saved.");
       return null;
     } finally {
       mutationInFlight.current = false;
@@ -291,7 +291,7 @@ export function usePlanningSnapshotLibrary() {
       setHasUnsavedChanges(false);
       setPersistence((current) => ({
         ...current,
-        message: "Planning Snapshot opened from the library.",
+        message: "Snapshot opened from the library.",
         status: "ready",
       }));
     },
@@ -319,7 +319,7 @@ export function usePlanningSnapshotLibrary() {
         message:
           current.status === "conflict"
             ? "Conflict detected. Your newer edits remain in the form; review the latest server metadata before saving."
-            : "Planning Snapshot has unsaved changes.",
+            : "Snapshot has unsaved changes.",
         status: current.status === "conflict" ? "conflict" : "unsaved",
       }));
       setHasUnsavedChanges(true);
@@ -401,7 +401,7 @@ export function usePlanningSnapshotLibrary() {
       mutationInFlight.current = true;
       localRevision.current += 1;
       setPersistence({
-        message: "Archiving Planning Snapshot…",
+        message: "Archiving snapshot…",
         requestId: null,
         sessionOnly: IS_DEMO_MODE,
         status: "saving",
@@ -421,14 +421,14 @@ export function usePlanningSnapshotLibrary() {
         );
         if (snapshotId === activePlanningSnapshotId) setHasUnsavedChanges(false);
         setPersistence({
-          message: "Planning Snapshot archived.",
+          message: "Snapshot archived.",
           requestId: result.requestId,
           sessionOnly: IS_DEMO_MODE,
           status: "archived",
         });
         return true;
       } catch (error) {
-        setFailure(error, "Planning Snapshot could not be archived.");
+        setFailure(error, "Snapshot could not be archived.");
         return false;
       } finally {
         mutationInFlight.current = false;

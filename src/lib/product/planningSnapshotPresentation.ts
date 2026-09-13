@@ -3,8 +3,11 @@ import type { PlanningSnapshot } from "@/types";
 export function planningSnapshotDefaultTitle(
   snapshot: {
     hasDevelopmentActivity?: boolean;
+    managementAnalysisPeriod?: PlanningSnapshot["managementAnalysisPeriod"];
     overviewCommandMode?: PlanningSnapshot["overviewCommandMode"];
     selectedParcelId?: string | null;
+    snapshotSource?: PlanningSnapshot["snapshotSource"];
+    snapshotSubtype?: PlanningSnapshot["snapshotSubtype"];
   },
   date = new Date(),
 ) {
@@ -13,6 +16,10 @@ export function planningSnapshotDefaultTitle(
     month: "short",
     year: "numeric",
   }).format(date);
+
+  if (snapshot.snapshotSource === "management") {
+    return `${snapshot.snapshotSubtype ?? "Overview"}${snapshot.managementAnalysisPeriod ? ` · ${snapshot.managementAnalysisPeriod.label}` : ""}`;
+  }
 
   if (snapshot.selectedParcelId) {
     return `Parcel ${snapshot.selectedParcelId} — Planning Review`;
@@ -27,6 +34,15 @@ export function planningSnapshotDefaultTitle(
     return `Model Research View — ${day}`;
   }
   return `Countywide Planning View — ${day}`;
+}
+
+export function getSnapshotSource(snapshot: PlanningSnapshot) {
+  return snapshot.snapshotSource ?? "analyst";
+}
+
+export function getSnapshotSubtype(snapshot: PlanningSnapshot): NonNullable<PlanningSnapshot["snapshotSubtype"]> {
+  if (snapshot.snapshotSubtype) return snapshot.snapshotSubtype;
+  return "Planning";
 }
 
 export function planningSnapshotSummary(

@@ -423,7 +423,7 @@ function ProductShell() {
       ) : parcelReviewMode ? (
         <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
           <EnterpriseErrorBoundary
-            moduleName="Planning Snapshot"
+            moduleName="Snapshots"
             resetKey={`${productMode}-${selectedParcelId ?? "none"}`}
           >
             <DueDiligenceReview

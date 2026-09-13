@@ -83,9 +83,9 @@ const productModes: Array<{
     description: "Executive reports",
     icon: FileSearch,
     id: "due_diligence",
-    label: "Planning Snapshot",
+    label: "Snapshots",
     shortLabel: "Snapshot",
-    title: "Saved planning context, explanations, and executive summary",
+    title: "Saved analyses and views from Management and Analyst",
   },
   {
     description: "Sources and caveats",

@@ -162,7 +162,7 @@ export function SharedAskCfsDrawer({
         <button
           aria-controls="shared-ask-cfs-panel"
           aria-label="Open Ask Insights"
-          className={`cfs-ask-rail fixed right-0 top-1/2 z-[70] hidden -translate-y-1/2 flex-col items-center gap-2 rounded-l-xl border border-r-0 px-2 py-4 transition xl:flex ${working ? "cfs-ask-rail--working" : ""} ${justCompleted ? "cfs-ask-rail--complete" : ""}`}
+          className={`cfs-ask-rail no-print fixed right-0 top-1/2 z-[70] hidden -translate-y-1/2 flex-col items-center gap-2 rounded-l-xl border border-r-0 px-2 py-4 transition xl:flex ${working ? "cfs-ask-rail--working" : ""} ${justCompleted ? "cfs-ask-rail--complete" : ""}`}
           data-testid="shared-ask-cfs-rail"
           onClick={onOpen}
           type="button"
@@ -177,7 +177,7 @@ export function SharedAskCfsDrawer({
       <button
         aria-hidden="true"
         aria-label="Close Ask Insights"
-        className={`fixed inset-0 z-[80] bg-[#02050a]/60 transition-opacity duration-150 xl:hidden ${
+        className={`no-print fixed inset-0 z-[80] bg-[#02050a]/60 transition-opacity duration-150 xl:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         data-testid="shared-ask-cfs-backdrop"
@@ -188,7 +188,7 @@ export function SharedAskCfsDrawer({
       <aside
         aria-hidden={!open}
         aria-labelledby="shared-ask-cfs-title"
-        className={`fixed inset-x-0 bottom-0 z-[90] flex h-[92dvh] flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[#35c98d]/24 bg-[#06101c]/98 text-slate-100 shadow-[-20px_0_55px_rgba(0,0,0,0.42)] transition-[width,transform,visibility] duration-200 ease-out sm:inset-y-0 sm:left-auto sm:h-auto sm:rounded-none sm:border-b sm:border-r-0 sm:w-[23rem] xl:top-[var(--cfs-top-nav-height)] xl:h-[calc(100dvh-var(--cfs-top-nav-height))] min-[1400px]:shadow-none ${
+        className={`no-print fixed inset-x-0 bottom-0 z-[90] flex h-[92dvh] flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[#35c98d]/24 bg-[#06101c]/98 text-slate-100 shadow-[-20px_0_55px_rgba(0,0,0,0.42)] transition-[width,transform,visibility] duration-200 ease-out sm:inset-y-0 sm:left-auto sm:h-auto sm:rounded-none sm:border-b sm:border-r-0 sm:w-[23rem] xl:top-[var(--cfs-top-nav-height)] xl:h-[calc(100dvh-var(--cfs-top-nav-height))] min-[1400px]:shadow-none ${
           expanded ? "sm:w-[34rem]" : "sm:w-[23rem]"
         } ${
           open

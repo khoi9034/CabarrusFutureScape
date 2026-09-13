@@ -166,6 +166,24 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
     window.history.pushState(null, "", `/?${params.toString()}`);
     setChangingPeriod(false);
   };
+  const saveSnapshot = () => {
+    const subtype = section === "overview" ? "Overview" : title(section);
+    window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT, {
+      detail: {
+        managementContext: {
+          headlineMetrics: [
+            { label: "Permit records", value: development.totalPermits === null ? "Unavailable" : number.format(development.totalPermits) },
+            { label: "Active development parcels", value: development.activeParcelCount === null ? "Unavailable" : number.format(development.activeParcelCount) },
+            { label: "Development hotspots", value: number.format(hotspots.markers.length) },
+            { label: "Elevated Development Signals", value: elevatedSignals === null ? "Unavailable" : number.format(elevatedSignals) },
+          ],
+          section,
+        },
+        snapshotSource: "management",
+        snapshotSubtype: subtype,
+      },
+    }));
+  };
 
   return (
     <main className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8" data-management-section={section} data-testid="cfs-management-workspace">
@@ -178,7 +196,7 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
               <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{title(section)}</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">{description(section)}</p>
             </div>
-            <button className="inline-flex w-fit items-center gap-2 rounded-lg border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2.5 text-sm font-semibold text-[#c9ead0] disabled:opacity-50" disabled={!dashboard.planningSnapshotCanWrite || !periodValid} onClick={() => window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT))}>
+            <button className="inline-flex w-fit items-center gap-2 rounded-lg border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2.5 text-sm font-semibold text-[#c9ead0] disabled:opacity-50" disabled={!dashboard.planningSnapshotCanWrite || !periodDataReady} onClick={saveSnapshot}>
               <Save className="h-4 w-4" /> Save snapshot
             </button>
           </div>

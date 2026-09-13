@@ -341,6 +341,14 @@ export interface PlanningSnapshot {
     preset: "past-3-months" | "past-12-months" | "past-3-years" | "past-5-years" | "all" | "custom";
     startDate: string;
   };
+  managementContext?: {
+    headlineMetrics: Array<{ label: string; value: string }>;
+    section:
+      | "overview"
+      | "planning-insights"
+      | "economic-insights"
+      | "development-signals";
+  };
   developmentActivityContext?: PlanningSnapshotDevelopmentActivityContext | null;
   indicatorCenterContext?: PlanningSnapshotIndicatorCenterContext | null;
   mapScreenshotCapturedAt?: string | null;
@@ -390,6 +398,15 @@ export interface PlanningSnapshot {
   selectedParcelSummary: PlanningSnapshotParcelSummary | null;
   snapshotId: string;
   snapshotTitle?: string;
+  snapshotSource?: "analyst" | "management";
+  snapshotSubtype?:
+    | "Overview"
+    | "Planning Insights"
+    | "Economic Insights"
+    | "Development Signals"
+    | "Planning"
+    | "Economics"
+    | "Master Data";
   snapshotType?: "indicator_center" | "map";
   snapshotVersion:
     | "phase22a_v1"

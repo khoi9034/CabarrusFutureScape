@@ -200,6 +200,11 @@ export function PlanningSnapshotSaveController() {
   return <IntelligencePanel controllerOnly />;
 }
 
+type SnapshotOrigin = Pick<
+  PlanningSnapshot,
+  "managementContext" | "snapshotSource" | "snapshotSubtype"
+>;
+
 export function IntelligencePanel({
   controllerOnly = false,
 }: {
@@ -415,6 +420,10 @@ function OverviewModeContent({
   const [snapshotDialogOpen, setSnapshotDialogOpen] = useState(false);
   const [snapshotName, setSnapshotName] = useState("");
   const [snapshotNote, setSnapshotNote] = useState("");
+  const [snapshotOrigin, setSnapshotOrigin] = useState<SnapshotOrigin>({
+    snapshotSource: "analyst",
+    snapshotSubtype: "Planning",
+  });
   const [parcelIdCopied, setParcelIdCopied] = useState(false);
   const [countywideBriefOverride, setCountywideBriefOverride] = useState<{
     parcelId: string | null;
@@ -479,18 +488,34 @@ function OverviewModeContent({
       ].filter((label): label is string => Boolean(label)),
     ),
   );
+  const snapshotManagementPeriod = managementAnalysisPeriod.initialized && managementAnalysisPeriod.startDate && managementAnalysisPeriod.endDate && managementAnalysisPeriod.preset
+    ? {
+        endDate: managementAnalysisPeriod.endDate,
+        label: managementAnalysisPeriod.label,
+        preset: managementAnalysisPeriod.preset,
+        startDate: managementAnalysisPeriod.startDate,
+      }
+    : undefined;
 
-  const openSnapshotDialog = useCallback(() => {
+  const showSnapshotDialog = useCallback((origin: SnapshotOrigin) => {
+    setSnapshotOrigin(origin);
     setSnapshotName(
       planningSnapshotDefaultTitle({
         hasDevelopmentActivity: Boolean(selectedDevelopmentHotspotContext),
+        managementAnalysisPeriod: snapshotManagementPeriod,
         overviewCommandMode,
         selectedParcelId: selectedParcelOfficialId,
+        snapshotSource: origin.snapshotSource,
+        snapshotSubtype: origin.snapshotSubtype,
       }),
     );
     setSnapshotNote("");
     setSnapshotDialogOpen(true);
-  }, [overviewCommandMode, selectedDevelopmentHotspotContext, selectedParcelOfficialId]);
+  }, [overviewCommandMode, selectedDevelopmentHotspotContext, selectedParcelOfficialId, snapshotManagementPeriod]);
+
+  const openSnapshotDialog = useCallback(() => {
+    showSnapshotDialog({ snapshotSource: "analyst", snapshotSubtype: "Planning" });
+  }, [showSnapshotDialog]);
 
   const handleSaveOverviewSnapshot = useCallback(async () => {
     if (!planningSnapshotCanWrite || snapshotSaving) {
@@ -538,6 +563,7 @@ function OverviewModeContent({
       });
       const nextSnapshot = {
         ...capturedSnapshot,
+        ...snapshotOrigin,
         notes: snapshotNote.trim(),
         snapshotTitle:
           snapshotName.trim() ||
@@ -545,8 +571,11 @@ function OverviewModeContent({
             hasDevelopmentActivity: Boolean(
               capturedSnapshot.developmentActivityContext,
             ),
+            managementAnalysisPeriod: snapshotManagementPeriod,
             overviewCommandMode: capturedSnapshot.overviewCommandMode,
             selectedParcelId: capturedSnapshot.selectedParcelId,
+            snapshotSource: snapshotOrigin.snapshotSource,
+            snapshotSubtype: snapshotOrigin.snapshotSubtype,
           }),
       };
       const savedSnapshot = await savePlanningSnapshot(nextSnapshot);
@@ -585,12 +614,16 @@ function OverviewModeContent({
     snapshotSaving,
     snapshotName,
     snapshotNote,
+    snapshotOrigin,
+    snapshotManagementPeriod,
     scopedActiveLayerIds,
   ]);
 
   useEffect(() => {
-    function handleCommandCenterSave() {
-      openSnapshotDialog();
+    function handleCommandCenterSave(event: Event) {
+      const detail = (event as CustomEvent<SnapshotOrigin>).detail;
+      if (detail?.snapshotSource) showSnapshotDialog(detail);
+      else openSnapshotDialog();
     }
     function handleCountywideIntelligence() {
       setOverviewCommandMode("countywide");
@@ -625,6 +658,7 @@ function OverviewModeContent({
     };
   }, [
     openSnapshotDialog,
+    showSnapshotDialog,
     selectedParcelOfficialId,
     setOverviewCommandMode,
   ]);
@@ -825,14 +859,14 @@ function PlanningSnapshotSaveDialog({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-              Save Planning Snapshot
+              Save Snapshot
             </p>
             <h2 className="mt-1 text-xl font-semibold text-white" id="planning-snapshot-dialog-title">
               Save what you are looking at now
             </h2>
           </div>
           <button
-            aria-label="Close Save Planning Snapshot"
+            aria-label="Close Save Snapshot"
             className="rounded-md border border-white/10 p-2 text-slate-400 hover:bg-white/[0.06] hover:text-white"
             disabled={saving}
             onClick={onClose}
@@ -844,7 +878,7 @@ function PlanningSnapshotSaveDialog({
 
         <div className="mt-5 grid gap-4">
           <label className="grid gap-1.5 text-xs font-semibold text-slate-300">
-            Name
+            Title
             <input
               autoFocus
               className="rounded-md border border-white/12 bg-black/25 px-3 py-2.5 text-sm text-white outline-none focus:border-[#68d8ff]/55"

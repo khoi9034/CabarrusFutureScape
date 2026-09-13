@@ -30,6 +30,7 @@
     "check:local-interactions": "node scripts/check-local-interactions.mjs",
     "check:management-handoff": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-management-handoff.mjs",
     "check:management-context": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-management-context.mjs",
+    "check:snapshot-experience": "node scripts/check-snapshot-experience.mjs",
     "check:local-presentation": "node scripts/check-local-presentation.mjs",
     "check:master-data-v1b": "node scripts/check-master-data-v1b.mjs",
     "check:master-data-v1b-local": "node scripts/check-master-data-v1b.mjs --local",
