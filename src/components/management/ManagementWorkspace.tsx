@@ -225,11 +225,12 @@ function ManagementPeriodSetup({ availableYears, coverage, current, onAnalyze }:
   current: ManagementAnalysisPeriod | null;
   onAnalyze: (period: ManagementAnalysisPeriod) => void;
 }) {
-  const [preset, setPreset] = useState<ManagementPeriodPreset>(current?.preset ?? "past-12-months");
+  const [preset, setPreset] = useState<ManagementPeriodPreset | null>(current?.preset ?? null);
   const [startYear, setStartYear] = useState(current?.startDate ? Number(current.startDate.slice(0, 4)) : availableYears.at(-1) ?? Number(coverage.endDate.slice(0, 4)));
   const [endYear, setEndYear] = useState(current?.endDate ? Number(current.endDate.slice(0, 4)) : availableYears.at(-1) ?? Number(coverage.endDate.slice(0, 4)));
   const validCustom = preset !== "custom" || startYear <= endYear;
-  const analyze = () => validCustom && onAnalyze(createManagementPeriod(preset, coverage, preset === "custom" ? { endYear, startYear } : undefined));
+  const canAnalyze = preset !== null && validCustom;
+  const analyze = () => preset && validCustom && onAnalyze(createManagementPeriod(preset, coverage, preset === "custom" ? { endYear, startYear } : undefined));
 
   return <section className="rounded-2xl border border-[#9bd1de]/25 bg-[#0b1726] p-6 shadow-xl shadow-black/10" data-testid="management-period-setup">
     <div className="max-w-3xl">
@@ -247,7 +248,7 @@ function ManagementPeriodSetup({ availableYears, coverage, current, onAnalyze }:
       <YearSelect label="To year" value={endYear} years={availableYears} onChange={setEndYear} />
       {!validCustom ? <p className="w-full text-sm text-amber-200">The start year must not be later than the end year.</p> : null}
     </div> : null}
-    <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#55d38f] px-5 py-2.5 text-sm font-bold text-[#07131f] disabled:opacity-50" data-testid="management-analyze" disabled={!validCustom} onClick={analyze}>Analyze <ArrowRight className="h-4 w-4" /></button>
+    <button className={`mt-6 inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1726] ${canAnalyze ? "border-[#82c9d8] bg-[#82c9d8] text-slate-950 hover:bg-[#9bd9e5]" : "cursor-not-allowed border-white/10 bg-white/[0.04] text-slate-500"}`} data-testid="management-analyze" disabled={!canAnalyze} onClick={analyze} type="button">Analyze <ArrowRight className="h-4 w-4" /></button>
   </section>;
 }
 
