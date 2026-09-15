@@ -878,10 +878,10 @@ def test_ai_search_management_numbers_answer_current_page_directly() -> None:
     )
 
     assert response.answer.startswith("Here are the key numbers currently shown on this page for All available (1986–2025):")
-    assert "Permit records: 64,426" in response.answer
-    assert "Active development parcels: 43,474" in response.answer
-    assert "School assignment review: 75,143" in response.answer
-    assert "Elevated Development Signals: 5,501" in response.answer
+    assert "Selected-period permit records: 64,426" in response.answer
+    assert "Selected-period active development parcels: 43,474" in response.answer
+    assert "Current school assignment review (reference): 75,143" in response.answer
+    assert "Development Signals (fixed model reference): 5,501" in response.answer
     assert "Executive summary" not in response.answer
     assert "Priority order" not in response.answer
 
@@ -924,9 +924,22 @@ def test_ai_search_management_school_language_is_plain_and_grounded() -> None:
         _context(),
     )
 
+    assert "current reference data" in response.answer
+    assert "not a result filtered to the selected permit period" in response.answer
     assert "75,143 parcel assignments" in response.answer
     assert "official capacity, enrollment, and student-generation assumptions are incomplete" in response.answer
     assert "indicator_summary" not in response.answer
+
+
+def test_ai_search_management_flood_count_is_labeled_reference_context() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        _management_request("how many flood parcels are there"),
+        _context(),
+    )
+
+    assert "7,989 parcels" in response.answer
+    assert "reference context" in response.answer
+    assert "not a count filtered to the selected permit period" in response.answer
 
 
 def test_ai_search_development_signal_follow_up_is_not_a_probability() -> None:

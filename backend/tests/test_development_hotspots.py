@@ -127,7 +127,14 @@ def test_development_hotspots_date_range_filter() -> None:
         "date_end": "2025-12-31",
         "date_start": "2025-01-01",
     }
-    assert body["total_count"] > 0
+    assert body["analysis_period"] == {
+        "end_date": "2025-12-31",
+        "start_date": "2025-01-01",
+    }
+    assert body["total_count"] == 3_074
+    assert body["results"][0]["total_permit_count"] == 25
+    assert body["results"][0]["first_permit_date"] >= "2025-01-01"
+    assert body["results"][0]["latest_permit_date"] <= "2025-12-31"
 
 
 def test_development_hotspots_year_range_filter() -> None:

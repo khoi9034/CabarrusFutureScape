@@ -624,14 +624,15 @@ function toDemoDevelopmentHotspotMarker(
       asString(properties.dominant_permit_segment) ??
       asString(properties.permit_segment),
     dominantZoningCodeRaw: asString(properties.dominant_zoning_code_raw),
-    firstPermitDate: asString(properties.year_start),
+    firstPermitDate: options.yearStart ? `${options.yearStart}-01-01` : asString(properties.year_start),
     highValuePermits: asNumber(properties.high_value_permits) ?? 0,
     industrialActivityPermits:
       asNumber(properties.industrial_activity_permits) ?? 0,
     institutionalActivityPermits:
       asNumber(properties.institutional_activity_permits) ?? 0,
-    latestPermitDate:
-      asString(properties.latest_activity_date) ?? asString(properties.year_end),
+    latestPermitDate: options.yearEnd
+      ? `${options.yearEnd}-12-31`
+      : asString(properties.latest_activity_date) ?? asString(properties.year_end),
     majorValuePermits: asNumber(properties.major_value_permits) ?? 0,
     minorMaintenancePermits:
       asNumber(properties.minor_maintenance_permits) ?? 0,

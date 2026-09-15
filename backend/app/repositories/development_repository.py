@@ -1226,7 +1226,64 @@ class DevelopmentRepository:
     ) -> DevelopmentHotspotsPage:
         predicates = self._hotspot_predicates(filters)
         where_clause = and_(*predicates)
-        hotspot_from = DevelopmentActivityParcelSummary.__table__.outerjoin(
+        period_activity = None
+        if filters.date_start is not None or filters.date_end is not None:
+            period_predicates = [
+                RealPropertyPermitParcelRelationship.has_parcel_match.is_(True),
+            ]
+            if filters.date_start is not None:
+                period_predicates.append(
+                    RealPropertyPermitParcelRelationship.activity_date
+                    >= filters.date_start,
+                )
+            if filters.date_end is not None:
+                period_predicates.append(
+                    RealPropertyPermitParcelRelationship.activity_date
+                    <= filters.date_end,
+                )
+            period_activity = (
+                select(
+                    RealPropertyPermitParcelRelationship.official_parcel_id.label(
+                        "official_parcel_id",
+                    ),
+                    func.count(
+                        func.distinct(
+                            RealPropertyPermitParcelRelationship.permit_id,
+                        ),
+                    ).label("total_permit_count"),
+                    func.min(
+                        RealPropertyPermitParcelRelationship.activity_date,
+                    ).label("first_permit_date"),
+                    func.max(
+                        RealPropertyPermitParcelRelationship.activity_date,
+                    ).label("latest_permit_date"),
+                    func.count(
+                        func.distinct(
+                            RealPropertyPermitParcelRelationship.activity_year,
+                        ),
+                    ).label("active_year_count"),
+                    func.sum(
+                        RealPropertyPermitParcelRelationship.permit_amount,
+                    ).label("total_permit_amount"),
+                    func.avg(
+                        RealPropertyPermitParcelRelationship.permit_amount,
+                    ).label("avg_permit_amount"),
+                )
+                .where(and_(*period_predicates))
+                .group_by(
+                    RealPropertyPermitParcelRelationship.official_parcel_id,
+                )
+                .subquery("period_hotspot_activity")
+            )
+
+        hotspot_from = DevelopmentActivityParcelSummary.__table__
+        if period_activity is not None:
+            hotspot_from = hotspot_from.join(
+                period_activity,
+                period_activity.c.official_parcel_id
+                == DevelopmentActivityParcelSummary.official_parcel_id,
+            )
+        hotspot_from = hotspot_from.outerjoin(
             ParcelEnriched.__table__,
             ParcelEnriched.official_parcel_id
             == DevelopmentActivityParcelSummary.official_parcel_id,
@@ -1250,13 +1307,54 @@ class DevelopmentRepository:
             "total_permit_amount": DevelopmentActivityParcelSummary.total_permit_amount,
             "total_permit_count": DevelopmentActivityParcelSummary.total_permit_count,
         }
+        if period_activity is not None:
+            sort_columns.update(
+                {
+                    "development_activity_score": period_activity.c.total_permit_count,
+                    "recent_permit_count_1yr": period_activity.c.total_permit_count,
+                    "recent_permit_count_3yr": period_activity.c.total_permit_count,
+                    "total_permit_amount": period_activity.c.total_permit_amount,
+                    "total_permit_count": period_activity.c.total_permit_count,
+                },
+            )
         sort_column = sort_columns[sort_by]
 
         total_count = self.db.execute(
             select(func.count())
-            .select_from(DevelopmentActivityParcelSummary)
+            .select_from(hotspot_from)
             .where(where_clause),
         ).scalar_one()
+
+        total_permit_count = (
+            period_activity.c.total_permit_count
+            if period_activity is not None
+            else DevelopmentActivityParcelSummary.total_permit_count
+        )
+        first_permit_date = (
+            period_activity.c.first_permit_date
+            if period_activity is not None
+            else DevelopmentActivityParcelSummary.first_permit_date
+        )
+        latest_permit_date = (
+            period_activity.c.latest_permit_date
+            if period_activity is not None
+            else DevelopmentActivityParcelSummary.latest_permit_date
+        )
+        active_year_count = (
+            period_activity.c.active_year_count
+            if period_activity is not None
+            else DevelopmentActivityParcelSummary.active_year_count
+        )
+        total_permit_amount = (
+            period_activity.c.total_permit_amount
+            if period_activity is not None
+            else DevelopmentActivityParcelSummary.total_permit_amount
+        )
+        avg_permit_amount = (
+            period_activity.c.avg_permit_amount
+            if period_activity is not None
+            else DevelopmentActivityParcelSummary.avg_permit_amount
+        )
 
         statement = (
             select(
@@ -1269,14 +1367,14 @@ class DevelopmentRepository:
                 DevelopmentActivityParcelSummary.dominant_zoning_general_normalized,
                 DevelopmentActivityParcelSummary.parcel_quality_status,
                 DevelopmentActivityParcelSummary.zoning_assignment_confidence,
-                DevelopmentActivityParcelSummary.total_permit_count,
-                DevelopmentActivityParcelSummary.first_permit_date,
+                total_permit_count.label("total_permit_count"),
+                first_permit_date.label("first_permit_date"),
                 DevelopmentActivityParcelSummary.recent_permit_count_1yr,
                 DevelopmentActivityParcelSummary.recent_permit_count_3yr,
-                DevelopmentActivityParcelSummary.total_permit_amount,
-                DevelopmentActivityParcelSummary.avg_permit_amount,
-                DevelopmentActivityParcelSummary.latest_permit_date,
-                DevelopmentActivityParcelSummary.active_year_count,
+                total_permit_amount.label("total_permit_amount"),
+                avg_permit_amount.label("avg_permit_amount"),
+                latest_permit_date.label("latest_permit_date"),
+                active_year_count.label("active_year_count"),
                 DevelopmentActivityParcelSummary.dominant_permit_type,
                 DevelopmentActivityParcelSummary.dominant_work_type,
                 DevelopmentActivityParcelSummary.latest_permit_status,
@@ -1309,7 +1407,7 @@ class DevelopmentRepository:
             .where(where_clause)
             .order_by(
                 sort_column.desc().nulls_last(),
-                DevelopmentActivityParcelSummary.total_permit_count.desc().nulls_last(),
+                total_permit_count.desc().nulls_last(),
                 DevelopmentActivityParcelSummary.official_parcel_id,
             )
             .limit(limit)

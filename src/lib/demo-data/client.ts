@@ -248,14 +248,17 @@ export async function getDemoDevelopmentActivitySummaryResponse(options: { dateE
   if (!options.dateStart && !options.dateEnd) return activity;
   const start = options.dateStart ?? activity.date_range.activity_date_min ?? "0000-01-01";
   const end = options.dateEnd ?? activity.date_range.activity_date_max ?? "9999-12-31";
+  const fullHistory = start === activity.date_range.activity_date_min && end === activity.date_range.activity_date_max;
   const byMonth = activity.by_month.filter((row) => `${row.year}-${String(row.month).padStart(2, "0")}-01` >= start.slice(0, 7) + "-01" && `${row.year}-${String(row.month).padStart(2, "0")}-01` <= end.slice(0, 7) + "-01");
   const wholeYears = start.endsWith("-01-01") && end.endsWith("-12-31");
   const byYear = activity.by_year.filter((row) => row.year >= Number(start.slice(0, 4)) && row.year <= Number(end.slice(0, 4)));
   const buckets = wholeYears ? byYear : byMonth;
-  const totalPermits = buckets.reduce((sum, row) => sum + row.permit_count, 0);
-  const totalPermitAmount = buckets.reduce((sum, row) => sum + (row.total_permit_amount ?? 0), 0);
+  const totalPermits = fullHistory ? activity.total_permits : buckets.reduce((sum, row) => sum + row.permit_count, 0);
+  const totalPermitAmount = fullHistory ? activity.total_permit_amount ?? 0 : buckets.reduce((sum, row) => sum + (row.total_permit_amount ?? 0), 0);
   // ponytail: Demo only publishes exact distinct-parcel counts for all, one-year, and three-year periods.
-  const activeParcelCount = start === "2023-01-01" && end === "2025-12-31"
+  const activeParcelCount = wholeYears && byYear.length === 1
+      ? byYear[0].active_parcel_count
+      : start === "2023-01-01" && end === "2025-12-31"
       ? activity.recent_activity.recent_3yr_parcels
       : start === activity.date_range.activity_date_min && end === activity.date_range.activity_date_max
         ? activity.active_parcel_count
@@ -263,6 +266,7 @@ export async function getDemoDevelopmentActivitySummaryResponse(options: { dateE
   return {
     ...activity,
     active_parcel_count: activeParcelCount,
+    analysis_period: { end_date: end, start_date: start },
     avg_permit_amount: totalPermits ? totalPermitAmount / totalPermits : null,
     by_activity_class: [],
     by_month: byMonth,
@@ -472,6 +476,7 @@ function getUnavailableDevelopmentStatistics(): DevelopmentStatisticsResponse {
 function getUnavailableDevelopmentActivitySummary(): DevelopmentActivitySummaryResponse {
   return {
     active_parcel_count: 0,
+    analysis_period: null,
     avg_permit_amount: null,
     by_activity_class: [],
     by_month: [],

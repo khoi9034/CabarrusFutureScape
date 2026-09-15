@@ -2689,10 +2689,17 @@ def _management_answer(
         count = value("page_school_assignment_review")
         count_text = f"The page currently shows {_fmt(count)} parcel assignments for review. " if count is not None else ""
         answer = (
-            f"School Assignment & Growth Context connects parcel school assignments with available school planning and growth information. {count_text}"
+            f"School Assignment & Growth Context is current reference data, not a result filtered to the selected permit period. {count_text}"
             "It is marked limited because official capacity, enrollment, and student-generation assumptions are incomplete; it is a coordination screen, not an enrollment forecast."
         )
         evidence = [_evidence("School planning context", answer, "Cabarrus County Schools planning context", "limited")]
+    elif "flood" in query and any(term in query for term in ("how many", "count", "number")):
+        count = value("page_flood_review_parcels")
+        answer = (
+            f"{_fmt(count)} parcels are in the current countywide flood-review context. "
+            "That is reference context, not a count filtered to the selected permit period; a permit/flood overlap is not currently available in this view."
+        )
+        evidence = [_evidence("FEMA floodplain context", answer, "FEMA floodplain context", "limited")]
     elif any(term in query for term in ("99 percent", "99%", "chance they will develop", "probability")):
         answer = (
             "No. An elevated Development Signal is a relative historical ranking, not a probability or forecast of future parcel development. "
@@ -2753,20 +2760,19 @@ def _management_answer(
     elif any(term in query for term in ("give me the numbers", "give actual numbers", "explain these numbers", "numbers on this page", "key numbers", "main numbers", "what does this page show")):
         keys = (
             [
-                ("Permit records", "page_permit_records"),
-                ("Active development parcels", "page_active_development_parcels"),
-                ("Active hotspots", "page_active_hotspots"),
-                ("Flood review parcels", "page_flood_review_parcels"),
-                ("School assignment review", "page_school_assignment_review"),
-                ("Elevated Development Signals", "page_elevated_signals"),
-                ("Parcels flagged for economic review", "page_economic_review_parcels"),
+                ("Selected-period permit records", "page_permit_records"),
+                ("Selected-period active development parcels", "page_active_development_parcels"),
+                ("Current flood review parcels (reference)", "page_flood_review_parcels"),
+                ("Current school assignment review (reference)", "page_school_assignment_review"),
+                ("Development Signals (fixed model reference)", "page_elevated_signals"),
+                ("Current economic review parcels (reference)", "page_economic_review_parcels"),
             ]
             if section == "overview"
             else [
-                ("Permit records", "page_permit_records"),
-                ("Active development parcels", "page_active_development_parcels"),
-                ("Flood review parcels", "page_flood_review_parcels"),
-                ("School assignment review", "page_school_assignment_review"),
+                ("Selected-period permit records", "page_permit_records"),
+                ("Selected-period active development parcels", "page_active_development_parcels"),
+                ("Current flood review parcels (reference)", "page_flood_review_parcels"),
+                ("Current school assignment review (reference)", "page_school_assignment_review"),
             ]
             if section == "planning-insights"
             else [

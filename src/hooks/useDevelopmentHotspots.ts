@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getStaticDevelopmentActivitySummary } from "@/lib/adapters/developmentActivitySummaryAdapter";
 import {
   getStaticDevelopmentHotspots,
   getUnavailableDevelopmentHotspots,
@@ -34,17 +35,31 @@ export function useDevelopmentHotspots({ dateEnd = null, dateStart = null, enabl
 
   useEffect(() => {
     if (!enabled) return;
-    if (hotspotCache.has(queryKey)) return;
+    const cached = hotspotCache.get(queryKey);
+    if (cached) {
+      setHotspots({ ...cached, queryKey });
+      return;
+    }
     if (USE_DEMO_DATA) {
       let active = true;
-      const wholeYears = Boolean(dateStart?.endsWith("-01-01") && dateEnd?.endsWith("-12-31"));
+      const coverage = getStaticDevelopmentActivitySummary();
+      const wholeYears = Boolean(
+        dateStart && dateEnd && dateEnd.endsWith("-12-31")
+        && (dateStart.endsWith("-01-01") || dateStart === coverage.activityDateMin),
+      );
       void (wholeYears
         ? getDemoManagementDevelopmentHotspots(40, { yearEnd: Number(dateEnd?.slice(0, 4)), yearStart: Number(dateStart?.slice(0, 4)) })
         : Promise.resolve([]))
         .then((markers) => {
           if (!active) return;
           setHotspots((current) => {
-            const next = { ...current, markers, queryKey, totalCount: markers.length };
+            const next = {
+              ...current,
+              analysisPeriod: dateStart && dateEnd ? { endDate: dateEnd, startDate: dateStart } : null,
+              markers,
+              queryKey,
+              totalCount: markers.length,
+            };
             hotspotCache.set(queryKey, next);
             return next;
           });
@@ -60,12 +75,13 @@ export function useDevelopmentHotspots({ dateEnd = null, dateStart = null, enabl
     }
 
     const controller = new AbortController();
+    setHotspots((current) => ({ ...current, isLoading: true, queryKey, source: "loading" }));
 
     getDevelopmentHotspots(
       {
         limit: 10,
         date_end: dateEnd ?? undefined,
-        sort_by: "development_activity_score",
+        sort_by: "total_permit_count",
         date_start: dateStart ?? undefined,
       },
       { signal: controller.signal },

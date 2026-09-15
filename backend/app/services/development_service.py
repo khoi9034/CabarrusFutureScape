@@ -38,6 +38,7 @@ from app.schemas import (
 )
 from app.schemas.development import (
     DevelopmentActivityClassSummary,
+    DevelopmentAnalysisPeriod,
     DevelopmentActivityRecentSummary,
     DevelopmentActivitySummaryBucket,
     DevelopmentActivitySummaryDateRange,
@@ -412,6 +413,13 @@ class DevelopmentService:
             filters_applied[key] = value.isoformat() if isinstance(value, date) else value
 
         return DevelopmentHotspotsResponse(
+            analysis_period=DevelopmentAnalysisPeriod(
+                start_date=normalized_filters.date_start,
+                end_date=normalized_filters.date_end,
+            )
+            if normalized_filters.date_start is not None
+            and normalized_filters.date_end is not None
+            else None,
             filters_applied=filters_applied,
             sort_by=normalized_sort_by,
             limit=clamped_limit,
@@ -502,6 +510,13 @@ class DevelopmentService:
         }
 
         return DevelopmentActivitySummaryResponse(
+            analysis_period=DevelopmentAnalysisPeriod(
+                start_date=normalized_filters.date_start,
+                end_date=normalized_filters.date_end,
+            )
+            if normalized_filters.date_start is not None
+            and normalized_filters.date_end is not None
+            else None,
             filters_applied=filters_applied,
             total_permits=summary.total_permits,
             active_parcel_count=summary.active_parcel_count,

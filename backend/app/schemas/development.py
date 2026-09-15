@@ -154,7 +154,13 @@ class DevelopmentHotspotResult(BaseModel):
     map_focus: DevelopmentHotspotMapFocus | None = None
 
 
+class DevelopmentAnalysisPeriod(BaseModel):
+    start_date: date
+    end_date: date
+
+
 class DevelopmentHotspotsResponse(BaseModel):
+    analysis_period: DevelopmentAnalysisPeriod | None = None
     filters_applied: dict[str, int | str] = Field(default_factory=dict)
     sort_by: str
     limit: int
@@ -223,6 +229,7 @@ class DevelopmentActivityRecentSummary(BaseModel):
 
 
 class DevelopmentActivitySummaryResponse(BaseModel):
+    analysis_period: DevelopmentAnalysisPeriod | None = None
     filters_applied: dict[str, int | str] = Field(default_factory=dict)
     total_permits: int
     active_parcel_count: int

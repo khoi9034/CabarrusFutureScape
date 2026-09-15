@@ -1855,9 +1855,13 @@ function demoManagementAnswer(
   if (/school/.test(query) && /(mean|limited|why|what is)/.test(query)) {
     const count = display("page_school_assignment_review");
     return answer(
-      `School Assignment & Growth Context connects parcel school assignments with available school planning and growth information. ${count ? `The page currently shows ${count} parcel assignments for review. ` : ""}It is marked limited because official capacity, enrollment, and student-generation assumptions are incomplete; it is a coordination screen, not an enrollment forecast.`,
+      `School Assignment & Growth Context is current reference data, not a result filtered to the selected permit period. ${count ? `The page currently shows ${count} parcel assignments for review. ` : ""}It is marked limited because official capacity, enrollment, and student-generation assumptions are incomplete; it is a coordination screen, not an enrollment forecast.`,
       "Cabarrus County Schools planning context",
     );
+  }
+  if (/flood/.test(query) && /(how many|count|number)/.test(query)) {
+    const count = display("page_flood_review_parcels") ?? "an unavailable number of";
+    return answer(`${count} parcels are in the current countywide flood-review context. That is reference context, not a count filtered to the selected permit period; a permit/flood overlap is not currently available in this view.`, "FEMA floodplain context");
   }
   if (/(99 percent|99%|chance they will develop|probability)/.test(query)) {
     return answer(
@@ -1906,8 +1910,8 @@ function demoManagementAnswer(
   }
   if (/(give me the numbers|give actual numbers|explain these numbers|numbers on this page|key numbers|main numbers|what does this page show)/.test(query)) {
     const keySets: Record<string, Array<[string, string]>> = {
-      overview: [["Permit records", "page_permit_records"], ["Active development parcels", "page_active_development_parcels"], ["Active hotspots", "page_active_hotspots"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"], ["Elevated Development Signals", "page_elevated_signals"], ["Parcels flagged for economic review", "page_economic_review_parcels"]],
-      "planning-insights": [["Permit records", "page_permit_records"], ["Active development parcels", "page_active_development_parcels"], ["Active hotspots", "page_active_hotspots"], ["Flood review parcels", "page_flood_review_parcels"], ["School assignment review", "page_school_assignment_review"]],
+      overview: [["Selected-period permit records", "page_permit_records"], ["Selected-period active development parcels", "page_active_development_parcels"], ["Current flood review parcels (reference)", "page_flood_review_parcels"], ["Current school assignment review (reference)", "page_school_assignment_review"], ["Development Signals (fixed model reference)", "page_elevated_signals"], ["Current economic review parcels (reference)", "page_economic_review_parcels"]],
+      "planning-insights": [["Selected-period permit records", "page_permit_records"], ["Selected-period active development parcels", "page_active_development_parcels"], ["Current flood review parcels (reference)", "page_flood_review_parcels"], ["Current school assignment review (reference)", "page_school_assignment_review"]],
       "economic-insights": [["Parcels analyzed", "page_total_economic_parcels"], ["Parcels flagged for economic review", "page_economic_review_parcels"], ["Median value per acre", "page_median_value_per_acre"], ["Total assessed value", "page_total_assessed_value"]],
       "development-signals": [["Parcels evaluated", "page_parcels_evaluated"], ["Very High signals", "page_very_high_signals"], ["High signals", "page_high_signals"], ["Elevated Development Signals", "page_elevated_signals"]],
     };

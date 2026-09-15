@@ -73,7 +73,13 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
   const development = useDevelopmentActivitySummary({ dateEnd: period.endDate, dateStart: period.startDate, enabled: periodValid });
   const hotspots = useDevelopmentHotspots({ dateEnd: period.endDate, dateStart: period.startDate, enabled: periodValid });
   const selectedQueryKey = `${period.startDate ?? ""}|${period.endDate ?? ""}`;
-  const periodDataReady = periodValid && development.queryKey === selectedQueryKey && hotspots.queryKey === selectedQueryKey;
+  const periodDataReady = periodValid
+    && development.queryKey === selectedQueryKey
+    && hotspots.queryKey === selectedQueryKey
+    && development.analysisPeriod?.startDate === period.startDate
+    && development.analysisPeriod?.endDate === period.endDate
+    && hotspots.analysisPeriod?.startDate === period.startDate
+    && hotspots.analysisPeriod?.endDate === period.endDate;
   const flood = useFloodConstraintSummary();
   const schools = useSchoolConstraintSummary();
   const model = useDevelopmentPredictionResearchStatus();
@@ -99,11 +105,15 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
     if (section === "economic-insights") dashboard.setEconomicsSection("dashboard");
   }, [dashboard, section]);
 
-  const trendRows = useMemo<CfsChartRow[]>(() =>
-    (development.byMonth.length ? development.byMonth : development.byYear).slice(-12).map((row) => ({
+  const trendRows = useMemo<CfsChartRow[]>(() => {
+    const monthSpan = period.startDate && period.endDate
+      ? (Number(period.endDate.slice(0, 4)) - Number(period.startDate.slice(0, 4))) * 12 + Number(period.endDate.slice(5, 7)) - Number(period.startDate.slice(5, 7)) + 1
+      : 0;
+    return (monthSpan <= 24 ? development.byMonth : development.byYear).map((row) => ({
       label: "month" in row ? `${String(row.month).padStart(2, "0")}/${String(row.year).slice(-2)}` : String(row.year),
       value: row.permit_count,
-    })), [development.byMonth, development.byYear]);
+    }));
+  }, [development.byMonth, development.byYear, period.endDate, period.startDate]);
   const trendDirection = trendRows.length < 2 ? null : trendRows.at(-1)!.value > trendRows.at(-2)!.value ? "up" : trendRows.at(-1)!.value < trendRows.at(-2)!.value ? "down" : "flat";
   const hotspotRows = useMemo<CfsChartRow[]>(() => hotspots.markers.slice(0, 8).map((marker) => {
     const record = hotspots.hotspots.find((item) => item.official_parcel_id === marker.officialParcelId);
@@ -211,7 +221,7 @@ function ManagementDataWorkspace({ onAskContextChange, section }: { onAskContext
         {section === "overview" ? <Overview development={development} economics={economics} flood={flood} hotspots={hotspots} hotspotRows={hotspotRows} model={model} schools={schools} trendRows={trendRows} trendSource={development.source} openEconomicsBuilder={openEconomicsBuilder} openManagementDetail={openManagementDetail} openPlanningBuilder={openPlanningBuilder} period={period} /> : null}
         {section === "planning-insights" ? <Planning development={development} flood={flood} hotspots={hotspots} hotspotMarkers={hotspotMarkers} hotspotRows={hotspotRows} schools={schools} selected={selectedHotspot} setSelected={(marker: DevelopmentHotspotMapMarker | null) => { setSelectedHotspot(marker); dashboard.setSelectedDevelopmentHotspotContext(marker ? toHotspotContext(marker) : null); }} trendRows={trendRows} trendSource={development.source} openBuilder={openPlanningBuilder} period={period} /> : null}
         {section === "economic-insights" ? <Economics development={development} economics={economics} openBuilder={openEconomicsBuilder} period={period} trendDirection={trendDirection} trendRows={trendRows} /> : null}
-        {section === "development-signals" ? <Signals model={model} preview={modelPreview} markers={signalMarkers} period={period} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
+        {section === "development-signals" ? <Signals development={development} model={model} preview={modelPreview} markers={signalMarkers} period={period} selected={selectedSignal} setSelected={(marker: ModelResearchPreviewMarker | null) => { setSelectedSignal(marker); dashboard.setSelectedModelResearchContext(marker); }} openBuilder={openPlanningBuilder} /> : null}
 
       <footer className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-slate-400"><ShieldCheck className="h-4 w-4 text-[#77c99b]" /> Insights are based on available County data and documented analytical methods. Detailed controls, sources, and methodology remain in Analyst View.</footer></>}
       </div>
@@ -266,17 +276,15 @@ function Overview({ development, economics, flood, hotspots, hotspotRows, model,
   const signalData = modelTrust(model);
   return <>
     <KpiGrid items={[
-      { actionLabel: "View in Planning Insights", label: managementKpis.permitActivity.label, value: countValue(development.source, development.isLoading, development.totalPermits), status: `${period.label} · ${datedStatus(development.source, development.activityDateMax)}`, info: insight("permitActivity", permits, managementKpis.permitActivity, period.label), onAction: () => openManagementDetail(managementKpis.permitActivity.section, managementKpis.permitActivity.focus) },
-      { actionLabel: "View in Planning Insights", label: managementKpis.activeParcels.label, value: countValue(development.source, development.isLoading, development.activeParcelCount), status: `${period.label} · ${datedStatus(development.source, development.activityDateMax)}`, info: insight("activeHotspots", permits, managementKpis.activeParcels, period.label), onAction: () => openManagementDetail(managementKpis.activeParcels.section, managementKpis.activeParcels.focus) },
-      { actionLabel: "View in Planning Insights", label: managementKpis.floodReview.label, value: metric(flood.metrics, "review-required-parcels"), status: `Current parcel context · ${freshness(flood.source)}`, info: insight("floodReview", floodData, managementKpis.floodReview, period.label), onAction: () => openManagementDetail(managementKpis.floodReview.section, managementKpis.floodReview.focus) },
-      { actionLabel: "View in Planning Insights", label: managementKpis.schoolGrowth.label, value: schools.isLoading ? "Loading" : sourceAvailable(schools.source) ? metric(schools.metrics, "assignment-review") : "Unavailable", status: sourceAvailable(schools.source) ? "Current assignment context · Limited" : "Unavailable", info: insight("schoolPosture", schoolData, managementKpis.schoolGrowth, period.label), onAction: () => openManagementDetail(managementKpis.schoolGrowth.section, managementKpis.schoolGrowth.focus) },
-      { actionLabel: "View Development Signals", label: managementKpis.elevatedSignals.label, value: countValue(model.source, model.isLoading, strongest), status: sourceAvailable(model.source) ? "Model evidence: 2014–2022 · Limited" : "Unavailable", info: insight("elevatedSignals", signalData, managementKpis.elevatedSignals, period.label), onAction: () => openManagementDetail(managementKpis.elevatedSignals.section, managementKpis.elevatedSignals.focus) },
-      { actionLabel: "View Economic Insights", label: managementKpis.economicReview.label, value: economics.data ? number.format(economics.data.summary.high_opportunity_count) : economics.error ? "Unavailable" : "Loading", status: economics.data ? `Current parcel value context · ${freshness(economics.data.context_freshness ?? "current")}` : freshness(economics.error ? "unavailable" : "loading"), info: insight("economicPosture", economicData, managementKpis.economicReview, period.label), onAction: () => openManagementDetail(managementKpis.economicReview.section, managementKpis.economicReview.focus) },
+      { actionLabel: "View in Planning Insights", label: managementKpis.permitActivity.label, value: countValue(development.source, development.isLoading, development.totalPermits), status: sourceAvailable(development.source) && development.activityDateMax ? `${period.label} · Permit source through ${formatDate(development.activityDateMax)}` : "Unavailable", info: insight("permitActivity", permits, managementKpis.permitActivity, period.label), onAction: () => openManagementDetail(managementKpis.permitActivity.section, managementKpis.permitActivity.focus) },
+      { actionLabel: "View in Planning Insights", label: managementKpis.activeParcels.label, value: countValue(development.source, development.isLoading, development.activeParcelCount), status: sourceAvailable(development.source) && development.activityDateMax ? `${period.label} · Permit source through ${formatDate(development.activityDateMax)}` : "Unavailable", info: insight("activeHotspots", permits, managementKpis.activeParcels, period.label), onAction: () => openManagementDetail(managementKpis.activeParcels.section, managementKpis.activeParcels.focus) },
+      { actionLabel: "View in Planning Insights", label: "Top Development Area", value: hotspotRows.at(0)?.label ?? "Unavailable", status: hotspotRows.at(0) ? `${number.format(hotspotRows[0].value)} permits · ${period.label}` : period.label, info: insight("planningAttention", hotspotData), onAction: () => openManagementDetail("planning-insights", "active-development-parcels") },
     ]} />
     <TwoColumns>
       <Panel eyebrow={period.label} info={insight("permitTrend", permits)} title="Permit Activity"><CfsTrendChart ariaLabel="Recent development permit activity" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
       <Panel eyebrow={`Observed activity · ${period.label}`} info={insight("planningAttention", hotspotData)} title="Highest-activity areas"><Watchlist emptyMessage={unavailableMessage(hotspots.source, "No high-activity areas were identified.")} rows={hotspotRows.slice(0, 5).map((item: CfsChartRow) => [item.label, `${number.format(item.value)} permits`])} /><Action onClick={() => openManagementDetail("planning-insights", "active-development-parcels")}>View in Planning Insights</Action></Panel>
     </TwoColumns>
+    <SectionLabel description="Current parcel, constraint, economic, and model sources do not change with the selected permit period." title="Reference context" />
     <ThreeColumns>
       <Panel eyebrow="Flood and school review context" info={insight("constraintPosture", combineTrust("Planning constraints", [floodData, schoolData]))} title="Review context"><StatusRows rows={[["Flood review", metric(flood.metrics, "review-required-parcels")], ["High/severe impact", metric(flood.metrics, "high-severe-buildability")], ["School assignment review", metric(schools.metrics, "assignment-review")]]} /><Action onClick={() => openPlanningBuilder({ activeLayerIds: ["flood-risk", "fema-flood-zones", "school-pressure"], planningMode: "countywide", sourceInsightType: "overview-constraints" })}>Open in Analyst View</Action></Panel>
       <Panel eyebrow="Economic snapshot" info={insight("economicSnapshot", economicData)} title="County portfolio"><StatusRows rows={economics.data ? [["Parcels analyzed", number.format(economics.data.summary.total_parcels_analyzed)], ["Flagged for economic review", number.format(economics.data.summary.high_opportunity_count)], ["Assessed value", formatMoney(economics.data.summary.total_assessed_value)]] : []} /><Action onClick={() => openEconomicsBuilder("overview-economics", economics.data?.scenario_outputs?.[0]?.scenario_id)}>Open in Analyst View</Action></Panel>
@@ -300,10 +308,11 @@ function Planning({ development, flood, hotspots, hotspotMarkers, hotspotRows, s
       <Panel eyebrow={period.label} focus="permit-activity" info={insight("permitTrend", permits)} title="Permit Activity"><CfsTrendChart ariaLabel="Planning development activity trend" emptyMessage={unavailableMessage(trendSource, "No permit activity was recorded for this period.")} rows={trendRows} /></Panel>
       <Panel eyebrow={`Observed activity · ${period.label}`} focus="active-development-parcels" info={insight("hotspotRanking", hotspotData)} title="Active Development Parcels"><p className="mb-4 text-sm leading-6 text-slate-300">Unique parcels with observed permit activity in the selected period. The ranking below shows the strongest geographic concentrations without treating multiple permits as multiple parcels.</p><CfsRankedBarChart ariaLabel="Ranked development hotspots" emptyMessage={unavailableMessage(hotspots.source, "No development hotspots were identified.")} rows={hotspotRows} /></Panel>
     </TwoColumns>
+    <SectionLabel description="Current FEMA and school-assignment sources are shown separately because they are not recalculated by the permit-period filter." title="Current reference context" />
     <TwoColumns>
       <Panel eyebrow={`Geographic context · ${period.label}`} info={insight("hotspotMap", hotspotData)} title="Development hotspots"><ManagementMapPreview ariaLabel="Development hotspot map" markers={hotspotMarkers} onSelect={(marker) => setSelected(hotspots.markers.find((item: DevelopmentHotspotMapMarker) => item.officialParcelId === marker.id) ?? null)} testId="management-hotspot-map" /></Panel>
       <Panel eyebrow="Selected hotspot" info={insight("selectedHotspot", hotspotData)} title={selected ? selected.managementLabel || selected.zoningJurisdictionName || "Selected development hotspot" : "Select a hotspot on the map"}>
-        {selected ? <StatusRows rows={[["Permit activity", number.format(selected.totalPermitCount)], ["Analysis period", period.label], ["Signal", clean(selected.developmentActivityClass)], ["Observed dates", dateRange(selected.firstPermitDate, selected.latestPermitDate)]]} /> : <CompactEmpty>Click a hotspot to review its current observed evidence.</CompactEmpty>}
+        {selected ? <StatusRows rows={[["Permit activity", number.format(selected.totalPermitCount)], ["Analysis period", period.label], ["Observed dates", dateRange(selected.firstPermitDate, selected.latestPermitDate)]]} /> : <CompactEmpty>Click a hotspot to review its current observed evidence.</CompactEmpty>}
         <Action disabled={!selected} onClick={() => selected && openBuilder({ planningMode: "countywide", selectedHotspotContext: toHotspotContext(selected), selectedHotspotId: selected.officialParcelId, selectedParcelId: selected.officialParcelId, sourceInsightType: "planning-hotspot" })} testId="management-hotspot-builder-handoff">Open in Analyst View</Action>
       </Panel>
     </TwoColumns>
@@ -311,7 +320,7 @@ function Planning({ development, flood, hotspots, hotspotMarkers, hotspotRows, s
       <Panel eyebrow="Current FEMA and parcel context" focus="flood-review" info={insight("floodReview", floodData, managementKpis.floodReview, period.label)} title="Flood Review"><StatusRows rows={[["Parcels requiring review", metric(flood.metrics, "review-required-parcels")], ["High/severe flood impact", metric(flood.metrics, "high-severe-buildability")]]} /><Action onClick={() => openBuilder({ activeLayerIds: ["flood-risk", "fema-flood-zones"], planningMode: "countywide", sourceInsightType: "planning-constraints" })}>Open in Analyst View</Action></Panel>
       <Panel eyebrow="Current assignment context" focus="school-growth" info={insight("schoolPosture", schoolData, managementKpis.schoolGrowth, period.label)} title="School Assignment & Growth Context"><StatusRows rows={[["Assignment review", metric(schools.metrics, "assignment-review")], ["Development pressure period", period.label], ["Capacity status", "Official capacity information is incomplete"]]} /><Action onClick={() => openBuilder({ activeLayerIds: ["school-pressure", "permit-activity"], planningMode: "countywide", sourceInsightType: "planning-constraints" })}>Open in Analyst View</Action></Panel>
     </TwoColumns>
-    <Panel eyebrow={`Based on current Management period · ${period.label}`} info={insight("planningWatchlist", planningWatchlistTrust())} title="Planning Watchlist"><Watchlist rows={indicatorCenterDefinitions.filter((item) => ["High Attention", "Review Needed"].includes(item.priorityLabel)).slice(0, 5).map((item) => [item.name, item.priorityLabel])} /></Panel>
+    <Panel eyebrow="Current planning configuration · reference context" info={insight("planningWatchlist", planningWatchlistTrust())} title="Planning Watchlist"><Watchlist rows={indicatorCenterDefinitions.filter((item) => ["High Attention", "Review Needed"].includes(item.priorityLabel)).slice(0, 5).map((item) => [item.name, item.priorityLabel])} /></Panel>
     <DataTrust items={[hotspotData, floodData, schoolData]} />
   </>;
 }
@@ -322,6 +331,8 @@ function Economics({ development, economics, openBuilder, period, trendDirection
   const economicData = economicsTrust(economics);
   const permits = permitTrust(development);
   return <>
+    <Panel eyebrow={`Selected-period activity · ${period.label}`} info={insight("economicTrend", permits)} title="Development-linked economic activity"><CfsTrendChart ariaLabel="Development activity over time" emptyMessage="Development activity is unavailable for this comparison." rows={trendRows} /></Panel>
+    <SectionLabel description="The parcel inventory, assessed values, economic screening, and scenarios are current reference data; they are not historical permit-period results." title="Current parcel economic context" />
     <KpiGrid items={data ? [
       { label: "Parcels analyzed", value: number.format(data.summary.total_parcels_analyzed), status: freshness(data.context_freshness ?? "current"), info: insight("parcelsAnalyzed", economicData) },
       { label: managementKpis.economicReview.label, value: number.format(data.summary.high_opportunity_count), status: `${((data.summary.high_opportunity_count / data.summary.total_parcels_analyzed) * 100).toFixed(1)}% of parcels analyzed · Current parcel value context`, info: insight("highOpportunity", economicData, managementKpis.economicReview, period.label) },
@@ -330,11 +341,10 @@ function Economics({ development, economics, openBuilder, period, trendDirection
       { label: "Total assessed value", value: formatMoney(data.summary.total_assessed_value), status: "Current", info: insight("totalAssessedValue", economicData) },
     ] : []} />
     <TwoColumns>
-      <Panel eyebrow={`Permit-dependent context · ${period.label}`} info={insight("economicTrend", permits)} title="Development activity over time"><CfsTrendChart ariaLabel="Development activity over time" emptyMessage="Development activity is unavailable for this comparison." rows={trendRows} /></Panel>
       <Panel eyebrow="Current parcel value context" focus="economic-review" info={insight("currentEconomicPosture", economicData)} title="Economic Review"><StatusRows rows={data ? [["Screening definition", "Parcels in the current high-opportunity screening class"], ["Flagged parcels", number.format(data.summary.high_opportunity_count)], ["Share of parcels analyzed", `${((data.summary.high_opportunity_count / data.summary.total_parcels_analyzed) * 100).toFixed(1)}%`], ["Development activity", `${trendLabel(trendDirection)} · ${period.label}`], ["Median assessed value per acre", formatMoney(data.summary.median_value_per_acre)]] : []} /></Panel>
+      <Panel eyebrow="Opportunity mix" info={insight("opportunityMix", economicData)} title="Economic review classifications"><CfsRankedBarChart ariaLabel="Economic opportunity classes" rows={(data?.opportunity_class_breakdown ?? []).map((row: any) => ({ label: clean(row.opportunity_class), value: row.count }))} /></Panel>
     </TwoColumns>
     <TwoColumns>
-      <Panel eyebrow="Opportunity mix" info={insight("opportunityMix", economicData)} title="Economic review classifications"><CfsRankedBarChart ariaLabel="Economic opportunity classes" rows={(data?.opportunity_class_breakdown ?? []).map((row: any) => ({ label: clean(row.opportunity_class), value: row.count }))} /></Panel>
       <Panel eyebrow="Geographic coverage" info={insight("geographicComparison", economicData)} title="Assessed-value coverage"><CfsRankedBarChart ariaLabel="Economic parcels by geography" rows={(data?.jurisdiction_value_summary ?? []).slice(0, 8).map((row: any) => ({ label: areaLabel(row.geography_label), value: row.parcel_count }))} /></Panel>
     </TwoColumns>
     <Panel eyebrow="Scenario results" info={insight("scenarioResults", economicData)} title="Screening-level comparisons">
@@ -345,7 +355,7 @@ function Economics({ development, economics, openBuilder, period, trendDirection
   </>;
 }
 
-function Signals({ model, preview, markers, period, selected, setSelected, openBuilder }: any) {
+function Signals({ development, model, preview, markers, period, selected, setSelected, openBuilder }: any) {
   const strongest = model.rankingSummary.class_distribution.slice(0, 2).reduce((sum: number, row: any) => sum + row.row_count, 0);
   const modelIsAvailable = sourceAvailable(model.source);
   const previewIsAvailable = preview.status === "ready" && ["api", "demo"].includes(preview.source);
@@ -360,6 +370,8 @@ function Signals({ model, preview, markers, period, selected, setSelected, openB
   const veryHigh = model.rankingSummary.class_distribution.find((row: any) => row.development_signal_class === "very_high_development_signal")?.row_count ?? 0;
   const high = model.rankingSummary.class_distribution.find((row: any) => row.development_signal_class === "high_development_signal")?.row_count ?? 0;
   return <>
+    <Panel eyebrow={`Management analysis · ${period.label}`} info={insight("permitActivity", permitTrust(development), managementKpis.permitActivity, period.label)} title="Current observed activity"><StatusRows rows={[["Permit records", countValue(development.source, development.isLoading, development.totalPermits)], ["Active development parcels", countValue(development.source, development.isLoading, development.activeParcelCount)], ["Analysis period", period.label]]} /></Panel>
+    <SectionLabel description="Development Signals use fixed 2014–2022 model evidence and do not change when the Management permit period changes." title="Model reference" />
     <Panel eyebrow="Development signals" info={insight("developmentSignals", signalData)} title="Observed patterns associated with later activity"><p className="max-w-4xl text-sm leading-6 text-slate-300">These relative bands identify parcel conditions that were more common among historical parcels with later observed new-construction permit activity. They help staff prioritize evidence review; they are not a forecast, approval prediction, or exact probability.</p></Panel>
     <KpiGrid items={[
       { label: "Parcels evaluated", value: countValue(model.source, model.isLoading, model.rankingSummary.unique_parcel_count), status: modelIsAvailable ? "Limited" : "Unavailable", info: insight("parcelsEvaluated", signalData) },
@@ -407,6 +419,7 @@ function FeatureGroup({ items, title }: { items: string[]; title: string }) { re
 function EvidenceCard({ text, title }: { text: string; title: string }) { return <article className="rounded-xl border border-white/10 bg-white/[0.035] p-4"><h3 className="text-sm font-semibold text-white">{title}</h3><p className="mt-2 text-xs leading-5 text-slate-400">{text}</p></article>; }
 
 function Panel({ children, eyebrow, focus, info, title }: { children: ReactNode; eyebrow: string; focus?: ManagementFocus; info?: InsightInfo; title: string }) { return <section className="cfs-command-surface relative scroll-mt-24 rounded-2xl p-5 focus:outline-none focus:ring-2 focus:ring-[#82c9d8] sm:p-6" id={focus ? `management-focus-${focus}` : undefined} tabIndex={focus ? -1 : undefined}><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9bd1de]">{eyebrow}</p><h2 className="mt-1 text-lg font-semibold text-white">{title}</h2></div>{info ? <InsightInfoPopover info={info} /> : null}</div><div className="mt-5">{children}</div></section>; }
+function SectionLabel({ description, title }: { description: string; title: string }) { return <header className="pt-2"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9bd1de]">{title}</p><p className="mt-1 max-w-4xl text-sm leading-6 text-slate-400">{description}</p></header>; }
 function TwoColumns({ children }: { children: ReactNode }) { return <div className="grid gap-5 xl:grid-cols-2">{children}</div>; }
 function ThreeColumns({ children }: { children: ReactNode }) { return <div className="grid gap-5 lg:grid-cols-3">{children}</div>; }
 type KpiItem = { actionLabel?: string; focus?: ManagementFocus; info: InsightInfo; label: string; onAction?: () => void; status: string; value: string };
@@ -428,7 +441,7 @@ const insightCopy = {
   schoolPosture: { title: "School Assignment & Growth Context", meaning: "The count of parcels requiring school-assignment review, alongside available school geography, utilization context, and observed permit pressure.", howBuilt: "Uses available Cabarrus County Schools assignment geography, parcel context, and observed development/permit activity.", whyMatters: "Rapid development can increase the need for school-capacity and assignment review.", limitations: "Official school enrollment and capacity information is incomplete; verify current information with Cabarrus County Schools." },
   elevatedSignals: { title: "Elevated historical signals", meaning: "Parcels whose current characteristics more closely resemble patterns associated with later major permit/development activity in the model's historical data.", howBuilt: "The model compares parcel characteristics, historical zoning, transportation accessibility, tax/value enrichment, and observed permit outcomes across historical parcel-year records.", whyMatters: "These parcels may deserve additional staff review when evaluating where development pressure could emerge.", limitations: "An elevated signal does not mean development will occur; market conditions, ownership, infrastructure, policy, and proposals can change independently of the model." },
   economicPosture: { title: "Economic review screening", meaning: "The count of parcels meeting the current Economics screening criteria.", whyMatters: "It indicates how much of the analyzed portfolio may warrant closer value, use, and constraint review.", limitations: "Screening classifications support review and are not investment or development recommendations." },
-  permitTrend: { title: "Development activity trend", meaning: "The chart plots observed permit records by month or year across the most recent available periods.", howBuilt: "The horizontal axis is the available month/year period; the vertical axis is the number of observed permit records.", whyMatters: "The direction and timing of observed activity provide countywide change context.", limitations: "Observed activity is descriptive planning context, not a development forecast." },
+  permitTrend: { title: "Development activity trend", meaning: "The chart plots observed permit records by month or year across the selected analysis period.", howBuilt: "The horizontal axis is the selected month/year period; the vertical axis is the number of observed permit records.", whyMatters: "The direction and timing of observed activity provide countywide change context.", limitations: "Observed activity is descriptive planning context, not a development forecast." },
   planningAttention: { title: "Highest-activity areas", meaning: "The areas with the largest number of observed permit records in the current summary.", whyMatters: "The ranking helps staff choose where to begin a focused review.", limitations: "Ranking reflects observed records and should be reviewed with constraints and local context." },
   constraintPosture: { title: "Flood and school review context", meaning: "A screening view of mapped flood context and preliminary school assignment/capacity context that may require additional review.", whyMatters: "These factors can change how staff interpret development activity and site readiness.", limitations: "Indicators support early review and do not replace official flood, school, or site determinations." },
   economicSnapshot: { title: "Economic snapshot", meaning: "A countywide summary of analyzed parcels, assessed value, and parcels meeting current economic screening criteria.", whyMatters: "It provides a quick view of the portfolio before staff open the detailed Analyst View.", limitations: "Use Analyst View for parcel-level assumptions and scenario analysis." },

@@ -9,6 +9,7 @@ type DevelopmentActivitySummaryInput = Omit<DevelopmentActivitySummaryResponse, 
 
 export interface DevelopmentActivitySummaryViewModel {
   activeParcelCount: number | null;
+  analysisPeriod: { endDate: string; startDate: string } | null;
   activityDateMax: string | null;
   activityDateMin: string | null;
   avgPermitAmount: number | null;
@@ -31,6 +32,7 @@ export function getStaticDevelopmentActivitySummary(): DevelopmentActivitySummar
 
   return {
     activeParcelCount: developmentActivitySummary.parcelSummary.parcels_with_permits,
+    analysisPeriod: null,
     activityDateMax: developmentActivitySummary.dateRange.latest_permit_date,
     activityDateMin: developmentActivitySummary.dateRange.first_permit_date,
     avgPermitAmount: null,
@@ -52,6 +54,7 @@ export function getStaticDevelopmentActivitySummary(): DevelopmentActivitySummar
 export function getUnavailableDevelopmentActivitySummary(): DevelopmentActivitySummaryViewModel {
   return {
     activeParcelCount: 0,
+    analysisPeriod: null,
     activityDateMax: null,
     activityDateMin: null,
     avgPermitAmount: null,
@@ -77,6 +80,9 @@ export function normalizeDevelopmentActivitySummary(
 
   return {
     activeParcelCount: response.active_parcel_count,
+    analysisPeriod: response.analysis_period
+      ? { endDate: response.analysis_period.end_date, startDate: response.analysis_period.start_date }
+      : null,
     activityDateMax: response.date_range.activity_date_max,
     activityDateMin: response.date_range.activity_date_min,
     avgPermitAmount: response.avg_permit_amount,

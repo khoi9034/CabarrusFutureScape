@@ -36,7 +36,11 @@ export function useDevelopmentActivitySummary({ dateEnd = null, dateStart = null
 
   useEffect(() => {
     if (!enabled) return;
-    if (summaryCache.has(queryKey)) return;
+    const cached = summaryCache.get(queryKey);
+    if (cached) {
+      setSummary({ ...cached, queryKey });
+      return;
+    }
     if (USE_DEMO_DATA) {
       let active = true;
       getDemoDevelopmentActivitySummaryResponse({ dateEnd, dateStart })
@@ -73,6 +77,7 @@ export function useDevelopmentActivitySummary({ dateEnd = null, dateStart = null
     }
 
     const controller = new AbortController();
+    setSummary((current) => ({ ...current, isLoading: true, queryKey, source: "loading" }));
 
     getDevelopmentActivitySummary(
       {

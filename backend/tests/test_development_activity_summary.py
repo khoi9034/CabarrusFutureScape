@@ -70,6 +70,10 @@ def test_development_activity_summary_date_range_filter() -> None:
         "date_end": "2025-12-31",
         "date_start": "2025-01-01",
     }
+    assert body["analysis_period"] == {
+        "end_date": "2025-12-31",
+        "start_date": "2025-01-01",
+    }
     assert body["total_permits"] == 3_642
     assert body["active_parcel_count"] == 3_074
 

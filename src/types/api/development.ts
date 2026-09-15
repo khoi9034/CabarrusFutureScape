@@ -2,6 +2,11 @@ export type DevelopmentFilterValue = boolean | number | string;
 
 export type DevelopmentFilters = Record<string, DevelopmentFilterValue>;
 
+export interface DevelopmentAnalysisPeriod {
+  end_date: string;
+  start_date: string;
+}
+
 export interface DevelopmentStatisticsBucket {
   count: number;
   value: string;
@@ -131,6 +136,7 @@ export interface DevelopmentHotspotResult {
 }
 
 export interface DevelopmentHotspotsResponse {
+  analysis_period: DevelopmentAnalysisPeriod | null;
   filters_applied: DevelopmentFilters;
   limit: number;
   offset: number;
@@ -190,6 +196,7 @@ export interface DevelopmentActivitySummaryMonthBucket {
 
 export interface DevelopmentActivitySummaryResponse {
   active_parcel_count: number;
+  analysis_period: DevelopmentAnalysisPeriod | null;
   avg_permit_amount: number | null;
   by_activity_class: DevelopmentActivitySummaryBucket[];
   by_month: DevelopmentActivitySummaryMonthBucket[];

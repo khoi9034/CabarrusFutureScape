@@ -11,6 +11,7 @@ import { normalizeDevelopmentHotspotMapMarkers } from "@/lib/adapters/developmen
 import type { DevelopmentHotspotMapMarker } from "@/types/map/developmentHotspots";
 
 export interface DevelopmentHotspotsViewModel {
+  analysisPeriod: { endDate: string; startDate: string } | null;
   errorMessage: string | null;
   hotspots: DevelopmentHotspotRecord[];
   isLoading: boolean;
@@ -74,6 +75,7 @@ function mapHotspotResult(result: DevelopmentHotspotResult): DevelopmentHotspotR
 
 export function getStaticDevelopmentHotspots(): DevelopmentHotspotsViewModel {
   return {
+    analysisPeriod: null,
     errorMessage: null,
     hotspots: developmentHotspotParcels,
     isLoading: false,
@@ -85,6 +87,7 @@ export function getStaticDevelopmentHotspots(): DevelopmentHotspotsViewModel {
 
 export function getUnavailableDevelopmentHotspots(): DevelopmentHotspotsViewModel {
   return {
+    analysisPeriod: null,
     errorMessage: null,
     hotspots: [],
     isLoading: false,
@@ -102,6 +105,9 @@ export function normalizeDevelopmentHotspots(
   }
 
   return {
+    analysisPeriod: response.analysis_period
+      ? { endDate: response.analysis_period.end_date, startDate: response.analysis_period.start_date }
+      : null,
     hotspots: response.results.map(mapHotspotResult),
     markers: normalizeDevelopmentHotspotMapMarkers(response).markers,
     totalCount: response.total_count,
