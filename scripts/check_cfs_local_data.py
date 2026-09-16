@@ -26,8 +26,14 @@ CANONICAL_PARCEL = "CFS-PARCEL-0149726579"
 PRESENTATION_LIMIT_MS = 5_000
 
 DOMAIN_RELATIONS = {
-    "Planning": ("parcels_enriched", "parcel_zoning_overlay"),
+    "Planning": (
+        "parcels_enriched",
+        "parcel_zoning_overlay",
+        "zoning_jurisdictional_clean",
+    ),
+    "Addresses": ("accela_plan_reviews_clean",),
     "Development": (
+        "real_property_permit_clean",
         "real_property_permit_parcel_relationship",
         "permit_activity",
     ),
@@ -44,6 +50,18 @@ DOMAIN_RELATIONS = {
         "parcel_tax_value_enrichment_features",
         "parcel_development_screening_output",
     ),
+    "Transportation": (
+        "transportation_centerlines_clean",
+        "transportation_aadt_stations_clean",
+        "transportation_stip_projects_clean",
+        "parcel_transportation_accessibility_features",
+    ),
+    "Development Signals": (
+        "development_prediction_ranking_classes",
+        "development_prediction_ranking_explanations",
+        "development_prediction_model_experiment_scores",
+    ),
+    "Snapshots": ("planning_snapshots", "planning_snapshot_versions"),
     "WSACC": (
         "wsacc_data_inventory",
         "wsacc_basins",
@@ -52,6 +70,22 @@ DOMAIN_RELATIONS = {
         "parcel_wsacc_utility_features",
     ),
 }
+
+DEMO_DATASETS = (
+    ("Parcels", "parcels_enriched", "max(enriched_at)::text"),
+    ("Permits", "real_property_permit_clean", "max(permit_date)::text"),
+    ("Addresses", "accela_plan_reviews_clean", "max(cleaned_at)::text"),
+    ("Zoning", "zoning_jurisdictional_clean", "max(transformed_at)::text"),
+    ("Flood", "fema_nfhl_flood_zones_clean", "max(transformed_at)::text"),
+    ("School assignment zones", "school_zones", "max(transformed_at)::text"),
+    ("School utilization context", "school_presentation_utilization_seed", "max(school_year)"),
+    ("Transportation centerlines", "transportation_centerlines_clean", "max(cleaned_at)::text"),
+    ("Transportation counts", "transportation_aadt_stations_clean", "max(count_year)::text"),
+    ("WSACC utility proxies", "parcel_wsacc_utility_features", "max(updated_at)::text"),
+    ("Parcel economics", "parcel_tax_value_enrichment_features", "max(created_at)::text"),
+    ("Development Signals", "development_prediction_ranking_classes", "max(snapshot_year)::text"),
+    ("Snapshots", "planning_snapshots", "max(updated_at)::text"),
+)
 
 LIMITED_RELATIONS = {
     "school_capacity": "No official capacity rows; presentation uses preliminary utilization context.",
@@ -89,6 +123,7 @@ def main() -> int:
         "geometry": {},
         "timings_ms": {},
         "warnings": [],
+        "demo_datasets": [],
     }
     failures: list[str] = []
 
@@ -299,6 +334,25 @@ def main() -> int:
             if not parcel or not parcel["geometry_valid"]:
                 failures.append("Representative parcel is missing or invalid")
 
+            for name, relation, current_through_sql in DEMO_DATASETS:
+                current_through_result, current_through_ms = timed(
+                    connection,
+                    f'SELECT {current_through_sql} FROM public."{relation}"',
+                )
+                relation_report = report["relations"][relation]
+                report["demo_datasets"].append(
+                    {
+                        "dataset": name,
+                        "local_source": f"public.{relation}",
+                        "row_count": relation_report["rows"],
+                        "source_current_through": current_through_result.scalar_one(),
+                        "status": relation_report["status"],
+                        "required_for_demo": True,
+                        "remote_dependency": "none",
+                        "response_ms": current_through_ms,
+                    }
+                )
+
     except Exception as error:
         # Database exceptions can contain credentials; record only the safe type.
         failures.append(f"Local database check failed ({type(error).__name__})")
@@ -322,6 +376,27 @@ def main() -> int:
     LOGS.mkdir(exist_ok=True)
     output = LOGS / "local-data-readiness.json"
     output.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    thursday_output = LOGS / "thursday-demo-data-readiness.json"
+    thursday_output.write_text(
+        json.dumps(
+            {
+                "checked_at": report["checked_at"],
+                "freeze_label": "Cabarrus Insights Thursday Local Demo",
+                "target": report["target"],
+                "status": report["status"],
+                "datasets": report["demo_datasets"],
+                "remote_required_dependencies": [],
+                "optional_external_services": [
+                    "OpenFreeMap/OpenStreetMap basemap",
+                    "OpenAI explanations",
+                    "EagleView imagery",
+                ],
+                "ingestion_behavior": "No ingestion jobs run during present:cfs; local datasets remain frozen unless an operator starts ingestion explicitly.",
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
     print(f"[local-data] {report['status']}")
     print(
@@ -333,6 +408,7 @@ def main() -> int:
     )
     print(f"[local-data] Slowest readiness query: {slowest_ms:.1f} ms")
     print(f"[local-data] Report: {output}")
+    print(f"[local-data] Thursday report: {thursday_output}")
     for failure in failures:
         print(f"[local-data] FAIL: {failure}")
     return 0 if not failures else 1

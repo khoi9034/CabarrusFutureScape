@@ -22,6 +22,8 @@ export interface BackendAvailabilityController {
 
 const checksBackend = USE_BACKEND_API && !USE_DEMO_DATA;
 const restartTimeoutMs = 90_000;
+const readinessTimeoutMs = 30_000;
+const unavailableAfterFailures = 2;
 
 export function useBackendAvailability(): BackendAvailabilityController {
   const [status, setStatus] = useState<BackendConnectionStatus>(
@@ -31,6 +33,8 @@ export function useBackendAvailability(): BackendAvailabilityController {
   const [refreshKey, setRefreshKey] = useState(0);
   const [restarting, setRestarting] = useState(false);
   const statusRef = useRef(status);
+  const failedChecks = useRef(0);
+  const probeInProgress = useRef(false);
   const recoveryInProgress = useRef(false);
 
   const updateStatus = useCallback((next: BackendConnectionStatus) => {
@@ -40,7 +44,7 @@ export function useBackendAvailability(): BackendAvailabilityController {
 
   const probe = useCallback(async () => {
     try {
-      const ready = await getApiReady({ timeoutMs: 4_000 });
+      const ready = await getApiReady({ timeoutMs: readinessTimeoutMs });
       return ready.status === "ready";
     } catch {
       return false;
@@ -49,6 +53,7 @@ export function useBackendAvailability(): BackendAvailabilityController {
 
   const reconnect = useCallback(() => {
     const changed = statusRef.current !== "healthy";
+    failedChecks.current = 0;
     updateStatus("healthy");
     if (changed) setRefreshKey((value) => value + 1);
   }, [updateStatus]);
@@ -112,9 +117,17 @@ export function useBackendAvailability(): BackendAvailabilityController {
 
     let active = true;
     const refresh = async () => {
-      if (!active || recoveryInProgress.current) return;
-      if (await probe()) reconnect();
-      else updateStatus("unavailable");
+      if (!active || probeInProgress.current || recoveryInProgress.current) return;
+      probeInProgress.current = true;
+      try {
+        if (await probe()) reconnect();
+        else {
+          failedChecks.current += 1;
+          if (failedChecks.current >= unavailableAfterFailures) updateStatus("unavailable");
+        }
+      } finally {
+        probeInProgress.current = false;
+      }
     };
     void refresh();
     const timer = window.setInterval(refresh, 10_000);

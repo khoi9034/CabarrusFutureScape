@@ -15,7 +15,7 @@ const [panel, drawer, shell, scene, service, router, schema, types] = await Prom
 assert.match(shell, /mapAware: cfsAppMode === "planning"/);
 assert.match(panel, /captureAskCfsMapContext/);
 assert.match(panel, /map_context: mapContext/);
-assert.match(panel, /contextLabel \?\? "Current Planning map"/);
+assert.match(panel, /contextLabel \?\? "Current map view"/);
 assert.match(panel, /ask-cfs-conversation-history/);
 assert.match(drawer, /shared-ask-cfs-rail/);
 assert.match(drawer, /shared-ask-cfs-expand/);
