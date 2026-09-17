@@ -1218,51 +1218,35 @@ function EconomicDashboardPage({
   const [activeDashboardSegment, setActiveDashboardSegment] =
     useState<"pulse" | "land" | "burden" | "confidence">("pulse");
   const kpis = intelligence?.kpis ?? [];
-  const filteredSignals = filterEconomicSignals(signals, {
+  const economicsFilterContext: EconomicsFilterContext = {
     dataConfidence: selectedDataConfidence,
     economicSegment: selectedSegment,
     geography: selectedGeography,
     opportunityClass: selectedOpportunityClass,
-  });
-  const filteredWatchlist = filterEconomicSignals(watchlist, {
-    dataConfidence: selectedDataConfidence,
-    economicSegment: selectedSegment,
-    geography: selectedGeography,
-    opportunityClass: selectedOpportunityClass,
-  });
+  };
+  const filteredSignals = filterEconomicSignals(signals, economicsFilterContext);
+  const filteredWatchlist = filteredSignals.filter(isEconomicWatchlistSignal);
+  const filteredKpis = economicsKpisForSignals(filteredSignals, kpis);
   const filteredScenarios = intelligence?.scenario_outputs ?? [];
-  const segmentRows = buildSegmentSummaryRows(intelligence, signals);
+  const segmentRows = buildSegmentSummaryRows(filteredSignals);
   const selectedSegmentRows =
     selectedSegment === "All"
       ? segmentRows
       : segmentRows.filter((row) => row.segment === selectedSegment);
-  const valueBars =
-    selectedSegment === "All"
-      ? segmentRows.map((row) => ({
-          label: row.segment,
-          value: row.median_value_per_acre ?? 0,
-        }))
-      : topSignals(filteredSignals, "value_per_acre").map((signal) => ({
-          label: signal.geography_label ?? signal.parcel_id,
-          value: signal.value_per_acre ?? 0,
-        }));
-  const ratioBars =
-    selectedSegment === "All"
-      ? segmentRows.map((row) => ({
-          label: row.segment,
-          value: row.median_improvement_to_land_ratio ?? 0,
-        }))
-      : topSignals(filteredSignals, "improvement_to_land_ratio").map((signal) => ({
-          label: signal.geography_label ?? signal.parcel_id,
-          value: signal.improvement_to_land_ratio ?? 0,
-        }));
-  const classBars = filteredSignals.length
-    ? countRowsBy(filteredSignals, (signal) => signal.opportunity_class)
-    : (intelligence?.opportunity_class_breakdown?.map((row) => ({
-        label: row.opportunity_class,
-        value: row.count,
-      })) ?? []);
-  const confidenceBars = countRowsBy(filteredSignals, (signal) => signal.economic_data_confidence);
+  const valueBars = segmentRows.map((row) => ({
+    label: row.segment,
+    value: row.median_value_per_acre ?? 0,
+  }));
+  const ratioBars = segmentRows.map((row) => ({
+    label: row.segment,
+    value: row.median_improvement_to_land_ratio ?? 0,
+  }));
+  const classBars = countRowsBy(filteredSignals, (signal) =>
+    normalizeEconomicsText(signal.opportunity_class, "Needs More Data Before Recommendation"),
+  );
+  const confidenceBars = countRowsBy(filteredSignals, (signal) =>
+    normalizeConfidence(signal.economic_data_confidence),
+  );
   const scenarioRows = scenarioMatrixRows(filteredScenarios);
   const burdenRows = fiscalBurdenRows(filteredSignals, filteredScenarios);
   const landOpportunityRows = filteredSignals.filter((signal) =>
@@ -1276,10 +1260,10 @@ function EconomicDashboardPage({
     landOpportunityRows,
     (signal) => signal.sewer_proxy_class ?? "Data Needed",
   );
-  const segmentOptions = ["All", ...uniqueValues([...segmentRows.map((row) => row.segment), ...signals.map((signal) => signalSegment(signal))])];
-  const geographyOptions = ["All", ...uniqueValues(signals.map((signal) => signal.geography_label).filter(Boolean))];
-  const opportunityOptions = ["All", ...uniqueValues(signals.map((signal) => signal.opportunity_class))];
-  const confidenceOptions = ["All", ...uniqueValues(signals.map((signal) => signal.economic_data_confidence))];
+  const segmentOptions = ["All", ...uniqueValues(signals.map((signal) => signalSegment(signal)))];
+  const geographyOptions = ["All", ...uniqueValues(signals.map((signal) => normalizeEconomicsText(signal.geography_label, "Parcel context")))];
+  const opportunityOptions = ["All", ...uniqueValues(signals.map((signal) => normalizeEconomicsText(signal.opportunity_class, "Needs More Data Before Recommendation")))];
+  const confidenceOptions = ["All", ...uniqueValues(signals.map((signal) => normalizeConfidence(signal.economic_data_confidence)))];
   const summary = intelligence?.summary;
   const selectedParcelSignal = selectedParcelId
     ? signals.find((signal) => signal.parcel_id === selectedParcelId) ?? null
@@ -1383,7 +1367,7 @@ function EconomicDashboardPage({
       <section className="grid gap-4">
         <EconPanel title="Executive Economic Signals" kicker="KPIs" tourId="kpi-strip">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
-            {kpis.map((kpi) => (
+            {filteredKpis.map((kpi) => (
               <KpiCard key={kpi.id} kpi={kpi} />
             ))}
           </div>
@@ -1409,7 +1393,7 @@ function EconomicDashboardPage({
             recipe="Table: parcel_economic_signal_fact | Visual: Donut chart | Legend: opportunity_class | Values: Count of signal_id"
             title="Opportunity Class Breakdown"
           >
-            <EconomicsDonutChart rows={classBars} />
+            {filteredSignals.length ? <EconomicsDonutChart rows={classBars} /> : <FilteredEconomicsEmpty onReset={resetFilters} />}
           </EconomicsVisualPanel>
           <EconPanel title="Underbuilt Redevelopment Watchlist" kicker="Watchlist">
             <SignalTable signals={filteredWatchlist.slice(0, 5)} />
@@ -1549,14 +1533,6 @@ function EconomicDashboardPage({
         <DetailsBlock summary="Full Data Confidence Register" hint="Domain readiness, current use, and next data need.">
           <EconomicsReadinessMatrix rows={intelligence?.data_readiness ?? []} />
         </DetailsBlock>
-        <DetailsBlock summary="Power BI recipe details" hint="Use economic_segment before value-per-acre comparisons.">
-          <ul className="grid gap-2 text-sm leading-6 text-[var(--econ-muted)]">
-            <li>Source table: parcel_economic_signal_fact.</li>
-            <li>Slicer: economic_segment, then geography_label, opportunity_class, and data_confidence.</li>
-            <li>Value-per-acre visual: compare rows within the selected segment, not across all assets.</li>
-            <li>Special asset flag: use it to separate civic, institutional, infrastructure, or utility rows from ordinary parcel peers.</li>
-          </ul>
-        </DetailsBlock>
       </section>
       ) : null}
     </>
@@ -1615,6 +1591,7 @@ function EconomicsWorkspacePage({
       ? filterWorkspaceSignals(signalRowsByTable[activeTable], {
           burdenBand: selectedBurdenBand,
           dataConfidence: selectedDataConfidence,
+          economicSegment: "All",
           geography: selectedGeography,
           opportunityClass: selectedOpportunityClass,
         }).slice(0, 18)
@@ -6042,16 +6019,13 @@ function EconomicsVisualPanel({
     <EconPanel title={title}>
       <p className="sr-only">{description}</p>
       {children}
-      <DetailsBlock summary="Power BI recipe" hint="Table, fields, and slicer.">
-        <p className="text-sm leading-6 text-[var(--econ-muted)]">{recipe}</p>
-      </DetailsBlock>
     </EconPanel>
   );
 }
 
 function SignalTable({ signals }: { signals: EconomicsParcelSignal[] }) {
   if (!signals.length) {
-    return <p className="text-sm text-[var(--econ-muted)]">No parcel signals available.</p>;
+    return <p className="text-sm text-[var(--econ-muted)]">No records match the current filters.</p>;
   }
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--econ-border)]">
@@ -6540,28 +6514,112 @@ const workspaceTableOptions: Array<{
 
 function filterEconomicSignals(
   signals: EconomicsParcelSignal[],
-  filters: {
-    dataConfidence: string;
-    economicSegment?: string;
-    geography: string;
-    opportunityClass: string;
-  },
+  filters: EconomicsFilterContext,
 ) {
   return signals.filter((signal) => {
-    const geography = signal.geography_label ?? "Parcel context";
+    const geography = normalizeEconomicsText(signal.geography_label, "Parcel context");
     const economicSegment = signalSegment(signal);
     return (
-      (!filters.economicSegment || filters.economicSegment === "All" || economicSegment === filters.economicSegment) &&
-      (filters.geography === "All" || geography === filters.geography) &&
-      (filters.opportunityClass === "All" || signal.opportunity_class === filters.opportunityClass) &&
-      (filters.dataConfidence === "All" || signal.economic_data_confidence === filters.dataConfidence)
+      matchesEconomicsFilter(economicSegment, filters.economicSegment) &&
+      matchesEconomicsFilter(geography, filters.geography) &&
+      matchesEconomicsFilter(normalizeEconomicsText(signal.opportunity_class, "Needs More Data Before Recommendation"), filters.opportunityClass) &&
+      matchesEconomicsFilter(normalizeConfidence(signal.economic_data_confidence), filters.dataConfidence)
     );
   });
 }
 
+type EconomicsFilterContext = {
+    dataConfidence: string;
+    economicSegment: string;
+    geography: string;
+    opportunityClass: string;
+};
+
+function normalizeEconomicsText(value: unknown, fallback: string) {
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+
+function normalizeConfidence(value: unknown) {
+  const text = normalizeEconomicsText(value, "data_needed").toLowerCase();
+  if (["strong", "high"].includes(text)) return "strong";
+  if (text === "medium") return "medium";
+  if (["proxy", "limited"].includes(text)) return "proxy";
+  if (["data needed", "data_needed", "unknown"].includes(text)) return "data_needed";
+  return text;
+}
+
+function matchesEconomicsFilter(value: string, selected: string | undefined) {
+  if (!selected || selected === "All") return true;
+  return value.trim().toLocaleLowerCase() === selected.trim().toLocaleLowerCase();
+}
+
+function isEconomicWatchlistSignal(signal: EconomicsParcelSignal) {
+  return [
+    "Underbuilt Redevelopment Candidate",
+    "Tax-Base Opportunity",
+    "High Value but Infrastructure-Constrained",
+    "Needs More Data Before Recommendation",
+  ].includes(normalizeEconomicsText(signal.opportunity_class, "Needs More Data Before Recommendation"));
+}
+
+function economicsKpisForSignals(
+  signals: EconomicsParcelSignal[],
+  fallback: EconomicsKpi[],
+): EconomicsKpi[] {
+  const assessedValues = signals
+    .map((signal) => signal.assessed_value)
+    .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  const totalAssessed = assessedValues.length
+    ? assessedValues.reduce((sum, value) => sum + value, 0)
+    : null;
+  const valuesPerAcre = signals
+    .map((signal) => signal.value_per_acre)
+    .filter((value): value is number => typeof value === "number" && Number.isFinite(value))
+    .sort((left, right) => left - right);
+  const median = valuesPerAcre.length
+    ? valuesPerAcre[Math.floor((valuesPerAcre.length - 1) / 2)]
+    : null;
+  const byId = new Map(fallback.map((kpi) => [kpi.id, kpi]));
+  const value = (id: string, computed: number | null): EconomicsKpi => {
+    const existing = byId.get(id);
+    return existing
+      ? { ...existing, value: computed }
+      : {
+          caveat: "Derived from the current filtered economics population.",
+          id,
+          label: id,
+          status_band: "unavailable",
+          unit: null,
+          value: computed,
+        };
+  };
+  return [
+    value("parcels_analyzed", signals.length),
+    value("assessed_value_coverage", totalAssessed),
+    value("median_value_per_acre", median),
+    value("underbuilt_candidates", signals.filter((signal) => signal.economic_status_band === "underbuilt_watch").length),
+    value("tax_base_opportunity", signals.filter((signal) => signal.economic_status_band === "tax_base_opportunity").length),
+    value("data_needed", signals.filter((signal) => normalizeConfidence(signal.economic_data_confidence) === "data_needed").length),
+  ];
+}
+
+function FilteredEconomicsEmpty({ onReset }: { onReset: () => void }) {
+  return (
+    <div className="grid gap-2 text-sm text-[var(--econ-muted)]">
+      <p>No records match the current filters.</p>
+      <button className="w-fit text-left font-semibold text-[var(--econ-gold)] hover:underline" onClick={onReset} type="button">Reset filters</button>
+    </div>
+  );
+}
+
 function signalSegment(signal: EconomicsParcelSignal): EconomicSegment {
-  if (economicSegmentOrder.includes(signal.economic_segment as EconomicSegment)) {
-    return signal.economic_segment as EconomicSegment;
+  const normalizedSegment = normalizeEconomicsText(signal.economic_segment, "");
+  const matchedSegment = economicSegmentOrder.find(
+    (segment) => segment.toLocaleLowerCase() === normalizedSegment.toLocaleLowerCase(),
+  );
+  if (matchedSegment) {
+    return matchedSegment;
   }
   const text = [
     signal.economic_status_band,
@@ -6588,14 +6646,8 @@ function signalSegment(signal: EconomicsParcelSignal): EconomicSegment {
 }
 
 function buildSegmentSummaryRows(
-  intelligence: EconomicsIntelligenceResponse | null,
   signals: EconomicsParcelSignal[],
 ): EconomicsSegmentSummary[] {
-  if (intelligence?.segment_summary?.length) {
-    return [...intelligence.segment_summary].sort(
-      (left, right) => economicSegmentIndex(left.segment) - economicSegmentIndex(right.segment),
-    );
-  }
   return economicSegmentOrder
     .flatMap((segment): EconomicsSegmentSummary[] => {
       const group = signals.filter((signal) => signalSegment(signal) === segment);
@@ -6639,11 +6691,8 @@ function medianNumber(values: Array<number | null | undefined>) {
 
 function filterWorkspaceSignals(
   signals: EconomicsParcelSignal[],
-  filters: {
+  filters: EconomicsFilterContext & {
     burdenBand: string;
-    dataConfidence: string;
-    geography: string;
-    opportunityClass: string;
   },
 ) {
   return filterEconomicSignals(signals, filters).filter(
