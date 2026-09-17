@@ -1,4 +1,5 @@
 import type { ManagementSection, OverviewCommandMode } from "@/types";
+import type { ManagementAnalysisPeriod } from "@/lib/managementAnalysis";
 import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
 import type { SelectedDevelopmentHotspotContext } from "@/types/map/developmentHotspots";
 
@@ -14,8 +15,13 @@ export type ManagementHandoffInsight =
 
 export interface ManagementHandoffContext {
   activeLayerIds?: string[];
+  analysisPeriod?: ManagementAnalysisPeriod;
   economicScenarioId?: string;
+  filter?: Record<string, string>;
+  fitExtent?: "countywide" | "results" | "selection";
   planningMode?: OverviewCommandMode;
+  selectionType?: "area" | "parcel-population" | "signal-band" | "hotspot";
+  selectionValue?: string;
   selectedHotspotContext?: SelectedDevelopmentHotspotContext;
   selectedHotspotId?: string;
   selectedParcelId?: string;
@@ -56,6 +62,13 @@ export function createManagementHandoffUrl(context: ManagementHandoffContext) {
   if (context.selectedSignalId) params.set("signal", context.selectedSignalId);
   if (context.economicScenarioId) params.set("economicScenario", context.economicScenarioId);
   if (context.activeLayerIds?.length) params.set("layers", context.activeLayerIds.join(","));
+  if (context.analysisPeriod?.startDate) params.set("periodFrom", context.analysisPeriod.startDate);
+  if (context.analysisPeriod?.endDate) params.set("periodTo", context.analysisPeriod.endDate);
+  if (context.analysisPeriod?.preset) params.set("periodRange", context.analysisPeriod.preset);
+  if (context.selectionType) params.set("selection", context.selectionType);
+  if (context.selectionValue) params.set("selectionValue", context.selectionValue);
+  if (context.fitExtent) params.set("fit", context.fitExtent);
+  if (context.filter && Object.keys(context.filter).length) params.set("filter", JSON.stringify(context.filter));
   return `/?${params.toString()}`;
 }
 

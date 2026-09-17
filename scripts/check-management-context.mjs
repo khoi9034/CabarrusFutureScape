@@ -7,6 +7,7 @@ import {
   managementKpis,
   readManagementPeriodFromSearch,
 } from "../src/lib/managementAnalysis.ts";
+import { createManagementHandoffUrl, readManagementHandoff } from "../src/lib/managementHandoff.ts";
 
 const coverage = { startDate: "1986-12-01", endDate: "2025-12-31" };
 const recent = createManagementPeriod("past-3-years", coverage);
@@ -27,6 +28,22 @@ assert.equal(
   managementDetailUrl("planning-insights", "permit-activity", recent),
   "/?from=2023-01-01&to=2025-12-31&range=past-3-years&app=management&section=planning-insights&focus=permit-activity",
 );
+const handoff = {
+  analysisPeriod: recent,
+  filter: { population: "active_development_parcels" },
+  fitExtent: "results",
+  selectionType: "parcel-population",
+  selectionValue: "active_development_parcels",
+  sourceInsightType: "planning-constraints",
+  sourceManagementPage: "planning-insights",
+  targetWorkspace: "planning",
+};
+const handoffUrl = createManagementHandoffUrl(handoff);
+assert.match(handoffUrl, /from=management/);
+assert.match(handoffUrl, /periodFrom=2023-01-01/);
+assert.match(handoffUrl, /selection=parcel-population/);
+assert.match(handoffUrl, /filter=%7B%22population%22%3A%22active_development_parcels%22%7D/);
+assert.deepEqual(readManagementHandoff({ cfsManagementHandoff: handoff }, handoffUrl.slice(1))?.analysisPeriod, recent);
 
 const [coverageResponse, summaryResponse, hotspotsResponse, workspace, snapshots, demoAsk, repository, activityHook, hotspotHook] = await Promise.all([
   fetch("http://127.0.0.1:8000/development/activity-summary"),
@@ -53,6 +70,9 @@ assert.ok(hotspots.results.every((row) => row.first_permit_date >= "2023-01-01" 
 assert.match(workspace, /management_analysis_period: period\.label/);
 assert.match(workspace, /monthSpan <= 24 \? development\.byMonth : development\.byYear/);
 assert.match(workspace, /title="Reference context"/);
+assert.match(workspace, /actionLabel: "Inspect permits"/);
+assert.doesNotMatch(workspace, /title="Planning Watchlist"/);
+assert.match(workspace, /aria-label="Data sources"/);
 assert.match(workspace, /Fixed model bands · not permit-period filtered/);
 assert.match(workspace, /page_permit_records: development\.totalPermits/);
 assert.match(snapshots, /managementAnalysisPeriod/);

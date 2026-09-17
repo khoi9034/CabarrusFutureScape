@@ -30,6 +30,7 @@ export function DashboardUrlSync() {
     setScenarioId,
     setSimulationIntensity,
     setSimulationYear,
+    setManagementAnalysisPeriod,
     setEconomicsSection,
     setOverviewCommandMode,
     setSelectedDevelopmentHotspotContext,
@@ -76,6 +77,9 @@ export function DashboardUrlSync() {
       }
 
       if (handoff) {
+        if (handoff.analysisPeriod?.initialized) {
+          setManagementAnalysisPeriod(handoff.analysisPeriod);
+        }
         if (handoff.targetWorkspace === "economics") {
           setEconomicsSection("dashboard");
         } else {
@@ -161,6 +165,7 @@ export function DashboardUrlSync() {
     setPrintableViewMode,
     setReportIntent,
     setScenarioId,
+    setManagementAnalysisPeriod,
     setEconomicsSection,
     setOverviewCommandMode,
     setSelectedDevelopmentHotspotContext,

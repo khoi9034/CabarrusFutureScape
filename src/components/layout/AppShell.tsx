@@ -283,6 +283,11 @@ function ProductShell() {
             permit_segment: developmentHotspotControls.permitSegment,
             permit_year_end: developmentHotspotControls.permitYearEnd,
             permit_year_start: developmentHotspotControls.permitYearStart,
+            management_analysis_period: managementHandoff?.analysisPeriod?.label ?? null,
+            management_handoff_filter: managementHandoff?.filter ? JSON.stringify(managementHandoff.filter) : null,
+            management_handoff_selection: managementHandoff?.selectionValue ?? null,
+            management_handoff_selection_type: managementHandoff?.selectionType ?? null,
+            management_handoff_fit_extent: managementHandoff?.fitExtent ?? null,
             selected_feature_analysis_period:
               selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
             selected_feature_id:
