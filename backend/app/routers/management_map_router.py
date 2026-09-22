@@ -18,6 +18,7 @@ ManagementMapSelection = Literal[
     "flood-review",
     "flood-high-severe",
     "development-signals",
+    "development-signals-high",
     "development-signals-very-high",
 ]
 
@@ -28,6 +29,7 @@ _META = {
     "flood-review": ("Flood Review", "FEMA floodplain review context", "polygon"),
     "flood-high-severe": ("High / Severe Flood Review", "FEMA floodplain review context", "polygon"),
     "development-signals": ("Elevated Development Signals", "Development Signals model evidence", "polygon"),
+    "development-signals-high": ("High Development Signals", "Development Signals model evidence", "polygon"),
     "development-signals-very-high": ("Very High Development Signals", "Development Signals model evidence", "polygon"),
 }
 
@@ -122,11 +124,11 @@ def _selection_sql(selection: ManagementMapSelection) -> str:
               AND p.geometry IS NOT NULL AND NOT ST_IsEmpty(p.geometry)
         """
 
-    class_filter = (
-        "r.development_signal_class = 'very_high_development_signal'"
-        if selection == "development-signals-very-high"
-        else "r.development_signal_class IN ('very_high_development_signal', 'high_development_signal')"
-    )
+    class_filter = {
+        "development-signals": "r.development_signal_class IN ('very_high_development_signal', 'high_development_signal')",
+        "development-signals-high": "r.development_signal_class = 'high_development_signal'",
+        "development-signals-very-high": "r.development_signal_class = 'very_high_development_signal'",
+    }[selection]
     return f"""
         WITH latest AS (
           SELECT model_experiment_id

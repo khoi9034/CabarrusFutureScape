@@ -8099,9 +8099,11 @@ function getManagementMapSelection(
   if (!handoff || handoff.targetWorkspace !== "planning") return null;
   if (handoff.selectionType === "hotspot") return "hotspot";
   if (handoff.selectionType === "signal-band") {
-    return handoff.selectionValue === "very_high"
-      ? "development-signals-very-high"
-      : "development-signals";
+    const signalSelection = {
+      high: "development-signals-high",
+      very_high: "development-signals-very-high",
+    }[handoff.selectionValue ?? ""];
+    return signalSelection ?? "development-signals";
   }
   return {
     active_development_parcels: "active-development-parcels",

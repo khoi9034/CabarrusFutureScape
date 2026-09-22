@@ -290,6 +290,8 @@ function ProductShell() {
             management_handoff_fit_extent: managementHandoff?.fitExtent ?? null,
             management_handoff_feature_count: managementMapResult?.feature_count ?? null,
             management_handoff_record_count: managementMapResult?.record_count ?? null,
+            management_handoff_primary_result: managementHandoff?.primaryResult ?? null,
+            management_handoff_result_label: managementHandoff?.resultLabel ?? null,
             management_handoff_title: managementMapResult?.title ?? null,
             selected_feature_analysis_period:
               selectedDevelopmentHotspotContext?.analysisPeriod ?? null,

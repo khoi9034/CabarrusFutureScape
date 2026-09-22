@@ -98,8 +98,12 @@ export function DashboardUrlSync() {
               population === "permit_activity" ||
               handoff.selectionType === "hotspot",
           );
-          setFloodConstraintsEnabled(population === "flood_review");
-          setFloodZonesEnabled(population === "flood_review");
+          setFloodConstraintsEnabled(
+            population === "flood_review" || population === "flood_high_severe",
+          );
+          setFloodZonesEnabled(
+            population === "flood_review" || population === "flood_high_severe",
+          );
           setModelResearchOverlayEnabled(handoff.selectionType === "signal-band");
           if (handoff.selectedHotspotContext) {
             setSelectedDevelopmentHotspotContext(handoff.selectedHotspotContext);

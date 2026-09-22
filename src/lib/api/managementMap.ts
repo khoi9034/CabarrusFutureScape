@@ -7,6 +7,7 @@ export type ManagementMapSelection =
   | "flood-review"
   | "flood-high-severe"
   | "development-signals"
+  | "development-signals-high"
   | "development-signals-very-high";
 
 export interface ManagementMapResult {

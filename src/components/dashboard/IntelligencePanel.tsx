@@ -738,8 +738,8 @@ function OverviewModeContent({
           </h3>
           {managementMapResult ? (
             <div className="mt-2 space-y-1 text-sm text-slate-200">
-              <p>{managementMapResult.feature_count.toLocaleString()} matching {managementMapResult.geometry_kind === "point" ? "locations" : "parcels"}</p>
-              {managementMapResult.record_count !== managementMapResult.feature_count ? <p>{managementMapResult.record_count.toLocaleString()} permit records</p> : null}
+              <p>{(managementHandoff.primaryResult === "records" ? managementMapResult.record_count : managementMapResult.feature_count).toLocaleString()} {managementHandoff.resultLabel ?? (managementMapResult.geometry_kind === "point" ? "matching locations" : "matching parcels")}</p>
+              {managementMapResult.record_count !== managementMapResult.feature_count ? <p>{managementHandoff.primaryResult === "records" ? `${managementMapResult.feature_count.toLocaleString()} matching parcel locations` : `${managementMapResult.record_count.toLocaleString()} permit records`}</p> : null}
               {managementHandoff.analysisPeriod?.label ? <p>{managementHandoff.analysisPeriod.label}</p> : null}
               <p className="text-xs text-slate-400">Source: {managementMapResult.source}</p>
             </div>

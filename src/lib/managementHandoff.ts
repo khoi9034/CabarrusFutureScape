@@ -20,6 +20,8 @@ export interface ManagementHandoffContext {
   filter?: Record<string, string>;
   fitExtent?: "countywide" | "results" | "selection";
   planningMode?: OverviewCommandMode;
+  primaryResult?: "features" | "records";
+  resultLabel?: string;
   selectionType?: "area" | "parcel-population" | "signal-band" | "hotspot";
   selectionValue?: string;
   selectedHotspotContext?: SelectedDevelopmentHotspotContext;
@@ -30,6 +32,144 @@ export interface ManagementHandoffContext {
   sourceInsightType: ManagementHandoffInsight;
   sourceManagementPage: ManagementSection;
   targetWorkspace: "economics" | "planning";
+}
+
+export type ManagementKpiHandoffId =
+  | "activeDevelopmentParcels"
+  | "economicReview"
+  | "elevatedSignals"
+  | "floodHighSevere"
+  | "floodReview"
+  | "highSignals"
+  | "hotspot"
+  | "permitActivity"
+  | "veryHighSignals";
+
+type ManagementKpiHandoffDefinition = Omit<
+  ManagementHandoffContext,
+  "analysisPeriod" | "sourceManagementPage"
+> & {
+  label: string;
+  meaning: string;
+};
+
+export const managementKpiHandoffs = {
+  permitActivity: {
+    activeLayerIds: ["permit-activity"],
+    filter: { population: "permit_activity" },
+    label: "Permit Activity",
+    meaning: "Observed permit records in the selected Management analysis period.",
+    primaryResult: "records",
+    resultLabel: "permit records",
+    selectionType: "parcel-population",
+    selectionValue: "permit_activity",
+    sourceInsightType: "overview-planning-attention",
+    targetWorkspace: "planning",
+  },
+  activeDevelopmentParcels: {
+    activeLayerIds: ["permit-activity", "development-hotspots"],
+    filter: { population: "active_development_parcels" },
+    label: "Active Development Parcels",
+    meaning: "Unique parcels matched to observed permit records in the selected Management analysis period.",
+    primaryResult: "features",
+    resultLabel: "active development parcels",
+    selectionType: "parcel-population",
+    selectionValue: "active_development_parcels",
+    sourceInsightType: "overview-planning-attention",
+    targetWorkspace: "planning",
+  },
+  hotspot: {
+    planningMode: "countywide",
+    label: "Development Area",
+    meaning: "Observed permit records for the selected ranked development area.",
+    primaryResult: "records",
+    resultLabel: "permit records",
+    selectionType: "hotspot",
+    sourceInsightType: "planning-hotspot",
+    targetWorkspace: "planning",
+  },
+  floodReview: {
+    activeLayerIds: ["flood-risk", "fema-flood-zones"],
+    filter: { population: "flood_review" },
+    label: "Flood Review",
+    meaning: "Parcels requiring FEMA floodplain review context.",
+    primaryResult: "features",
+    resultLabel: "flood-review parcels",
+    selectionType: "parcel-population",
+    selectionValue: "flood_review",
+    sourceInsightType: "overview-constraints",
+    targetWorkspace: "planning",
+  },
+  floodHighSevere: {
+    activeLayerIds: ["flood-risk", "fema-flood-zones"],
+    filter: { population: "flood_high_severe" },
+    label: "High / Severe Flood Review",
+    meaning: "Flood-review parcels with High or Severe buildability impact.",
+    primaryResult: "features",
+    resultLabel: "high/severe flood-review parcels",
+    selectionType: "parcel-population",
+    selectionValue: "flood_high_severe",
+    sourceInsightType: "planning-constraints",
+    targetWorkspace: "planning",
+  },
+  elevatedSignals: {
+    activeLayerIds: ["development-signals"],
+    filter: { signalBand: "high,very_high" },
+    label: "Parcels With Elevated Historical Signals",
+    meaning: "Parcels in the High and Very High Development Signals bands.",
+    planningMode: "modelLab",
+    primaryResult: "features",
+    resultLabel: "parcels with elevated development signals",
+    selectionType: "signal-band",
+    selectionValue: "high,very_high",
+    sourceInsightType: "overview-development-signals",
+    targetWorkspace: "planning",
+  },
+  veryHighSignals: {
+    activeLayerIds: ["development-signals"],
+    filter: { signalBand: "very_high" },
+    label: "Very High Development Signals",
+    meaning: "Parcels in the Very High Development Signals band.",
+    planningMode: "modelLab",
+    primaryResult: "features",
+    resultLabel: "Very High development-signal parcels",
+    selectionType: "signal-band",
+    selectionValue: "very_high",
+    sourceInsightType: "overview-development-signals",
+    targetWorkspace: "planning",
+  },
+  highSignals: {
+    activeLayerIds: ["development-signals"],
+    filter: { signalBand: "high" },
+    label: "High Development Signals",
+    meaning: "Parcels in the High Development Signals band.",
+    planningMode: "modelLab",
+    primaryResult: "features",
+    resultLabel: "High development-signal parcels",
+    selectionType: "signal-band",
+    selectionValue: "high",
+    sourceInsightType: "overview-development-signals",
+    targetWorkspace: "planning",
+  },
+  economicReview: {
+    filter: { economicStatus: "high_opportunity" },
+    label: "Parcels Flagged for Economic Review",
+    meaning: "Parcels meeting the current high-opportunity economic screening criteria.",
+    primaryResult: "features",
+    resultLabel: "parcels flagged for economic review",
+    sourceInsightType: "economic-insights",
+    targetWorkspace: "economics",
+  },
+} as const satisfies Record<ManagementKpiHandoffId, ManagementKpiHandoffDefinition>;
+
+export function createManagementKpiHandoff(
+  id: ManagementKpiHandoffId,
+  analysisPeriod: ManagementAnalysisPeriod,
+  sourceManagementPage: ManagementSection,
+  overrides: Partial<ManagementHandoffContext> = {},
+): ManagementHandoffContext {
+  const { label: _label, meaning: _meaning, ...definition } = managementKpiHandoffs[id];
+  return { ...definition, ...overrides, analysisPeriod, sourceManagementPage };
 }
 
 const stateKey = "cfsManagementHandoff";
