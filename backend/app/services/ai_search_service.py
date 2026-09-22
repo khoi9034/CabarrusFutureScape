@@ -66,6 +66,14 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "experience",
         "management_section",
         "management_analysis_period",
+        "management_handoff_feature_count",
+        "management_handoff_inspect_next",
+        "management_handoff_meaning",
+        "management_handoff_primary_result",
+        "management_handoff_record_count",
+        "management_handoff_result_label",
+        "management_handoff_title",
+        "management_handoff_why_it_matters",
         "mode",
         "opportunity_class",
         "planning_mode",
@@ -653,6 +661,9 @@ def deterministic_answer(
 ) -> CfsAiSearchResponse:
     if safety_kind := classify_safety_query(request.query):
         return _safety_answer(request, context, safety_kind)
+
+    if handoff_response := _management_handoff_answer(request, context, domains):
+        return sanitize_response(handoff_response)
 
     if is_map_context_query(request) and request.map_context:
         return sanitize_response(_map_extent_answer(request, context, domains))
@@ -2662,6 +2673,36 @@ def _permit_answer_context(
         else "CFS does not have permit totals in the current compact context."
     )
     return detail, top_types, top_segments, top_geographies, total_records, active_parcels, total_sentence
+
+
+def _management_handoff_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    filters = safe_filter_context(request.filter_context)
+    title = filters.get("management_handoff_title")
+    if not title or "what am i looking" not in " ".join(request.query.lower().split()):
+        return None
+    primary = filters.get("management_handoff_primary_result")
+    count = filters.get("management_handoff_record_count") if primary == "records" else filters.get("management_handoff_feature_count")
+    label = filters.get("management_handoff_result_label") or "selected results"
+    period = filters.get("management_analysis_period")
+    meaning = filters.get("management_handoff_meaning") or "These are the Management-selected results now highlighted on the map."
+    why = filters.get("management_handoff_why_it_matters")
+    inspect_next = filters.get("management_handoff_inspect_next")
+    answer = f"You are viewing {_fmt(count)} {label} for {title}{f' during {period}' if period else ''}. {meaning}"
+    if why:
+        answer += f" {why}"
+    response = _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [_evidence(str(title), f"{_fmt(count)} {label}. {meaning}", "Management handoff", "available")],
+        [str(inspect_next)] if inspect_next else [],
+    )
+    return response
 
 
 def _management_answer(

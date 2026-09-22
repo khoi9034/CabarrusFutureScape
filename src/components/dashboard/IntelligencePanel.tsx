@@ -744,13 +744,14 @@ function OverviewModeContent({
               <p className="text-xs text-slate-400">Source: {managementMapResult.source}</p>
             </div>
           ) : null}
+          {managementHandoff.meaning ? <div className="mt-3 space-y-2 border-t border-white/10 pt-3 text-xs leading-5 text-slate-300"><p><span className="font-semibold text-white">What this means:</span> {managementHandoff.meaning}</p>{managementHandoff.whyItMatters ? <p><span className="font-semibold text-white">Why it matters:</span> {managementHandoff.whyItMatters}</p> : null}{managementHandoff.inspectNext ? <p><span className="font-semibold text-white">Inspect next:</span> {managementHandoff.inspectNext}</p> : null}</div> : null}
           <div className="mt-3 flex flex-wrap gap-2">
             <button className="rounded-md border border-white/15 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold text-slate-100 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={clearManagementResult} type="button">Clear highlight</button>
             <button className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={() => window.history.back()} type="button">Return to Management</button>
           </div>
         </section>
       ) : null}
-      {overviewCommandMode === "modelLab" ? (
+      {managementHandoff ? null : overviewCommandMode === "modelLab" ? (
         <ModelLabPanel
           canSaveSnapshot={planningSnapshotCanWrite}
           modelResearchOverlayEnabled={modelResearchOverlayEnabled}

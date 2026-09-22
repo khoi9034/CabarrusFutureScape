@@ -19,6 +19,8 @@ export interface ManagementHandoffContext {
   economicScenarioId?: string;
   filter?: Record<string, string>;
   fitExtent?: "countywide" | "results" | "selection";
+  inspectNext?: string;
+  meaning?: string;
   planningMode?: OverviewCommandMode;
   primaryResult?: "features" | "records";
   resultLabel?: string;
@@ -32,6 +34,7 @@ export interface ManagementHandoffContext {
   sourceInsightType: ManagementHandoffInsight;
   sourceManagementPage: ManagementSection;
   targetWorkspace: "economics" | "planning";
+  whyItMatters?: string;
 }
 
 export type ManagementKpiHandoffId =
@@ -50,7 +53,6 @@ type ManagementKpiHandoffDefinition = Omit<
   "analysisPeriod" | "sourceManagementPage"
 > & {
   label: string;
-  meaning: string;
 };
 
 export const managementKpiHandoffs = {
@@ -59,6 +61,8 @@ export const managementKpiHandoffs = {
     filter: { population: "permit_activity" },
     label: "Permit Activity",
     meaning: "Observed permit records in the selected Management analysis period.",
+    whyItMatters: "Shows the volume and distribution of recent observed development activity.",
+    inspectNext: "Review matching parcels, hotspots, and permit categories.",
     primaryResult: "records",
     resultLabel: "permit records",
     selectionType: "parcel-population",
@@ -71,6 +75,8 @@ export const managementKpiHandoffs = {
     filter: { population: "active_development_parcels" },
     label: "Active Development Parcels",
     meaning: "Unique parcels matched to observed permit records in the selected Management analysis period.",
+    whyItMatters: "Shows where recent development activity is distributed geographically.",
+    inspectNext: "Review zoning, flood, school, transportation, and utility context.",
     primaryResult: "features",
     resultLabel: "active development parcels",
     selectionType: "parcel-population",
@@ -82,6 +88,8 @@ export const managementKpiHandoffs = {
     planningMode: "countywide",
     label: "Development Area",
     meaning: "Observed permit records for the selected ranked development area.",
+    whyItMatters: "This area ranks highly because it has concentrated observed permit activity in the selected period.",
+    inspectNext: "Review zoning, flood, schools, and utilities in this area.",
     primaryResult: "records",
     resultLabel: "permit records",
     selectionType: "hotspot",
@@ -93,6 +101,8 @@ export const managementKpiHandoffs = {
     filter: { population: "flood_review" },
     label: "Flood Review",
     meaning: "Parcels requiring FEMA floodplain review context.",
+    whyItMatters: "This is screening context for parcel and development review, not a regulatory determination.",
+    inspectNext: "Review FEMA context, parcel details, and nearby development activity.",
     primaryResult: "features",
     resultLabel: "flood-review parcels",
     selectionType: "parcel-population",
@@ -105,6 +115,8 @@ export const managementKpiHandoffs = {
     filter: { population: "flood_high_severe" },
     label: "High / Severe Flood Review",
     meaning: "Flood-review parcels with High or Severe buildability impact.",
+    whyItMatters: "This is the higher-impact subset of the flood-review population.",
+    inspectNext: "Review FEMA context, parcel details, and nearby development activity.",
     primaryResult: "features",
     resultLabel: "high/severe flood-review parcels",
     selectionType: "parcel-population",
@@ -117,6 +129,8 @@ export const managementKpiHandoffs = {
     filter: { signalBand: "high,very_high" },
     label: "Parcels With Elevated Historical Signals",
     meaning: "Parcels in the High and Very High Development Signals bands.",
+    whyItMatters: "These are relative historical screening bands, not probabilities or development predictions.",
+    inspectNext: "Review parcel, zoning, transportation, and permit context.",
     planningMode: "modelLab",
     primaryResult: "features",
     resultLabel: "parcels with elevated development signals",
@@ -130,6 +144,8 @@ export const managementKpiHandoffs = {
     filter: { signalBand: "very_high" },
     label: "Very High Development Signals",
     meaning: "Parcels in the Very High Development Signals band.",
+    whyItMatters: "This is a relative historical screening band, not a probability or development prediction.",
+    inspectNext: "Review parcel, zoning, transportation, and permit context.",
     planningMode: "modelLab",
     primaryResult: "features",
     resultLabel: "Very High development-signal parcels",
@@ -143,6 +159,8 @@ export const managementKpiHandoffs = {
     filter: { signalBand: "high" },
     label: "High Development Signals",
     meaning: "Parcels in the High Development Signals band.",
+    whyItMatters: "This is a relative historical screening band, not a probability or development prediction.",
+    inspectNext: "Review parcel, zoning, transportation, and permit context.",
     planningMode: "modelLab",
     primaryResult: "features",
     resultLabel: "High development-signal parcels",
@@ -155,6 +173,8 @@ export const managementKpiHandoffs = {
     filter: { economicStatus: "high_opportunity" },
     label: "Parcels Flagged for Economic Review",
     meaning: "Parcels meeting the current high-opportunity economic screening criteria.",
+    whyItMatters: "This is a screening population for economic review, not an appraisal or recommendation.",
+    inspectNext: "Review parcel economics, zoning, and infrastructure context.",
     primaryResult: "features",
     resultLabel: "parcels flagged for economic review",
     sourceInsightType: "economic-insights",
@@ -168,7 +188,7 @@ export function createManagementKpiHandoff(
   sourceManagementPage: ManagementSection,
   overrides: Partial<ManagementHandoffContext> = {},
 ): ManagementHandoffContext {
-  const { label: _label, meaning: _meaning, ...definition } = managementKpiHandoffs[id];
+  const { label: _label, ...definition } = managementKpiHandoffs[id];
   return { ...definition, ...overrides, analysisPeriod, sourceManagementPage };
 }
 

@@ -293,6 +293,9 @@ function ProductShell() {
             management_handoff_primary_result: managementHandoff?.primaryResult ?? null,
             management_handoff_result_label: managementHandoff?.resultLabel ?? null,
             management_handoff_title: managementMapResult?.title ?? null,
+            management_handoff_meaning: managementHandoff?.meaning ?? null,
+            management_handoff_why_it_matters: managementHandoff?.whyItMatters ?? null,
+            management_handoff_inspect_next: managementHandoff?.inspectNext ?? null,
             selected_feature_analysis_period:
               selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
             selected_feature_id:
