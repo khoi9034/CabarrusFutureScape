@@ -92,6 +92,7 @@ import {
   getManagementMapResult,
   type ManagementMapSelection,
 } from "@/lib/api/managementMap";
+import { getManagementHandoffCameraTarget } from "@/lib/map/managementHandoffCamera";
 import {
   getDemoMapContext,
   type DemoGeoJsonFeature,
@@ -306,6 +307,7 @@ export function SceneViewContainer() {
   const floodZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const modelResearchPreviewLayerRef = useRef<GraphicsLayer | null>(null);
   const managementResultLayerRef = useRef<GraphicsLayer | null>(null);
+  const managementHandoffCameraKeyRef = useRef<string | null>(null);
   const modelResearchHeatmapLayerRef = useRef<FeatureLayer | null>(null);
   const modelResearchGoToKeyRef = useRef<string | null>(null);
   const schoolPressureLayerRef = useRef<GraphicsLayer | null>(null);
@@ -2015,6 +2017,7 @@ export function SceneViewContainer() {
       !view ||
       view.destroyed
     ) {
+      managementHandoffCameraKeyRef.current = null;
       return;
     }
 
@@ -2046,12 +2049,38 @@ export function SceneViewContainer() {
             ? { ...result, title: managementHandoff.selectedHotspotContext.areaLabel }
             : result;
         setManagementMapResult(displayResult);
-        const extent = getGraphicsExtent(graphics);
-        if (extent) {
+        const cameraKey = [
+          selection,
+          managementHandoff.analysisPeriod?.startDate ?? "",
+          managementHandoff.analysisPeriod?.endDate ?? "",
+          managementHandoff.selectedHotspotId ?? "",
+        ].join(":");
+        const target = getManagementHandoffCameraTarget(
+          graphics.flatMap((graphic) => {
+            const extent = graphic.geometry?.extent;
+            return extent
+              ? [
+                  {
+                    xmax: extent.xmax,
+                    xmin: extent.xmin,
+                    ymax: extent.ymax,
+                    ymin: extent.ymin,
+                  },
+                ]
+              : [];
+          }),
+          { featureCount: result.feature_count, selection },
+        );
+        if (target && managementHandoffCameraKeyRef.current !== cameraKey) {
+          managementHandoffCameraKeyRef.current = cameraKey;
           void view
-            .goTo(extent.expand(result.feature_count === 1 ? 2.2 : 1.12), {
-              duration: 500,
-            })
+            .goTo(
+              new runtime.Extent({
+                ...target.extent,
+                spatialReference: { wkid: 4326 },
+              }).expand(target.padding),
+              { duration: 500 },
+            )
             .catch(handleMapNavigationFailure);
         }
       })
@@ -8118,16 +8147,6 @@ function createManagementResultGraphic(
       type: "simple-fill",
     } as unknown as Graphic["symbol"],
   });
-}
-
-function getGraphicsExtent(graphics: Graphic[]) {
-  let extent: Extent | null = null;
-  for (const graphic of graphics) {
-    const graphicExtent = graphic.geometry?.extent;
-    if (!graphicExtent) continue;
-    extent = extent ? extent.union(graphicExtent) : graphicExtent.clone();
-  }
-  return extent;
 }
 
 function createParcelBoundaryGraphic(

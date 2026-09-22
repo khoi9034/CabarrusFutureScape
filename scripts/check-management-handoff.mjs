@@ -59,7 +59,7 @@ for (const selection of [
   assert.match(managementMapRouter, new RegExp(`"${selection}"`));
 }
 assert.match(mapRuntime, /cfs-management-result-layer/);
-assert.match(mapRuntime, /getGraphicsExtent\(graphics\)/);
+assert.match(mapRuntime, /getManagementHandoffCameraTarget/);
 assert.match(economicsRuntime, /managementFilter\?\.economicStatus === "high_opportunity"/);
 assert.match(economicsRuntime, /summary\.high_opportunity_count/);
 
