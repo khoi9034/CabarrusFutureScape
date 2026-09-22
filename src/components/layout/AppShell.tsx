@@ -64,7 +64,7 @@ import {
   readManagementHandoff,
   type ManagementHandoffContext,
 } from "@/lib/managementHandoff";
-import { emptyManagementAnalysisPeriod, readManagementPeriodFromSearch } from "@/lib/managementAnalysis";
+import { readManagementPeriodFromSearch } from "@/lib/managementAnalysis";
 import { cn } from "@/lib/utils";
 import type {
   CfsAppMode,
@@ -119,6 +119,7 @@ function ProductShell() {
     isMapFocusMode,
     cfsAppMode,
     overviewCommandMode,
+    managementMapResult,
     parcelReviewView,
     productMode,
     selectedDevelopmentHotspotContext,
@@ -211,16 +212,15 @@ function ProductShell() {
   }, []);
 
   useEffect(() => {
-    const syncManagementSection = (clearMissingPeriod = false) => {
+    const syncManagementSection = () => {
       const params = new URLSearchParams(window.location.search);
       const section = params.get("section");
       setManagementSectionState(isManagementSection(section) ? section : "overview");
       const period = readManagementPeriodFromSearch(window.location.search);
       if (period) setManagementAnalysisPeriod(period);
-      else if (clearMissingPeriod) setManagementAnalysisPeriod(emptyManagementAnalysisPeriod);
     };
     syncManagementSection();
-    const onPopState = () => syncManagementSection(true);
+    const onPopState = () => syncManagementSection();
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
@@ -288,6 +288,9 @@ function ProductShell() {
             management_handoff_selection: managementHandoff?.selectionValue ?? null,
             management_handoff_selection_type: managementHandoff?.selectionType ?? null,
             management_handoff_fit_extent: managementHandoff?.fitExtent ?? null,
+            management_handoff_feature_count: managementMapResult?.feature_count ?? null,
+            management_handoff_record_count: managementMapResult?.record_count ?? null,
+            management_handoff_title: managementMapResult?.title ?? null,
             selected_feature_analysis_period:
               selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
             selected_feature_id:

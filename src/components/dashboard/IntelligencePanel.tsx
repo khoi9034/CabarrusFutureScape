@@ -214,6 +214,8 @@ export function IntelligencePanel({
     activeLayers,
     developmentHotspotControls,
     managementAnalysisPeriod,
+    managementHandoff,
+    managementMapResult,
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
     floodZonesEnabled,
@@ -240,6 +242,8 @@ export function IntelligencePanel({
     schoolUtilizationZonesEnabled,
     setSelectedIndicatorCenterContext,
     setMapFocusMode,
+    setManagementHandoff,
+    setManagementMapResult,
     setOverviewCommandMode,
     setParcelReviewView,
     setPlanningSnapshotView,
@@ -261,6 +265,8 @@ export function IntelligencePanel({
         controllerOnly={controllerOnly}
         developmentHotspotControls={developmentHotspotControls}
         managementAnalysisPeriod={managementAnalysisPeriod}
+        managementHandoff={managementHandoff}
+        managementMapResult={managementMapResult}
         developmentHotspotsEnabled={developmentHotspotsEnabled}
         floodConstraintsEnabled={floodConstraintsEnabled}
         floodZonesEnabled={floodZonesEnabled}
@@ -283,6 +289,8 @@ export function IntelligencePanel({
         selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
         selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
         setMapFocusMode={setMapFocusMode}
+        setManagementHandoff={setManagementHandoff}
+        setManagementMapResult={setManagementMapResult}
         setOverviewCommandMode={setOverviewCommandMode}
         setPlanningSnapshotView={setPlanningSnapshotView}
         setProductMode={setProductMode}
@@ -354,6 +362,8 @@ function OverviewModeContent({
   controllerOnly,
   developmentHotspotControls,
   managementAnalysisPeriod,
+  managementHandoff,
+  managementMapResult,
   developmentHotspotsEnabled,
   floodConstraintsEnabled,
   floodZonesEnabled,
@@ -376,6 +386,8 @@ function OverviewModeContent({
   selectedModelResearchContext,
   selectedSchoolUtilizationZone,
   setMapFocusMode,
+  setManagementHandoff,
+  setManagementMapResult,
   setOverviewCommandMode,
   setSelectedIndicatorCenterContext,
   setProductMode,
@@ -386,6 +398,8 @@ function OverviewModeContent({
   controllerOnly: boolean;
   developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
   managementAnalysisPeriod: ReturnType<typeof useDashboardState>["managementAnalysisPeriod"];
+  managementHandoff: ReturnType<typeof useDashboardState>["managementHandoff"];
+  managementMapResult: ReturnType<typeof useDashboardState>["managementMapResult"];
   developmentHotspotsEnabled: boolean;
   floodConstraintsEnabled: boolean;
   floodZonesEnabled: boolean;
@@ -410,6 +424,8 @@ function OverviewModeContent({
   selectedModelResearchContext: ModelResearchPreviewMarker | null;
   selectedSchoolUtilizationZone: SelectedSchoolUtilizationZone | null;
   setMapFocusMode: ReturnType<typeof useDashboardState>["setMapFocusMode"];
+  setManagementHandoff: ReturnType<typeof useDashboardState>["setManagementHandoff"];
+  setManagementMapResult: ReturnType<typeof useDashboardState>["setManagementMapResult"];
   setOverviewCommandMode: ReturnType<typeof useDashboardState>["setOverviewCommandMode"];
   setSelectedIndicatorCenterContext: ReturnType<typeof useDashboardState>["setSelectedIndicatorCenterContext"];
   setProductMode: (mode: ProductMode) => void;
@@ -699,8 +715,41 @@ function OverviewModeContent({
     }
   }
 
+  function clearManagementResult() {
+    setManagementHandoff(null);
+    setManagementMapResult(null);
+    const params = new URLSearchParams(window.location.search);
+    for (const key of [
+      "filter", "fit", "from", "hotspot", "insight", "managementPage",
+      "periodFrom", "periodRange", "periodTo", "selection", "selectionValue", "signal",
+    ]) params.delete(key);
+    const state = { ...(window.history.state ?? {}) };
+    delete state.cfsManagementHandoff;
+    window.history.replaceState(state, "", `/?${params.toString()}`);
+  }
+
   return (
     <div className="space-y-4">
+      {managementHandoff ? (
+        <section className="rounded-xl border border-[#82c9d8]/35 bg-[#82c9d8]/[0.08] p-4" data-testid="management-handoff-result">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#9bd9e5]">Management handoff</p>
+          <h3 className="mt-1 text-base font-semibold text-white">
+            {managementMapResult?.title ?? "Loading selected results…"}
+          </h3>
+          {managementMapResult ? (
+            <div className="mt-2 space-y-1 text-sm text-slate-200">
+              <p>{managementMapResult.feature_count.toLocaleString()} matching {managementMapResult.geometry_kind === "point" ? "locations" : "parcels"}</p>
+              {managementMapResult.record_count !== managementMapResult.feature_count ? <p>{managementMapResult.record_count.toLocaleString()} permit records</p> : null}
+              {managementHandoff.analysisPeriod?.label ? <p>{managementHandoff.analysisPeriod.label}</p> : null}
+              <p className="text-xs text-slate-400">Source: {managementMapResult.source}</p>
+            </div>
+          ) : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button className="rounded-md border border-white/15 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold text-slate-100 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={clearManagementResult} type="button">Clear highlight</button>
+            <button className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={() => window.history.back()} type="button">Return to Management</button>
+          </div>
+        </section>
+      ) : null}
       {overviewCommandMode === "modelLab" ? (
         <ModelLabPanel
           canSaveSnapshot={planningSnapshotCanWrite}

@@ -54,7 +54,9 @@ import {
   type ManagementAnalysisPeriod,
 } from "@/lib/managementAnalysis";
 import { USE_DEMO_DATA } from "@/lib/api/client";
+import type { ManagementMapResult } from "@/lib/api/managementMap";
 import { isExploreCountywideMode } from "@/lib/gis/layerModeOwnership";
+import type { ManagementHandoffContext } from "@/lib/managementHandoff";
 import { dispatchParcelMapRefocusRequest } from "@/lib/map/parcelMapFocus";
 import { defaultIndicatorCenterGroupIds } from "@/data/intelligence/indicatorCenter";
 import type {
@@ -156,6 +158,8 @@ interface DashboardContextValue {
   dashboardUrlState: DashboardUrlState;
   developmentHotspotControls: DevelopmentHotspotControls;
   managementAnalysisPeriod: ManagementAnalysisPeriod;
+  managementHandoff: ManagementHandoffContext | null;
+  managementMapResult: ManagementMapResult | null;
   developmentHotspotLayer: DevelopmentHotspotLayerState;
   developmentHotspotsEnabled: boolean;
   floodConstraintLayer: FloodConstraintLayerState;
@@ -306,6 +310,8 @@ interface DashboardContextValue {
   setDashboardViewMode: (viewMode: DashboardViewMode) => void;
   setDevelopmentHotspotControls: Dispatch<SetStateAction<DevelopmentHotspotControls>>;
   setManagementAnalysisPeriod: Dispatch<SetStateAction<ManagementAnalysisPeriod>>;
+  setManagementHandoff: (handoff: ManagementHandoffContext | null) => void;
+  setManagementMapResult: (result: ManagementMapResult | null) => void;
   setDevelopmentHotspotsEnabled: (enabled: boolean) => void;
   setFloodConstraintsEnabled: (enabled: boolean) => void;
   setFloodZoneControls: (controls: FloodZoneControls) => void;
@@ -457,6 +463,10 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       return emptyManagementAnalysisPeriod;
     }
   });
+  const [managementHandoff, setManagementHandoff] =
+    useState<ManagementHandoffContext | null>(null);
+  const [managementMapResult, setManagementMapResult] =
+    useState<ManagementMapResult | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (managementAnalysisPeriod.initialized) window.sessionStorage.setItem(MANAGEMENT_PERIOD_STORAGE_KEY, JSON.stringify(managementAnalysisPeriod));
@@ -941,6 +951,8 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       dashboardUrlState,
       developmentHotspotControls,
       managementAnalysisPeriod,
+      managementHandoff,
+      managementMapResult,
       developmentHotspotLayer,
       developmentHotspotsEnabled,
       executiveBriefing,
@@ -1012,6 +1024,8 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       setDashboardViewMode,
       setDevelopmentHotspotControls,
       setManagementAnalysisPeriod,
+      setManagementHandoff,
+      setManagementMapResult,
       setDevelopmentHotspotsEnabled,
       setFloodConstraintsEnabled,
       setFloodZoneControls,
@@ -1095,6 +1109,8 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       dashboardUrlState,
       developmentHotspotControls,
       managementAnalysisPeriod,
+      managementHandoff,
+      managementMapResult,
       developmentHotspotLayer,
       developmentHotspotsEnabled,
       executiveBriefing,
@@ -1166,6 +1182,8 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       setDashboardViewMode,
       setDevelopmentHotspotControls,
       setManagementAnalysisPeriod,
+      setManagementHandoff,
+      setManagementMapResult,
       setDevelopmentHotspotsEnabled,
       setFloodConstraintsEnabled,
       setFloodZoneControls,

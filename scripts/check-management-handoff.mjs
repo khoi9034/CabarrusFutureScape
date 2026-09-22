@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   createManagementHandoffUrl,
   hasUnresolvedManagementTarget,
@@ -32,5 +33,34 @@ assert.equal(
   ),
   null,
 );
+
+const managementMapRouter = readFileSync(
+  new URL("../backend/app/routers/management_map_router.py", import.meta.url),
+  "utf8",
+);
+const mapRuntime = readFileSync(
+  new URL("../src/components/gis/SceneViewContainer.tsx", import.meta.url),
+  "utf8",
+);
+const economicsRuntime = readFileSync(
+  new URL("../src/components/economics/EconomicsShell.tsx", import.meta.url),
+  "utf8",
+);
+
+for (const selection of [
+  "active-development-parcels",
+  "permit-activity",
+  "hotspot",
+  "flood-review",
+  "flood-high-severe",
+  "development-signals",
+  "development-signals-very-high",
+]) {
+  assert.match(managementMapRouter, new RegExp(`"${selection}"`));
+}
+assert.match(mapRuntime, /cfs-management-result-layer/);
+assert.match(mapRuntime, /getGraphicsExtent\(graphics\)/);
+assert.match(economicsRuntime, /managementFilter\?\.economicStatus === "high_opportunity"/);
+assert.match(economicsRuntime, /summary\.high_opportunity_count/);
 
 console.log("PASS Management-to-Analyst handoff contract");

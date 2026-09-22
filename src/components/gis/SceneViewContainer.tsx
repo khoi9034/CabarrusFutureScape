@@ -89,6 +89,10 @@ import {
   USE_INTERACTIVE_MAP,
 } from "@/lib/api/client";
 import {
+  getManagementMapResult,
+  type ManagementMapSelection,
+} from "@/lib/api/managementMap";
+import {
   getDemoMapContext,
   type DemoGeoJsonFeature,
   type DemoGeoJsonGeometry,
@@ -96,6 +100,7 @@ import {
 } from "@/lib/demo-data/mapLayerClient";
 import { getDemoParcelById } from "@/lib/demo-data/client";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
+import type { ManagementHandoffContext } from "@/lib/managementHandoff";
 import type {
   ParcelMapFocus,
   ParcelMapFocusRequestEventDetail,
@@ -300,6 +305,7 @@ export function SceneViewContainer() {
   const floodConstraintLayerRef = useRef<GraphicsLayer | null>(null);
   const floodZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const modelResearchPreviewLayerRef = useRef<GraphicsLayer | null>(null);
+  const managementResultLayerRef = useRef<GraphicsLayer | null>(null);
   const modelResearchHeatmapLayerRef = useRef<FeatureLayer | null>(null);
   const modelResearchGoToKeyRef = useRef<string | null>(null);
   const schoolPressureLayerRef = useRef<GraphicsLayer | null>(null);
@@ -384,6 +390,7 @@ export function SceneViewContainer() {
     mapStatus,
     mapError,
     modelResearchOverlayEnabled,
+    managementHandoff,
     modelResearchViewMode,
     overviewCommandMode,
     selectedParcel,
@@ -399,6 +406,7 @@ export function SceneViewContainer() {
     setMapError,
     setMapStatus,
     setModelResearchMapSummary,
+    setManagementMapResult,
     setSelectedParcelIntelligence,
     setSelectedDevelopmentHotspotContext,
     setSelectedModelResearchContext,
@@ -1329,6 +1337,8 @@ export function SceneViewContainer() {
         modelResearchPreviewLayerRef.current =
           createModelResearchPreviewLayer(runtime);
         map.add(modelResearchPreviewLayerRef.current);
+        managementResultLayerRef.current = createManagementResultLayer(runtime);
+        map.add(managementResultLayerRef.current);
         focusLayerRef.current = createParcelFocusLayer(runtime);
         map.add(focusLayerRef.current);
         layerRefs.current = layers;
@@ -1827,6 +1837,8 @@ export function SceneViewContainer() {
       floodZoneLayerRef.current = null;
       modelResearchPreviewLayerRef.current?.removeAll();
       modelResearchPreviewLayerRef.current = null;
+      managementResultLayerRef.current?.removeAll();
+      managementResultLayerRef.current = null;
       modelResearchGoToKeyRef.current = null;
       removeFeatureLayerFromView(localView, modelResearchHeatmapLayerRef.current);
       modelResearchHeatmapLayerRef.current = null;
@@ -1982,6 +1994,77 @@ export function SceneViewContainer() {
     arcGisViewState,
     modelResearchRenderTick,
     setSelectedDevelopmentHotspotContext,
+  ]);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+    const layer = managementResultLayerRef.current;
+    const selection = getManagementMapSelection(managementHandoff);
+
+    layer?.removeAll();
+    if (layer) layer.visible = false;
+    setManagementMapResult(null);
+    if (
+      USE_DEMO_DATA ||
+      !selection ||
+      !managementHandoff ||
+      managementHandoff.targetWorkspace !== "planning" ||
+      arcGisViewState !== "ready" ||
+      !runtime ||
+      !view ||
+      view.destroyed
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+    void getManagementMapResult(
+      {
+        end_date: managementHandoff.analysisPeriod?.endDate ?? undefined,
+        selected_parcel:
+          selection === "hotspot"
+            ? managementHandoff.selectedHotspotId
+            : undefined,
+        selection,
+        start_date: managementHandoff.analysisPeriod?.startDate ?? undefined,
+      },
+      { signal: controller.signal },
+    )
+      .then((result) => {
+        if (controller.signal.aborted || view.destroyed) return;
+        const resultLayer = ensureManagementResultLayer(runtime, view);
+        managementResultLayerRef.current = resultLayer;
+        resultLayer.removeAll();
+        const graphics = result.features
+          .map((feature) => createManagementResultGraphic(runtime, feature))
+          .filter((graphic): graphic is Graphic => Boolean(graphic));
+        resultLayer.addMany(graphics);
+        resultLayer.visible = true;
+        const displayResult =
+          selection === "hotspot" && managementHandoff.selectedHotspotContext?.areaLabel
+            ? { ...result, title: managementHandoff.selectedHotspotContext.areaLabel }
+            : result;
+        setManagementMapResult(displayResult);
+        const extent = getGraphicsExtent(graphics);
+        if (extent) {
+          void view
+            .goTo(extent.expand(result.feature_count === 1 ? 2.2 : 1.12), {
+              duration: 500,
+            })
+            .catch(handleMapNavigationFailure);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) handleMapNavigationFailure(error);
+      });
+
+    return () => controller.abort();
+  }, [
+    arcGisViewState,
+    handleMapNavigationFailure,
+    managementHandoff,
+    setManagementMapResult,
   ]);
 
   useEffect(() => {
@@ -4086,6 +4169,16 @@ function ensureDevelopmentHotspotLayer(
   return hotspotLayer;
 }
 
+function ensureManagementResultLayer(runtime: ArcGISRuntime, view: SceneView) {
+  const map = view.map;
+  if (!map) throw new Error("MapView map is unavailable for Management results.");
+  const existingLayer = map.findLayerById("cfs-management-result-layer");
+  if (existingLayer) return existingLayer as GraphicsLayer;
+  const layer = createManagementResultLayer(runtime);
+  map.add(layer);
+  return layer;
+}
+
 function ensureFloodConstraintLayer(runtime: ArcGISRuntime, view: SceneView) {
   const map = view.map;
 
@@ -6104,6 +6197,15 @@ function createDevelopmentHotspotAreaLabel(
   )} records`;
 }
 
+function createManagementResultLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    id: "cfs-management-result-layer",
+    listMode: "hide",
+    title: "Management Result",
+    visible: false,
+  });
+}
+
 function formatDevelopmentHotspotAnalysisPeriod(
   markers: DevelopmentHotspotMapMarker[],
 ) {
@@ -7960,6 +8062,72 @@ function getParcelFocusMarkerProfile(zoom: number) {
     outlineSize: 2,
     screenOffset: 50,
   };
+}
+
+function getManagementMapSelection(
+  handoff: ManagementHandoffContext | null,
+): ManagementMapSelection | null {
+  if (!handoff || handoff.targetWorkspace !== "planning") return null;
+  if (handoff.selectionType === "hotspot") return "hotspot";
+  if (handoff.selectionType === "signal-band") {
+    return handoff.selectionValue === "very_high"
+      ? "development-signals-very-high"
+      : "development-signals";
+  }
+  return {
+    active_development_parcels: "active-development-parcels",
+    flood_high_severe: "flood-high-severe",
+    flood_review: "flood-review",
+    permit_activity: "permit-activity",
+  }[handoff.filter?.population ?? ""] as ManagementMapSelection | null;
+}
+
+function createManagementResultGraphic(
+  runtime: ArcGISRuntime,
+  feature: {
+    geometry: { coordinates: unknown; type: "Point" | "Polygon" | "MultiPolygon" };
+    weight: number;
+  },
+) {
+  if (feature.geometry.type === "Point") {
+    const coordinates = feature.geometry.coordinates;
+    if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
+    return new runtime.Graphic({
+      attributes: { graphicRole: "management-result", weight: feature.weight },
+      geometry: new runtime.Point({
+        spatialReference: { wkid: 4326 },
+        x: Number(coordinates[0]),
+        y: Number(coordinates[1]),
+      }),
+      symbol: {
+        color: [245, 181, 61, 0.88],
+        outline: { color: [255, 245, 199, 0.95], width: 0.8 },
+        size: Math.min(18, 7 + Math.log2(Math.max(1, feature.weight)) * 2),
+        type: "simple-marker",
+      } as unknown as Graphic["symbol"],
+    });
+  }
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(feature.geometry);
+  if (!rings.length) return null;
+  return new runtime.Graphic({
+    attributes: { graphicRole: "management-result", weight: feature.weight },
+    geometry: new runtime.Polygon({ rings, spatialReference: { wkid: 4326 } }),
+    symbol: {
+      color: [67, 201, 184, 0.2],
+      outline: { color: [133, 255, 223, 0.86], width: 1.15 },
+      type: "simple-fill",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function getGraphicsExtent(graphics: Graphic[]) {
+  let extent: Extent | null = null;
+  for (const graphic of graphics) {
+    const graphicExtent = graphic.geometry?.extent;
+    if (!graphicExtent) continue;
+    extent = extent ? extent.union(graphicExtent) : graphicExtent.clone();
+  }
+  return extent;
 }
 
 function createParcelBoundaryGraphic(

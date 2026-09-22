@@ -58,6 +58,7 @@ export function EconomicsShell() {
   const {
     clearSelectedParcel,
     economicsSection,
+    managementHandoff,
     selectedParcelId,
     setEconomicsSection,
   } = useDashboardState();
@@ -471,6 +472,7 @@ export function EconomicsShell() {
         {activeEconomicsSection === "dashboard" ? (
           <EconomicDashboardPage
             intelligence={intelligence}
+            managementFilter={managementHandoff?.targetWorkspace === "economics" ? managementHandoff.filter : undefined}
             onClearParcel={clearSelectedParcel}
             selectedParcelId={selectedParcelId}
             signals={signals}
@@ -1200,12 +1202,14 @@ function ParcelEconomicContext({
 
 function EconomicDashboardPage({
   intelligence,
+  managementFilter,
   onClearParcel,
   selectedParcelId,
   signals,
   watchlist,
 }: {
   intelligence: EconomicsIntelligenceResponse | null;
+  managementFilter?: Record<string, string>;
   onClearParcel: () => void;
   selectedParcelId: string | null;
   signals: EconomicsParcelSignal[];
@@ -1224,10 +1228,22 @@ function EconomicDashboardPage({
     geography: selectedGeography,
     opportunityClass: selectedOpportunityClass,
   };
-  const filteredSignals = filterEconomicSignals(signals, economicsFilterContext);
+  const scopedSignals = managementFilter?.economicStatus === "high_opportunity"
+    ? signals.filter((signal) =>
+        typeof signal.value_per_acre === "number" &&
+        signal.value_per_acre < 150000 &&
+        typeof signal.acreage === "number" &&
+        signal.acreage >= 1 &&
+        typeof signal.assessed_value === "number",
+      )
+    : signals;
+  const filteredSignals = filterEconomicSignals(scopedSignals, economicsFilterContext);
   const filteredWatchlist = filteredSignals.filter(isEconomicWatchlistSignal);
   const filteredKpis = economicsKpisForSignals(filteredSignals, kpis);
   const filteredScenarios = intelligence?.scenario_outputs ?? [];
+  const scopedPopulationCount = managementFilter?.economicStatus === "high_opportunity"
+    ? intelligence?.summary.high_opportunity_count ?? scopedSignals.length
+    : filteredSignals.length;
   const segmentRows = buildSegmentSummaryRows(filteredSignals);
   const selectedSegmentRows =
     selectedSegment === "All"
@@ -1260,10 +1276,10 @@ function EconomicDashboardPage({
     landOpportunityRows,
     (signal) => signal.sewer_proxy_class ?? "Data Needed",
   );
-  const segmentOptions = ["All", ...uniqueValues(signals.map((signal) => signalSegment(signal)))];
-  const geographyOptions = ["All", ...uniqueValues(signals.map((signal) => normalizeEconomicsText(signal.geography_label, "Parcel context")))];
-  const opportunityOptions = ["All", ...uniqueValues(signals.map((signal) => normalizeEconomicsText(signal.opportunity_class, "Needs More Data Before Recommendation")))];
-  const confidenceOptions = ["All", ...uniqueValues(signals.map((signal) => normalizeConfidence(signal.economic_data_confidence)))];
+  const segmentOptions = ["All", ...uniqueValues(scopedSignals.map((signal) => signalSegment(signal)))];
+  const geographyOptions = ["All", ...uniqueValues(scopedSignals.map((signal) => normalizeEconomicsText(signal.geography_label, "Parcel context")))];
+  const opportunityOptions = ["All", ...uniqueValues(scopedSignals.map((signal) => normalizeEconomicsText(signal.opportunity_class, "Needs More Data Before Recommendation")))];
+  const confidenceOptions = ["All", ...uniqueValues(scopedSignals.map((signal) => normalizeConfidence(signal.economic_data_confidence)))];
   const summary = intelligence?.summary;
   const selectedParcelSignal = selectedParcelId
     ? signals.find((signal) => signal.parcel_id === selectedParcelId) ?? null
@@ -1280,13 +1296,16 @@ function EconomicDashboardPage({
       geography: selectedGeography,
       opportunity_class: selectedOpportunityClass,
       data_confidence: selectedDataConfidence,
-      filtered_signal_count: filteredSignals.length,
+      filtered_signal_count: scopedPopulationCount,
+      management_population_count: scopedPopulationCount,
+      filtered_detail_row_count: filteredSignals.length,
       filtered_watchlist_rows: filteredWatchlist.length,
       selected_parcel_id: selectedParcelId,
     }),
     [
       filteredSignals.length,
       filteredWatchlist.length,
+      scopedPopulationCount,
       selectedDataConfidence,
       selectedGeography,
       selectedOpportunityClass,
@@ -1302,6 +1321,13 @@ function EconomicDashboardPage({
         title="Economic Dashboard"
         text="Growth and tax-base intelligence with segment-aware visuals and slicers."
       />
+      {managementFilter?.economicStatus === "high_opportunity" ? (
+        <section className="rounded-2xl border border-[var(--econ-gold)]/35 bg-[var(--econ-gold)]/10 px-4 py-3" data-testid="management-economics-handoff">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-gold)]">Management handoff</p>
+          <p className="mt-1 text-sm text-[var(--econ-text)]">High-opportunity screening population · {formatNumber(scopedPopulationCount)} parcels</p>
+          <p className="mt-1 text-xs text-[var(--econ-muted)]">Charts use the {formatNumber(scopedSignals.length)} governed detail rows supplied by the current Economics response.</p>
+        </section>
+      ) : null}
       <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] px-4 py-3">
         <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
         {intelligence?.context_freshness ? (

@@ -31,6 +31,12 @@ export function DashboardUrlSync() {
     setSimulationIntensity,
     setSimulationYear,
     setManagementAnalysisPeriod,
+    setManagementHandoff,
+    setManagementMapResult,
+    setDevelopmentHotspotsEnabled,
+    setFloodConstraintsEnabled,
+    setFloodZonesEnabled,
+    setModelResearchOverlayEnabled,
     setEconomicsSection,
     setOverviewCommandMode,
     setSelectedDevelopmentHotspotContext,
@@ -58,6 +64,8 @@ export function DashboardUrlSync() {
       // throwing or reaching for production county services.
       const nextState = deserializeDashboardUrlState(currentSearch);
       const handoff = readManagementHandoff(window.history.state, currentSearch);
+      setManagementHandoff(handoff);
+      setManagementMapResult(null);
       setHandoffError(hasUnresolvedManagementTarget(currentSearch) && !handoff);
       const appMode = new URLSearchParams(currentSearch).get("app");
       if (
@@ -84,6 +92,15 @@ export function DashboardUrlSync() {
           setEconomicsSection("dashboard");
         } else {
           setOverviewCommandMode(handoff.planningMode ?? "countywide");
+          const population = handoff.filter?.population;
+          setDevelopmentHotspotsEnabled(
+            population === "active_development_parcels" ||
+              population === "permit_activity" ||
+              handoff.selectionType === "hotspot",
+          );
+          setFloodConstraintsEnabled(population === "flood_review");
+          setFloodZonesEnabled(population === "flood_review");
+          setModelResearchOverlayEnabled(handoff.selectionType === "signal-band");
           if (handoff.selectedHotspotContext) {
             setSelectedDevelopmentHotspotContext(handoff.selectedHotspotContext);
           }
@@ -166,6 +183,12 @@ export function DashboardUrlSync() {
     setReportIntent,
     setScenarioId,
     setManagementAnalysisPeriod,
+    setManagementHandoff,
+    setManagementMapResult,
+    setDevelopmentHotspotsEnabled,
+    setFloodConstraintsEnabled,
+    setFloodZonesEnabled,
+    setModelResearchOverlayEnabled,
     setEconomicsSection,
     setOverviewCommandMode,
     setSelectedDevelopmentHotspotContext,
@@ -213,7 +236,7 @@ export function DashboardUrlSync() {
       return;
     }
 
-    window.history.replaceState(null, "", createDashboardUrl(nextSearch));
+    window.history.replaceState(window.history.state, "", createDashboardUrl(nextSearch));
     lastHydratedSearchRef.current = nextSearch;
   }, [cfsAppMode, dashboardUrlState]);
 
