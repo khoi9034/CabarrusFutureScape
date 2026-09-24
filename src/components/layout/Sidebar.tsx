@@ -1,11 +1,6 @@
 "use client";
 
-import type {
-  KeyboardEvent as ReactKeyboardEvent,
-  PointerEvent as ReactPointerEvent,
-} from "react";
 import {
-  ArrowLeftRight,
   BookOpen,
   ChevronLeft,
   ChevronRight,
@@ -38,18 +33,14 @@ import {
 
 interface SidebarProps {
   collapsed?: boolean;
-  dragging?: boolean;
   embedded?: boolean;
-  onResizeStart?: (event: ReactPointerEvent) => void;
   onToggleCollapsed?: () => void;
   overviewCommandMode?: OverviewCommandMode;
 }
 
 export function Sidebar({
   collapsed = false,
-  dragging = false,
   embedded = false,
-  onResizeStart,
   onToggleCollapsed,
   overviewCommandMode = "parcel",
 }: SidebarProps) {
@@ -69,42 +60,19 @@ export function Sidebar({
       <aside
         aria-label={`Collapsed ${modeAwareCollapsedLabel} controls`}
         className={cn(
-          "app-chrome glass-panel cfs-layer-rail cfs-layer-rail--collapsed relative order-2 grid h-full min-h-[22rem] min-w-0 grid-rows-[auto_minmax(0,1fr)_auto] place-items-center overflow-visible rounded-lg p-2 md:max-h-none lg:order-1",
+          "app-chrome cfs-layer-rail cfs-layer-rail--collapsed relative order-2 h-full min-h-[22rem] min-w-0 overflow-visible md:max-h-none lg:order-1",
           embedded && "h-full order-none md:max-h-none lg:order-none",
-          dragging && "cfs-layer-rail--dragging",
         )}
       >
-        {!embedded ? (
-          <LayerRailEdgeHandle
-            collapsed
-            onPointerDown={onResizeStart}
-            onToggleCollapsed={onToggleCollapsed}
-          />
-        ) : null}
         <button
-          aria-label={`Expand ${modeAwareCollapsedLabel} panel`}
-          className="flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#9eeeff]"
+          aria-label="Expand map controls"
+          className="cfs-layer-rail-arrow group absolute left-2 top-4 z-30 inline-flex items-center justify-center text-slate-200 transition hover:text-[#f0cd79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
           onClick={onToggleCollapsed}
-          title={`Expand ${modeAwareCollapsedLabel} panel`}
+          title="Expand map controls"
           type="button"
         >
-          <CollapsedRailGlyph mode={overviewCommandMode} />
+          <ChevronRight className="h-4 w-4" />
         </button>
-        <button
-          aria-label={`Expand ${modeAwareCollapsedLabel} panel`}
-          className="flex h-full min-h-0 w-full items-center justify-center py-3"
-          onClick={onToggleCollapsed}
-          title={`Expand ${modeAwareCollapsedLabel} panel`}
-          type="button"
-        >
-          <span className="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-            {modeAwareCollapsedLabel}
-          </span>
-        </button>
-        <div
-          aria-hidden="true"
-          className="h-10 w-10 rounded-md border border-white/0"
-        />
       </aside>
     );
   }
@@ -116,15 +84,8 @@ export function Sidebar({
         "app-chrome glass-panel cfs-layer-rail relative z-20 order-2 flex h-full min-h-0 w-full min-w-0 flex-col overflow-visible rounded-lg lg:order-1",
         embedded &&
           "h-full order-none overflow-hidden border-white/10 bg-[#07111f]/90 md:max-h-none lg:order-none",
-        dragging && "cfs-layer-rail--dragging",
       )}
     >
-      {!embedded ? (
-        <LayerRailEdgeHandle
-          onPointerDown={onResizeStart}
-          onToggleCollapsed={onToggleCollapsed}
-        />
-      ) : null}
       <div className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto rounded-lg p-3 pr-3 lg:pr-4">
         <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
           <div className="min-w-0">
@@ -136,18 +97,10 @@ export function Sidebar({
             </h2>
           </div>
           <button
-            aria-label={
-              overviewCommandMode === "countywide"
-                ? "Collapse map controls"
-                : `Collapse ${modeAwareExpandedTitle}`
-            }
+            aria-label="Collapse map controls"
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f0cd79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
             onClick={onToggleCollapsed}
-            title={
-              overviewCommandMode === "countywide"
-                ? "Collapse map controls"
-                : `Collapse ${modeAwareExpandedTitle}`
-            }
+            title="Collapse map controls"
             type="button"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -155,36 +108,27 @@ export function Sidebar({
         </div>
 
         <div className="min-w-0 space-y-3 pr-1">
-          <ModeSpecificRailContent
-            mode={overviewCommandMode}
-            onCollapseDrawer={onToggleCollapsed}
-          />
+          <ModeSpecificRailContent mode={overviewCommandMode} />
         </div>
       </div>
     </aside>
   );
 }
 
-function ModeSpecificRailContent({
-  mode,
-  onCollapseDrawer,
-}: {
-  mode: OverviewCommandMode;
-  onCollapseDrawer?: () => void;
-}) {
+function ModeSpecificRailContent({ mode }: { mode: OverviewCommandMode }) {
   const { cfsAppMode } = useDashboardState();
   const economicsMode = cfsAppMode === "economics";
 
   if (economicsMode && mode === "modelLab") {
-    return <EconomicScenarioControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+    return <EconomicScenarioControlsPanel />;
   }
 
   if (economicsMode && mode === "countywide") {
-    return <EconomicsLayerControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+    return <EconomicsLayerControlsPanel />;
   }
 
   if (mode === "modelLab") {
-    return <ModelLabControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+    return <ModelLabControlsPanel />;
   }
 
   if (mode === "indicatorCenter") {
@@ -192,21 +136,17 @@ function ModeSpecificRailContent({
   }
 
   if (mode === "parcel") {
-    return <ParcelModeControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+    return <ParcelModeControlsPanel />;
   }
 
   if (mode === "snapshot") {
-    return <SnapshotModeControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+    return <SnapshotModeControlsPanel />;
   }
 
   return <LayerToggle />;
 }
 
-function EconomicsLayerControlsPanel({
-  onCollapseDrawer,
-}: {
-  onCollapseDrawer?: () => void;
-}) {
+function EconomicsLayerControlsPanel() {
   const layers = [
     {
       caveat: "Assessed value divided by acreage where fields are available.",
@@ -275,22 +215,11 @@ function EconomicsLayerControlsPanel({
         </section>
       ))}
 
-      <button
-        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
-        onClick={onCollapseDrawer}
-        type="button"
-      >
-        Collapse economic controls
-      </button>
     </div>
   );
 }
 
-function EconomicScenarioControlsPanel({
-  onCollapseDrawer,
-}: {
-  onCollapseDrawer?: () => void;
-}) {
+function EconomicScenarioControlsPanel() {
   const scenarios = [
     "Current Conditions",
     "Growth Continues As-Is",
@@ -329,42 +258,11 @@ function EconomicScenarioControlsPanel({
           </p>
         </section>
       ))}
-      <button
-        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
-        onClick={onCollapseDrawer}
-        type="button"
-      >
-        Collapse scenario controls
-      </button>
     </div>
   );
 }
 
-function CollapsedRailGlyph({ mode }: { mode: OverviewCommandMode }) {
-  if (mode === "modelLab") {
-    return <FlaskConical className="h-4 w-4" />;
-  }
-
-  if (mode === "indicatorCenter") {
-    return <Gauge className="h-4 w-4" />;
-  }
-
-  if (mode === "snapshot") {
-    return <Save className="h-4 w-4" />;
-  }
-
-  if (mode === "parcel") {
-    return <MapPin className="h-4 w-4" />;
-  }
-
-  return <Layers3 className="h-4 w-4" />;
-}
-
-function ParcelModeControlsPanel({
-  onCollapseDrawer,
-}: {
-  onCollapseDrawer?: () => void;
-}) {
+function ParcelModeControlsPanel() {
   const {
     planningSnapshot,
     planningSnapshotCanWrite,
@@ -469,22 +367,11 @@ function ParcelModeControlsPanel({
         </p>
       ) : null}
 
-      <button
-        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
-        onClick={onCollapseDrawer}
-        type="button"
-      >
-        Collapse parcel helper
-      </button>
     </div>
   );
 }
 
-function ModelLabControlsPanel({
-  onCollapseDrawer,
-}: {
-  onCollapseDrawer?: () => void;
-}) {
+function ModelLabControlsPanel() {
   const {
     modelResearchMapSummary,
     modelResearchOverlayEnabled,
@@ -663,13 +550,6 @@ function ModelLabControlsPanel({
           <BookOpen className="h-3.5 w-3.5" />
           Open Methodology Model Lab
         </button>
-        <button
-          className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
-          onClick={onCollapseDrawer}
-          type="button"
-        >
-          Collapse controls
-        </button>
       </div>
 
       <details className="cfs-command-card rounded-lg p-3">
@@ -684,11 +564,7 @@ function ModelLabControlsPanel({
   );
 }
 
-function SnapshotModeControlsPanel({
-  onCollapseDrawer,
-}: {
-  onCollapseDrawer?: () => void;
-}) {
+function SnapshotModeControlsPanel() {
   const {
     activeLayerIds,
     overviewCommandMode,
@@ -763,13 +639,6 @@ function SnapshotModeControlsPanel({
         type="button"
       >
         Open Snapshot Library
-      </button>
-      <button
-        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
-        onClick={onCollapseDrawer}
-        type="button"
-      >
-        Collapse helper
       </button>
     </div>
   );
@@ -912,81 +781,4 @@ function getExpandedRailTitle(mode: OverviewCommandMode, economicsMode = false) 
   }
 
   return economicsMode ? "Economic Layers" : "Map Controls";
-}
-
-function LayerRailEdgeHandle({
-  collapsed = false,
-  onPointerDown,
-  onToggleCollapsed,
-}: {
-  collapsed?: boolean;
-  onPointerDown?: (event: ReactPointerEvent) => void;
-  onToggleCollapsed?: () => void;
-}) {
-  function handleKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
-
-    event.preventDefault();
-    onToggleCollapsed?.();
-  }
-
-  if (!collapsed) {
-    return (
-      <>
-        <div
-          aria-hidden="true"
-          className="cfs-layer-rail-resize-zone absolute -right-1.5 top-2 bottom-2 z-20 hidden touch-none cursor-ew-resize lg:block"
-          onPointerDown={onPointerDown}
-          title="Drag to resize panel"
-        />
-        <div
-          aria-label="Drag to resize panel"
-          aria-orientation="vertical"
-          className={cn(
-            "cfs-layer-rail-arrow group absolute right-[-0.85rem] top-[44%] z-30 hidden -translate-y-1/2 touch-none cursor-ew-resize items-center justify-center lg:flex",
-          )}
-          onPointerDown={onPointerDown}
-          role="separator"
-          tabIndex={0}
-          title="Drag to resize panel"
-        >
-          <ArrowLeftRight className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
-        </div>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <div
-        aria-hidden="true"
-        className="cfs-layer-rail-resize-zone absolute -right-1.5 top-2 bottom-2 z-20 hidden touch-none cursor-col-resize lg:block"
-        onPointerDown={onPointerDown}
-        title={
-          collapsed
-            ? "Drag right to expand map layers"
-            : "Drag to resize map layers"
-        }
-      />
-      <button
-        aria-label="Expand map layers panel"
-        aria-pressed={collapsed}
-        className={cn(
-          "cfs-layer-rail-arrow group absolute right-[-0.85rem] top-1/2 z-30 hidden -translate-y-1/2 touch-none items-center justify-center lg:flex",
-        )}
-        onClick={(event) => {
-          event.stopPropagation();
-          onToggleCollapsed?.();
-        }}
-        onKeyDown={handleKeyDown}
-        onPointerDown={(event) => event.stopPropagation()}
-        title="Expand map layers panel"
-        type="button"
-      >
-        <ChevronRight className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
-      </button>
-    </>
-  );
 }

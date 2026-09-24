@@ -388,12 +388,6 @@ select:focus-visible {
   }
 }
 
-.cfs-resizing,
-.cfs-resizing * {
-  cursor: col-resize !important;
-  user-select: none !important;
-}
-
 .cfs-layer-rail {
   min-width: 0;
   box-shadow:
@@ -421,33 +415,6 @@ select:focus-visible {
 
 .cfs-layer-rail--collapsed {
   align-self: stretch;
-}
-
-.cfs-layer-rail-resize-zone {
-  width: 12px;
-}
-
-.cfs-layer-rail-resize-zone::before {
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(104, 216, 255, 0.22),
-    rgba(216, 184, 106, 0.18),
-    transparent
-  );
-  border-radius: 9999px;
-  content: "";
-  inset: 0 5px;
-  opacity: 0.32;
-  pointer-events: none;
-  position: absolute;
-  transition:
-    opacity 140ms ease,
-    background 140ms ease;
-}
-
-.cfs-layer-rail-resize-zone:hover::before {
-  opacity: 0.72;
 }
 
 .cfs-layer-rail-arrow {
@@ -478,11 +445,6 @@ select:focus-visible {
     0 0 18px rgba(216, 184, 106, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   opacity: 1;
-}
-
-.cfs-layer-rail--dragging,
-.cfs-layer-rail--dragging * {
-  transition-duration: 0ms !important;
 }
 
 .no-scrollbar {

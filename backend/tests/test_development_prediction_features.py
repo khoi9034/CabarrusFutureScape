@@ -1110,7 +1110,7 @@ def test_phase25b_qa1_overview_rail_and_intelligence_panel_layout() -> None:
     )[1].split(">", 1)[0]
 
 
-def test_phase25b_qa2_unified_left_panel_resize_and_layer_drawer_shell() -> None:
+def test_phase25b_qa2_fixed_left_panel_and_layer_drawer_shell() -> None:
     app_shell_text = (
         REPO_ROOT / "src" / "components" / "layout" / "AppShell.tsx"
     ).read_text(encoding="utf-8")
@@ -1131,18 +1131,14 @@ def test_phase25b_qa2_unified_left_panel_resize_and_layer_drawer_shell() -> None
         encoding="utf-8",
     )
 
-    assert "LEFT_PANEL_MIN_EXPANDED_WIDTH = 320" in app_shell_text
-    assert "LEFT_PANEL_MAX_EXPANDED_WIDTH = 520" in app_shell_text
-    assert "LEFT_PANEL_COLLAPSE_THRESHOLD = 210" in app_shell_text
-    assert "lastExpandedLayerRailWidth" in app_shell_text
+    assert "LEFT_PANEL_EXPANDED_WIDTH = 372" in app_shell_text
+    assert "LEFT_PANEL_COLLAPSED_WIDTH = 0" in app_shell_text
     assert 'setOverviewLayoutPanel("left", "collapsed");' in app_shell_text
-    assert "rawWidth <= LEFT_PANEL_COLLAPSE_THRESHOLD" in app_shell_text
     assert 'setOverviewLayoutPanel("left", "collapsed")' in app_shell_text
-    assert 'document.body.classList.add("cfs-resizing")' in app_shell_text
-    assert 'document.body.classList.remove("cfs-resizing")' in app_shell_text
+    assert "handleLayerRailResizeStart" not in app_shell_text
+    assert 'document.body.classList.add("cfs-resizing")' not in app_shell_text
     assert '"--desktop-rail-width"' in app_shell_text
-    assert "leftPanelCollapsed ? LEFT_PANEL_COLLAPSED_WIDTH : layerRailWidth" in app_shell_text
-    assert "LEFT_PANEL_COLLAPSED_WIDTH" in app_shell_text
+    assert "LEFT_PANEL_EXPANDED_WIDTH" in app_shell_text
     assert "onToggleCollapsed={toggleLayerRailCollapsed}" in app_shell_text
     explore_countywide_workflow = command_text.split(
         'actionLabel: "Explore Countywide"',
@@ -1152,12 +1148,14 @@ def test_phase25b_qa2_unified_left_panel_resize_and_layer_drawer_shell() -> None
     assert "BarChart3" not in command_text
 
     assert "getCollapsedRailLabel(overviewCommandMode)" in sidebar_text
-    assert "CollapsedRailGlyph" in sidebar_text
     assert "h-full min-h-0 w-full min-w-0 flex-col overflow-visible" in sidebar_text
     assert "overflow-x-hidden overflow-y-auto" in sidebar_text
     assert "Collapse map controls" in sidebar_text
-    assert "ArrowLeftRight" in sidebar_text
-    assert "Drag to resize panel" in sidebar_text
+    assert "Expand map controls" in sidebar_text
+    assert "ArrowLeftRight" not in sidebar_text
+    assert "Drag to resize" not in sidebar_text
+    assert "cfs-layer-rail-resize-zone" not in theme_text
+    assert "cfs-resizing" not in theme_text
     assert "Collapse map layers panel" not in sidebar_text
     assert "<LayerToggle />" in sidebar_text
     assert "ModelLabControlsPanel" in sidebar_text
@@ -1205,8 +1203,8 @@ def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:
     ).read_text(encoding="utf-8")
 
     assert 'setOverviewLayoutPanel("left", "collapsed");' in app_shell_text
-    assert "rawWidth <= LEFT_PANEL_COLLAPSE_THRESHOLD" in app_shell_text
-    assert '? "w-16 shadow-none"' in app_shell_text
+    assert "handleLayerRailResizeStart" not in app_shell_text
+    assert '? "w-0 shadow-none"' in app_shell_text
     assert ': "w-[min(22rem,calc(100vw-1.5rem))] shadow-2xl"' in app_shell_text
     assert "cfs-layer-rail-arrow" in sidebar_text
     assert "overflow-visible" in sidebar_text

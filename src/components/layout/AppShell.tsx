@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
   ArrowRight,
@@ -73,28 +72,14 @@ import type {
 } from "@/types";
 import type { CfsAiSearchRequest } from "@/types/api";
 
-const LEFT_PANEL_WIDTHS: Record<OverviewPanelWidthPreset, number> = {
-  compact: 320,
-  standard: 372,
-  wide: 456,
-};
-const LEFT_PANEL_COLLAPSED_WIDTH = 64;
-const LEFT_PANEL_MIN_EXPANDED_WIDTH = 320;
-const LEFT_PANEL_MAX_EXPANDED_WIDTH = 520;
-const LEFT_PANEL_COLLAPSE_THRESHOLD = 210;
+const LEFT_PANEL_EXPANDED_WIDTH = 372;
+const LEFT_PANEL_COLLAPSED_WIDTH = 0;
 
 const RIGHT_PANEL_WIDTHS: Record<OverviewPanelWidthPreset, number> = {
   compact: 320,
   standard: 390,
   wide: 460,
 };
-
-function clampLeftPanelWidth(width: number) {
-  return Math.min(
-    LEFT_PANEL_MAX_EXPANDED_WIDTH,
-    Math.max(LEFT_PANEL_MIN_EXPANDED_WIDTH, width),
-  );
-}
 
 export function AppShell({
   initialAppMode,
@@ -1144,13 +1129,6 @@ function StableOverviewWorkspace({
     setOverviewLayoutCommandCenter,
     setOverviewLayoutPanel,
   } = useDashboardState();
-  const [layerRailWidth, setLayerRailWidth] = useState(
-    LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
-  );
-  const [lastExpandedLayerRailWidth, setLastExpandedLayerRailWidth] = useState(
-    LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
-  );
-  const [draggingLayerRail, setDraggingLayerRail] = useState(false);
   const [parcelImageryOpen, setParcelImageryOpen] = useState(false);
   const compactLayoutAppliedRef = useRef<boolean | null>(null);
   const commandCenterHidden = overviewLayout.commandCenter === "hidden";
@@ -1184,21 +1162,6 @@ function StableOverviewWorkspace({
       compactViewport.removeEventListener("change", applyResponsiveLayout);
   }, [setOverviewLayoutPanel]);
 
-  useEffect(() => {
-    if (!draggingLayerRail) {
-      const frameId = window.requestAnimationFrame(() => {
-        const nextWidth = clampLeftPanelWidth(
-          LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
-        );
-
-        setLayerRailWidth(nextWidth);
-        setLastExpandedLayerRailWidth(nextWidth);
-      });
-
-      return () => window.cancelAnimationFrame(frameId);
-    }
-  }, [draggingLayerRail, overviewLayout.leftPanelWidth]);
-
   function requestMapResize() {
     window.requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
   }
@@ -1211,77 +1174,13 @@ function StableOverviewWorkspace({
     }
 
     if (leftPanelCollapsed) {
-      const nextWidth = clampLeftPanelWidth(lastExpandedLayerRailWidth);
-
-      setLayerRailWidth(nextWidth);
-      setLastExpandedLayerRailWidth(nextWidth);
       setOverviewLayoutPanel("left", "visible");
       requestMapResize();
       return;
     }
 
-    setLastExpandedLayerRailWidth(clampLeftPanelWidth(layerRailWidth));
     setOverviewLayoutPanel("left", "collapsed");
     requestMapResize();
-  }
-
-  function handleLayerRailResizeStart(event: ReactPointerEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    setDraggingLayerRail(true);
-    setOverviewLayoutPanel("left", "visible");
-    document.body.classList.add("cfs-resizing");
-
-    const startX = event.clientX;
-    const startWidth = clampLeftPanelWidth(
-      leftPanelCollapsed ? lastExpandedLayerRailWidth : layerRailWidth,
-    );
-    let latestWidth = startWidth;
-    let latestCollapsed = false;
-
-    setLayerRailWidth(startWidth);
-    setLastExpandedLayerRailWidth(startWidth);
-
-    function handlePointerMove(moveEvent: PointerEvent) {
-      const rawWidth = startWidth + moveEvent.clientX - startX;
-
-      if (rawWidth <= LEFT_PANEL_COLLAPSE_THRESHOLD) {
-        latestCollapsed = true;
-        setOverviewLayoutPanel("left", "collapsed");
-        window.dispatchEvent(new Event("resize"));
-        return;
-      }
-
-      if (latestCollapsed) {
-        setOverviewLayoutPanel("left", "visible");
-      }
-
-      latestCollapsed = false;
-      latestWidth = clampLeftPanelWidth(rawWidth);
-      setLayerRailWidth(latestWidth);
-      setLastExpandedLayerRailWidth(latestWidth);
-      window.dispatchEvent(new Event("resize"));
-    }
-
-    function handlePointerUp() {
-      setDraggingLayerRail(false);
-      document.body.classList.remove("cfs-resizing");
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-
-      if (latestCollapsed) {
-        setOverviewLayoutPanel("left", "collapsed");
-      } else {
-        setLayerRailWidth(latestWidth);
-        setLastExpandedLayerRailWidth(latestWidth);
-        setOverviewLayoutPanel("left", "visible");
-      }
-
-      requestMapResize();
-    }
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
   }
 
   return (
@@ -1313,19 +1212,19 @@ function StableOverviewWorkspace({
             className={cn(
               "absolute inset-y-0 left-0 z-[70] flex h-full min-h-0 shrink-0 overflow-visible transition-[width] duration-150 ease-out md:relative md:z-30 md:w-[var(--desktop-rail-width)] md:shadow-none",
               leftPanelCollapsed
-                ? "w-16 shadow-none"
+                ? "w-0 shadow-none"
                 : "w-[min(22rem,calc(100vw-1.5rem))] shadow-2xl",
             )}
             style={{
               "--desktop-rail-width": `${
-                leftPanelCollapsed ? LEFT_PANEL_COLLAPSED_WIDTH : layerRailWidth
+                leftPanelCollapsed
+                  ? LEFT_PANEL_COLLAPSED_WIDTH
+                  : LEFT_PANEL_EXPANDED_WIDTH
               }px`,
             } as CSSProperties}
           >
             <Sidebar
               collapsed={leftPanelCollapsed}
-              dragging={draggingLayerRail}
-              onResizeStart={handleLayerRailResizeStart}
               onToggleCollapsed={toggleLayerRailCollapsed}
               overviewCommandMode={overviewCommandMode}
             />

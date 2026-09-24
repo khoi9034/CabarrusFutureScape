@@ -111,7 +111,6 @@ export type OverviewPanelWidthPreset = "compact" | "standard" | "wide";
 export interface OverviewLayoutPreference {
   commandCenter: OverviewCommandCenterState;
   leftPanel: OverviewPanelVisibility;
-  leftPanelWidth: OverviewPanelWidthPreset;
   rightPanel: Exclude<OverviewPanelVisibility, "collapsed">;
   rightPanelWidth: OverviewPanelWidthPreset;
 }

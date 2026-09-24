@@ -365,7 +365,6 @@ function writeStoredCfsAppMode(mode: CfsAppMode) {
 const defaultOverviewLayout: OverviewLayoutPreference = {
   commandCenter: "visible",
   leftPanel: "collapsed",
-  leftPanelWidth: "standard",
   rightPanel: "visible",
   rightPanelWidth: "standard",
 };
@@ -414,9 +413,6 @@ function normalizeOverviewLayoutPreference(
     leftPanel: isOverviewPanelVisibility(value?.leftPanel)
       ? value.leftPanel
       : defaultOverviewLayout.leftPanel,
-    leftPanelWidth: isOverviewPanelWidthPreset(value?.leftPanelWidth)
-      ? value.leftPanelWidth
-      : defaultOverviewLayout.leftPanelWidth,
     rightPanel: isOverviewRightPanelVisibility(value?.rightPanel)
       ? value.rightPanel
       : defaultOverviewLayout.rightPanel,
