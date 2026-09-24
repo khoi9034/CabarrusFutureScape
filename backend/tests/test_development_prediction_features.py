@@ -1152,6 +1152,8 @@ def test_phase25b_qa2_fixed_left_panel_and_layer_drawer_shell() -> None:
     assert "overflow-x-hidden overflow-y-auto" in sidebar_text
     assert "Collapse map controls" in sidebar_text
     assert "Expand map controls" in sidebar_text
+    assert sidebar_text.count('right-[-1rem] top-1/2') == 2
+    assert "left-2 top-4" not in sidebar_text
     assert "ArrowLeftRight" not in sidebar_text
     assert "Drag to resize" not in sidebar_text
     assert "cfs-layer-rail-resize-zone" not in theme_text

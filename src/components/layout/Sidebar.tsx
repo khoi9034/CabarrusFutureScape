@@ -66,7 +66,7 @@ export function Sidebar({
       >
         <button
           aria-label="Expand map controls"
-          className="cfs-layer-rail-arrow group absolute left-2 top-4 z-30 inline-flex items-center justify-center text-slate-200 transition hover:text-[#f0cd79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
+          className="cfs-layer-rail-arrow group absolute right-[-1rem] top-1/2 z-30 inline-flex -translate-y-1/2 items-center justify-center text-[#f0cd79] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
           onClick={onToggleCollapsed}
           title="Expand map controls"
           type="button"
@@ -86,8 +86,17 @@ export function Sidebar({
           "h-full order-none overflow-hidden border-white/10 bg-[#07111f]/90 md:max-h-none lg:order-none",
       )}
     >
+      <button
+        aria-label="Collapse map controls"
+        className="cfs-layer-rail-arrow group absolute right-[-1rem] top-1/2 z-30 inline-flex -translate-y-1/2 items-center justify-center text-[#f0cd79] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
+        onClick={onToggleCollapsed}
+        title="Collapse map controls"
+        type="button"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
       <div className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto rounded-lg p-3 pr-3 lg:pr-4">
-        <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
+        <div className="mb-3 min-w-0">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase text-slate-500">
               Advanced
@@ -96,15 +105,6 @@ export function Sidebar({
               {modeAwareExpandedTitle}
             </h2>
           </div>
-          <button
-            aria-label="Collapse map controls"
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f0cd79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
-            onClick={onToggleCollapsed}
-            title="Collapse map controls"
-            type="button"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
         </div>
 
         <div className="min-w-0 space-y-3 pr-1">
