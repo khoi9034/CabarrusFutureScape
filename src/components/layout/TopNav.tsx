@@ -80,12 +80,12 @@ const productModes: Array<{
     title: "Explore County GIS layers, parcels, planning context, and development activity",
   },
   {
-    description: "Executive reports",
+    description: "Saved planning work",
     icon: FileSearch,
     id: "due_diligence",
-    label: "Snapshots",
-    shortLabel: "Snapshot",
-    title: "Saved analyses and views from Management and Analyst",
+    label: "Planning Files",
+    shortLabel: "Files",
+    title: "Reopen saved snapshots and generated planning packages",
   },
   {
     description: "Sources and caveats",

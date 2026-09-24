@@ -68,6 +68,7 @@ def test_project_snapshot_version_archive_and_restart_persist(
             "title": "Planning Snapshot report",
             "status": "Draft",
             "payload": {
+                "package_type": "planning_review",
                 "source_snapshot_id": snapshot["id"],
                 "selected_sections": {
                     "key_findings": True,
@@ -108,6 +109,7 @@ def test_project_snapshot_version_archive_and_restart_persist(
         ] == 2
         reopened_report = ProductService(reopened, planner).get("reports", report_draft["id"])
         assert reopened_report["report_type"] == "planning_snapshot_draft"
+        assert reopened_report["payload"]["package_type"] == "planning_review"
         assert reopened_report["payload"]["source_snapshot_id"] == snapshot["id"]
         assert reopened_report["payload"]["selected_sections"] == {
             "key_findings": True,

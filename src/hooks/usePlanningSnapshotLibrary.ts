@@ -131,7 +131,7 @@ export function usePlanningSnapshotLibrary() {
         setPersistence({
           message: IS_DEMO_MODE
             ? "Snapshots are stored for this browser session only."
-            : "Snapshot Library is current.",
+            : "Planning Files are current.",
           requestId: result.requestId,
           sessionOnly: IS_DEMO_MODE,
           status: "ready",
@@ -139,7 +139,7 @@ export function usePlanningSnapshotLibrary() {
       })
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
-          setFailure(error, "Snapshot Library could not be loaded.");
+          setFailure(error, "Planning Files could not be loaded.");
         }
       });
     return () => controller.abort();
@@ -329,8 +329,8 @@ export function usePlanningSnapshotLibrary() {
 
   const renamePlanningSnapshot = useCallback(
     (snapshotId: string, title: string) => {
-      const safeTitle = title.trim().slice(0, 240);
-      if (!safeTitle || snapshotId !== activePlanningSnapshotId) return;
+      const safeTitle = title.slice(0, 240);
+      if (!safeTitle.trim() || snapshotId !== activePlanningSnapshotId) return;
       updateActive((snapshot) => ({ ...snapshot, snapshotTitle: safeTitle }));
     },
     [activePlanningSnapshotId, updateActive],

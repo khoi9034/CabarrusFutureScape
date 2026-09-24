@@ -1140,7 +1140,7 @@ function IntelligenceBriefPanel({
           type="button"
         >
           <FileSearch className="h-3.5 w-3.5" />
-          Open Snapshots
+          Open Planning Files
         </button>
       </div>
 
@@ -1351,7 +1351,7 @@ function SnapshotCapturePanel({
           type="button"
         >
           <FileSearch className="h-3.5 w-3.5" />
-          Open Snapshot Library
+          Open Planning Files
         </button>
       </div>
     </section>
@@ -1770,7 +1770,7 @@ function IndicatorCenterPanel({
           type="button"
         >
           <FileSearch className="h-3.5 w-3.5" />
-          Open Snapshots
+          Open Planning Files
         </button>
       </div>
     </section>
@@ -2028,7 +2028,7 @@ function ModelLabPanel({
               type="button"
             >
               <FileSearch className="h-3.5 w-3.5" />
-              Open Snapshots
+              Open Planning Files
             </button>
           </div>
 
@@ -2219,7 +2219,7 @@ function ModelLabPanel({
               type="button"
             >
               <FileSearch className="h-3.5 w-3.5" />
-              Open Snapshots
+              Open Planning Files
             </button>
           ) : null}
           <button

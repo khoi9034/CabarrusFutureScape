@@ -9,6 +9,7 @@ import {
   FileText,
   History,
   MapPinned,
+  PackageOpen,
   Printer,
   Route,
   Save,
@@ -108,6 +109,7 @@ export function DueDiligenceReview({
     planningSnapshotHasUnsavedChanges,
     planningSnapshotLegacyNotice,
     planningSnapshotPersistence,
+    renamePlanningSnapshot,
     savePlanningSnapshotChanges,
     savedPlanningSnapshots,
     selectParcel,
@@ -121,6 +123,7 @@ export function DueDiligenceReview({
     setPlanningSnapshotNotes,
     setPlanningSnapshotView,
   } = useDashboardState();
+  const packageLibrary = usePlanningReportDrafts();
 
   function continueSnapshot(snapshotId: string) {
     const snapshot = savedPlanningSnapshots.find(
@@ -179,6 +182,7 @@ export function DueDiligenceReview({
       window.dispatchEvent(new PopStateEvent("popstate"));
     },
     onSaveChanges: savePlanningSnapshotChanges,
+    onRename: renamePlanningSnapshot,
     onSetNotes: setPlanningSnapshotNotes,
     onUse: (snapshotId) => {
       setActivePlanningSnapshot(snapshotId);
@@ -186,6 +190,7 @@ export function DueDiligenceReview({
     },
     persistence: planningSnapshotPersistence,
     snapshots: savedPlanningSnapshots,
+    packageLibrary,
   };
 
   return <PlanningSnapshotLibraryPanel {...snapshotLibraryProps} />;
@@ -985,6 +990,9 @@ function PlanningSnapshotReportBuilder({
       draftId,
       draftName,
       explainNumbers: showExplanationCards,
+      packageType: planningSnapshot.selectedParcelId
+        ? "parcel_review"
+        : "planning_review",
       reportNotes: reportNotes.trim(),
       reportTitle: reportTitle.trim() || DEFAULT_EXECUTIVE_REPORT_TITLE,
       selectedSections: getReportSectionSelectionSnapshot(
@@ -1639,12 +1647,14 @@ interface PlanningSnapshotLibraryProps {
   onContinue: (snapshotId: string) => void;
   onGoAnalyst: () => void;
   onGoManagement: () => void;
+  onRename: (snapshotId: string, title: string) => void;
   onSaveChanges: () => Promise<PlanningSnapshot | null>;
   onSetNotes: (notes: string) => void;
   onUse: (snapshotId: string) => void;
   persistence: ReturnType<
     typeof useDashboardState
   >["planningSnapshotPersistence"];
+  packageLibrary: ReturnType<typeof usePlanningReportDrafts>;
   snapshots: PlanningSnapshot[];
 }
 
@@ -1656,40 +1666,123 @@ function PlanningSnapshotLibraryPanel({
   onContinue,
   onGoAnalyst,
   onGoManagement,
+  onRename,
   onSaveChanges,
   onSetNotes,
   onUse,
   persistence,
+  packageLibrary,
   snapshots,
 }: PlanningSnapshotLibraryProps) {
-  const [filter, setFilter] = useState<"all" | "management" | "analyst">("all");
+  const [filter, setFilter] = useState<"all" | "snapshots" | "packages">("all");
   const [search, setSearch] = useState("");
   const [detailSnapshotId, setDetailSnapshotId] = useState<string | null>(null);
+  const [detailPackageId, setDetailPackageId] = useState<string | null>(null);
+  const [packageNotes, setPackageNotes] = useState("");
+  const [packageTitle, setPackageTitle] = useState("");
   const activeSnapshot = snapshots.find((snapshot) => snapshot.snapshotId === detailSnapshotId);
+  const activePackage = packageLibrary.drafts.find((item) => item.draftId === detailPackageId);
   const busy = persistence.status === "loading" || persistence.status === "saving";
+  const packageBusy = packageLibrary.persistence.status === "loading" || packageLibrary.persistence.status === "saving";
   const visibleSnapshots = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
     return snapshots.filter((snapshot) => {
-      if (filter !== "all" && getSnapshotSource(snapshot) !== filter) return false;
       return (
         !query ||
         getSnapshotLibraryTitle(snapshot).toLocaleLowerCase().includes(query) ||
         getSnapshotSubtype(snapshot).toLocaleLowerCase().includes(query) ||
         planningSnapshotSummary(snapshot).toLocaleLowerCase().includes(query) ||
+        snapshot.selectedParcelId?.toLocaleLowerCase().includes(query) ||
+        snapshot.selectedParcelSummary?.address.toLocaleLowerCase().includes(query) ||
         snapshot.notes?.toLocaleLowerCase().includes(query)
       );
     });
-  }, [filter, search, snapshots]);
+  }, [search, snapshots]);
+  const visiblePackages = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return packageLibrary.drafts.filter((item) => {
+      const sourceSnapshot = snapshots.find(
+        (snapshot) => snapshot.snapshotId === item.sourceSnapshotId,
+      );
+      return (
+        !query ||
+        item.draftName.toLocaleLowerCase().includes(query) ||
+        item.reportTitle.toLocaleLowerCase().includes(query) ||
+        getPlanningPackageType(item, sourceSnapshot).toLocaleLowerCase().includes(query) ||
+        item.reportNotes?.toLocaleLowerCase().includes(query)
+      );
+    });
+  }, [packageLibrary.drafts, search, snapshots]);
 
   const openDetail = (snapshotId: string, print = false) => {
     onUse(snapshotId);
+    setDetailPackageId(null);
     setDetailSnapshotId(snapshotId);
     if (print) window.setTimeout(() => window.print(), 50);
   };
 
+  const openPackage = (packageId: string, print = false) => {
+    const item = packageLibrary.drafts.find((draft) => draft.draftId === packageId);
+    if (!item) return;
+    packageLibrary.selectDraft(packageId);
+    setDetailSnapshotId(null);
+    setDetailPackageId(packageId);
+    setPackageTitle(item.draftName);
+    setPackageNotes(item.reportNotes ?? "");
+    if (print) window.setTimeout(() => window.print(), 50);
+  };
+
+  if (activePackage) {
+    const sourceSnapshot = snapshots.find(
+      (snapshot) => snapshot.snapshotId === activePackage.sourceSnapshotId,
+    );
+    const includedSections = Object.entries(activePackage.selectedSections)
+      .filter(([, included]) => included)
+      .map(([section]) => formatPlanningFileSection(section));
+    return (
+      <div className="space-y-4">
+        <div className="no-print flex flex-wrap items-center justify-between gap-3">
+          <button className="rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]" onClick={() => setDetailPackageId(null)} type="button">
+            Return to Planning Files
+          </button>
+          <div className="flex gap-2">
+            <button className="rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]" onClick={() => window.print()} type="button"><Printer className="mr-2 inline h-4 w-4" />Print Package</button>
+            <button className="rounded-md border border-rose-300/20 px-3 py-2 text-sm font-semibold text-rose-100 disabled:opacity-50" disabled={!packageLibrary.canWrite || packageBusy} onClick={() => { if (window.confirm("Delete this package?")) void packageLibrary.archiveDraft(activePackage.draftId).then((deleted) => { if (deleted) setDetailPackageId(null); }); }} type="button"><Trash2 className="mr-2 inline h-4 w-4" />Delete</button>
+          </div>
+        </div>
+        <article className="print-report rounded-xl border border-white/10 bg-[#07111f]/88 p-5 text-slate-100 print:border-0 print:bg-white print:p-0 print:text-slate-950" data-testid="planning-package-detail">
+          <header className="border-b border-white/10 pb-4 print:border-slate-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff] print:text-slate-600">{getPlanningPackageType(activePackage, sourceSnapshot)}</p>
+            <h1 className="mt-2 text-2xl font-semibold text-white print:text-slate-950">{activePackage.draftName}</h1>
+            <div className="mt-3 flex flex-wrap gap-3 text-sm text-slate-400 print:text-slate-700">
+              <span>Created {formatDateTime(activePackage.createdAt)}</span>
+              <span>Updated {formatDateTime(activePackage.updatedAt)}</span>
+              {sourceSnapshot ? <span>From {getSnapshotLibraryTitle(sourceSnapshot)}</span> : null}
+            </div>
+          </header>
+
+          <section className="mt-5">
+            <h2 className="text-base font-semibold text-white print:text-slate-950">Summary</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-300 print:text-slate-700">{activePackage.reportTitle}</p>
+            {sourceSnapshot ? <p className="mt-2 text-sm leading-6 text-slate-400 print:text-slate-700">{planningSnapshotSummary(sourceSnapshot)}</p> : null}
+          </section>
+
+          {includedSections.length ? <section className="mt-5"><h2 className="text-base font-semibold text-white print:text-slate-950">Included planning context</h2><ul className="mt-2 grid gap-2 text-sm text-slate-300 sm:grid-cols-2 print:text-slate-700">{includedSections.map((section) => <li className="rounded-md border border-white/10 px-3 py-2 print:border-slate-300" key={section}>{section}</li>)}</ul></section> : null}
+
+          <section className="mt-5">
+            <h2 className="text-base font-semibold text-white print:text-slate-950">File details</h2>
+            <label className="no-print mt-3 grid gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Title<input className="rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45" disabled={!packageLibrary.canWrite || packageBusy} maxLength={240} onChange={(event) => setPackageTitle(event.target.value)} value={packageTitle} /></label>
+            <label className="no-print mt-3 grid gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Notes<textarea className="min-h-28 rounded-md border border-white/10 bg-black/20 p-3 text-sm font-normal normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45" disabled={!packageLibrary.canWrite || packageBusy} maxLength={4000} onChange={(event) => setPackageNotes(event.target.value)} placeholder="Add notes for this package" value={packageNotes} /></label>
+            <p className="hidden whitespace-pre-wrap text-sm leading-6 text-slate-700 print:mt-2 print:block">{activePackage.reportNotes?.trim() || "No notes."}</p>
+            <button className="no-print mt-3 rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-3 py-2 text-sm font-semibold text-[#bdf6d1] disabled:opacity-50" disabled={!packageLibrary.canWrite || packageBusy || !packageTitle.trim()} onClick={() => void packageLibrary.saveDraft({ ...activePackage, draftName: packageTitle.trim(), reportNotes: packageNotes })} type="button"><Save className="mr-2 inline h-4 w-4" />Save Changes</button>
+          </section>
+        </article>
+      </div>
+    );
+  }
+
   if (activeSnapshot) {
-    const source = getSnapshotSource(activeSnapshot);
-    const sourceLabel = source === "management" ? "Management" : "Analyst";
+    const sourceLabel = getPlanningSnapshotFileType(activeSnapshot);
     const metrics = activeSnapshot.managementContext?.headlineMetrics.length
       ? activeSnapshot.managementContext.headlineMetrics
       : activeSnapshot.keyFacts;
@@ -1698,7 +1791,7 @@ function PlanningSnapshotLibraryPanel({
       <div className="space-y-4">
         <div className="no-print flex flex-wrap items-center justify-between gap-3">
           <button className="rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200" onClick={() => setDetailSnapshotId(null)} type="button">
-            Return to Snapshot Library
+            Return to Planning Files
           </button>
           <div className="flex gap-2">
             <button className="rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200" onClick={() => window.print()} type="button"><Printer className="mr-2 inline h-4 w-4" />Print Snapshot</button>
@@ -1711,8 +1804,8 @@ function PlanningSnapshotLibraryPanel({
             <h1 className="mt-2 text-2xl font-semibold text-white print:text-slate-950">{getSnapshotLibraryTitle(activeSnapshot)}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400 print:text-slate-700">
               <span className="rounded-full border border-[#9bd1de]/25 bg-[#9bd1de]/10 px-2.5 py-1 font-semibold text-[#bfe5ed] print:border-slate-400 print:bg-white print:text-slate-800">{sourceLabel}</span>
-              <span>{getSnapshotSubtype(activeSnapshot)}</span>
               <span>Created {formatDateTime(activeSnapshot.createdAt)}</span>
+              {activeSnapshot.updatedAt ? <span>Updated {formatDateTime(activeSnapshot.updatedAt)}</span> : null}
               {activeSnapshot.managementAnalysisPeriod ? <span>Analysis period: {activeSnapshot.managementAnalysisPeriod.label}</span> : null}
             </div>
           </header>
@@ -1725,10 +1818,11 @@ function PlanningSnapshotLibraryPanel({
           {activeSnapshot.activeLayers.length ? <section className="mt-5"><h2 className="text-base font-semibold text-white print:text-slate-950">Visible layers</h2><p className="mt-2 text-sm text-slate-300 print:text-slate-700">{activeSnapshot.activeLayers.join(", ")}</p></section> : null}
 
           <section className="mt-5">
-            <h2 className="text-base font-semibold text-white print:text-slate-950">Notes</h2>
-            <textarea className="no-print mt-2 min-h-28 w-full rounded-md border border-white/10 bg-black/20 p-3 text-sm text-white outline-none focus:border-[#68d8ff]/45" disabled={!canWrite || busy} maxLength={4000} onChange={(event) => onSetNotes(event.target.value)} placeholder="Add notes for this snapshot" value={activeSnapshot.notes ?? ""} />
+            <h2 className="text-base font-semibold text-white print:text-slate-950">File details</h2>
+            <label className="no-print mt-3 grid gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Title<input className="rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45" disabled={!canWrite || busy} maxLength={240} onChange={(event) => onRename(activeSnapshot.snapshotId, event.target.value)} value={getSnapshotLibraryTitle(activeSnapshot)} /></label>
+            <label className="no-print mt-3 grid gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Notes<textarea className="min-h-28 rounded-md border border-white/10 bg-black/20 p-3 text-sm font-normal normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45" disabled={!canWrite || busy} maxLength={4000} onChange={(event) => onSetNotes(event.target.value)} placeholder="Add notes for this snapshot" value={activeSnapshot.notes ?? ""} /></label>
             <p className="hidden whitespace-pre-wrap text-sm leading-6 text-slate-700 print:mt-2 print:block">{activeSnapshot.notes?.trim() || "No notes."}</p>
-            <button className="no-print mt-2 rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-3 py-2 text-sm font-semibold text-[#bdf6d1] disabled:opacity-50" data-testid="planning-snapshot-save-changes" disabled={!canWrite || busy || !hasUnsavedChanges} onClick={() => void onSaveChanges()} type="button"><Save className="mr-2 inline h-4 w-4" />Save Notes</button>
+            <button className="no-print mt-3 rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-3 py-2 text-sm font-semibold text-[#bdf6d1] disabled:opacity-50" data-testid="planning-snapshot-save-changes" disabled={!canWrite || busy || !hasUnsavedChanges} onClick={() => void onSaveChanges()} type="button"><Save className="mr-2 inline h-4 w-4" />Save Changes</button>
           </section>
         </article>
       </div>
@@ -1742,22 +1836,23 @@ function PlanningSnapshotLibraryPanel({
     >
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">Cabarrus Insights</p>
-        <h1 className="mt-1 text-2xl font-semibold text-white">Snapshots</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">Saved analyses and views from Management and Analyst.</p>
+        <h1 className="mt-1 text-2xl font-semibold text-white">Planning Files</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">Snapshots save where you were. Packages save what you produced.</p>
       </div>
 
-      {snapshots.length ? <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+      {snapshots.length || packageLibrary.drafts.length ? <div className="mt-5 flex flex-col gap-2 sm:flex-row">
         <input
-          aria-label="Search snapshots"
+          aria-label="Search Planning Files"
           className="min-w-0 flex-1 rounded-md border border-white/10 bg-black/22 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-[#68d8ff]/45"
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search snapshots..."
+          placeholder="Search by title or file type..."
           value={search}
         />
-        <div className="flex gap-1 rounded-md border border-white/10 bg-black/18 p-1">
-          {(["all", "management", "analyst"] as const).map((value) => (
+        <div aria-label="Planning File types" className="flex gap-1 rounded-md border border-white/10 bg-black/18 p-1" role="tablist">
+          {(["all", "snapshots", "packages"] as const).map((value) => (
             <button
-              aria-pressed={filter === value}
+              aria-controls="planning-files-list"
+              aria-selected={filter === value}
               className={cn(
                 "rounded px-3 py-1.5 text-xs font-semibold capitalize",
                 filter === value
@@ -1766,9 +1861,10 @@ function PlanningSnapshotLibraryPanel({
               )}
               key={value}
               onClick={() => setFilter(value)}
+              role="tab"
               type="button"
             >
-              {value === "all" ? "All" : value}
+              {value === "all" ? "All" : value === "snapshots" ? "Snapshots" : "Packages"}
             </button>
           ))}
         </div>
@@ -1794,8 +1890,23 @@ function PlanningSnapshotLibraryPanel({
         </p>
       ) : null}
 
-      {visibleSnapshots.length ? (
-        <div className="mt-4 grid gap-2">
+      {packageLibrary.legacyNotice ? (
+        <p className="mt-3 rounded-md border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs leading-5 text-amber-100">
+          {packageLibrary.legacyNotice}
+        </p>
+      ) : null}
+
+      {packageLibrary.persistence.status !== "ready" ? (
+        <div aria-live="polite" className="mt-3 rounded-md border border-white/10 bg-black/18 px-3 py-2 text-xs leading-5 text-slate-300" data-state={packageLibrary.persistence.status} role="status">
+          {packageLibrary.persistence.message}
+        </div>
+      ) : null}
+
+      <div className="mt-4 space-y-5" id="planning-files-list">
+      {filter !== "packages" && visibleSnapshots.length ? (
+        <section aria-labelledby="planning-files-snapshots-heading">
+          {filter === "all" ? <h2 className="mb-2 text-sm font-semibold text-slate-200" id="planning-files-snapshots-heading">Snapshots</h2> : null}
+          <div className="grid gap-2">
           {visibleSnapshots.map((snapshot) => {
             return (
               <article
@@ -1812,10 +1923,11 @@ function PlanningSnapshotLibraryPanel({
                           {getSnapshotLibraryTitle(snapshot)}
                         </p>
                         <p className="mt-1 truncate text-[11px] text-slate-500">
-                          {formatDateTime(snapshot.createdAt)}
+                          Created {formatDateTime(snapshot.createdAt)}
+                          {snapshot.updatedAt ? ` · Updated ${formatDateTime(snapshot.updatedAt)}` : ""}
                         </p>
                       </div>
-                      <div className="flex shrink-0 gap-2"><span className="rounded-full border border-[#9bd1de]/25 bg-[#9bd1de]/10 px-2 py-0.5 text-[10px] font-semibold text-[#bfe5ed]">{getSnapshotSource(snapshot) === "management" ? "Management" : "Analyst"}</span><span className="text-xs text-slate-500">{getSnapshotSubtype(snapshot)}</span></div>
+                      <div className="flex shrink-0 gap-2"><FileText className="h-4 w-4 text-[#9bd1de]" /><span className="rounded-full border border-[#9bd1de]/25 bg-[#9bd1de]/10 px-2 py-0.5 text-[10px] font-semibold text-[#bfe5ed]">{getPlanningSnapshotFileType(snapshot)}</span></div>
                     </div>
 
                     <p className="mt-2 text-sm leading-5 text-slate-300">
@@ -1842,29 +1954,59 @@ function PlanningSnapshotLibraryPanel({
                       >
                         Print
                       </button>
-                      <details className="relative"><summary className="cursor-pointer list-none rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300">More</summary><button className="absolute right-0 z-10 mt-1 inline-flex items-center gap-2 rounded-md border border-rose-300/18 bg-[#111827] px-3 py-2 text-xs font-semibold text-rose-100" data-testid="planning-snapshot-archive" disabled={!canWrite || busy} onClick={() => { if (window.confirm("Archive this snapshot?")) void onDelete(snapshot.snapshotId); }} type="button"><Trash2 className="h-3.5 w-3.5" />Archive</button></details>
+                      <details className="relative"><summary className="cursor-pointer list-none rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300">More</summary><button className="absolute right-0 z-10 mt-1 inline-flex items-center gap-2 rounded-md border border-rose-300/18 bg-[#111827] px-3 py-2 text-xs font-semibold text-rose-100" data-testid="planning-snapshot-archive" disabled={!canWrite || busy} onClick={() => { if (window.confirm("Delete this snapshot?")) void onDelete(snapshot.snapshotId); }} type="button"><Trash2 className="h-3.5 w-3.5" />Delete</button></details>
                     </div>
                   </div>
                 </div>
               </article>
             );
           })}
-        </div>
-      ) : (
+          </div>
+        </section>
+      ) : null}
+
+      {filter !== "snapshots" && visiblePackages.length ? (
+        <section aria-labelledby="planning-files-packages-heading">
+          {filter === "all" ? <h2 className="mb-2 text-sm font-semibold text-slate-200" id="planning-files-packages-heading">Packages</h2> : null}
+          <div className="grid gap-2">
+            {visiblePackages.map((item) => {
+              const sourceSnapshot = snapshots.find((snapshot) => snapshot.snapshotId === item.sourceSnapshotId);
+              return <article className="rounded-lg border border-white/10 bg-white/[0.035] p-3" data-package-id={item.draftId} data-testid="planning-package-card" key={item.draftId}>
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold text-white">{item.draftName}</p><p className="mt-1 text-[11px] text-slate-500">Created {formatDateTime(item.createdAt)} · Updated {formatDateTime(item.updatedAt)}</p></div><div className="flex shrink-0 items-center gap-2 text-xs text-slate-400"><PackageOpen className="h-4 w-4 text-[#d8b86a]" />{getPlanningPackageType(item, sourceSnapshot)}</div></div>
+                <p className="mt-2 text-sm leading-5 text-slate-300">{item.reportTitle}</p>
+                {sourceSnapshot ? <p className="mt-1 text-xs text-slate-500">From {getSnapshotLibraryTitle(sourceSnapshot)}</p> : null}
+                {item.reportNotes ? <p className="mt-2 truncate text-xs text-slate-400">{item.reportNotes}</p> : null}
+                <div className="mt-3 flex flex-wrap gap-2"><button className="rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2 text-xs font-semibold text-[#bdf6d1]" data-testid="planning-package-open" onClick={() => openPackage(item.draftId)} type="button">Open</button><button className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300" onClick={() => openPackage(item.draftId, true)} type="button">Print</button><details className="relative"><summary className="cursor-pointer list-none rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300">More</summary><button className="absolute right-0 z-10 mt-1 inline-flex items-center gap-2 rounded-md border border-rose-300/18 bg-[#111827] px-3 py-2 text-xs font-semibold text-rose-100" disabled={!packageLibrary.canWrite || packageBusy} onClick={() => { if (window.confirm("Delete this package?")) void packageLibrary.archiveDraft(item.draftId); }} type="button"><Trash2 className="h-3.5 w-3.5" />Delete</button></details></div>
+              </article>;
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {!((filter !== "packages" && visibleSnapshots.length) || (filter !== "snapshots" && visiblePackages.length)) ? (
         <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] p-6 text-center">
           <h2 className="text-lg font-semibold text-white">
-            {snapshots.length ? "No snapshots match your search" : "No saved snapshots yet."}
+            {search.trim()
+              ? "No Planning Files match your search."
+              : filter === "snapshots"
+                ? "No Snapshots saved yet."
+                : filter === "packages"
+                  ? "No Packages created yet."
+                  : "No Planning Files have been saved yet."}
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">
-            {snapshots.length
-              ? "Try a different search or view."
-              : "Save a snapshot from Management or Analyst to preserve the view, filters, map context, and analysis you are working with."}
+            {search.trim()
+              ? "Try a different title or file type."
+              : filter === "packages"
+                ? "Create a planning report from a saved Snapshot and it will appear here automatically."
+                : "Save a Snapshot from Management or Analyst to preserve the view, filters, map context, and analysis you are working with."}
           </p>
-          {!snapshots.length ? (
+          {!snapshots.length && !packageLibrary.drafts.length ? (
             <div className="mt-4 flex justify-center gap-2"><button className="rounded-md border border-[#55d38f]/30 bg-[#55d38f]/10 px-4 py-2 text-sm font-semibold text-[#bdf6d1]" onClick={onGoManagement} type="button">Go to Management</button><button className="rounded-md border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200" onClick={onGoAnalyst} type="button">Go to Analyst</button></div>
           ) : null}
         </div>
-      )}
+      ) : null}
+      </div>
     </section>
   );
 }
@@ -1898,6 +2040,33 @@ function getSnapshotLibraryTitle(snapshot: PlanningSnapshot) {
   }
 
   return snapshot.focusModeLabel ?? "Countywide Planning Snapshot";
+}
+
+function getPlanningSnapshotFileType(snapshot: PlanningSnapshot) {
+  if (snapshot.selectedParcelId) return "Parcel Review Snapshot";
+  return getSnapshotSource(snapshot) === "management"
+    ? "Management Snapshot"
+    : "Analyst Snapshot";
+}
+
+function getPlanningPackageType(
+  draft: PlanningSnapshotReportDraft,
+  sourceSnapshot?: PlanningSnapshot,
+) {
+  if (draft.packageType === "consultant_data") return "Consultant Data Package";
+  if (draft.packageType === "parcel_review" || sourceSnapshot?.selectedParcelId) {
+    return "Parcel Review Package";
+  }
+
+  return "Planning Review Package";
+}
+
+function formatPlanningFileSection(section: string) {
+  return section
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
 }
 
 function getSnapshotContextLabel(snapshot: PlanningSnapshot) {

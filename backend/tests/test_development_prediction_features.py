@@ -1235,7 +1235,7 @@ def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:
     assert "CFS_EXPAND_OVERVIEW_RAIL_EVENT" not in command_text
 
     assert "PlanningSnapshotReportBuilder" in snapshot_text
-    assert "Snapshot Library" in snapshot_text
+    assert "Planning Files" in snapshot_text
     assert "Report Drafts" in snapshot_text
     assert "usePlanningReportDrafts" in snapshot_text
     assert "getReportRepository" in report_drafts_text
@@ -1451,9 +1451,9 @@ def test_phase27a_navigation_refactor_overview_workspace_system() -> None:
     )[0]
     assert 'id: "overview"' not in planning_nav
     assert 'id: "workspace"' in top_nav_text
-    assert 'label: "Planning Snapshot"' in top_nav_text
+    assert 'label: "Planning Files"' in top_nav_text
     assert 'label: "Methodology"' in top_nav_text
-    assert "Live map workspace for countywide exploration and Model Lab" in top_nav_text
+    assert "Explore County GIS layers, parcels, planning context" in top_nav_text
     assert 'setProductMode("workspace")' in top_nav_text
     assert 'setOverviewCommandMode("parcel")' not in top_nav_text
     assert 'setOverviewCommandMode("countywide")' in top_nav_text

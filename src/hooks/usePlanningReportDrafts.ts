@@ -23,12 +23,18 @@ export type PlanningReportSectionKey =
   | "legend_map_notes"
   | PlanningSnapshotSectionKey;
 
+export type PlanningPackageType =
+  | "consultant_data"
+  | "parcel_review"
+  | "planning_review";
+
 export interface PlanningSnapshotReportDraft {
   clientDraftId?: string;
   createdAt: string;
   draftId: string;
   draftName: string;
   explainNumbers: boolean;
+  packageType?: PlanningPackageType;
   reportNotes?: string;
   reportTitle: string;
   selectedSections: Record<PlanningReportSectionKey, boolean>;
@@ -423,6 +429,7 @@ function reportDraftFromRecord(record: ReportRecord): PlanningSnapshotReportDraf
     draftId: record.id,
     draftName: record.title,
     explainNumbers: record.payload.explain_numbers === true,
+    packageType: planningPackageType(record.payload.package_type),
     reportNotes: text(record.payload.report_notes) ?? "",
     reportTitle: text(record.payload.report_title) ?? record.title,
     selectedSections: sections,
@@ -452,6 +459,7 @@ function reportPayload(draft: PlanningSnapshotReportDraft) {
   return toJsonObject({
     client_draft_id: draft.clientDraftId ?? draft.draftId,
     explain_numbers: draft.explainNumbers,
+    package_type: draft.packageType,
     report_notes: draft.reportNotes ?? "",
     report_title: draft.reportTitle,
     schema_version: "planning_snapshot_draft_v1",
@@ -489,4 +497,12 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function text(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function planningPackageType(value: unknown): PlanningPackageType | undefined {
+  return value === "consultant_data" ||
+    value === "parcel_review" ||
+    value === "planning_review"
+    ? value
+    : undefined;
 }
