@@ -55,6 +55,7 @@ import {
 } from "@/lib/managementAnalysis";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import type { ManagementMapResult } from "@/lib/api/managementMap";
+import type { CfsAskAgentResult } from "@/types/api";
 import { isExploreCountywideMode } from "@/lib/gis/layerModeOwnership";
 import type { ManagementHandoffContext } from "@/lib/managementHandoff";
 import { dispatchParcelMapRefocusRequest } from "@/lib/map/parcelMapFocus";
@@ -138,6 +139,7 @@ import {
 } from "@/types/map/schoolUtilizationZones";
 
 interface DashboardContextValue {
+  askAgentResult: CfsAskAgentResult | null;
   activeLayerIds: string[];
   activeLayers: OperationalLayer[];
   activeComparison: ScenarioComparison;
@@ -226,6 +228,7 @@ interface DashboardContextValue {
   isLayerActive: (layerId: string) => boolean;
   selectExecutiveNarrative: (narrativeId: string | null) => void;
   setActiveLayerIds: (layerIds: string[]) => void;
+  setAskAgentResult: (result: CfsAskAgentResult | null) => void;
   setBriefingMode: (mode: ExecutiveBriefingMode) => void;
   setComparisonPair: (pair: ScenarioComparisonPair) => void;
   setComparisonScenarioIds: (
@@ -463,6 +466,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     useState<ManagementHandoffContext | null>(null);
   const [managementMapResult, setManagementMapResult] =
     useState<ManagementMapResult | null>(null);
+  const [askAgentResult, setAskAgentResult] = useState<CfsAskAgentResult | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (managementAnalysisPeriod.initialized) window.sessionStorage.setItem(MANAGEMENT_PERIOD_STORAGE_KEY, JSON.stringify(managementAnalysisPeriod));
@@ -921,6 +925,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
 
   const value = useMemo(
     () => ({
+      askAgentResult,
       activeLayerIds,
       activeLayers,
       activeBriefingPacket,
@@ -1013,6 +1018,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       selectedParcelIntelligenceSource,
       selectedParcelSource,
       setActiveLayerIds,
+      setAskAgentResult,
       setBriefingMode,
       setComparisonPair,
       setComparisonScenarioIds,
@@ -1079,6 +1085,7 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       viewMode,
     }),
     [
+      askAgentResult,
       activeLayerIds,
       activeLayers,
       activeBriefingPacket,

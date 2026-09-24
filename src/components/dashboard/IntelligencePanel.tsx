@@ -212,6 +212,7 @@ export function IntelligencePanel({
 } = {}) {
   const {
     activeLayers,
+    askAgentResult,
     developmentHotspotControls,
     managementAnalysisPeriod,
     managementHandoff,
@@ -244,6 +245,7 @@ export function IntelligencePanel({
     setMapFocusMode,
     setManagementHandoff,
     setManagementMapResult,
+    setAskAgentResult,
     setOverviewCommandMode,
     setParcelReviewView,
     setPlanningSnapshotView,
@@ -261,6 +263,7 @@ export function IntelligencePanel({
     productMode === "workspace" ? (
       <OverviewModeContent
         activeLayers={activeLayers}
+        askAgentResult={askAgentResult}
         clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
         controllerOnly={controllerOnly}
         developmentHotspotControls={developmentHotspotControls}
@@ -291,6 +294,7 @@ export function IntelligencePanel({
         setMapFocusMode={setMapFocusMode}
         setManagementHandoff={setManagementHandoff}
         setManagementMapResult={setManagementMapResult}
+        setAskAgentResult={setAskAgentResult}
         setOverviewCommandMode={setOverviewCommandMode}
         setPlanningSnapshotView={setPlanningSnapshotView}
         setProductMode={setProductMode}
@@ -358,6 +362,7 @@ export function IntelligencePanel({
 
 function OverviewModeContent({
   activeLayers,
+  askAgentResult,
   clearSelectedSchoolUtilizationZone,
   controllerOnly,
   developmentHotspotControls,
@@ -388,12 +393,14 @@ function OverviewModeContent({
   setMapFocusMode,
   setManagementHandoff,
   setManagementMapResult,
+  setAskAgentResult,
   setOverviewCommandMode,
   setSelectedIndicatorCenterContext,
   setProductMode,
   setPlanningSnapshotView,
 }: {
   activeLayers: ReturnType<typeof useDashboardState>["activeLayers"];
+  askAgentResult: ReturnType<typeof useDashboardState>["askAgentResult"];
   clearSelectedSchoolUtilizationZone: () => void;
   controllerOnly: boolean;
   developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
@@ -426,6 +433,7 @@ function OverviewModeContent({
   setMapFocusMode: ReturnType<typeof useDashboardState>["setMapFocusMode"];
   setManagementHandoff: ReturnType<typeof useDashboardState>["setManagementHandoff"];
   setManagementMapResult: ReturnType<typeof useDashboardState>["setManagementMapResult"];
+  setAskAgentResult: ReturnType<typeof useDashboardState>["setAskAgentResult"];
   setOverviewCommandMode: ReturnType<typeof useDashboardState>["setOverviewCommandMode"];
   setSelectedIndicatorCenterContext: ReturnType<typeof useDashboardState>["setSelectedIndicatorCenterContext"];
   setProductMode: (mode: ProductMode) => void;
@@ -730,6 +738,28 @@ function OverviewModeContent({
 
   return (
     <div className="space-y-4">
+      {askAgentResult ? (
+        <section className="rounded-xl border border-[#68d8ff]/30 bg-[#68d8ff]/[0.07] p-4" data-testid="ask-agent-intelligence-result">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#9be9ff]">Ask Insights result</p>
+          <div className="mt-1 flex items-baseline justify-between gap-3">
+            <h3 className="text-base font-semibold text-white">Controlled GIS analysis</h3>
+            <span className="text-sm font-semibold text-white">{askAgentResult.count.toLocaleString()} parcels</span>
+          </div>
+          <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-300">
+            {askAgentResult.criteria.map((criterion) => <li key={criterion}>{criterion}</li>)}
+          </ul>
+          <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400" aria-label="GIS analysis activity">
+            {askAgentResult.execution_trace.map((step) => <li key={step}>✓ {step}</li>)}
+          </ul>
+          {askAgentResult.warning ? <p className="mt-2 text-xs leading-5 text-amber-100">{askAgentResult.warning}</p> : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button className="rounded-md border border-white/15 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold text-slate-100 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={() => { setAskAgentResult(null); setManagementMapResult(null); }} type="button">Clear result</button>
+            <button className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={openSnapshotDialog} type="button">Save Snapshot</button>
+            <button className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={() => { setPlanningSnapshotView("overview"); setProductMode("due_diligence"); }} type="button">Planning Files</button>
+            <button className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9bd1de]" onClick={() => document.querySelector<HTMLButtonElement>('[aria-label="Open Ask Insights"]')?.click()} type="button">Ask follow-up</button>
+          </div>
+        </section>
+      ) : null}
       {managementHandoff ? (
         <section className="rounded-xl border border-[#82c9d8]/35 bg-[#82c9d8]/[0.08] p-4" data-testid="management-handoff-result">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#9bd9e5]">Management handoff</p>

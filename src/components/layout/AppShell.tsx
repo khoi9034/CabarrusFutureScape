@@ -97,6 +97,7 @@ export function AppShell({
 function ProductShell() {
   const backendAvailability = useBackendAvailability();
   const {
+    askAgentResult,
     developmentHotspotControls,
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
@@ -114,6 +115,7 @@ function ProductShell() {
     selectedParcelIntelligenceSource,
     setMapFocusMode,
     setDevelopmentHotspotControls,
+    setAskAgentResult,
     setManagementAnalysisPeriod,
     setOverviewCommandMode,
     setOverviewLayoutCommandCenter,
@@ -132,12 +134,25 @@ function ProductShell() {
   const [managementAskContext, setManagementAskContext] =
     useState<CfsAiSearchRequest["filter_context"]>({});
   const askCfsModeRef = useRef(cfsAppMode);
+  const previousAskAgentResultRef = useRef<typeof askAgentResult>(null);
   const [masterDataAskContext, setMasterDataAskContext] =
     useState<CfsAiSearchRequest["filter_context"]>({ mode: "master_data" });
   const [parcelImageryAskContext, setParcelImageryAskContext] =
     useState<ParcelImageryAskContext | null>(null);
   const openAskCfs = useCallback(() => setAskCfsOpen(true), []);
   const executivePrintMode = productMode === "executive_print";
+  const applyAskAgentResult = useCallback((result: NonNullable<typeof askAgentResult>) => {
+    previousAskAgentResultRef.current = askAgentResult;
+    setAskAgentResult(result);
+  }, [askAgentResult, setAskAgentResult]);
+  const clearAskAgentResult = useCallback(() => {
+    previousAskAgentResultRef.current = askAgentResult;
+    setAskAgentResult(null);
+  }, [askAgentResult, setAskAgentResult]);
+  const undoAskAgentResult = useCallback(() => {
+    setAskAgentResult(previousAskAgentResultRef.current);
+    previousAskAgentResultRef.current = null;
+  }, [setAskAgentResult]);
   const parcelReviewMode =
     productMode === "due_diligence" || executivePrintMode;
   const effectiveParcelReviewView = executivePrintMode

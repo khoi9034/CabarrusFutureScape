@@ -12,6 +12,8 @@ export type CfsAiDomain =
   | "zoning";
 
 export interface CfsAiSearchRequest {
+  agent_mode?: "explain" | "assist" | "agent";
+  agent_result_id?: string | null;
   app_mode?: "economics" | "master-data" | "planning";
   conversation_context?: CfsAiConversationTurn[];
   filter_context?: Record<string, string | number | boolean | null | undefined>;
@@ -80,6 +82,7 @@ export interface CfsAiEvidenceItem {
 }
 
 export interface CfsAiDashboardActions {
+  agent_result?: CfsAskAgentResult | null;
   filter_watchlist?: {
     domain?: string | null;
     status?: string | null;
@@ -107,6 +110,19 @@ export interface CfsAiDashboardActions {
     end_year?: number | null;
     start_year?: number | null;
   } | null;
+}
+
+export interface CfsAskAgentResult {
+  count: number;
+  criteria: string[];
+  execution_trace: string[];
+  map_action: "clear" | "highlight_and_zoom" | "none" | "ready";
+  mode: "explain" | "assist" | "agent";
+  previous_result_id?: string | null;
+  result_id: string | null;
+  status: "cleared" | "executed" | "explained" | "unavailable";
+  tool_plan: string[];
+  warning?: string | null;
 }
 
 export interface CfsAiPowerBiActions {

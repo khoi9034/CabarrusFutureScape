@@ -17,6 +17,7 @@ import { toJsonObject } from "@/lib/product/json";
 import { getAskCfsConversationRepository } from "@/lib/product/runtimeRepository";
 import type { AskCfsMessageRecord, JsonObject, JsonValue } from "@/lib/product/types";
 import type {
+  CfsAskAgentResult,
   CfsAiConversationTurn,
   CfsAiMapContext,
   CfsAiSearchRequest,
@@ -40,6 +41,9 @@ export interface AskCfsPanelProps {
   inputId?: string;
   inputPlaceholderOverride?: string;
   mapAware?: boolean;
+  onAgentResultApply?: (result: CfsAskAgentResult) => void;
+  onAgentResultClear?: () => void;
+  onAgentResultUndo?: () => void;
   onWorkingChange?: (working: boolean) => void;
   onResponse?: (response: CfsAiSearchResponse) => void;
   suggestedPromptsOverride?: readonly string[];
@@ -75,6 +79,9 @@ export function AskCfsPanel({
   inputId = "ask-cfs-query",
   inputPlaceholderOverride,
   mapAware = false,
+  onAgentResultApply,
+  onAgentResultClear,
+  onAgentResultUndo,
   onWorkingChange,
   onResponse,
   suggestedPromptsOverride,
@@ -88,6 +95,8 @@ export function AskCfsPanel({
     status: principalStatus,
   } = useProductPrincipal();
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
+  const [agentMode, setAgentMode] = useState<"explain" | "assist" | "agent">("assist");
+  const [activeAgentResult, setActiveAgentResult] = useState<CfsAskAgentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingStage, setLoadingStage] = useState(0);
   const [contentScope, setContentScope] = useState("");
@@ -179,10 +188,12 @@ export function AskCfsPanel({
     setIsLoading(false);
     setLoadingScope("");
     setLastMapContext(null);
+    setActiveAgentResult(null);
+    onAgentResultClear?.();
     setPersistenceBusy(false);
     setPersistenceError(null);
     setPersistenceStatus(null);
-  }, [liveDataBlocked]);
+  }, [liveDataBlocked, onAgentResultClear]);
 
   useEffect(() => {
     if (activeScopeRef.current !== contextScopeKey) {
@@ -195,11 +206,13 @@ export function AskCfsPanel({
         setConversationId(null);
         setTurns([]);
         setAnswer(null);
+        setActiveAgentResult(null);
+        onAgentResultClear?.();
         setContentScope(contextScopeKey);
         setPersistenceRequestId(null);
       });
     }
-  }, [contextScopeKey]);
+  }, [contextScopeKey, onAgentResultClear]);
 
   useEffect(() => {
     if (liveDataBlocked) return;
@@ -459,12 +472,24 @@ export function AskCfsPanel({
           : undefined,
         mode: USE_DEMO_DATA ? "demo" : "live",
         interaction_mode: requestOverrides.interaction_mode ?? "freeform",
+        agent_mode: requestOverrides.agent_mode ?? agentMode,
+        agent_result_id: requestOverrides.agent_result_id ?? activeAgentResult?.result_id,
         map_context: mapContext,
         query: trimmedQuery,
       });
       if (requestId !== latestRequestId.current) return;
       const turn = toConversationTurn(trimmedQuery, response, mapContext?.view_signature);
       setAnswer(response);
+      const nextAgentResult = response.dashboard_actions.agent_result ?? null;
+      if (nextAgentResult?.status === "cleared") {
+        setActiveAgentResult(null);
+        onAgentResultClear?.();
+      } else if (nextAgentResult) {
+        setActiveAgentResult(nextAgentResult);
+        if (nextAgentResult.map_action === "highlight_and_zoom") {
+          onAgentResultApply?.(nextAgentResult);
+        }
+      }
       setTurns(
         [...scopedTurns, turn].slice(-5),
       );
@@ -521,11 +546,15 @@ export function AskCfsPanel({
     }
   }, [
     appMode,
+    activeAgentResult?.result_id,
+    agentMode,
     canUseAskCfs,
     contextScopeKey,
     filterContext,
     liveDataBlocked,
     onResponse,
+    onAgentResultApply,
+    onAgentResultClear,
     persistSafeTurn,
     persistenceBusy,
     query,
@@ -613,6 +642,8 @@ export function AskCfsPanel({
       pendingPersistenceRef.current = null;
       setTurns([]);
       setAnswer(null);
+      setActiveAgentResult(null);
+      onAgentResultClear?.();
       setError(null);
       setIsLoading(false);
       setLoadingScope("");
@@ -652,6 +683,26 @@ export function AskCfsPanel({
             {liveDataBlocked ? <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-amber-200">Live data unavailable</span> : null}
             {lastMapContext ? <span className="cfs-ask-context-chip">{lastMapContext.visible_layers.filter((layer) => layer.visible).length} active layers</span> : null}
             {lastMapContext?.selected_parcel_id ? <span className="cfs-ask-context-chip">Parcel selected</span> : null}
+          </div>
+        ) : null}
+        {mapAware && !USE_DEMO_DATA ? (
+          <div aria-label="Ask Insights analysis mode" className="flex gap-1" role="group">
+            {(["explain", "assist", "agent"] as const).map((mode) => (
+              <button
+                aria-pressed={agentMode === mode}
+                className={`rounded-md border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#68d8ff]/60 ${
+                  agentMode === mode
+                    ? "border-[#68d8ff]/45 bg-[#68d8ff]/15 text-[#c6f4ff]"
+                    : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
+                }`}
+                data-testid={`ask-cfs-agent-mode-${mode}`}
+                key={mode}
+                onClick={() => setAgentMode(mode)}
+                type="button"
+              >
+                {mode}
+              </button>
+            ))}
           </div>
         ) : null}
       </div>
@@ -786,6 +837,28 @@ export function AskCfsPanel({
 
       {scopedAnswer ? (
         <AskCfsAnswer question={lastTurn?.query ?? ""} response={scopedAnswer} />
+      ) : null}
+      {activeAgentResult?.status === "executed" ? (
+        <div className="mt-3 rounded-xl border border-[#68d8ff]/20 bg-[#68d8ff]/[0.06] p-3" data-testid="ask-cfs-agent-result">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9be9ff]">GIS result</p>
+            <p className="text-sm font-semibold text-white">{activeAgentResult.count.toLocaleString()} parcels</p>
+          </div>
+          <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-300">
+            {activeAgentResult.criteria.map((criterion) => <li key={criterion}>{criterion}</li>)}
+          </ul>
+          <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400" aria-label="GIS analysis activity">
+            {activeAgentResult.execution_trace.map((step) => <li key={step}>✓ {step}</li>)}
+          </ul>
+          {activeAgentResult.warning ? <p className="mt-2 text-xs leading-5 text-amber-100">{activeAgentResult.warning}</p> : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {activeAgentResult.map_action === "ready" ? (
+              <button className="rounded-md border border-[#68d8ff]/35 bg-[#68d8ff]/12 px-2.5 py-1.5 text-xs font-semibold text-[#c6f4ff]" onClick={() => onAgentResultApply?.(activeAgentResult)} type="button">Add to map</button>
+            ) : null}
+            <button className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-slate-300" onClick={onAgentResultUndo} type="button">Undo map action</button>
+            <button className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-slate-300" onClick={() => { setActiveAgentResult(null); onAgentResultClear?.(); }} type="button">Clear result</button>
+          </div>
+        </div>
       ) : null}
       </div>
 

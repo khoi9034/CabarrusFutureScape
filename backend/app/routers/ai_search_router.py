@@ -5,16 +5,17 @@ from __future__ import annotations
 import json
 import copy
 import logging
+import re
 import time
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.dependencies.database import get_optional_read_only_db
+from app.dependencies.database import get_optional_read_only_db, get_read_only_db
 from app.routers.economics_router import get_cached_economics_intelligence
 from app.routers.indicators_router import get_cached_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
@@ -24,6 +25,7 @@ from app.services.ai_search_service import (
     is_map_context_query,
     safe_filter_context,
 )
+from app.services.ask_gis_agent import result_map_payload, run_gis_agent, tool_registry
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
 LOGGER = logging.getLogger(__name__)
@@ -208,6 +210,38 @@ def search_cfs(
     """Answer CFS indicator questions from compact server-side context."""
 
     start = time.perf_counter()
+    agent_result = run_gis_agent(db, request)
+    if agent_result:
+        elapsed = int((time.perf_counter() - start) * 1000)
+        if agent_result.status == "cleared":
+            answer = "The Ask Insights analysis was cleared. Your other Analyst map work was not changed."
+        elif agent_result.status == "unavailable":
+            answer = agent_result.warning or "Live GIS analysis is unavailable."
+        elif agent_result.status == "explained":
+            answer = "I prepared a read-only GIS analysis plan. Explain mode did not query or change the map."
+        else:
+            answer = f"{agent_result.count:,} parcels match the screening criteria."
+            if agent_result.mode == "assist":
+                answer += " Review the criteria, then choose Add to map when ready."
+        return CfsAiSearchResponse(
+            answer=answer,
+            answer_mode="deterministic",
+            as_of=datetime.now(UTC).isoformat(),
+            caveats=[agent_result.warning] if agent_result.warning else [],
+            context_freshness="current_session",
+            dashboard_actions={"agent_result": agent_result},
+            data_source="local_live_backend",
+            data_mode=request.mode,
+            domains=["general"],
+            fallback_used=False,
+            provider="none",
+            provider_status="controlled_gis_tools",
+            provenance={"analysis_boundary": "read_only_fastapi", "geometry_in_ai_context": False},
+            related_layers=["Ask Insights Result"],
+            response_time_ms=elapsed,
+            suggested_actions=["Review criteria", "Add result to map", "Clear agent result"],
+            timings_ms={"agent_ms": elapsed, "total_ms": elapsed},
+        )
     context = gather_cfs_ai_context(db, request)
     context_ms = int((time.perf_counter() - start) * 1000)
     response = CfsAiSearchService(get_settings()).search(request, context)
@@ -224,6 +258,28 @@ def search_cfs(
         response.provider_status,
     )
     return response
+
+
+@router.get("/tools")
+def list_gis_tools() -> dict[str, object]:
+    """Describe the approved Ask Insights tools without implementation details."""
+
+    return {"tools": tool_registry(), "version": "ask-gis-agent-v1"}
+
+
+@router.get("/results/{result_id}/map")
+def get_gis_result_map(
+    result_id: str,
+    db: Session = Depends(get_read_only_db, scope="function"),
+) -> dict[str, Any]:
+    """Resolve an opaque temporary result into map-safe simplified geometry."""
+
+    if not re.fullmatch(r"ask_\d{8}_[0-9a-f]{10}", result_id):
+        raise HTTPException(status_code=404, detail="Ask Insights result is unavailable.")
+    payload = result_map_payload(db, result_id)
+    if not payload:
+        raise HTTPException(status_code=404, detail="Ask Insights result expired or is unavailable.")
+    return payload
 
 
 @router.get("/status")

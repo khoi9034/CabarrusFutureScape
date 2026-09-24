@@ -1,5 +1,7 @@
 import { apiGet, type ApiRequestOptions } from "@/lib/api/client";
 
+import type { CfsAskAgentResult } from "@/types/api";
+
 export type ManagementMapSelection =
   | "active-development-parcels"
   | "permit-activity"
@@ -8,7 +10,8 @@ export type ManagementMapSelection =
   | "flood-high-severe"
   | "development-signals"
   | "development-signals-high"
-  | "development-signals-very-high";
+  | "development-signals-very-high"
+  | "ask-agent-result";
 
 export interface ManagementMapResult {
   feature_count: number;
@@ -24,6 +27,17 @@ export interface ManagementMapResult {
   selection: ManagementMapSelection;
   source: string;
   title: string;
+}
+
+export function getAskAgentMapResult(
+  result: Pick<CfsAskAgentResult, "result_id">,
+  options?: ApiRequestOptions,
+) {
+  if (!result.result_id) throw new Error("Ask Insights result ID is required.");
+  return apiGet<ManagementMapResult>(`/ai/results/${encodeURIComponent(result.result_id)}/map`, undefined, {
+    ...options,
+    timeoutMs: options?.timeoutMs ?? 60_000,
+  });
 }
 
 export function getManagementMapResult(

@@ -109,6 +109,8 @@ class CfsAiMapContext(BaseModel):
 
 
 class CfsAiSearchRequest(BaseModel):
+    agent_mode: Literal["explain", "assist", "agent"] = "assist"
+    agent_result_id: str | None = Field(default=None, max_length=80)
     app_mode: Literal["economics", "master-data", "planning"] = "planning"
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
     filter_context: dict[str, Any] = Field(default_factory=dict)
@@ -151,7 +153,21 @@ class CfsAiTimeRangeAction(BaseModel):
     start_year: int | None = None
 
 
+class CfsAiAgentResult(BaseModel):
+    count: int = Field(ge=0)
+    criteria: list[str] = Field(default_factory=list, max_length=12)
+    execution_trace: list[str] = Field(default_factory=list, max_length=20)
+    map_action: Literal["clear", "highlight_and_zoom", "none", "ready"] = "none"
+    mode: Literal["explain", "assist", "agent"] = "assist"
+    previous_result_id: str | None = Field(default=None, max_length=80)
+    result_id: str | None = Field(default=None, max_length=80)
+    status: Literal["cleared", "executed", "explained", "unavailable"]
+    tool_plan: list[str] = Field(default_factory=list, max_length=24)
+    warning: str | None = Field(default=None, max_length=500)
+
+
 class CfsAiDashboardActions(BaseModel):
+    agent_result: CfsAiAgentResult | None = None
     filter_watchlist: CfsAiWatchlistFilter | None = None
     focus_domain: CfsAiDashboardFocusDomain | None = None
     highlight_kpis: list[str] = Field(default_factory=list)

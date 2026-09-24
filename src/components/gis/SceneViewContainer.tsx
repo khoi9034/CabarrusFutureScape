@@ -89,6 +89,7 @@ import {
   USE_INTERACTIVE_MAP,
 } from "@/lib/api/client";
 import {
+  getAskAgentMapResult,
   getManagementMapResult,
   type ManagementMapSelection,
 } from "@/lib/api/managementMap";
@@ -381,6 +382,7 @@ export function SceneViewContainer() {
   const [modelResearchRenderTick, setModelResearchRenderTick] = useState(0);
   const {
     activeLayerIds,
+    askAgentResult,
     clearSelectedSchoolUtilizationZone,
     clearMapError,
     clearSelectedParcel,
@@ -2080,10 +2082,58 @@ export function SceneViewContainer() {
   ]);
 
   useEffect(() => {
+    if (!askAgentResult?.result_id || USE_DEMO_DATA) return;
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) return;
+
+    const controller = new AbortController();
+    void getAskAgentMapResult(askAgentResult, { signal: controller.signal })
+      .then((result) => {
+        if (controller.signal.aborted || view.destroyed) return;
+        const resultLayer = ensureManagementResultLayer(runtime, view);
+        managementResultLayerRef.current = resultLayer;
+        resultLayer.removeAll();
+        const graphics = result.features
+          .map((feature) => createManagementResultGraphic(runtime, feature))
+          .filter((graphic): graphic is Graphic => Boolean(graphic));
+        resultLayer.addMany(graphics);
+        resultLayer.visible = true;
+        setManagementMapResult(result);
+        const target = getManagementHandoffCameraTarget(
+          graphics.flatMap((graphic) => {
+            const extent = graphic.geometry?.extent;
+            return extent ? [{ xmax: extent.xmax, xmin: extent.xmin, ymax: extent.ymax, ymin: extent.ymin }] : [];
+          }),
+          { featureCount: result.feature_count, selection: "ask-agent-result" },
+        );
+        const cameraKey = `ask:${askAgentResult.result_id}`;
+        if (target && managementHandoffCameraKeyRef.current !== cameraKey) {
+          managementHandoffCameraKeyRef.current = cameraKey;
+          void view.goTo(
+            new runtime.Extent({ ...target.extent, spatialReference: { wkid: 4326 } }).expand(target.padding),
+            { duration: 500 },
+          ).catch(handleMapNavigationFailure);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) handleMapNavigationFailure(error);
+      });
+    return () => controller.abort();
+  }, [
+    arcGisViewState,
+    askAgentResult,
+    handleMapNavigationFailure,
+    setManagementMapResult,
+  ]);
+
+  useEffect(() => {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
     const layer = managementResultLayerRef.current;
     const selection = getManagementMapSelection(managementHandoff);
+
+    if (askAgentResult?.result_id) return;
 
     layer?.removeAll();
     if (layer) layer.visible = false;
@@ -2172,6 +2222,7 @@ export function SceneViewContainer() {
     return () => controller.abort();
   }, [
     arcGisViewState,
+    askAgentResult,
     handleMapNavigationFailure,
     managementHandoff,
     setManagementMapResult,
