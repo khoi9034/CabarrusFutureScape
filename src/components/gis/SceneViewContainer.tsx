@@ -202,6 +202,9 @@ const BASEMAP_LAYER_IDS = new Set([
   "transportation-context",
   "cfs-local-place-labels",
 ]);
+const MANUAL_WHEEL_ZOOM_PER_NOTCH = 0.32;
+const NORMALIZED_WHEEL_NOTCH_DELTA = 100;
+const MAX_MANUAL_WHEEL_ZOOM_PER_FRAME = 0.48;
 
 let preservedInteractiveExtent: Extent | null = null;
 
@@ -1006,6 +1009,10 @@ export function SceneViewContainer() {
     let refocusEventHandler: (() => void) | null = null;
     let visualBasemapAbortController: AbortController | null = null;
     let visualBasemapLayer: CfsVisualBasemapLayer | null = null;
+    let wheelEventHandler: ((event: WheelEvent) => void) | null = null;
+    let wheelZoomDelta = 0;
+    let wheelZoomFrame: number | null = null;
+    let wheelZoomPoint = { x: 0, y: 0 };
     let zoomWatchHandle: ArcGISHandle | null = null;
     const initializationAttemptId = ++initializationAttemptRef.current;
     const isCurrentAttempt = () =>
@@ -1375,6 +1382,71 @@ export function SceneViewContainer() {
           view.destroy();
           return;
         }
+
+        view.constraints.snapToZoom = false;
+        wheelEventHandler = (event) => {
+          if (
+            !(event.target instanceof Element) ||
+            !event.target.closest('[data-testid="cfs-arcgis-map"]')
+          ) {
+            return;
+          }
+          // Browser pinch gestures arrive as ctrl+wheel; leave those and native
+          // touch navigation to ArcGIS. Only replace ordinary manual wheel zoom.
+          if (event.ctrlKey) return;
+
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          const bounds = container.getBoundingClientRect();
+          wheelZoomPoint = {
+            x: event.clientX - bounds.left,
+            y: event.clientY - bounds.top,
+          };
+          const deltaY =
+            event.deltaMode === WheelEvent.DOM_DELTA_LINE
+              ? event.deltaY * 30
+              : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+                ? event.deltaY * 900
+                : event.deltaY;
+          wheelZoomDelta +=
+            (-deltaY / NORMALIZED_WHEEL_NOTCH_DELTA) *
+            MANUAL_WHEEL_ZOOM_PER_NOTCH;
+
+          if (wheelZoomFrame !== null) return;
+          wheelZoomFrame = window.requestAnimationFrame(() => {
+            wheelZoomFrame = null;
+            if (view.destroyed || !Number.isFinite(view.zoom)) {
+              wheelZoomDelta = 0;
+              return;
+            }
+
+            const frameDelta = Math.max(
+              -MAX_MANUAL_WHEEL_ZOOM_PER_FRAME,
+              Math.min(MAX_MANUAL_WHEEL_ZOOM_PER_FRAME, wheelZoomDelta),
+            );
+            wheelZoomDelta = 0;
+            const nextZoom = Math.max(
+              9,
+              Math.min(20, view.zoom + frameDelta),
+            );
+            const anchor = view.toMap(wheelZoomPoint);
+            const center = view.center?.clone();
+            if (anchor && center) {
+              const scaleRatio = 2 ** (view.zoom - nextZoom);
+              center.x = anchor.x - (anchor.x - center.x) * scaleRatio;
+              center.y = anchor.y - (anchor.y - center.y) * scaleRatio;
+            }
+            void view
+              .goTo({ center, zoom: nextZoom }, { animate: false })
+              .catch((error) => {
+                if (!isAbortError(error)) setMapError(getSceneErrorMessage(error));
+              });
+          });
+        };
+        document.addEventListener("wheel", wheelEventHandler, {
+          capture: true,
+          passive: false,
+        });
 
         const interactionController = createMapInteractionController({
           emptyClickBehavior: "preserve-selection",
@@ -1813,7 +1885,16 @@ export function SceneViewContainer() {
       hoverHandle?.remove();
       extentWatchHandle?.remove();
       readyWatchHandle?.remove();
+      if (wheelEventHandler) {
+        document.removeEventListener("wheel", wheelEventHandler, {
+          capture: true,
+        });
+      }
       zoomWatchHandle?.remove();
+      if (wheelZoomFrame !== null) {
+        window.cancelAnimationFrame(wheelZoomFrame);
+        wheelZoomFrame = null;
+      }
       if (focusBeaconTimeoutRef.current) {
         clearTimeout(focusBeaconTimeoutRef.current);
         focusBeaconTimeoutRef.current = null;
