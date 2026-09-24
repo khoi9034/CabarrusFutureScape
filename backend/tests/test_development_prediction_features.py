@@ -1152,7 +1152,8 @@ def test_phase25b_qa2_fixed_left_panel_and_layer_drawer_shell() -> None:
     assert "overflow-x-hidden overflow-y-auto" in sidebar_text
     assert "Collapse map controls" in sidebar_text
     assert "Expand map controls" in sidebar_text
-    assert sidebar_text.count('right-[-1rem] top-1/2') == 2
+    assert sidebar_text.count('right-[-1.125rem] top-1/2 z-[80]') == 1
+    assert sidebar_text.count('left-0 top-1/2 z-[80]') == 1
     assert "left-2 top-4" not in sidebar_text
     assert "ArrowLeftRight" not in sidebar_text
     assert "Drag to resize" not in sidebar_text
@@ -1174,6 +1175,10 @@ def test_phase25b_qa2_fixed_left_panel_and_layer_drawer_shell() -> None:
 
     assert ".cfs-layer-rail {" in theme_text
     assert "min-width: 0;" in theme_text
+    arrow_style = theme_text.split(".cfs-layer-rail-arrow {", 1)[1].split("}", 1)[0]
+    assert "border-radius: 0.5rem;" in arrow_style
+    assert "height: 2.25rem;" in arrow_style
+    assert "overflow: visible;" in arrow_style
 
 
 def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:

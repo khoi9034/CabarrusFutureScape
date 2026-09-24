@@ -418,27 +418,26 @@ select:focus-visible {
 }
 
 .cfs-layer-rail-arrow {
-  background:
-    linear-gradient(180deg, rgba(18, 28, 43, 0.96), rgba(7, 12, 21, 0.94)),
-    linear-gradient(180deg, rgba(104, 216, 255, 0.22), rgba(216, 184, 106, 0.18));
-  border: 1px solid rgba(161, 184, 211, 0.24);
-  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(24, 37, 56, 0.99), rgba(7, 13, 23, 0.99));
+  border: 1px solid rgba(216, 184, 106, 0.48);
+  border-radius: 0.5rem;
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  height: 2rem;
-  opacity: 0.82;
-  overflow: hidden;
+  height: 2.25rem;
+  opacity: 1;
+  overflow: visible;
   transition:
     opacity 140ms ease,
     border-color 140ms ease,
     background 140ms ease,
     box-shadow 140ms ease;
-  width: 2rem;
+  width: 2.25rem;
 }
 
 .cfs-layer-rail-arrow:hover,
 .cfs-layer-rail-arrow:focus-visible {
+  background: linear-gradient(180deg, rgba(38, 50, 70, 0.99), rgba(12, 20, 33, 0.99));
   border-color: rgba(240, 205, 121, 0.58);
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.38),

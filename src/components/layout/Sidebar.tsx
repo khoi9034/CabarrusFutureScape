@@ -66,7 +66,7 @@ export function Sidebar({
       >
         <button
           aria-label="Expand map controls"
-          className="cfs-layer-rail-arrow group absolute right-[-1rem] top-1/2 z-30 inline-flex -translate-y-1/2 items-center justify-center text-[#f0cd79] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
+          className="cfs-layer-rail-arrow group absolute left-0 top-1/2 z-[80] inline-flex -translate-y-1/2 items-center justify-center text-[#f0cd79] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
           onClick={onToggleCollapsed}
           title="Expand map controls"
           type="button"
@@ -88,7 +88,7 @@ export function Sidebar({
     >
       <button
         aria-label="Collapse map controls"
-        className="cfs-layer-rail-arrow group absolute right-[-1rem] top-1/2 z-30 inline-flex -translate-y-1/2 items-center justify-center text-[#f0cd79] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
+        className="cfs-layer-rail-arrow group absolute right-[-1.125rem] top-1/2 z-[80] inline-flex -translate-y-1/2 items-center justify-center text-[#f0cd79] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
         onClick={onToggleCollapsed}
         title="Collapse map controls"
         type="button"
