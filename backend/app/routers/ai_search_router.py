@@ -413,6 +413,8 @@ def _with_request_context(
 ) -> CfsAiContext:
     if not request:
         return context
+    if request.agent_result_id:
+        context["active_agent_result"] = result_metadata(request.agent_result_id)
     clean_filters = safe_filter_context(request.filter_context)
     if clean_filters:
         context["filter_context"] = clean_filters

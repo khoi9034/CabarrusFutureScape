@@ -206,6 +206,7 @@ export function AskCfsPanel({
         setConversationId(null);
         setTurns([]);
         setAnswer(null);
+        setQuery("");
         setActiveAgentResult(null);
         onAgentResultClear?.();
         setContentScope(contextScopeKey);

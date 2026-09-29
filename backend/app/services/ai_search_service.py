@@ -665,6 +665,12 @@ def deterministic_answer(
     if handoff_response := _management_handoff_answer(request, context, domains):
         return sanitize_response(handoff_response)
 
+    if active_result_response := _active_result_answer(request, context, domains):
+        return sanitize_response(active_result_response)
+
+    if selected_parcel_response := _selected_parcel_answer(request, context, domains):
+        return sanitize_response(selected_parcel_response)
+
     if is_map_context_query(request) and request.map_context:
         return sanitize_response(_map_extent_answer(request, context, domains))
 
@@ -699,6 +705,144 @@ def deterministic_answer(
     }
     response = builders.get(primary_domain, _general_answer)(request, context, domains)
     return sanitize_response(response)
+
+
+def _active_result_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    result = context.get("active_agent_result")
+    if not isinstance(result, dict):
+        return None
+    query = " ".join(request.query.lower().split())
+    criteria = [str(item) for item in result.get("criteria") or []]
+    limitations = [str(item) for item in result.get("limitations") or []]
+    count = int(result.get("count") or 0)
+    title = str(result.get("title") or "the active Ask Insights result")
+    intent = _context_question_intent(query)
+    if intent is None:
+        return None
+
+    if intent == "count":
+        answer = (
+            f"The active result contains {count:,} parcels. "
+            "A reconciled permit count is not stored with this result."
+            if "permit" in query
+            else f"The active result contains {count:,} parcels."
+        )
+    elif intent == "why":
+        answer = f"These parcels are highlighted because they match the active analysis: {_plain_list(criteria)}."
+    elif intent == "next":
+        checks = limitations[:2] or ["Confirm the source records and parcel-specific planning context before drawing a conclusion."]
+        answer = "Verify next: " + " ".join(checks)
+    elif intent == "method":
+        tools = [str(item).replace("_", " ") for item in result.get("tools") or []]
+        answer = f"CFS built this result by applying {_plain_list(criteria)}."
+        if tools:
+            answer += f" The approved steps were {_plain_list(tools)}."
+    elif intent == "limitation":
+        answer = "The main limitations are: " + _plain_list(limitations) if limitations else "No result-specific limitation was recorded; source verification is still required."
+    elif intent == "comparison":
+        answer = "This result does not contain a saved comparison. Ask for a specific comparison period, such as 2024."
+    elif intent == "largest_reduction":
+        steps = [item for item in result.get("intermediate_results") or [] if isinstance(item, dict)]
+        reductions = [
+            (int(steps[index - 1].get("count") or 0) - int(step.get("count") or 0), str(step.get("label") or "criterion"))
+            for index, step in enumerate(steps)
+            if index > 0
+        ]
+        reduction, label = max(reductions, default=(0, "No recorded criterion"))
+        answer = f"{label.capitalize()} removed the most parcels: {reduction:,}."
+    elif intent == "signal":
+        signal_criteria = [item for item in criteria if "signal" in item.lower()]
+        answer = (
+            f"{_plain_list(signal_criteria)} is a relative screening rank, not a probability or prediction."
+            if signal_criteria
+            else "The active result does not include a Development Signal criterion. Development Signals are relative screening ranks, not probabilities."
+        )
+    elif intent == "flood":
+        flood_criteria = [item for item in criteria if "flood" in item.lower()]
+        answer = (
+            f"The active result applies {_plain_list(flood_criteria)}. Flood context remains screening-level and requires official review."
+            if flood_criteria
+            else "No flood criterion was applied to the active result. Review parcel-level flood context before relying on it."
+        )
+    else:
+        answer = f"You are viewing {count:,} parcels in {title}."
+        if criteria:
+            answer += f" They match {_plain_list(criteria)}."
+
+    return _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [_evidence("Active Ask Insights result", f"{count:,} parcels; {_plain_list(criteria)}.", "Ask Insights result")],
+        ["Review the active result criteria and source limitations."],
+    )
+
+
+def _selected_parcel_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    query = " ".join(request.query.lower().split())
+    if "parcel" not in query or not any(term in query for term in ("summarize", "tell me", "what am i looking at", "what is this")):
+        return None
+    filters = safe_filter_context(request.filter_context)
+    parcel = filters.get("selected_parcel_id") or (request.map_context.selected_parcel_id if request.map_context else None)
+    if not parcel:
+        return None
+    zoning = filters.get("selected_parcel_zoning")
+    quality = filters.get("selected_parcel_quality")
+    details = ["The selected parcel"]
+    if zoning:
+        details.append(f"zoning context: {zoning}")
+    if quality:
+        details.append(f"source quality: {quality}")
+    answer = ". ".join(details) + ". I don't have enough current evidence here to add parcel facts that are not shown in the active context."
+    return _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [_evidence("Selected parcel context", answer, "Current parcel selection", "limited")],
+        ["Review the parcel Intelligence panel for the governed source details."],
+    )
+
+
+def _context_question_intent(query: str) -> str | None:
+    if "which criteria" in query and any(term in query for term in ("removed", "reduced", "most")):
+        return "largest_reduction"
+    if any(term in query for term in ("how many", "what is the count", "count?", "number of")):
+        return "count"
+    if any(term in query for term in ("what am i looking at", "summarize this result", "what is this result")):
+        return "current_view"
+    if "why" in query and any(term in query for term in ("highlight", "selected", "these")):
+        return "why"
+    if any(term in query for term in ("verify next", "check next", "inspect next", "what should i verify", "what should i check")):
+        return "next"
+    if any(term in query for term in ("how was", "calculated", "method", "methodology")):
+        return "method"
+    if any(term in query for term in ("limitation", "caveat")):
+        return "limitation"
+    if any(term in query for term in ("compare", "different from", "change from", "changed from")):
+        return "comparison"
+    if "development signal" in query or "signal mean" in query:
+        return "signal"
+    if "flood" in query:
+        return "flood"
+    return None
+
+
+def _plain_list(values: list[str]) -> str:
+    if not values:
+        return "the recorded criteria"
+    if len(values) == 1:
+        return values[0]
+    return ", ".join(values[:-1]) + f", and {values[-1]}"
 
 
 def sanitize_response(response: CfsAiSearchResponse) -> CfsAiSearchResponse:
@@ -820,6 +964,8 @@ def grounded_context_for_request(
         grounded["map_context"] = request.map_context.model_dump(exclude_none=True)
     if context.get("map_extent_summary"):
         grounded["map_extent_summary"] = context["map_extent_summary"]
+    if context.get("active_agent_result"):
+        grounded["active_agent_result"] = context["active_agent_result"]
     if request.app_mode == "master-data":
         return grounded
     if request.app_mode == "economics":
