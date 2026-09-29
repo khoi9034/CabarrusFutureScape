@@ -322,9 +322,14 @@ def ai_status() -> dict[str, Any]:
 
 
 def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | None = None) -> CfsAiContext:
-    context_kind = (
-        "management"
+    management_section = (
+        str(request.filter_context.get("management_section") or "overview")
         if request and request.filter_context.get("experience") == "management"
+        else None
+    )
+    context_kind = (
+        f"management_{management_section}"
+        if management_section
         else request.app_mode
         if request
         else "planning"
@@ -425,9 +430,23 @@ def _with_request_context(
         context["map_context"] = request.map_context.model_dump(exclude_none=True)
         if db is not None and is_map_context_query(request):
             map_context = request.map_context
+            normalized_query = request.query.lower()
+            prior_permit_question = any(
+                "permit" in turn.query.lower()
+                for turn in request.conversation_context[-3:]
+            )
+            include_top_permits = (
+                any(term in normalized_query for term in ("inspect", "which ones", "which three"))
+                and ("permit" in normalized_query or prior_permit_question)
+            )
+            include_top_hotspots = not (
+                "permit" in normalized_query
+                and any(term in normalized_query for term in ("how many", "count", "number"))
+            )
             map_cache_key = (
                 f"map_{map_context.view_signature}_{map_context.permit_year_start}_"
-                f"{map_context.permit_year_end}_{map_context.permit_segment}"
+                f"{map_context.permit_year_end}_{map_context.permit_segment}_"
+                f"{int(include_top_permits)}_{int(include_top_hotspots)}"
             )
             cached_map = _ASK_CFS_CONTEXT_CACHE.get(map_cache_key)
             cached_map_expires = _ASK_CFS_CONTEXT_CACHE.get(f"expires_at_{map_cache_key}")
@@ -440,11 +459,6 @@ def _with_request_context(
                 return context
             try:
                 extent = map_context.extent
-                normalized_query = request.query.lower()
-                prior_permit_question = any(
-                    "permit" in turn.query.lower()
-                    for turn in request.conversation_context[-3:]
-                )
                 # ponytail: reuse whole-table aggregates only when the view contains the
                 # current governed parcel-geometry extent; update after a parcel refresh.
                 countywide = (
@@ -464,14 +478,8 @@ def _with_request_context(
                         "permit_segment": map_context.permit_segment,
                         "permit_year_end": map_context.permit_year_end,
                         "permit_year_start": map_context.permit_year_start,
-                        "include_top_permits": (
-                            any(term in normalized_query for term in ("inspect", "which ones", "which three"))
-                            and ("permit" in normalized_query or prior_permit_question)
-                        ),
-                        "include_top_hotspots": not (
-                            "permit" in normalized_query
-                            and any(term in normalized_query for term in ("how many", "count", "number"))
-                        ),
+                        "include_top_permits": include_top_permits,
+                        "include_top_hotspots": include_top_hotspots,
                     },
                 ).mappings().one()
                 context["map_extent_summary"] = {

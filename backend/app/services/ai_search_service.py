@@ -287,6 +287,7 @@ DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
             "predictive",
             "current-best",
             "current best",
+            "lift",
             "production-ready",
             "production ready",
         ),
@@ -662,6 +663,9 @@ def deterministic_answer(
     if safety_kind := classify_safety_query(request.query):
         return _safety_answer(request, context, safety_kind)
 
+    if unsupported_response := _unsupported_evidence_answer(request, context, domains):
+        return sanitize_response(unsupported_response)
+
     if handoff_response := _management_handoff_answer(request, context, domains):
         return sanitize_response(handoff_response)
 
@@ -707,6 +711,32 @@ def deterministic_answer(
     return sanitize_response(response)
 
 
+def _unsupported_evidence_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    query = " ".join(request.query.lower().split())
+    if "sewer" in query and "capacity" in query:
+        answer = "CFS does not have verified remaining sewer capacity for this location. Sewer proximity is only a screening proxy; confirm service and available capacity with WSACC."
+    elif "school" in query and any(term in query for term in ("crowded", "capacity", "space available")):
+        answer = "The current context does not contain verified enrollment and capacity for the assigned school, so CFS cannot say how crowded it is. School context is a planning-review signal, not an official capacity forecast."
+    elif any(phrase in query for phrase in ("definitely develop", "certain to develop", "will develop")):
+        answer = "CFS cannot determine whether development will occur on a parcel. Development Signals are relative screening ranks, not probabilities or predictions."
+    elif "rezoning" in query and any(term in query for term in ("approved", "approve", "will pass")):
+        answer = "CFS cannot determine whether a rezoning will be approved. That requires the official application, staff review, public process, and governing-board decision."
+    else:
+        return None
+    return _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [_evidence("Evidence availability", answer, "Current Cabarrus Insights context", "not_available")],
+        ["Verify the missing evidence with the responsible official source."],
+    )
+
+
 def _active_result_answer(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
@@ -720,6 +750,15 @@ def _active_result_answer(
     limitations = [str(item) for item in result.get("limitations") or []]
     count = int(result.get("count") or 0)
     title = str(result.get("title") or "the active Ask Insights result")
+    if clarification := _active_result_clarification(query):
+        return _response(
+            clarification,
+            context,
+            domains,
+            request.mode,
+            [_evidence("Active Ask Insights result", f"{count:,} parcels; {_plain_list(criteria)}.", "Ask Insights result")],
+            ["Clarify the comparison or screening criterion before CFS changes the result."],
+        )
     intent = _context_question_intent(query)
     if intent is None:
         return None
@@ -754,6 +793,21 @@ def _active_result_answer(
         ]
         reduction, label = max(reductions, default=(0, "No recorded criterion"))
         answer = f"{label.capitalize()} removed the most parcels: {reduction:,}."
+    elif intent == "count_drop":
+        steps = [item for item in result.get("intermediate_results") or [] if isinstance(item, dict)]
+        if len(steps) > 1:
+            previous_count = int(steps[-2].get("count") or 0)
+            current_count = int(steps[-1].get("count") or 0)
+            label = str(steps[-1].get("label") or "the latest criterion")
+            answer = f"The count dropped by {previous_count - current_count:,} when CFS applied {label}: {previous_count:,} to {current_count:,} parcels."
+        else:
+            answer = "The active result does not contain enough intermediate counts to explain a reduction."
+    elif intent == "provenance":
+        sources = [str(item).replace("_", " ") for item in result.get("source_datasets") or []]
+        dates = [str(item) for item in result.get("source_dates") or []]
+        answer = f"This result uses {_plain_list(sources)}."
+        if dates:
+            answer += f" The recorded source period is {_plain_list(dates)}."
     elif intent == "signal":
         signal_criteria = [item for item in criteria if "signal" in item.lower()]
         answer = (
@@ -789,20 +843,39 @@ def _selected_parcel_answer(
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse | None:
     query = " ".join(request.query.lower().split())
-    if "parcel" not in query or not any(term in query for term in ("summarize", "tell me", "what am i looking at", "what is this")):
-        return None
     filters = safe_filter_context(request.filter_context)
     parcel = filters.get("selected_parcel_id") or (request.map_context.selected_parcel_id if request.map_context else None)
     if not parcel:
         return None
     zoning = filters.get("selected_parcel_zoning")
     quality = filters.get("selected_parcel_quality")
-    details = ["The selected parcel"]
-    if zoning:
-        details.append(f"zoning context: {zoning}")
-    if quality:
-        details.append(f"source quality: {quality}")
-    answer = ". ".join(details) + ". I don't have enough current evidence here to add parcel facts that are not shown in the active context."
+    if "permit" in query:
+        answer = "The current selected-parcel context does not include verified parcel-specific permit records. Review the parcel Intelligence panel or governed permit records; I will not substitute countywide permit totals."
+    elif "flood" in query:
+        answer = "The current selected-parcel context does not include a verified parcel-level flood result. Review the parcel's FEMA flood context before drawing a conclusion."
+    elif "zoning" in query:
+        answer = f"The current parcel context shows zoning {zoning}. Confirm the official zoning record and any case history." if zoning else "A verified zoning value is not present in the current parcel context. Check the official zoning record."
+    elif "signal band" in query or "why is it in this signal" in query:
+        band = filters.get("selected_feature_signal_band")
+        drivers = filters.get("selected_feature_top_drivers")
+        answer = (
+            f"The current context places the parcel in the {band} band"
+            + (f" using the recorded drivers: {drivers}" if drivers else "")
+            + ". This is a relative screening rank, not a development probability."
+            if band
+            else "The current parcel context does not include a verified Development Signal band or its drivers."
+        )
+    elif any(term in query for term in ("verify", "check next", "what should i check")):
+        answer = "Verify the official zoning record, parcel-specific permits, FEMA flood context, and utility service/capacity before drawing a site-specific conclusion."
+    elif any(term in query for term in ("summarize", "tell me", "what am i looking at", "what is this", "what should i know")):
+        details = ["Selected parcel context"]
+        if zoning:
+            details.append(f"zoning {zoning}")
+        if quality:
+            details.append(f"source quality {quality}")
+        answer = "; ".join(details) + ". Other parcel facts are not available in the approved current context."
+    else:
+        return None
     return _response(
         answer,
         context,
@@ -820,9 +893,13 @@ def _context_question_intent(query: str) -> str | None:
         return "count"
     if any(term in query for term in ("what am i looking at", "summarize this result", "what is this result")):
         return "current_view"
-    if "why" in query and any(term in query for term in ("highlight", "selected", "these")):
+    if "why" in query and any(term in query for term in ("count drop", "drop so much", "decrease")):
+        return "count_drop"
+    if query.rstrip("?.!") == "why" or "what's driving this" in query or (
+        "why" in query and any(term in query for term in ("highlight", "selected", "these"))
+    ):
         return "why"
-    if any(term in query for term in ("verify next", "check next", "inspect next", "what should i verify", "what should i check")):
+    if any(term in query for term in ("verify next", "check next", "inspect next", "what should i verify", "what should i check", "what should i care about")):
         return "next"
     if any(term in query for term in ("how was", "calculated", "method", "methodology")):
         return "method"
@@ -830,10 +907,22 @@ def _context_question_intent(query: str) -> str | None:
         return "limitation"
     if any(term in query for term in ("compare", "different from", "change from", "changed from")):
         return "comparison"
-    if "development signal" in query or "signal mean" in query:
+    if any(term in query for term in ("source", "provenance", "where did this result come from")):
+        return "provenance"
+    if "development signal" in query or "signal mean" in query or ("very high" in query and "why" in query):
         return "signal"
     if "flood" in query:
         return "flood"
+    return None
+
+
+def _active_result_clarification(query: str) -> str | None:
+    if query.rstrip("?.!") in {"what about these", "which ones"}:
+        return "Do you want the active result's count, criteria, limitations, or parcels to inspect next?"
+    if "worst" in query:
+        return "What should “worst” mean here—flood exposure, Development Signal, or another planning criterion?"
+    if any(phrase in query for phrase in ("is this area good", "actually risky")):
+        return "Which planning measure should I use—development activity, flood context, school context, utilities, or Development Signals?"
     return None
 
 
@@ -842,6 +931,8 @@ def _plain_list(values: list[str]) -> str:
         return "the recorded criteria"
     if len(values) == 1:
         return values[0]
+    if len(values) == 2:
+        return f"{values[0]} and {values[1]}"
     return ", ".join(values[:-1]) + f", and {values[-1]}"
 
 
@@ -3450,6 +3541,16 @@ def _model_answer(
     context: CfsAiContext,
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
+    normalized = request.query.lower()
+    if "4.05" in normalized or "lift mean" in normalized:
+        return _simple_domain_answer(
+            "Model evaluation",
+            "A 4.05x top-5% lift means observed positive cases appeared about 4.05 times as often in the model's highest-ranked 5% as in the full evaluation population. It is a ranking-performance measure, not a 405% chance or a parcel-level probability.",
+            "Use lift to compare screening models, then review the documented holdout period and limitations.",
+            request,
+            context,
+            domains,
+        )
     answer = _briefing(
         (
             "Executive summary",

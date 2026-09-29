@@ -124,6 +124,8 @@ def run_gis_agent(
     if request.app_mode != "planning" or request.interaction_mode != "freeform":
         return None
     query = " ".join(request.query.lower().split())
+    if _is_non_spatial_evidence_question(query):
+        return None
     if _is_clear(query):
         return CfsAiAgentResult(
             count=0,
@@ -137,6 +139,18 @@ def run_gis_agent(
         )
 
     previous = _get_result(request.agent_result_id)
+    if request.agent_result_id and not previous and _is_follow_up(query):
+        return CfsAiAgentResult(
+            count=0,
+            criteria=[],
+            execution_trace=["The prior Ask Insights result is no longer available."],
+            map_action="none",
+            mode=request.agent_mode,
+            result_id=None,
+            status="unavailable",
+            tool_plan=[],
+            warning="The prior Ask Insights result expired. Run the analysis again before refining it.",
+        )
     if previous and _is_save(query):
         return CfsAiAgentResult(
             count=previous["count"],
@@ -809,15 +823,30 @@ def _year(query: str) -> int | None:
 
 
 def _is_follow_up(query: str) -> bool:
-    return any(phrase in query for phrase in ("of those", "those parcels", "these parcels", "that result", "this result", "these results", "those results", "break these", "keep only", "only those", "those within", "remove the parcels", "remove parcels"))
+    return any(phrase in query for phrase in (
+        "of those", "those parcels", "these parcels", "that result", "this result",
+        "these results", "those results", "break these", "break them", "keep only",
+        "only those", "those within", "remove the parcels", "remove parcels",
+        "how many are", "which are",
+    ))
+
+
+def _is_non_spatial_evidence_question(query: str) -> bool:
+    return "sewer" in query and (
+        "capacity" in query
+        or "why" in query and "proxy" in query
+    )
 
 
 def _is_clear(query: str) -> bool:
-    return any(phrase in query for phrase in ("clear this analysis", "clear analysis", "clear the result", "reset analysis"))
+    return any(phrase in query for phrase in ("clear this", "clear analysis", "clear the result", "reset analysis"))
 
 
 def _is_save(query: str) -> bool:
-    return any(phrase in query for phrase in ("save this analysis", "save analysis", "save this result"))
+    return any(phrase in query for phrase in (
+        "save this analysis", "save analysis", "save this result",
+        "save this to planning files", "save to planning files",
+    ))
 
 
 def _is_empty_explanation(query: str) -> bool:
