@@ -123,6 +123,16 @@ export interface CfsAskAgentResult {
   status: "cleared" | "executed" | "explained" | "unavailable";
   tool_plan: string[];
   warning?: string | null;
+  verification_status?: "verified" | "partial" | "insufficient_data";
+  original_question?: string | null;
+  source_datasets?: string[];
+  source_dates?: string[];
+  parent_result_ids?: string[];
+  intermediate_results?: Array<{ result_id?: string | null; label?: string; count?: number }>;
+  method_summary?: string[];
+  limitations?: string[];
+  breakdown?: Array<{ label?: string; count?: number }>;
+  comparison?: { baseline_count?: number; current_count?: number; percent_change?: number | null; label?: string } | null;
 }
 
 export interface CfsAiPowerBiActions {

@@ -25,7 +25,7 @@ from app.services.ai_search_service import (
     is_map_context_query,
     safe_filter_context,
 )
-from app.services.ask_gis_agent import result_map_payload, run_gis_agent, tool_registry
+from app.services.ask_gis_agent import available_datasets, describe_dataset, result_map_payload, result_metadata, run_gis_agent, tool_registry
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
 LOGGER = logging.getLogger(__name__)
@@ -264,7 +264,22 @@ def search_cfs(
 def list_gis_tools() -> dict[str, object]:
     """Describe the approved Ask Insights tools without implementation details."""
 
-    return {"tools": tool_registry(), "version": "ask-gis-agent-v1"}
+    return {"tools": tool_registry(), "version": "ask-gis-agent-v2"}
+
+
+@router.get("/datasets")
+def list_gis_datasets() -> dict[str, object]:
+    """Return compact approved dataset metadata for agent planning."""
+
+    return {"datasets": available_datasets(), "version": "ask-gis-agent-v2"}
+
+
+@router.get("/datasets/{dataset_id}")
+def get_gis_dataset(dataset_id: str) -> dict[str, object]:
+    dataset = describe_dataset(dataset_id)
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Approved dataset is unavailable.")
+    return dataset
 
 
 @router.get("/results/{result_id}/map")
@@ -277,6 +292,16 @@ def get_gis_result_map(
     if not re.fullmatch(r"ask_\d{8}_[0-9a-f]{10}", result_id):
         raise HTTPException(status_code=404, detail="Ask Insights result is unavailable.")
     payload = result_map_payload(db, result_id)
+    if not payload:
+        raise HTTPException(status_code=404, detail="Ask Insights result expired or is unavailable.")
+    return payload
+
+
+@router.get("/results/{result_id}")
+def get_gis_result_metadata(result_id: str) -> dict[str, Any]:
+    if not re.fullmatch(r"ask_\d{8}_[0-9a-f]{10}", result_id):
+        raise HTTPException(status_code=404, detail="Ask Insights result is unavailable.")
+    payload = result_metadata(result_id)
     if not payload:
         raise HTTPException(status_code=404, detail="Ask Insights result expired or is unavailable.")
     return payload

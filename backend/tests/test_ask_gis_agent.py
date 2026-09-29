@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.schemas.ai_search import CfsAiSearchRequest
-from app.services.ask_gis_agent import TOOL_REGISTRY, _validated_provider_plan, run_gis_agent, tool_registry
+from app.services.ask_gis_agent import TOOL_REGISTRY, V2_TOOL_REGISTRY, _validated_provider_plan, available_datasets, run_gis_agent, tool_registry
 
 
 class _Result:
@@ -33,7 +33,7 @@ def test_registry_is_fixed_and_governed() -> None:
         "select_within_distance", "summarize_result", "highlight_result_on_map",
         "zoom_to_result", "clear_agent_result", "save_snapshot", "save_to_planning_files",
     }
-    assert set(TOOL_REGISTRY) == expected
+    assert set(TOOL_REGISTRY) == expected | set(V2_TOOL_REGISTRY)
     assert all(item["source"] and item["limitations"] for item in tool_registry())
 
 
@@ -97,3 +97,33 @@ def test_provider_plan_is_reduced_to_approved_filters() -> None:
     assert criteria == {"active_development": True, "sewer_within_feet": 1000}
     assert tools == ["filter_active_development_parcels", "filter_sewer_proximity"]
     assert _validated_provider_plan({"tools": [{"name": "run_sql", "parameters": {}}]}, {}) is None
+
+
+def test_v2_metadata_and_pipeline_observations() -> None:
+    names = {item["name"] for item in tool_registry()}
+    assert {"list_available_datasets", "aggregate_by_area", "compare_periods"} <= names
+    assert {dataset["id"] for dataset in available_datasets()} >= {"parcels", "permit_activity", "flood_review"}
+    result = run_gis_agent(_Db(), _request("Show active development parcels in 2020-2025."))
+    assert result and result.verification_status == "verified"
+    assert result.intermediate_results
+    assert "2020" in " ".join(result.criteria)
+
+
+def test_v2_common_followups_keep_the_prior_result_scope() -> None:
+    first = run_gis_agent(_Db(), _request("Show active development parcels in 2025."))
+    assert first and first.result_id
+    flood = run_gis_agent(_Db(), _request(
+        "Remove the parcels in high/severe flood areas.",
+        agent_result_id=first.result_id,
+    ))
+    assert flood and "High/severe flood review excluded" in flood.criteria
+    sewer = run_gis_agent(_Db(), _request(
+        "Now keep only those within 1,000 feet of sewer.",
+        agent_result_id=flood.result_id,
+    ))
+    assert sewer and "Sewer proximity: within 1,000 ft" in sewer.criteria
+    breakdown = run_gis_agent(_Db(), _request(
+        "Break these down by jurisdiction.",
+        agent_result_id=sewer.result_id,
+    ))
+    assert breakdown and "Breakdown by jurisdiction" in breakdown.criteria

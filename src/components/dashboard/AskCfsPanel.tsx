@@ -844,12 +844,47 @@ export function AskCfsPanel({
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9be9ff]">GIS result</p>
             <p className="text-sm font-semibold text-white">{activeAgentResult.count.toLocaleString()} parcels</p>
           </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-slate-300">
+              {activeAgentResult.verification_status === "insufficient_data"
+                ? "Needs more data"
+                : activeAgentResult.verification_status === "partial"
+                  ? "Partially verified"
+                  : "Verified"}
+            </span>
+            {activeAgentResult.source_datasets?.slice(0, 3).map((dataset) => (
+              <span className="rounded-full border border-white/10 px-2 py-1 text-slate-500" key={dataset}>{dataset}</span>
+            ))}
+          </div>
           <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-300">
             {activeAgentResult.criteria.map((criterion) => <li key={criterion}>{criterion}</li>)}
           </ul>
+          {activeAgentResult.tool_plan?.length ? (
+            <details className="mt-2 rounded-lg border border-white/8 bg-black/10 px-2.5 py-2" open>
+              <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Plan</summary>
+              <ol className="mt-1 list-decimal space-y-1 pl-4 text-xs leading-5 text-slate-400">
+                {activeAgentResult.tool_plan.map((step) => <li key={step}>{step}</li>)}
+              </ol>
+            </details>
+          ) : null}
           <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400" aria-label="GIS analysis activity">
             {activeAgentResult.execution_trace.map((step) => <li key={step}>✓ {step}</li>)}
           </ul>
+          {activeAgentResult.breakdown?.length ? (
+            <div className="mt-2 rounded-lg border border-white/8 bg-black/10 px-2.5 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Breakdown</p>
+              <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-300">
+                {activeAgentResult.breakdown.slice(0, 8).map((item) => <li className="flex justify-between gap-2" key={`${item.label}-${item.count}`}><span className="truncate">{item.label ?? "Other"}</span><span>{(item.count ?? 0).toLocaleString()}</span></li>)}
+              </ul>
+            </div>
+          ) : null}
+          {activeAgentResult.comparison ? (
+            <p className="mt-2 text-xs leading-5 text-slate-300">
+              Compared with {activeAgentResult.comparison.label ?? "the comparison period"}: {activeAgentResult.comparison.baseline_count?.toLocaleString() ?? "—"} → {activeAgentResult.comparison.current_count?.toLocaleString() ?? "—"}
+              {activeAgentResult.comparison.percent_change == null ? "" : ` (${activeAgentResult.comparison.percent_change > 0 ? "+" : ""}${activeAgentResult.comparison.percent_change.toFixed(1)}%)`}
+            </p>
+          ) : null}
+          {activeAgentResult.method_summary?.length ? <p className="mt-2 text-xs leading-5 text-slate-400">{activeAgentResult.method_summary.join(" ")}</p> : null}
           {activeAgentResult.warning ? <p className="mt-2 text-xs leading-5 text-amber-100">{activeAgentResult.warning}</p> : null}
           <div className="mt-3 flex flex-wrap gap-2">
             {activeAgentResult.map_action === "ready" ? (
@@ -857,6 +892,20 @@ export function AskCfsPanel({
             ) : null}
             <button className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-slate-300" onClick={onAgentResultUndo} type="button">Undo map action</button>
             <button className="rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-slate-300" onClick={() => { setActiveAgentResult(null); onAgentResultClear?.(); }} type="button">Clear result</button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2" aria-label="Suggested GIS follow-ups">
+            {(activeAgentResult.criteria.some((criterion) => /jurisdiction|school/i.test(criterion))
+              ? ["Break these results down by jurisdiction", "Show only Very High Development Signals"]
+              : ["Break these results down by jurisdiction", "Compare this with the prior period"]).map((followup) => (
+              <button
+                className="rounded-md border border-white/8 px-2.5 py-1.5 text-[11px] text-slate-400 transition hover:border-[#68d8ff]/35 hover:text-[#c6f4ff]"
+                key={followup}
+                onClick={() => { setQuery(followup); void submit(followup, { agent_mode: "agent", interaction_mode: "freeform" }); }}
+                type="button"
+              >
+                {followup}
+              </button>
+            ))}
           </div>
         </div>
       ) : null}

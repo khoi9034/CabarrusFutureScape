@@ -164,6 +164,16 @@ class CfsAiAgentResult(BaseModel):
     status: Literal["cleared", "executed", "explained", "unavailable"]
     tool_plan: list[str] = Field(default_factory=list, max_length=24)
     warning: str | None = Field(default=None, max_length=500)
+    verification_status: Literal["verified", "partial", "insufficient_data"] = "verified"
+    original_question: str | None = Field(default=None, max_length=500)
+    source_datasets: list[str] = Field(default_factory=list, max_length=16)
+    source_dates: list[str] = Field(default_factory=list, max_length=8)
+    parent_result_ids: list[str] = Field(default_factory=list, max_length=8)
+    intermediate_results: list[dict[str, Any]] = Field(default_factory=list, max_length=12)
+    method_summary: list[str] = Field(default_factory=list, max_length=12)
+    limitations: list[str] = Field(default_factory=list, max_length=12)
+    breakdown: list[dict[str, Any]] = Field(default_factory=list, max_length=24)
+    comparison: dict[str, Any] | None = None
 
 
 class CfsAiDashboardActions(BaseModel):
