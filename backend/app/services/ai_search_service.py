@@ -96,6 +96,7 @@ SAFE_FILTER_CONTEXT_KEYS = frozenset(
         "selected_signal_id",
         "selected_signal_title",
         "visible_kpis",
+        "visible_school_signals",
         "visible_watchlist_rows",
         "page_active_development_parcels",
         "page_active_hotspots",
@@ -134,7 +135,8 @@ def safe_filter_context(value: Any) -> dict[str, str | int | float | bool]:
         elif isinstance(item, (int, float)) and math.isfinite(item):
             clean[key] = item
         elif isinstance(item, str):
-            text_value = " ".join(item.split())[:240]
+            limit = 1600 if key == "visible_school_signals" else 240
+            text_value = " ".join(item.split())[:limit]
             if text_value and text_value != "All":
                 clean[key] = text_value
     return clean
@@ -663,6 +665,9 @@ def deterministic_answer(
     if safety_kind := classify_safety_query(request.query):
         return _safety_answer(request, context, safety_kind)
 
+    if external_response := _external_research_answer(request, context, domains):
+        return sanitize_response(external_response)
+
     if unsupported_response := _unsupported_evidence_answer(request, context, domains):
         return sanitize_response(unsupported_response)
 
@@ -674,6 +679,9 @@ def deterministic_answer(
 
     if selected_parcel_response := _selected_parcel_answer(request, context, domains):
         return sanitize_response(selected_parcel_response)
+
+    if school_screen_response := _school_screen_analysis_answer(request, context, domains):
+        return sanitize_response(school_screen_response)
 
     if is_map_context_query(request) and request.map_context:
         return sanitize_response(_map_extent_answer(request, context, domains))
@@ -722,7 +730,7 @@ def _unsupported_evidence_answer(
     elif "school" in query and any(term in query for term in ("crowded", "capacity", "space available")):
         answer = "The current context does not contain verified enrollment and capacity for the assigned school, so CFS cannot say how crowded it is. School context is a planning-review signal, not an official capacity forecast."
     elif any(phrase in query for phrase in ("definitely develop", "certain to develop", "will develop")):
-        answer = "CFS cannot determine whether development will occur on a parcel. Development Signals are relative screening ranks, not probabilities or predictions."
+        answer = "No. CFS cannot determine whether development will occur. A Development Signal is a relative screening rank, not a probability and not a 99% chance that development will occur."
     elif "rezoning" in query and any(term in query for term in ("approved", "approve", "will pass")):
         answer = "CFS cannot determine whether a rezoning will be approved. That requires the official application, staff review, public process, and governing-board decision."
     else:
@@ -783,7 +791,38 @@ def _active_result_answer(
     elif intent == "limitation":
         answer = "The main limitations are: " + _plain_list(limitations) if limitations else "No result-specific limitation was recorded; source verification is still required."
     elif intent == "comparison":
-        answer = "This result does not contain a saved comparison. Ask for a specific comparison period, such as 2024."
+        comparison = result.get("comparison")
+        if isinstance(comparison, dict):
+            baseline = int(comparison.get("baseline_count") or 0)
+            current = int(comparison.get("current_count") or count)
+            change = comparison.get("percent_change")
+            answer = f"The saved comparison is {baseline:,} parcels in the baseline and {current:,} now"
+            answer += f", a {float(change):+.1f}% change." if isinstance(change, (int, float)) else "."
+        else:
+            answer = "This result does not contain a saved comparison. Ask for a specific comparison period, such as 2024."
+    elif intent == "analysis":
+        steps = [item for item in result.get("intermediate_results") or [] if isinstance(item, dict)]
+        first_count = int(steps[0].get("count") or count) if steps else count
+        retained = (count / first_count * 100) if first_count else 0
+        reductions = [
+            (int(steps[index - 1].get("count") or 0) - int(step.get("count") or 0), str(step.get("label") or "criterion"))
+            for index, step in enumerate(steps)
+            if index > 0
+        ]
+        reduction, reduction_label = max(reductions, default=(0, "the recorded criteria"))
+        breakdown = [item for item in result.get("breakdown") or [] if isinstance(item, dict)]
+        leading = max(breakdown, key=lambda item: int(item.get("count") or 0), default=None)
+        answer = (
+            f"The active analysis contains {count:,} parcels, retaining {retained:.1f}% of the first recorded population ({first_count:,}). "
+            f"The largest narrowing step was {reduction_label}, which removed {reduction:,} parcels."
+        )
+        if leading:
+            leading_count = int(leading.get("count") or 0)
+            share = (leading_count / count * 100) if count else 0
+            answer += f" {leading.get('label') or 'The leading group'} is the largest recorded group at {leading_count:,} parcels ({share:.1f}% of the result)."
+        answer += (
+            " These filters identify overlap, not causation. Check the leading parcels against official zoning, flood, utility, and source-date evidence before prioritizing action."
+        )
     elif intent == "largest_reduction":
         steps = [item for item in result.get("intermediate_results") or [] if isinstance(item, dict)]
         reductions = [
@@ -849,7 +888,22 @@ def _selected_parcel_answer(
         return None
     zoning = filters.get("selected_parcel_zoning")
     quality = filters.get("selected_parcel_quality")
-    if "permit" in query:
+    if any(term in query for term in ("planning analysis", "analyze this site", "analyse this site", "important about this parcel", "important about this site", "deep analysis")):
+        known = []
+        if zoning:
+            known.append(f"the current zoning context is {zoning}")
+        if quality:
+            known.append(f"the recorded source quality is {quality}")
+        band = filters.get("selected_feature_signal_band")
+        if band:
+            known.append(f"the Development Signal band is {band}")
+        answer = "For this selected parcel, " + ("; ".join(known) if known else "no site-specific planning attributes are present in the approved context") + ". "
+        answer += (
+            "That is enough to frame review, but not to infer development feasibility or causation. "
+            "The current context does not provide verified parcel permits, flood status, school assignment, or utility capacity. "
+            "Next, compare the official zoning and case history, parcel-level permit activity, FEMA flood context, and confirmed utility service/capacity."
+        )
+    elif "permit" in query:
         answer = "The current selected-parcel context does not include verified parcel-specific permit records. Review the parcel Intelligence panel or governed permit records; I will not substitute countywide permit totals."
     elif "flood" in query:
         answer = "The current selected-parcel context does not include a verified parcel-level flood result. Review the parcel's FEMA flood context before drawing a conclusion."
@@ -899,6 +953,8 @@ def _context_question_intent(query: str) -> str | None:
         "why" in query and any(term in query for term in ("highlight", "selected", "these"))
     ):
         return "why"
+    if any(term in query for term in ("analyze this result", "analyse this result", "detailed analysis", "what stands out", "most important relationship", "prioritize this result")):
+        return "analysis"
     if any(term in query for term in ("verify next", "check next", "inspect next", "what should i verify", "what should i check", "what should i care about")):
         return "next"
     if any(term in query for term in ("how was", "calculated", "method", "methodology")):
@@ -914,6 +970,122 @@ def _context_question_intent(query: str) -> str | None:
     if "flood" in query:
         return "flood"
     return None
+
+
+def _visible_school_rows(filters: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = filters.get("visible_school_signals")
+    if not isinstance(raw, str):
+        return []
+    try:
+        value = json.loads(raw)
+    except (TypeError, ValueError):
+        return []
+    if not isinstance(value, list):
+        return []
+    rows: list[dict[str, Any]] = []
+    for item in value[:5]:
+        if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+            continue
+        rows.append(
+            {
+                "name": item["name"][:100],
+                "level": str(item.get("level") or "school")[:40],
+                "permits": int(item["permits"]) if isinstance(item.get("permits"), (int, float)) else None,
+                "utilization": float(item["utilization"]) if isinstance(item.get("utilization"), (int, float)) else None,
+                "watch": str(item.get("watch") or "")[:40],
+            }
+        )
+    return rows
+
+
+def _school_screen_analysis_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    query = " ".join(request.query.lower().split())
+    rows = _visible_school_rows(safe_filter_context(request.filter_context))
+    if not rows or not any(
+        term in query
+        for term in (
+            "analy", "compare", "stands out", "important", "investigate", "pressure",
+            "significant", "relationship", "care about", "strongest",
+        )
+    ):
+        return None
+
+    permit_rows = [row for row in rows if row["permits"] is not None]
+    utilization_rows = [row for row in rows if row["utilization"] is not None]
+    permit_rows.sort(key=lambda row: row["permits"], reverse=True)
+    leader = permit_rows[0] if permit_rows else None
+    lowest = permit_rows[-1] if permit_rows else None
+    utilization_leader = max(utilization_rows, key=lambda row: row["utilization"], default=None)
+    comparisons = "; ".join(
+        f"{row['name']}: {row['permits']:,} recent permits"
+        + (f", {row['utilization']:.0f}% utilization" if row["utilization"] is not None else "")
+        for row in permit_rows
+    )
+    answer = f"Among the {len(rows)} visible school areas, the observed comparison is: {comparisons}."
+    if leader and lowest and lowest["permits"]:
+        answer += (
+            f" {leader['name']} has the strongest recent permit pressure at {leader['permits']:,}—"
+            f"{leader['permits'] / lowest['permits']:.1f} times {lowest['name']}'s {lowest['permits']:,}."
+        )
+    named = {row["name"]: row for row in permit_rows}
+    odell = named.get("W R Odell ES")
+    cox_es = named.get("Cox Mill ES")
+    cox_hs = named.get("Cox Mill HS")
+    if odell and cox_es and cox_hs and cox_es["permits"] and cox_hs["permits"]:
+        answer += (
+            f" Among Cox Mill ES, W R Odell ES, and Cox Mill HS, W R Odell ES is {odell['permits'] / cox_es['permits']:.1f} times Cox Mill ES's count "
+            f"and {odell['permits'] / cox_hs['permits']:.1f} times Cox Mill HS's count."
+        )
+    if utilization_leader:
+        answer += (
+            f" {utilization_leader['name']} has the highest reported utilization at "
+            f"{utilization_leader['utilization']:.0f}%, so the permit leader and utilization leader are not the same signal."
+        )
+    answer += (
+        " The overlap can prioritize review, but it does not show that permits caused enrollment pressure. "
+        "Investigate official enrollment and capacity, the permitted housing pipeline and geography, and current student-generation assumptions next."
+    )
+    return _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [_evidence("Visible school pressure rows", comparisons, "Current School Utilization + Permit Pressure screen")],
+        ["Confirm official enrollment, capacity, and student-generation assumptions before drawing a capacity conclusion."],
+    )
+
+
+def _external_research_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse | None:
+    query = " ".join(request.query.lower().split())
+    explicit = any(
+        phrase in query
+        for phrase in (
+            "search the web", "look this up online", "external research", "outside cfs",
+            "latest official census", "latest official fema", "latest official ncdot",
+        )
+    )
+    if not explicit:
+        return None
+    answer = (
+        "This Local Cabarrus Insights runtime does not have an approved external-research connector, so I will not scrape arbitrary websites or present unverified material as County evidence. "
+        "Use the current governed CFS evidence, or provide/enable an approved authoritative source. For external verification, prefer Cabarrus County first, then the responsible state or federal agency, and label it separately from CFS data."
+    )
+    return _response(
+        answer,
+        context,
+        domains,
+        request.mode,
+        [_evidence("External research boundary", "No approved external connector is configured in this Local runtime.", "Cabarrus Insights runtime", "not_available")],
+        ["Use an approved County, state, or federal source for any external verification."],
+    )
 
 
 def _active_result_clarification(query: str) -> str | None:

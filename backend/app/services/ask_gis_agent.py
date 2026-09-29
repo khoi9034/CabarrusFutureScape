@@ -253,6 +253,8 @@ def run_gis_agent(
         tools=tools,
         verification_status=verification_status,
         limitations=_limitations(criteria),
+        breakdown=breakdown,
+        comparison=comparison,
     )
     warning = _warning(criteria)
     if count == 0:
@@ -456,6 +458,8 @@ def result_metadata(result_id: str) -> dict[str, Any] | None:
         "criteria": _criteria_labels(result["criteria"]),
         "intermediate_results": result.get("intermediate_results", []),
         "limitations": result.get("limitations", []),
+        "breakdown": result.get("breakdown", []),
+        "comparison": result.get("comparison"),
         "original_question": result.get("original_question"),
         "parent_result_ids": result.get("parent_result_ids", []),
         "source_datasets": result.get("source_datasets", []),
@@ -536,7 +540,8 @@ def _plan_known_query(query: str, criteria: dict[str, Any]) -> tuple[dict[str, A
         criteria["signal_bands"] = ["high_development_signal", "very_high_development_signal"]
         tools.append("filter_development_signal_band")
         recognized = True
-    if "school" in query and ("review" in query or "context" in query):
+    school_action = any(word in query for word in ("show", "find", "filter", "highlight", "map", "select", "keep", "remove"))
+    if "school" in query and school_action and ("review" in query or "context" in query):
         criteria["school_review"] = True
         tools.append("filter_school_context")
         recognized = True
@@ -560,7 +565,7 @@ def _plan_known_query(query: str, criteria: dict[str, Any]) -> tuple[dict[str, A
         criteria["comparison_year"] = int(match.group(1))
         tools.append("compare_periods")
         recognized = True
-    if "school" in query and any(word in query for word in ("areas", "most development", "development pressure")):
+    if "school" in query and school_action and any(word in query for word in ("areas", "most development", "development pressure")):
         criteria["school_group"] = True
         criteria["active_development"] = True
         tools.extend(["aggregate_by_area", "rank_results"])
@@ -784,6 +789,8 @@ def _store_result(
     tools: list[str] | None = None,
     verification_status: str = "verified",
     limitations: list[str] | None = None,
+    breakdown: list[dict[str, Any]] | None = None,
+    comparison: dict[str, Any] | None = None,
 ) -> None:
     with _RESULTS_LOCK:
         _purge_expired()
@@ -799,6 +806,8 @@ def _store_result(
             "tools": list(tools or []),
             "verification_status": verification_status,
             "limitations": list(limitations or _limitations(criteria)),
+            "breakdown": list(breakdown or []),
+            "comparison": dict(comparison) if comparison else None,
         }
 
 

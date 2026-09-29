@@ -560,38 +560,63 @@ function PlanningIndicatorCenterWorkspace() {
   const activeReadinessTabLabel =
     readinessTabs.find((tab) => tab.id === activeReadinessTab)?.label ??
     activeReadinessTab;
+  const showSchoolPressureSection = shouldShowGroupForReadinessTab(
+    "school-context",
+    activeReadinessTab,
+  );
   const askCfsFilterContext = useMemo(
-    () => ({
-      active_tab: activeReadinessTabLabel,
-      active_layers: activeLayerIds.join(", "),
-      planning_mode: overviewCommandMode,
-      selected_parcel_id: selectedParcelId,
-      selected_parcel_pin14: selectedParcelIntelligence?.pin14 ?? null,
-      selected_parcel_quality:
-        selectedParcelIntelligence?.parcelQualityStatus ?? null,
-      selected_parcel_zoning:
-        selectedParcelIntelligence?.zoningCode ?? null,
-      selected_feature_type: selectedDevelopmentHotspotContext
-        ? "development_hotspot"
-        : null,
-      selected_feature_id:
-        selectedDevelopmentHotspotContext?.clusterId ??
-        selectedDevelopmentHotspotContext?.officialParcelId ??
-        null,
-      selected_feature_label:
-        selectedDevelopmentHotspotContext?.areaLabel ?? null,
-      selected_feature_related_parcels:
-        selectedDevelopmentHotspotContext?.parcelsRepresented ?? null,
-      selected_feature_permit_count:
-        selectedDevelopmentHotspotContext?.totalPermitCount ?? null,
-      selected_feature_analysis_period:
-        selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
-      selected_domain: selectedIndicatorCenterContext?.groupId ?? null,
-      selected_signal_id: selectedIndicatorCenterContext?.indicatorId ?? null,
-      selected_signal_title: selectedIndicatorCenterContext?.name ?? null,
-      visible_kpis: visibleExecutiveSignals.length,
-      visible_watchlist_rows: visibleAttentionQueue.length,
-    }),
+    () => {
+      const visibleSchoolSignals = showSchoolPressureSection
+        ? schoolPressureLayer.features
+            .filter((feature) =>
+              ["elevated review", "review", "data needed"].includes(
+                feature.properties.school_pressure_watch_band,
+              ),
+            )
+            .slice(0, 5)
+            .map(({ properties }) => ({
+              level: properties.school_level,
+              name: properties.school_name,
+              permits: properties.permit_count_recent,
+              utilization: properties.utilization_pct,
+              watch: properties.school_pressure_watch_band,
+            }))
+        : [];
+      return {
+        active_tab: activeReadinessTabLabel,
+        active_layers: activeLayerIds.join(", "),
+        planning_mode: overviewCommandMode,
+        selected_parcel_id: selectedParcelId,
+        selected_parcel_pin14: selectedParcelIntelligence?.pin14 ?? null,
+        selected_parcel_quality:
+          selectedParcelIntelligence?.parcelQualityStatus ?? null,
+        selected_parcel_zoning:
+          selectedParcelIntelligence?.zoningCode ?? null,
+        selected_feature_type: selectedDevelopmentHotspotContext
+          ? "development_hotspot"
+          : null,
+        selected_feature_id:
+          selectedDevelopmentHotspotContext?.clusterId ??
+          selectedDevelopmentHotspotContext?.officialParcelId ??
+          null,
+        selected_feature_label:
+          selectedDevelopmentHotspotContext?.areaLabel ?? null,
+        selected_feature_related_parcels:
+          selectedDevelopmentHotspotContext?.parcelsRepresented ?? null,
+        selected_feature_permit_count:
+          selectedDevelopmentHotspotContext?.totalPermitCount ?? null,
+        selected_feature_analysis_period:
+          selectedDevelopmentHotspotContext?.analysisPeriod ?? null,
+        selected_domain: selectedIndicatorCenterContext?.groupId ?? null,
+        selected_signal_id: selectedIndicatorCenterContext?.indicatorId ?? null,
+        selected_signal_title: selectedIndicatorCenterContext?.name ?? null,
+        visible_kpis: visibleExecutiveSignals.length,
+        visible_watchlist_rows: visibleAttentionQueue.length,
+        visible_school_signals: visibleSchoolSignals.length
+          ? JSON.stringify(visibleSchoolSignals)
+          : null,
+      };
+    },
     [
       activeReadinessTabLabel,
       activeLayerIds,
@@ -600,13 +625,11 @@ function PlanningIndicatorCenterWorkspace() {
       selectedParcelIntelligence,
       selectedDevelopmentHotspotContext,
       selectedIndicatorCenterContext,
+      schoolPressureLayer.features,
+      showSchoolPressureSection,
       visibleAttentionQueue.length,
       visibleExecutiveSignals.length,
     ],
-  );
-  const showSchoolPressureSection = shouldShowGroupForReadinessTab(
-    "school-context",
-    activeReadinessTab,
   );
   const schoolPressureIndicator = buildSchoolPressureIndicatorContext(
     schoolPressureLayer.summary,

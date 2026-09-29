@@ -95,7 +95,6 @@ export function AskCfsPanel({
     status: principalStatus,
   } = useProductPrincipal();
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
-  const [agentMode, setAgentMode] = useState<"explain" | "assist" | "agent">("assist");
   const [activeAgentResult, setActiveAgentResult] = useState<CfsAskAgentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingStage, setLoadingStage] = useState(0);
@@ -132,7 +131,7 @@ export function AskCfsPanel({
       ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
       : appMode === "master-data"
         ? "Explain governed dataset metadata, approved fields, filters, joins, and result summaries."
-        : "Search across indicators, layers, methodology, and cached planning signals.");
+        : "Ask about the current map, parcel, data, or analysis.");
   const inputPlaceholder = inputPlaceholderOverride ??
     (appMode === "economics"
       ? "Ask about this economic view..."
@@ -167,6 +166,7 @@ export function AskCfsPanel({
     filterContext?.master_data_join,
     filterContext?.master_data_result_count,
     filterContext?.master_data_match_percentage,
+    filterContext?.visible_school_signals,
   ].join("|");
   const inCurrentScope = contentScope === contextScopeKey;
   const scopedAnswer = inCurrentScope ? answer : null;
@@ -473,7 +473,7 @@ export function AskCfsPanel({
           : undefined,
         mode: USE_DEMO_DATA ? "demo" : "live",
         interaction_mode: requestOverrides.interaction_mode ?? "freeform",
-        agent_mode: requestOverrides.agent_mode ?? agentMode,
+        agent_mode: "agent",
         agent_result_id: requestOverrides.agent_result_id ?? activeAgentResult?.result_id,
         map_context: mapContext,
         query: trimmedQuery,
@@ -548,7 +548,6 @@ export function AskCfsPanel({
   }, [
     appMode,
     activeAgentResult?.result_id,
-    agentMode,
     canUseAskCfs,
     contextScopeKey,
     filterContext,
@@ -684,26 +683,6 @@ export function AskCfsPanel({
             {liveDataBlocked ? <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-amber-200">Live data unavailable</span> : null}
             {lastMapContext ? <span className="cfs-ask-context-chip">{lastMapContext.visible_layers.filter((layer) => layer.visible).length} active layers</span> : null}
             {lastMapContext?.selected_parcel_id ? <span className="cfs-ask-context-chip">Parcel selected</span> : null}
-          </div>
-        ) : null}
-        {mapAware && !USE_DEMO_DATA ? (
-          <div aria-label="Ask Insights analysis mode" className="flex gap-1" role="group">
-            {(["explain", "assist", "agent"] as const).map((mode) => (
-              <button
-                aria-pressed={agentMode === mode}
-                className={`rounded-md border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#68d8ff]/60 ${
-                  agentMode === mode
-                    ? "border-[#68d8ff]/45 bg-[#68d8ff]/15 text-[#c6f4ff]"
-                    : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
-                }`}
-                data-testid={`ask-cfs-agent-mode-${mode}`}
-                key={mode}
-                onClick={() => setAgentMode(mode)}
-                type="button"
-              >
-                {mode}
-              </button>
-            ))}
           </div>
         ) : null}
       </div>
@@ -860,17 +839,11 @@ export function AskCfsPanel({
           <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-300">
             {activeAgentResult.criteria.map((criterion) => <li key={criterion}>{criterion}</li>)}
           </ul>
-          {activeAgentResult.tool_plan?.length ? (
-            <details className="mt-2 rounded-lg border border-white/8 bg-black/10 px-2.5 py-2" open>
-              <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Plan</summary>
-              <ol className="mt-1 list-decimal space-y-1 pl-4 text-xs leading-5 text-slate-400">
-                {activeAgentResult.tool_plan.map((step) => <li key={step}>{step}</li>)}
-              </ol>
-            </details>
+          {activeAgentResult.execution_trace.length ? (
+            <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400" aria-label="GIS analysis activity">
+              {activeAgentResult.execution_trace.map((step) => <li key={step}>✓ {step}</li>)}
+            </ul>
           ) : null}
-          <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400" aria-label="GIS analysis activity">
-            {activeAgentResult.execution_trace.map((step) => <li key={step}>✓ {step}</li>)}
-          </ul>
           {activeAgentResult.breakdown?.length ? (
             <div className="mt-2 rounded-lg border border-white/8 bg-black/10 px-2.5 py-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Breakdown</p>
@@ -1082,6 +1055,7 @@ const safeAskCfsFilterKeys = [
   "master_data_result_count",
   "master_data_match_percentage",
   "master_data_lineage",
+  "visible_school_signals",
 ] as const;
 
 function safeAskCfsFilterContext(
