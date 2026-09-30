@@ -105,11 +105,37 @@ export interface CfsAiDashboardActions {
     id: string;
   } | null;
   recommended_layers?: string[];
+  recommended_areas?: CfsAiRecommendedArea[];
+  recommended_parcels?: CfsAiRecommendedParcel[];
   sort_watchlist_by?: "data_gap" | "recent_activity" | "severity" | null;
   time_range?: {
     end_year?: number | null;
     start_year?: number | null;
   } | null;
+}
+
+export interface CfsAiRecommendedArea {
+  count: number;
+  extent: { xmax: number; xmin: number; ymax: number; ymin: number };
+  label: string;
+  parent_result_id: string;
+  reason: string;
+  recent_permit_count: number;
+  share_percent: number;
+  subset_result_id: string;
+}
+
+export interface CfsAiRecommendedParcel {
+  area_label?: string | null;
+  centroid: { latitude: number; longitude: number };
+  extent: { xmax: number; xmin: number; ymax: number; ymin: number };
+  highlight_geometry: Record<string, unknown>;
+  latest_permit_date?: string | null;
+  parcel_reference: string;
+  parent_result_id: string;
+  reason: string;
+  recent_permit_count: number;
+  total_permit_count: number;
 }
 
 export interface CfsAskAgentResult {

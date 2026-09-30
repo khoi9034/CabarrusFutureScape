@@ -1,6 +1,9 @@
 import { apiGet, type ApiRequestOptions } from "@/lib/api/client";
 
-import type { CfsAskAgentResult } from "@/types/api";
+import type { CfsAiRecommendedArea, CfsAskAgentResult } from "@/types/api";
+
+export const CFS_ASK_AREA_INSPECT_EVENT = "cfs:ask-area-inspect";
+export const CFS_ASK_RESULT_BACK_EVENT = "cfs:ask-result-back";
 
 export type ManagementMapSelection =
   | "active-development-parcels"
@@ -53,4 +56,12 @@ export function getManagementMapResult(
     ...options,
     timeoutMs: options?.timeoutMs ?? 60_000,
   });
+}
+
+export function inspectAskArea(area: CfsAiRecommendedArea) {
+  window.dispatchEvent(new CustomEvent(CFS_ASK_AREA_INSPECT_EVENT, { detail: area }));
+}
+
+export function returnToAskResult() {
+  window.dispatchEvent(new Event(CFS_ASK_RESULT_BACK_EVENT));
 }

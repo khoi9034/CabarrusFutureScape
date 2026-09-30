@@ -18,6 +18,8 @@ import { getAskCfsConversationRepository } from "@/lib/product/runtimeRepository
 import type { AskCfsMessageRecord, JsonObject, JsonValue } from "@/lib/product/types";
 import type {
   CfsAskAgentResult,
+  CfsAiRecommendedArea,
+  CfsAiRecommendedParcel,
   CfsAiConversationTurn,
   CfsAiMapContext,
   CfsAiSearchRequest,
@@ -32,6 +34,7 @@ export interface AskCfsExternalRequest {
 }
 
 export interface AskCfsPanelProps {
+  agentResult?: CfsAskAgentResult | null;
   appMode?: AskCfsAppMode;
   backend?: BackendAvailabilityController;
   contextLabel?: string;
@@ -44,6 +47,9 @@ export interface AskCfsPanelProps {
   onAgentResultApply?: (result: CfsAskAgentResult) => void;
   onAgentResultClear?: () => void;
   onAgentResultUndo?: () => void;
+  onRecommendedAreaInspect?: (area: CfsAiRecommendedArea) => void;
+  onRecommendedParcelInspect?: (parcel: CfsAiRecommendedParcel) => void;
+  onReturnToAgentResult?: () => void;
   onWorkingChange?: (working: boolean) => void;
   onResponse?: (response: CfsAiSearchResponse) => void;
   suggestedPromptsOverride?: readonly string[];
@@ -70,6 +76,7 @@ interface PendingAskPersistence {
 }
 
 export function AskCfsPanel({
+  agentResult,
   appMode = "planning",
   backend,
   contextLabel,
@@ -82,6 +89,9 @@ export function AskCfsPanel({
   onAgentResultApply,
   onAgentResultClear,
   onAgentResultUndo,
+  onRecommendedAreaInspect,
+  onRecommendedParcelInspect,
+  onReturnToAgentResult,
   onWorkingChange,
   onResponse,
   suggestedPromptsOverride,
@@ -96,6 +106,7 @@ export function AskCfsPanel({
   } = useProductPrincipal();
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
   const [activeAgentResult, setActiveAgentResult] = useState<CfsAskAgentResult | null>(null);
+  const [drilldownLabel, setDrilldownLabel] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingStage, setLoadingStage] = useState(0);
   const [contentScope, setContentScope] = useState("");
@@ -143,7 +154,6 @@ export function AskCfsPanel({
     : suggestedPrompts;
   const contextScopeKey = [
     appMode,
-    filterContext?.selected_parcel_id,
     filterContext?.active_parcel_id,
     filterContext?.scenario_id,
     filterContext?.active_scenario,
@@ -179,6 +189,10 @@ export function AskCfsPanel({
   const historyTurns = scopedAnswer ? scopedTurns.slice(0, -1) : scopedTurns;
 
   useEffect(() => onWorkingChange?.(scopedIsLoading), [onWorkingChange, scopedIsLoading]);
+
+  useEffect(() => {
+    if (agentResult !== undefined) setActiveAgentResult(agentResult);
+  }, [agentResult]);
 
   useEffect(() => {
     if (!liveDataBlocked) return;
@@ -817,6 +831,67 @@ export function AskCfsPanel({
 
       {scopedAnswer ? (
         <AskCfsAnswer question={lastTurn?.query ?? ""} response={scopedAnswer} />
+      ) : null}
+      {scopedAnswer?.dashboard_actions.recommended_areas?.length || scopedAnswer?.dashboard_actions.recommended_parcels?.length ? (
+        <div className="mt-3 space-y-3" data-testid="ask-spatial-recommendations">
+          {drilldownLabel ? (
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-[#68d8ff]/20 bg-[#68d8ff]/[0.07] px-3 py-2 text-xs text-slate-300">
+              <span>Current subset: <strong className="text-white">{drilldownLabel}</strong></span>
+              <button
+                className="rounded-md border border-white/15 px-2.5 py-1.5 font-semibold text-[#c6f4ff] hover:border-[#68d8ff]/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#68d8ff]/60"
+                onClick={() => { setDrilldownLabel(null); onReturnToAgentResult?.(); }}
+                type="button"
+              >
+                Back to highlighted result
+              </button>
+            </div>
+          ) : null}
+          {scopedAnswer.dashboard_actions.recommended_areas?.length ? (
+            <div className="rounded-xl border border-white/10 bg-black/10 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9be9ff]">Areas worth inspecting</p>
+              <div className="mt-2 space-y-2">
+                {scopedAnswer.dashboard_actions.recommended_areas.map((area) => (
+                  <div className="rounded-lg border border-white/8 bg-white/[0.025] p-2.5" key={area.subset_result_id}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{area.label}</p>
+                        <p className="mt-1 text-xs leading-5 text-slate-400">{area.reason}</p>
+                      </div>
+                      <button
+                        className="shrink-0 rounded-md border border-[#68d8ff]/30 bg-[#68d8ff]/10 px-2.5 py-1.5 text-xs font-semibold text-[#c6f4ff] hover:border-[#68d8ff]/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#68d8ff]/60"
+                        onClick={() => { setDrilldownLabel(area.label); onRecommendedAreaInspect?.(area); }}
+                        type="button"
+                      >
+                        Inspect area
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {scopedAnswer.dashboard_actions.recommended_parcels?.length ? (
+            <div className="rounded-xl border border-white/10 bg-black/10 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9be9ff]">Parcels worth inspecting</p>
+              <div className="mt-2 space-y-2">
+                {scopedAnswer.dashboard_actions.recommended_parcels.map((parcel) => (
+                  <div className="rounded-lg border border-white/8 bg-white/[0.025] p-2.5" key={parcel.parcel_reference}>
+                    <p className="text-sm font-semibold text-white">Parcel {parcel.parcel_reference}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">{parcel.area_label ?? "Current highlighted result"} · {parcel.total_permit_count.toLocaleString()} total · {parcel.recent_permit_count.toLocaleString()} recent</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-400">{parcel.reason}</p>
+                    <button
+                      className="mt-2 rounded-md border border-[#d9b867]/35 bg-[#d9b867]/10 px-2.5 py-1.5 text-xs font-semibold text-[#f5dda0] hover:border-[#d9b867]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9b867]/60"
+                      onClick={() => { setDrilldownLabel(`Parcel ${parcel.parcel_reference}`); onRecommendedParcelInspect?.(parcel); }}
+                      type="button"
+                    >
+                      Inspect parcel
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
       ) : null}
       {activeAgentResult?.status === "executed" ? (
         <div className="mt-3 rounded-xl border border-[#68d8ff]/20 bg-[#68d8ff]/[0.06] p-3" data-testid="ask-cfs-agent-result">

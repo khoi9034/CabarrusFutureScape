@@ -25,7 +25,7 @@ from app.services.ai_search_service import (
     is_map_context_query,
     safe_filter_context,
 )
-from app.services.ask_gis_agent import available_datasets, describe_dataset, result_map_payload, result_metadata, run_gis_agent, tool_registry
+from app.services.ask_gis_agent import analyze_highlighted_result, available_datasets, describe_dataset, result_map_payload, result_metadata, run_gis_agent, tool_registry
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
 LOGGER = logging.getLogger(__name__)
@@ -210,6 +210,41 @@ def search_cfs(
     """Answer CFS indicator questions from compact server-side context."""
 
     start = time.perf_counter()
+    spatial_analysis = analyze_highlighted_result(db, request)
+    if spatial_analysis:
+        elapsed = int((time.perf_counter() - start) * 1000)
+        if spatial_analysis.get("unavailable"):
+            return CfsAiSearchResponse(
+                answer=str(spatial_analysis["unavailable"]),
+                answer_mode="safety",
+                data_mode=request.mode,
+                provider="none",
+                provider_status="local_data_unavailable",
+                response_time_ms=elapsed,
+                timings_ms={"spatial_analysis_ms": elapsed, "total_ms": elapsed},
+            )
+        return CfsAiSearchResponse(
+            answer=str(spatial_analysis["answer"]),
+            answer_mode="deterministic",
+            as_of=datetime.now(UTC).isoformat(),
+            caveats=["Recommendations support investigation only; permit concentration does not establish future development."],
+            context_freshness="current_session",
+            dashboard_actions={
+                "agent_result": spatial_analysis["agent_result"],
+                "recommended_areas": spatial_analysis["areas"],
+                "recommended_parcels": spatial_analysis["parcels"],
+            },
+            data_source="local_live_backend",
+            data_mode=request.mode,
+            domains=["permits"],
+            provider="none",
+            provider_status="controlled_spatial_analysis",
+            provenance={"analysis_boundary": "active_highlighted_result", "geometry_in_ai_context": False},
+            related_layers=["Ask Insights Result", "Parcel Intelligence"],
+            response_time_ms=elapsed,
+            suggested_follow_up_questions=["Why did you recommend this parcel?", "What constraints overlap the strongest cluster?"],
+            timings_ms={"spatial_analysis_ms": elapsed, "total_ms": elapsed},
+        )
     agent_result = run_gis_agent(db, request)
     if agent_result:
         elapsed = int((time.perf_counter() - start) * 1000)

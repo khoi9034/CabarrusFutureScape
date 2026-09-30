@@ -176,6 +176,30 @@ class CfsAiAgentResult(BaseModel):
     comparison: dict[str, Any] | None = None
 
 
+class CfsAiRecommendedArea(BaseModel):
+    count: int = Field(ge=0)
+    extent: CfsAiMapExtent
+    label: str = Field(max_length=200)
+    parent_result_id: str = Field(max_length=80)
+    reason: str = Field(max_length=500)
+    recent_permit_count: int = Field(default=0, ge=0)
+    share_percent: float = Field(ge=0, le=100)
+    subset_result_id: str = Field(max_length=80)
+
+
+class CfsAiRecommendedParcel(BaseModel):
+    area_label: str | None = Field(default=None, max_length=200)
+    centroid: CfsAiMapCenter
+    extent: CfsAiMapExtent
+    highlight_geometry: dict[str, Any]
+    latest_permit_date: str | None = Field(default=None, max_length=20)
+    parcel_reference: str = Field(max_length=120)
+    parent_result_id: str = Field(max_length=80)
+    reason: str = Field(max_length=500)
+    recent_permit_count: int = Field(default=0, ge=0)
+    total_permit_count: int = Field(default=0, ge=0)
+
+
 class CfsAiDashboardActions(BaseModel):
     agent_result: CfsAiAgentResult | None = None
     filter_watchlist: CfsAiWatchlistFilter | None = None
@@ -183,6 +207,8 @@ class CfsAiDashboardActions(BaseModel):
     highlight_kpis: list[str] = Field(default_factory=list)
     open_detail: CfsAiOpenDetailAction | None = None
     recommended_layers: list[str] = Field(default_factory=list)
+    recommended_areas: list[CfsAiRecommendedArea] = Field(default_factory=list, max_length=5)
+    recommended_parcels: list[CfsAiRecommendedParcel] = Field(default_factory=list, max_length=5)
     sort_watchlist_by: Literal["data_gap", "recent_activity", "severity"] | None = None
     time_range: CfsAiTimeRangeAction | None = None
 

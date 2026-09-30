@@ -89,10 +89,13 @@ import {
   USE_INTERACTIVE_MAP,
 } from "@/lib/api/client";
 import {
+  CFS_ASK_AREA_INSPECT_EVENT,
+  CFS_ASK_RESULT_BACK_EVENT,
   getAskAgentMapResult,
   getManagementMapResult,
   type ManagementMapSelection,
 } from "@/lib/api/managementMap";
+import type { CfsAiRecommendedArea } from "@/types/api";
 import { getManagementHandoffCameraTarget } from "@/lib/map/managementHandoffCamera";
 import {
   getDemoMapContext,
@@ -311,6 +314,7 @@ export function SceneViewContainer() {
   const floodZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const modelResearchPreviewLayerRef = useRef<GraphicsLayer | null>(null);
   const managementResultLayerRef = useRef<GraphicsLayer | null>(null);
+  const askDrilldownLayerRef = useRef<GraphicsLayer | null>(null);
   const managementHandoffCameraKeyRef = useRef<string | null>(null);
   const modelResearchHeatmapLayerRef = useRef<FeatureLayer | null>(null);
   const modelResearchGoToKeyRef = useRef<string | null>(null);
@@ -2126,6 +2130,62 @@ export function SceneViewContainer() {
     handleMapNavigationFailure,
     setManagementMapResult,
   ]);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) return;
+
+    const inspectArea = (event: Event) => {
+      const area = (event as CustomEvent<CfsAiRecommendedArea>).detail;
+      if (!area?.subset_result_id) return;
+      void getAskAgentMapResult({ result_id: area.subset_result_id })
+        .then((result) => {
+          if (view.destroyed) return;
+          const layer = ensureAskDrilldownLayer(runtime, view);
+          askDrilldownLayerRef.current = layer;
+          layer.removeAll();
+          layer.addMany(result.features.flatMap((feature) => {
+            const graphic = createManagementResultGraphic(runtime, feature);
+            if (!graphic) return [];
+            if (feature.geometry.type !== "Point") {
+              graphic.symbol = {
+                color: [245, 181, 61, 0.28],
+                outline: { color: [255, 232, 153, 1], width: 2 },
+                type: "simple-fill",
+              } as unknown as Graphic["symbol"];
+            }
+            return [graphic];
+          }));
+          layer.visible = true;
+          void view.goTo(new runtime.Extent({ ...area.extent, spatialReference: { wkid: 4326 } }).expand(1.25), { duration: 500 })
+            .catch(handleMapNavigationFailure);
+        })
+        .catch(handleMapNavigationFailure);
+    };
+    const returnToResult = () => {
+      askDrilldownLayerRef.current?.removeAll();
+      if (askDrilldownLayerRef.current) askDrilldownLayerRef.current.visible = false;
+      focusLayerRef.current?.removeAll();
+      const extents = managementResultLayerRef.current?.graphics
+        .toArray()
+        .flatMap((graphic) => graphic.geometry?.extent ? [graphic.geometry.extent] : []) ?? [];
+      const target = getManagementHandoffCameraTarget(
+        extents.map((extent) => ({ xmax: extent.xmax, xmin: extent.xmin, ymax: extent.ymax, ymin: extent.ymin })),
+        { featureCount: extents.length, selection: "ask-agent-result" },
+      );
+      if (target) {
+        void view.goTo(new runtime.Extent({ ...target.extent, spatialReference: { wkid: 4326 } }).expand(target.padding), { duration: 500 })
+          .catch(handleMapNavigationFailure);
+      }
+    };
+    window.addEventListener(CFS_ASK_AREA_INSPECT_EVENT, inspectArea);
+    window.addEventListener(CFS_ASK_RESULT_BACK_EVENT, returnToResult);
+    return () => {
+      window.removeEventListener(CFS_ASK_AREA_INSPECT_EVENT, inspectArea);
+      window.removeEventListener(CFS_ASK_RESULT_BACK_EVENT, returnToResult);
+    };
+  }, [arcGisViewState, handleMapNavigationFailure]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
@@ -4336,6 +4396,21 @@ function ensureManagementResultLayer(runtime: ArcGISRuntime, view: SceneView) {
   const existingLayer = map.findLayerById("cfs-management-result-layer");
   if (existingLayer) return existingLayer as GraphicsLayer;
   const layer = createManagementResultLayer(runtime);
+  map.add(layer);
+  return layer;
+}
+
+function ensureAskDrilldownLayer(runtime: ArcGISRuntime, view: SceneView) {
+  const map = view.map;
+  if (!map) throw new Error("MapView map is unavailable for Ask Insights drill-down.");
+  const existingLayer = map.findLayerById("cfs-ask-drilldown-layer");
+  if (existingLayer) return existingLayer as GraphicsLayer;
+  const layer = new runtime.GraphicsLayer({
+    id: "cfs-ask-drilldown-layer",
+    listMode: "hide",
+    title: "Ask Insights Drill-down",
+    visible: false,
+  });
   map.add(layer);
   return layer;
 }

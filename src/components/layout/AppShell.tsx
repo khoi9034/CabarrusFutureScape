@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
 import { ParcelImageryPanel } from "@/components/dashboard/ParcelImageryPanel";
+import { createParcelDetailFallbackRecord } from "@/components/dashboard/ParcelSearchPanel";
 import {
   SharedAskCfsDrawer,
   SharedAskCfsRegistryProvider,
@@ -58,7 +59,14 @@ import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
 import { useBackendAvailability } from "@/hooks/useBackendAvailability";
 import { USE_DEMO_DATA } from "@/lib/api/client";
+import { getParcelDetail } from "@/lib/api/parcels";
+import { normalizeBackendParcelDetailResponse } from "@/lib/adapters/parcelDetailAdapter";
 import type { ParcelImageryAskContext } from "@/lib/api/imagery";
+import { inspectAskArea, returnToAskResult } from "@/lib/api/managementMap";
+import {
+  createParcelMapFocus,
+  dispatchParcelMapFocusRequest,
+} from "@/lib/map/parcelMapFocus";
 import {
   readManagementHandoff,
   type ManagementHandoffContext,
@@ -70,7 +78,8 @@ import type {
   ManagementSection,
   OverviewPanelWidthPreset,
 } from "@/types";
-import type { CfsAiSearchRequest } from "@/types/api";
+import type { CfsAiRecommendedArea, CfsAiRecommendedParcel, CfsAiSearchRequest } from "@/types/api";
+import type { ParcelHighlightGeometry } from "@/types/map/parcelFocus";
 
 const LEFT_PANEL_EXPANDED_WIDTH = 372;
 const LEFT_PANEL_COLLAPSED_WIDTH = 0;
@@ -98,6 +107,7 @@ function ProductShell() {
   const backendAvailability = useBackendAvailability();
   const {
     askAgentResult,
+    clearSelectedParcel,
     developmentHotspotControls,
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
@@ -113,6 +123,7 @@ function ProductShell() {
     selectedParcelId,
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
+    selectParcel,
     setMapFocusMode,
     setDevelopmentHotspotControls,
     setAskAgentResult,
@@ -123,6 +134,7 @@ function ProductShell() {
     setParcelReviewView,
     setPlanningSnapshotView,
     setProductMode,
+    setSelectedParcelIntelligence,
   } = useDashboardState();
   const [askCfsOpen, setAskCfsOpen] = useState(false);
   const [askCfsExpanded, setAskCfsExpanded] = useState(false);
@@ -153,6 +165,42 @@ function ProductShell() {
     setAskAgentResult(previousAskAgentResultRef.current);
     previousAskAgentResultRef.current = null;
   }, [setAskAgentResult]);
+  const inspectRecommendedArea = useCallback((area: CfsAiRecommendedArea) => {
+    inspectAskArea(area);
+  }, []);
+  const inspectRecommendedParcel = useCallback((parcel: CfsAiRecommendedParcel) => {
+    setOverviewCommandMode("parcel");
+    setOverviewLayoutPanel("right", "visible");
+    selectParcel(parcel.parcel_reference, { source: "dashboard" });
+    const focus = createParcelMapFocus(
+      { officialParcelId: parcel.parcel_reference },
+      "command",
+      {
+        centroid: { ...parcel.centroid, spatialReference: { wkid: 4326 } },
+        extent: { ...parcel.extent, spatialReference: { wkid: 4326 } },
+        highlightGeometry: {
+          ...parcel.highlight_geometry,
+          spatialReference: { wkid: 4326 },
+        } as ParcelHighlightGeometry,
+      },
+    );
+    window.requestAnimationFrame(() => dispatchParcelMapFocusRequest(focus));
+    void getParcelDetail(parcel.parcel_reference, { include_geometry: false })
+      .then((response) => setSelectedParcelIntelligence(
+        normalizeBackendParcelDetailResponse(
+          response,
+          createParcelDetailFallbackRecord(parcel.parcel_reference),
+        ),
+        "api",
+      ))
+      .catch(() => {
+        // The selected parcel and governed recommendation remain visible if detail hydration fails.
+      });
+  }, [selectParcel, setOverviewCommandMode, setOverviewLayoutPanel, setSelectedParcelIntelligence]);
+  const returnToHighlightedResult = useCallback(() => {
+    clearSelectedParcel();
+    returnToAskResult();
+  }, [clearSelectedParcel]);
   const parcelReviewMode =
     productMode === "due_diligence" || executivePrintMode;
   const effectiveParcelReviewView = executivePrintMode
@@ -284,6 +332,8 @@ function ProductShell() {
             permit_year_end: developmentHotspotControls.permitYearEnd,
             permit_year_start: developmentHotspotControls.permitYearStart,
             management_analysis_period: managementHandoff?.analysisPeriod?.label ?? null,
+            management_handoff_period_start: managementHandoff?.analysisPeriod?.startDate ?? null,
+            management_handoff_period_end: managementHandoff?.analysisPeriod?.endDate ?? null,
             management_handoff_filter: managementHandoff?.filter ? JSON.stringify(managementHandoff.filter) : null,
             management_handoff_selection: managementHandoff?.selectionValue ?? null,
             management_handoff_selection_type: managementHandoff?.selectionType ?? null,
@@ -334,6 +384,7 @@ function ProductShell() {
           };
   const sharedAskCfsProps: AskCfsPanelProps = {
     ...askCfsConfig,
+    agentResult: askAgentResult,
     appMode: cfsAppMode === "management" ? "planning" : cfsAppMode,
     backend: backendAvailability,
     contextLabel:
@@ -357,6 +408,12 @@ function ProductShell() {
         ? "Ask about this page..."
         : askCfsConfig?.inputPlaceholderOverride,
     mapAware: cfsAppMode === "planning",
+    onAgentResultApply: applyAskAgentResult,
+    onAgentResultClear: clearAskAgentResult,
+    onAgentResultUndo: undoAskAgentResult,
+    onRecommendedAreaInspect: inspectRecommendedArea,
+    onRecommendedParcelInspect: inspectRecommendedParcel,
+    onReturnToAgentResult: returnToHighlightedResult,
     suggestedPromptsOverride:
       cfsAppMode === "management"
         ? managementSuggestedPrompts[managementSection]

@@ -51,7 +51,7 @@ const RESULT_LIMIT = 50;
 const API_RESULT_LIMIT = 100;
 const MIN_BACKEND_QUERY_LENGTH = 3;
 
-function createParcelDetailFallbackRecord(
+export function createParcelDetailFallbackRecord(
   officialParcelId: string,
 ): ParcelSearchRecord {
   return {

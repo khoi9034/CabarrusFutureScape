@@ -471,6 +471,283 @@ def result_metadata(result_id: str) -> dict[str, Any] | None:
     }
 
 
+def analyze_highlighted_result(
+    db: Session | None,
+    request: CfsAiSearchRequest,
+) -> dict[str, Any] | None:
+    """Analyze only the active temporary/Management result for spatial questions."""
+
+    query = " ".join(request.query.lower().split())
+    if not any(
+        phrase in query
+        for phrase in (
+            "what patterns",
+            "where is activity concentrated",
+            "where are the strongest",
+            "which areas stand out",
+            "which parcels should i inspect",
+            "why those parcels",
+            "why did you recommend this parcel",
+            "constraints overlap the strongest",
+            "strongest recent activity",
+            "most interesting one",
+        )
+    ):
+        return None
+    if db is None:
+        return {"unavailable": "Live spatial analysis is unavailable while the local data service is offline."}
+
+    parent_id = request.agent_result_id
+    parent = _get_result(parent_id)
+    if parent is None:
+        criteria = _management_handoff_criteria(request.filter_context)
+        if not criteria:
+            return None
+        parent_id = str(uuid4())
+        count = int(db.execute(text(_candidate_sql(criteria, count_only=True)), _params(criteria)).scalar_one())
+        _store_result(
+            parent_id,
+            criteria,
+            count,
+            original_question=str(request.filter_context.get("management_handoff_title") or "Management highlighted result"),
+            tools=["summarize_result"],
+        )
+        parent = _get_result(parent_id)
+    if not parent_id or not parent:
+        return None
+
+    criteria = dict(parent["criteria"])
+    count = int(parent["count"])
+    selected_parcel = str(request.filter_context.get("selected_parcel_id") or "").strip() or None
+    areas = _spatial_area_recommendations(db, criteria, parent_id, count)
+    parcels = _spatial_parcel_recommendations(db, criteria, parent_id, selected_parcel)
+    if selected_parcel and "why did you recommend" in query:
+        selected = next((item for item in parcels if item["parcel_reference"] == selected_parcel), None)
+        if selected:
+            answer = f"I recommended parcel {selected_parcel} because {selected['reason'][0].lower() + selected['reason'][1:]}"
+        else:
+            answer = "That parcel is part of the highlighted result, but it is not among the current evidence-based recommendations."
+    else:
+        answer = _spatial_analysis_answer(count, areas, parcels)
+    return {
+        "agent_result": CfsAiAgentResult(
+            count=count,
+            criteria=_criteria_labels(criteria),
+            execution_trace=[
+                "Kept the current highlighted result as the analysis universe.",
+                "Grouped the result by governed parcel area.",
+                "Compared recent activity, total activity, and material planning overlaps.",
+            ],
+            map_action="highlight_and_zoom",
+            mode="agent",
+            result_id=parent_id,
+            status="executed",
+            tool_plan=["aggregate_by_area", "rank_results", "intersect_result_sets", "summarize_numeric_field"],
+            verification_status="verified",
+            original_question=parent.get("original_question"),
+            source_datasets=_source_datasets(criteria),
+            source_dates=_source_dates(criteria),
+            method_summary=["Recommendations rank evidence inside the active result; they do not recommend approval or predict development."],
+            limitations=_limitations(criteria),
+        ),
+        "answer": answer,
+        "areas": areas,
+        "parcels": parcels,
+    }
+
+
+def _management_handoff_criteria(filter_context: dict[str, Any]) -> dict[str, Any] | None:
+    selection = str(filter_context.get("management_handoff_selection") or "").strip().lower()
+    selection_type = str(filter_context.get("management_handoff_selection_type") or "").strip().lower()
+    criteria: dict[str, Any] = {}
+    if selection in {"permit_activity", "active_development_parcels"}:
+        criteria["active_development"] = True
+    elif selection == "flood_review":
+        criteria["flood_review"] = True
+    elif selection == "flood_high_severe":
+        criteria["flood_review"] = True
+    elif selection_type == "signal-band" or selection in {"high", "very_high", "high,very_high"}:
+        if selection == "very_high":
+            criteria["signal_band"] = "very_high_development_signal"
+        elif selection == "high":
+            criteria["signal_band"] = "high_development_signal"
+        else:
+            criteria["signal_bands"] = ["high_development_signal", "very_high_development_signal"]
+    else:
+        return None
+    for source, target in (("management_handoff_period_start", "start_date"), ("management_handoff_period_end", "end_date")):
+        if filter_context.get(source):
+            try:
+                criteria[target] = date.fromisoformat(str(filter_context[source]))
+            except ValueError:
+                pass
+    raw_filter = filter_context.get("management_handoff_filter")
+    try:
+        parsed = json.loads(raw_filter) if isinstance(raw_filter, str) else {}
+    except json.JSONDecodeError:
+        parsed = {}
+    for source, target in (("start_date", "start_date"), ("end_date", "end_date"), ("startDate", "start_date"), ("endDate", "end_date")):
+        if parsed.get(source):
+            try:
+                criteria[target] = date.fromisoformat(str(parsed[source]))
+            except ValueError:
+                pass
+    return criteria
+
+
+def _spatial_area_recommendations(
+    db: Session,
+    criteria: dict[str, Any],
+    parent_id: str,
+    parent_count: int,
+) -> list[dict[str, Any]]:
+    sql = f"""
+        WITH parent AS ({_candidate_sql(criteria, count_only=False, identifiers_only=True)}),
+        grouped AS (
+          SELECT
+            COALESCE(NULLIF(TRIM(d.nbh_name), ''), NULLIF(TRIM(d.planning_jurisdiction_name), ''),
+              NULLIF(TRIM(d.zoning_jurisdiction_name), ''), 'Other governed area') AS label,
+            COUNT(*)::int AS count,
+            COALESCE(SUM(d.recent_permit_count_1yr), 0)::int AS recent_permits,
+            COALESCE(SUM(d.total_permit_count), 0)::int AS total_permits,
+            ST_XMin(ST_Extent(p.geometry)) AS xmin,
+            ST_YMin(ST_Extent(p.geometry)) AS ymin,
+            ST_XMax(ST_Extent(p.geometry)) AS xmax,
+            ST_YMax(ST_Extent(p.geometry)) AS ymax
+          FROM parent x
+          JOIN public.parcels_enriched p ON p.official_parcel_id = x.official_parcel_id
+          LEFT JOIN public.development_activity_parcel_summary d ON d.official_parcel_id = x.official_parcel_id
+          GROUP BY 1
+        )
+        SELECT * FROM grouped WHERE count >= 2
+        ORDER BY count DESC, recent_permits DESC, label
+        LIMIT 5
+    """
+    rows = db.execute(text(sql), _params(criteria)).mappings().all()
+    recommendations: list[dict[str, Any]] = []
+    for row in rows:
+        label = str(row["label"])
+        subset_criteria = {**criteria, "area_label": label}
+        subset_id = str(uuid4())
+        subset_count = int(row["count"])
+        _store_result(
+            subset_id,
+            subset_criteria,
+            subset_count,
+            original_question=f"Subset of highlighted result: {label}",
+            parent_result_ids=[parent_id],
+            tools=["aggregate_by_area"],
+        )
+        share = round(subset_count * 100 / parent_count, 1) if parent_count else 0.0
+        recent = int(row["recent_permits"] or 0)
+        recommendations.append({
+            "count": subset_count,
+            "extent": {key: float(row[key]) for key in ("xmin", "ymin", "xmax", "ymax")},
+            "label": label,
+            "parent_result_id": parent_id,
+            "reason": f"{subset_count:,} highlighted parcels ({share:.1f}% of the result) with {recent:,} permits in the recent one-year window.",
+            "recent_permit_count": recent,
+            "share_percent": share,
+            "subset_result_id": subset_id,
+        })
+    return recommendations
+
+
+def _spatial_parcel_recommendations(
+    db: Session,
+    criteria: dict[str, Any],
+    parent_id: str,
+    selected_parcel: str | None,
+) -> list[dict[str, Any]]:
+    sql = f"""
+        WITH parent AS ({_candidate_sql(criteria, count_only=False, identifiers_only=True)}),
+        candidates AS (
+          SELECT p.official_parcel_id, p.pin14, p.geometry,
+            COALESCE(NULLIF(TRIM(d.nbh_name), ''), NULLIF(TRIM(d.planning_jurisdiction_name), ''),
+              NULLIF(TRIM(d.zoning_jurisdiction_name), ''), 'Other governed area') AS area_label,
+            COALESCE(d.recent_permit_count_1yr, 0)::int AS recent_permits,
+            COALESCE(d.total_permit_count, 0)::int AS total_permits,
+            d.latest_permit_date,
+            COALESCE(f.flood_review_required, false) AS flood_review,
+            COALESCE(u.distance_to_nearest_sewer_pipe_ft <= 1000, false) AS sewer_nearby,
+            COALESCE(s.development_signal_class IN ('high_development_signal', 'very_high_development_signal'), false) AS elevated_signal,
+            (p.parcel_area_acres_calc >= 1 AND p.assessedvalue_numeric / NULLIF(p.parcel_area_acres_calc, 0) < 150000) AS economic_review
+          FROM parent x
+          JOIN public.parcels_enriched p ON p.official_parcel_id = x.official_parcel_id
+          LEFT JOIN public.development_activity_parcel_summary d ON d.official_parcel_id = x.official_parcel_id
+          LEFT JOIN public.parcel_flood_constraint_overlay f ON f.official_parcel_id = x.official_parcel_id
+          LEFT JOIN public.parcel_wsacc_utility_features u ON u.parcel_id = x.official_parcel_id
+          LEFT JOIN LATERAL (
+            SELECT development_signal_class
+            FROM public.development_prediction_ranking_classes r
+            WHERE r.official_parcel_id = x.official_parcel_id
+            ORDER BY r.created_at DESC LIMIT 1
+          ) s ON true
+        )
+        SELECT *,
+          ST_X(ST_PointOnSurface(geometry)) AS longitude,
+          ST_Y(ST_PointOnSurface(geometry)) AS latitude,
+          ST_XMin(ST_Extent(geometry) OVER (PARTITION BY official_parcel_id)) AS xmin,
+          ST_YMin(ST_Extent(geometry) OVER (PARTITION BY official_parcel_id)) AS ymin,
+          ST_XMax(ST_Extent(geometry) OVER (PARTITION BY official_parcel_id)) AS xmax,
+          ST_YMax(ST_Extent(geometry) OVER (PARTITION BY official_parcel_id)) AS ymax,
+          ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, 0.000002), 6)::json AS highlight_geometry
+        FROM candidates
+        ORDER BY
+          CASE WHEN official_parcel_id = :selected_parcel THEN 1 ELSE 0 END DESC,
+          ((CASE WHEN recent_permits > 0 THEN 4 ELSE 0 END) + LN(1 + recent_permits) * 3 + LN(1 + total_permits)
+            + flood_review::int + sewer_nearby::int + elevated_signal::int + economic_review::int) DESC,
+          latest_permit_date DESC NULLS LAST, official_parcel_id
+        LIMIT 5
+    """
+    rows = db.execute(text(sql), {**_params(criteria), "selected_parcel": selected_parcel}).mappings().all()
+    recommendations: list[dict[str, Any]] = []
+    for row in rows:
+        recent = int(row["recent_permits"] or 0)
+        total = int(row["total_permits"] or 0)
+        evidence = []
+        if recent: evidence.append(f"{recent:,} permits in the recent one-year window")
+        if total: evidence.append(f"{total:,} permits overall")
+        if row["flood_review"]: evidence.append("flood-review overlap")
+        if row["sewer_nearby"]: evidence.append("sewer proximity within 1,000 feet")
+        if row["elevated_signal"]: evidence.append("an elevated Development Signal")
+        if row["economic_review"]: evidence.append("economic-review overlap")
+        reason = ", ".join(evidence[:4]) or "it is a representative parcel in a leading governed area"
+        recommendations.append({
+            "area_label": str(row["area_label"]),
+            "centroid": {"latitude": float(row["latitude"]), "longitude": float(row["longitude"])},
+            "extent": {key: float(row[key]) for key in ("xmin", "ymin", "xmax", "ymax")},
+            "highlight_geometry": row["highlight_geometry"],
+            "latest_permit_date": row["latest_permit_date"].isoformat() if row["latest_permit_date"] else None,
+            "parcel_reference": str(row["official_parcel_id"]),
+            "parent_result_id": parent_id,
+            "reason": f"It stands out within {row['area_label']} because it has {reason}.",
+            "recent_permit_count": recent,
+            "total_permit_count": total,
+        })
+    return recommendations
+
+
+def _spatial_analysis_answer(
+    count: int,
+    areas: list[dict[str, Any]],
+    parcels: list[dict[str, Any]],
+) -> str:
+    if not areas:
+        return f"The {count:,} highlighted parcels do not form a supported governed-area concentration in the available evidence."
+    lead = areas[0]
+    answer = (
+        f"The {count:,} highlighted parcels are not evenly distributed. The strongest governed-area concentration is {lead['label']}, "
+        f"with {lead['count']:,} parcels ({lead['share_percent']:.1f}% of the result) and {lead['recent_permit_count']:,} recent permits."
+    )
+    if len(areas) > 1:
+        second = areas[1]
+        answer += f" {second['label']} is the next largest concentration at {second['count']:,} parcels ({second['share_percent']:.1f}%)."
+    if parcels:
+        answer += " The parcel recommendations below combine recent and historical activity with material constraint, utility, signal, and economic overlaps inside this result."
+    return answer
+
+
 def _result_title(criteria: dict[str, Any]) -> str:
     labels = _criteria_labels(criteria)
     if not labels:
@@ -699,7 +976,13 @@ def _validated_provider_plan(
     return criteria, list(dict.fromkeys(tools))
 
 
-def _candidate_sql(criteria: dict[str, Any], *, count_only: bool, grouped: str | bool = False) -> str:
+def _candidate_sql(
+    criteria: dict[str, Any],
+    *,
+    count_only: bool,
+    grouped: str | bool = False,
+    identifiers_only: bool = False,
+) -> str:
     clauses = ["p.geometry IS NOT NULL", "NOT ST_IsEmpty(p.geometry)"]
     if criteria.get("extent_bounds"):
         clauses.append("p.geometry && ST_MakeEnvelope(:xmin, :ymin, :xmax, :ymax, 4326)")
@@ -719,6 +1002,8 @@ def _candidate_sql(criteria: dict[str, Any], *, count_only: bool, grouped: str |
         clauses.append("EXISTS (SELECT 1 FROM public.development_prediction_ranking_classes d WHERE d.official_parcel_id = p.official_parcel_id AND d.development_signal_class = :signal_band AND d.model_experiment_id = (SELECT model_experiment_id FROM public.development_prediction_ranking_classes GROUP BY model_experiment_id ORDER BY MAX(created_at) DESC LIMIT 1))")
     if criteria.get("signal_bands"):
         clauses.append("EXISTS (SELECT 1 FROM public.development_prediction_ranking_classes d WHERE d.official_parcel_id = p.official_parcel_id AND d.development_signal_class = ANY(:signal_bands) AND d.model_experiment_id = (SELECT model_experiment_id FROM public.development_prediction_ranking_classes GROUP BY model_experiment_id ORDER BY MAX(created_at) DESC LIMIT 1))")
+    if criteria.get("area_label"):
+        clauses.append("EXISTS (SELECT 1 FROM public.development_activity_parcel_summary a WHERE a.official_parcel_id = p.official_parcel_id AND COALESCE(NULLIF(TRIM(a.nbh_name), ''), NULLIF(TRIM(a.planning_jurisdiction_name), ''), NULLIF(TRIM(a.zoning_jurisdiction_name), ''), 'Other governed area') = :area_label)")
     where = " AND ".join(clauses)
     if grouped == "school":
         return f"SELECT COALESCE(s.elementary_school_name, 'Unknown') AS label, COUNT(DISTINCT r.official_parcel_id)::int AS count FROM public.real_property_permit_parcel_relationship r JOIN public.parcels_enriched p ON p.official_parcel_id = r.official_parcel_id LEFT JOIN public.parcel_school_summary s ON s.official_parcel_id = p.official_parcel_id WHERE {where} GROUP BY COALESCE(s.elementary_school_name, 'Unknown') ORDER BY count DESC, label LIMIT 24"
@@ -726,6 +1011,8 @@ def _candidate_sql(criteria: dict[str, Any], *, count_only: bool, grouped: str |
         return f"SELECT COALESCE(r.zoning_jurisdiction_name, 'Unknown') AS label, COUNT(DISTINCT r.official_parcel_id)::int AS count FROM public.real_property_permit_parcel_relationship r JOIN public.parcels_enriched p ON p.official_parcel_id = r.official_parcel_id WHERE {where} GROUP BY COALESCE(r.zoning_jurisdiction_name, 'Unknown') ORDER BY count DESC, label LIMIT 24"
     if count_only:
         return f"SELECT COUNT(*)::int FROM public.parcels_enriched p WHERE {where}"
+    if identifiers_only:
+        return f"SELECT p.official_parcel_id FROM public.parcels_enriched p WHERE {where}"
     return f"SELECT ST_AsGeoJSON(ST_SimplifyPreserveTopology(p.geometry, 0.00002), 6)::json AS geometry, 1::int AS weight FROM public.parcels_enriched p WHERE {where} ORDER BY p.official_parcel_id LIMIT 2500"
 
 
@@ -733,6 +1020,7 @@ def _params(criteria: dict[str, Any]) -> dict[str, Any]:
     bounds = criteria.get("extent_bounds") or {}
     return {
         "end_date": criteria.get("end_date"),
+        "area_label": criteria.get("area_label"),
         "xmax": bounds.get("xmax"),
         "xmin": bounds.get("xmin"),
         "sewer_within_feet": criteria.get("sewer_within_feet"),
