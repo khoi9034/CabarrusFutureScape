@@ -809,7 +809,7 @@ def _plan_known_query(query: str, criteria: dict[str, Any]) -> tuple[dict[str, A
         criteria["economic_review"] = True
         tools.append("filter_economic_review")
         recognized = True
-    if "very high" in query and ("signal" in query or "those" in query):
+    if "very high" in query and any(word in query for word in ("signal", "those", "ones")):
         criteria["signal_band"] = "very_high_development_signal"
         tools.append("filter_development_signal_band")
         recognized = True
@@ -1123,7 +1123,7 @@ def _is_follow_up(query: str) -> bool:
     return any(phrase in query for phrase in (
         "of those", "those parcels", "these parcels", "that result", "this result",
         "these results", "those results", "break these", "break them", "keep only",
-        "only those", "those within", "remove the parcels", "remove parcels",
+        "only those", "only the very high", "those within", "remove the parcels", "remove parcels",
         "how many are", "which are",
     ))
 

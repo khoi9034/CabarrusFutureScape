@@ -109,7 +109,7 @@ class CfsAiMapContext(BaseModel):
 
 
 class CfsAiSearchRequest(BaseModel):
-    agent_mode: Literal["explain", "assist", "agent"] = "assist"
+    agent_mode: Literal["explain", "assist", "agent"] = "agent"
     agent_result_id: str | None = Field(default=None, max_length=80)
     app_mode: Literal["economics", "master-data", "planning"] = "planning"
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)

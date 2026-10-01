@@ -172,3 +172,14 @@ def test_unified_panel_has_no_visible_mode_selector() -> None:
     assert "Ask Insights analysis mode" not in source
     assert "ask-cfs-agent-mode" not in source
     assert ">Plan</summary>" not in source
+
+
+def test_search_request_defaults_to_governed_agent_mode() -> None:
+    assert CfsAiSearchRequest(query="How many parcels are highlighted?").agent_mode == "agent"
+
+
+def test_agent_result_does_not_impersonate_a_management_handoff() -> None:
+    source = open("src/components/layout/AppShell.tsx", encoding="utf-8").read()
+    assert "management_handoff_feature_count: managementHandoff ?" in source
+    assert "management_handoff_record_count: managementHandoff ?" in source
+    assert "management_handoff_title: managementHandoff ?" in source

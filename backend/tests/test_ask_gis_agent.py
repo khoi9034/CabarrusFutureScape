@@ -37,7 +37,7 @@ def test_registry_is_fixed_and_governed() -> None:
     assert all(item["source"] and item["limitations"] for item in tool_registry())
 
 
-def test_assist_plan_returns_compact_opaque_result() -> None:
+def test_default_agent_returns_compact_opaque_result_and_updates_map() -> None:
     result = run_gis_agent(
         _Db(),
         _request(
@@ -46,8 +46,8 @@ def test_assist_plan_returns_compact_opaque_result() -> None:
     )
     assert result is not None
     assert result.count == 238
-    assert result.mode == "assist"
-    assert result.map_action == "ready"
+    assert result.mode == "agent"
+    assert result.map_action == "highlight_and_zoom"
     assert result.result_id and result.result_id.startswith("ask_")
     assert "filter_sewer_proximity" in result.tool_plan
     assert "exclude_result_set" in result.tool_plan
@@ -64,6 +64,20 @@ def test_follow_up_chains_previous_result_and_agent_mode_updates_map() -> None:
             agent_mode="agent",
             agent_result_id=first.result_id,
         ),
+    )
+    assert follow_up is not None
+    assert follow_up.previous_result_id == first.result_id
+    assert follow_up.map_action == "highlight_and_zoom"
+    assert "Active development parcels" in follow_up.criteria
+    assert "Development Signal: Very High" in follow_up.criteria
+
+
+def test_unified_agent_understands_very_high_ones_follow_up() -> None:
+    first = run_gis_agent(_Db(), _request("Show active development parcels from 2025."))
+    assert first and first.result_id
+    follow_up = run_gis_agent(
+        _Db(),
+        _request("Show only the Very High ones.", agent_result_id=first.result_id),
     )
     assert follow_up is not None
     assert follow_up.previous_result_id == first.result_id
